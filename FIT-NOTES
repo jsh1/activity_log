@@ -1,0 +1,290 @@
+
+- File structure
+
+struct fit_file {
+    fit_header header;
+    fit_data_record records[];
+    uint16_t crc;			/* little endian (LE) */
+};
+
+- Header structure. Variable sized, typically 12 or 14 bytes.
+
+struct fit_header {
+    uint8_t size;
+    uint8_t protocol_version;
+    uint16_t profile_version;		/* LE */
+    uint32_t data_size;			/* LE */
+    char data_type[4];			/* '.FIT' */
+    uint16_t crc;			/* optional, LE */
+};
+
+- Data records. Two types:
+
+  - Definition messages: define the upcoming data messages
+
+  - Data messages. Two types:
+    - Normal Data Message,
+    - Compressed Timestamp Data Message.
+
+Each record has a 1-byte header defining which of the three types it
+is. The header is a bit-field:
+
+ Bit 7 = 0 -> Normal (not compressed)
+
+  - Normal:
+    bit 6: Definition (1) or Data (0)
+    bits 0-3: Local message type.
+
+  - Compressed:
+    bits 5-6: Local message type,
+    bits 0-4: Time offset (seconds).
+
+Definition message contents:
+
+struct fit_definition_message {
+    uint8_t record_header;
+    uint8_t architecture;		/* 0 => LE, 1 => BE */
+    uint16_t global_message_number;	/* endian specified by arch. */
+    uint8_t number_of_fields;
+    fit_field_definition fields[];
+};
+
+struct fit_field_definition {
+    uint8_t field_definition_number;
+    uint8_t size;			/* bytes */
+    uint8_t base_type;			/* see below */
+};
+
+base_type is a bit-field:
+  bit 7: endian_ability;		/* 0 => single byte */
+  bits 0-4: base_type_number;
+
+base types:
+
+   0 (0x00) enum
+   1 (0x01) int8_t
+   2 (0x02) uint8_t
+   3 (0x83) int16_t
+   4 (0x84) uint16_t
+   5 (0x85) int32_t
+   6 (0x86) uint32_t
+   7 (0x07) char[]			/* null-terminated */
+   8 (0x88) float
+   9 (0x89) double
+  10 (0x0a) uint8z (?)
+  11 (0x8b) uint16z (?)
+  12 (0x8c) uint32z (?)
+  13 (0x0d) uint8_t[]			/* array of bytes */
+
+--------
+
+Thankfully it seems like the .FIT files written out by my FR210 are
+fairly simple, and a lot of this complexity can probably be ignored.
+The Perl fitdump program shows their structure and, modulo some stuff
+at the beginning and end, it's just a stream of records with
+interspersed lap summaries.
+
+Header stuff:
+
+File size: 12452, protocol version: 1.00, profile_verion: 1.35
+Extra octets in file header
+    00 00
+Local message type: 0 (message name: file_id, message number: 0)
+  serial_number (3-1-UINT32Z): 3817636923
+  time_created (4-1-UINT32): 2013-06-26T07:26:41 (741191201)
+  manufacturer (1-1-UINT16): garmin (1)
+  garmin_product (2-1-UINT16, orignal name: product): fr110 (1124)
+  number (5-1-UINT16, INVALID): 65535
+  type (0-1-ENUM): activity (4)
+Local message type: 1 (message name: file_creator, message number: 49)
+  software_version (0-1-UINT16): 260
+  hardware_version (1-1-UINT8, INVALID): 255
+Local message type: 2 (message name: event, message number: 21)
+  timestamp (253-1-UINT32): 2013-06-26T07:26:41 (741191201)
+  timer_trigger (3-1-UINT32, orignal name: data): manual (0)
+  event (0-1-ENUM): timer (0)
+  event_type (1-1-ENUM): start (0)
+  event_group (4-1-UINT8): 0
+Local message type: 2 (message name: event, message number: 21)
+  timestamp (253-1-UINT32): 2013-06-26T07:26:41 (741191201)
+  battery_level (3-1-UINT32, orignal name: data): 3.964V (3964)
+  event (0-1-ENUM): battery (11)
+  event_type (1-1-ENUM): marker (3)
+  event_group (4-1-UINT8): 0
+Local message type: 3 (message number: 79)
+  xxx253 (253-1-UINT32): 741191201
+  xxx0 (0-1-UINT16): 16806
+  xxx3 (3-1-UINT16): 690
+  xxx1 (1-1-UINT8): 38
+  xxx2 (2-1-UINT8): 183
+  xxx4 (4-1-ENUM): 1
+  xxx5 (5-1-ENUM): 70
+  xxx6 (6-1-UINT8): 185
+  xxx7 (7-1-SINT8): 1
+Local message type: 4 (message name: device_info, message number: 23)
+  timestamp (253-1-UINT32): 2013-06-26T07:26:42 (741191202)
+  serial_number (3-1-UINT32Z): 3817636923
+  cum_operating_time (7-1-UINT32, INVALID): 4294967295
+  xxx8 (8-1-UINT32, INVALID): 4294967295
+  manufacturer (2-1-UINT16): garmin (1)
+  garmin_product (4-1-UINT16, orignal name: product): 1264
+  software_version (5-1-UINT16): 2.60 (260)
+  battery_voltage (10-1-UINT16, INVALID): 65535
+  device_index (0-1-UINT8): creator (0)
+  device_type (1-1-UINT8): antfs (1)
+  hardware_version (6-1-UINT8, INVALID): 255
+  battery_status (11-1-UINT8, INVALID): 255
+Local message type: 4 (message name: device_info, message number: 23)
+  timestamp (253-1-UINT32): 2013-06-26T07:26:42 (741191202)
+  serial_number (3-1-UINT32Z, INVALID): 0
+  cum_operating_time (7-1-UINT32, INVALID): 4294967295
+  xxx8 (8-1-UINT32, INVALID): 4294967295
+  manufacturer (2-1-UINT16): garmin (1)
+  garmin_product (4-1-UINT16, orignal name: product): 1080
+  software_version (5-1-UINT16): 200.51 (20051)
+  battery_voltage (10-1-UINT16, INVALID): 65535
+  device_index (0-1-UINT8): 1
+  device_type (1-1-UINT8): environment_sensor (12)
+  hardware_version (6-1-UINT8, INVALID): 255
+  battery_status (11-1-UINT8, INVALID): 255
+Local message type: 5 (message number: 22)
+  timestamp (253-1-UINT32): 2013-06-26T07:26:42 (741191202)
+  xxx0_distance_source (0-1-UINT8): 1
+  xxx1_speed_source (1-1-UINT8): 1
+  xxx2_cadence_source (2-1-UINT8, INVALID): 255
+  xxx3_altitude_source (3-1-UINT8): 1
+  xxx4_heart_rate_source (4-1-UINT8, INVALID): 255
+  xxx5 (5-1-ENUM): 1
+  xxx6_power_source (6-1-UINT8, INVALID): 255
+
+Start of data and lap records:
+
+Local message type: 6 (message name: record, message number: 20)
+  timestamp (253-1-UINT32): 2012-10-24T09:53:21 (720032001)
+  position_lat (0-1-SINT32): 37.7683610deg (450594098)
+  position_long (1-1-SINT32): -122.4222724deg (-1460554601)
+  distance (5-1-UINT32): 8001.27m (800127)
+  altitude (2-1-UINT16): 31.2m (2656)
+  speed (6-1-UINT16): 12.643km/h (3512)
+  power (7-1-UINT16, INVALID): 65535
+  grade (9-1-SINT16, INVALID): 32767
+  heart_rate (3-1-UINT8, INVALID): 255
+  cadence (4-1-UINT8, INVALID): 255
+  registance (10-1-UINT8, INVALID): 255
+Local message type: 6 (message name: record, message number: 20)
+  timestamp (253-1-UINT32): 2012-10-24T09:53:26 (720032006)
+  position_lat (0-1-SINT32): 37.7685275deg (450596085)
+  position_long (1-1-SINT32): -122.4222560deg (-1460554405)
+  distance (5-1-UINT32): 8016.59m (801659)
+  altitude (2-1-UINT16): 31.8m (2659)
+  speed (6-1-UINT16): 12.157km/h (3377)
+  power (7-1-UINT16, INVALID): 65535
+  grade (9-1-SINT16, INVALID): 32767
+  heart_rate (3-1-UINT8, INVALID): 255
+  cadence (4-1-UINT8, INVALID): 255
+  registance (10-1-UINT8, INVALID): 255
+...
+Local message type: 7 (message name: lap, message number: 19)
+  timestamp (253-1-UINT32): 2012-10-24T09:53:35 (720032015)
+  start_time (2-1-UINT32): 2012-10-24T09:45:32 (720031532)
+  start_position_lat (3-1-SINT32): 37.7697370deg (450610515)
+  start_position_long (4-1-SINT32): -122.4049086deg (-1460347443)
+  end_position_lat (5-1-SINT32): 37.7688432deg (450599851)
+  end_position_long (6-1-SINT32): -122.4223334deg (-1460555328)
+  total_elapsed_time (7-1-UINT32): 482.970s (482970)
+  total_timer_time (8-1-UINT32): 420.570s (420570)
+  total_distance (9-1-UINT32): 1609.34m (160934)
+  total_strides (10-1-UINT32, orignal name: total_cycles, INVALID): 4294967295
+  message_index (254-1-UINT16): selected=0,reserved=0,mask=4 (4)
+  total_calories (11-1-UINT16): 116kcal (116)
+  total_fat_calories (12-1-UINT16, INVALID): 65535
+  avg_speed (13-1-UINT16): 13.792km/h (3831)
+  max_speed (14-1-UINT16): 17.662km/h (4906)
+  avg_power (19-1-UINT16, INVALID): 65535
+  max_power (20-1-UINT16, INVALID): 65535
+  total_ascent (21-1-UINT16): 27m (27)
+  total_descent (22-1-UINT16): 12m (12)
+  event (0-1-ENUM): lap (9)
+  event_type (1-1-ENUM): stop (1)
+  avg_heart_rate (15-1-UINT8, INVALID): 255
+  max_heart_rate (16-1-UINT8, INVALID): 255
+  avg_running_cadence (17-1-UINT8, orignal name: avg_cadence, INVALID): 255
+  max_running_cadence (18-1-UINT8, orignal name: max_cadence, INVALID): 255
+  intensity (23-1-ENUM): active (0)
+  lap_trigger (24-1-ENUM): distance (2)
+  sport (25-1-ENUM): running (1)
+... more records
+
+It also shows where the watch was stopped and started:
+
+Local message type: 2 (message name: event, message number: 21)
+  timestamp (253-1-UINT32): 2012-10-24T09:22:31 (720030151)
+  timer_trigger (3-1-UINT32, orignal name: data): manual (0)
+  event (0-1-ENUM): timer (0)
+  event_type (1-1-ENUM): stop_all (4)
+  event_group (4-1-UINT8): 0
+Local message type: 6 (message name: record, message number: 20)
+  timestamp (253-1-UINT32): 2012-10-24T09:22:51 (720030171)
+  position_lat (0-1-SINT32): 37.7685243deg (450596046)
+  position_long (1-1-SINT32): -122.4156183deg (-1460475214)
+  distance (5-1-UINT32): 691.59m (69159)
+  altitude (2-1-UINT16): 17.0m (2585)
+  speed (6-1-UINT16): 2.477km/h (688)
+  power (7-1-UINT16, INVALID): 65535
+  grade (9-1-SINT16, INVALID): 32767
+  heart_rate (3-1-UINT8, INVALID): 255
+  cadence (4-1-UINT8, INVALID): 255
+  registance (10-1-UINT8, INVALID): 255
+Local message type: 2 (message name: event, message number: 21)
+  timestamp (253-1-UINT32): 2012-10-24T09:22:51 (720030171)
+  timer_trigger (3-1-UINT32, orignal name: data): manual (0)
+  event (0-1-ENUM): timer (0)
+  event_type (1-1-ENUM): start (0)
+  event_group (4-1-UINT8): 0
+
+And a session summary at the end of the file:
+
+...last lap summary
+Local message type: 8 (message name: session, message number: 18)
+  timestamp (253-1-UINT32): 2012-10-24T09:54:09 (720032049)
+  start_time (2-1-UINT32): 2012-10-24T09:18:34 (720029914)
+  start_position_lat (3-1-SINT32): 37.7697179deg (450610286)
+  start_position_long (4-1-SINT32): -122.4217222deg (-1460548036)
+  total_elapsed_time (7-1-UINT32): 2125.870s (2125870)
+  total_timer_time (8-1-UINT32): 2026.930s (2026930)
+  total_distance (9-1-UINT32): 8141.57m (814157)
+  total_strides (10-1-UINT32, orignal name: total_cycles, INVALID): 4294967295
+  message_index (254-1-UINT16): selected=0,reserved=0,mask=0 (0)
+  total_calories (11-1-UINT16): 600kcal (600)
+  total_fat_calories (13-1-UINT16, INVALID): 65535
+  avg_speed (14-1-UINT16): 14.461km/h (4017)
+  max_speed (15-1-UINT16): 20.840km/h (5789)
+  avg_power (20-1-UINT16, INVALID): 65535
+  max_power (21-1-UINT16, INVALID): 65535
+  total_ascent (22-1-UINT16): 142m (142)
+  total_descent (23-1-UINT16): 87m (87)
+  first_lap_index (25-1-UINT16): 0
+  num_laps (26-1-UINT16): 6
+  event (0-1-ENUM): session (8)
+  event_type (1-1-ENUM): stop (1)
+  sport (5-1-ENUM): running (1)
+  sub_sport (6-1-ENUM): generic (0)
+  avg_heart_rate (16-1-UINT8, INVALID): 255
+  max_heart_rate (17-1-UINT8, INVALID): 255
+  avg_running_cadence (18-1-UINT8, orignal name: avg_cadence, INVALID): 255
+  max_running_cadence (19-1-UINT8, orignal name: max_cadence, INVALID): 255
+  total_training_effect (24-1-UINT8, INVALID): 255
+Local message type: 2 (message name: event, message number: 21)
+  timestamp (253-1-UINT32): 2012-10-24T09:54:09 (720032049)
+  data (3-1-UINT32): 1
+  event (0-1-ENUM): session (8)
+  event_type (1-1-ENUM): stop_disable_all (9)
+  event_group (4-1-UINT8): 1
+Local message type: 9 (message name: activity, message number: 34)
+  timestamp (253-1-UINT32): 2012-10-24T09:54:09 (720032049)
+  total_timer_time (0-1-UINT32): 2026.930s (2026930)
+  num_sessions (1-1-UINT16): 1
+  type (2-1-ENUM): manual (0)
+  event (3-1-ENUM): activity (26)
+  event_type (4-1-ENUM): stop (1)
+CRC: expected=0x40A3, calculated=0x40A3

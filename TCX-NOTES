@@ -1,0 +1,78 @@
+
+Garmin TCX files
+================
+
+Example data:
+
+<TrainingCenterDatabase
+  xsi:schemaLocation="http://www.garmin.com/xmlschemas/TrainingCenterDatabase/v2 http://www.garmin.com/xmlschemas/TrainingCenterDatabasev2.xsd"
+  xmlns:ns5="http://www.garmin.com/xmlschemas/ActivityGoals/v1"
+  xmlns:ns3="http://www.garmin.com/xmlschemas/ActivityExtension/v2"
+  xmlns:ns2="http://www.garmin.com/xmlschemas/UserProfile/v2"
+  xmlns="http://www.garmin.com/xmlschemas/TrainingCenterDatabase/v2"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ns4="http://www.garmin.com/xmlschemas/ProfileExtension/v1">
+  <Activities>
+    <Activity Sport="Running">
+      <Id>2010-05-20T15:38:46.000Z</Id>
+      <Lap StartTime="2010-05-20T15:38:46.000Z">
+        <TotalTimeSeconds>493.7</TotalTimeSeconds>
+        <DistanceMeters>1609.35</DistanceMeters>
+        <MaximumSpeed>4.2366185</MaximumSpeed>
+        <Calories>91</Calories>
+        <AverageHeartRateBpm>
+          <Value>156</Value>
+        </AverageHeartRateBpm>
+        <MaximumHeartRateBpm>
+          <Value>166</Value>
+        </MaximumHeartRateBpm>
+        <Intensity>Active</Intensity>
+        <TriggerMethod>Manual</TriggerMethod>
+        <Track>
+          <Trackpoint>
+            <Time>2010-05-20T15:38:47.000Z</Time>
+            <Position>
+              <LatitudeDegrees>37.76972455903888</LatitudeDegrees>
+              <LongitudeDegrees>-122.42642289027572</LongitudeDegrees>
+            </Position>
+            <AltitudeMeters>37.79999923706055</AltitudeMeters>
+            <DistanceMeters>0.3100000023841858</DistanceMeters>
+            <HeartRateBpm>
+              <Value>109</Value>
+            </HeartRateBpm>
+          </Trackpoint>
+   	  ...
+        </Track>
+        <Extensions>
+          <ns3:LX>
+            <ns3:AvgSpeed>3.259767157990683</ns3:AvgSpeed>
+          </ns3:LX>
+        </Extensions>
+      </Lap>
+      ...
+      <Creator xsi:type="Device_t">
+        <Name>Garmin Forerunner 405CX</Name>
+        <UnitId>3742080357</UnitId>
+        <ProductID>1039</ProductID>
+        <Version>
+          <VersionMajor>2</VersionMajor>
+          <VersionMinor>10</VersionMinor>
+          <BuildMajor>0</BuildMajor>
+          <BuildMinor>0</BuildMinor>
+        </Version>
+      </Creator>
+    </Activity>
+  </Activities>
+  <Author xsi:type="Application_t">
+    <Name>Garmin Connect API</Name>
+    <Build>
+      <Version>
+        <VersionMajor>2</VersionMajor>
+        <VersionMinor>9</VersionMinor>
+        <BuildMajor>0</BuildMajor>
+        <BuildMinor>0</BuildMinor>
+      </Version>
+    </Build>
+    <LangID>en</LangID>
+    <PartNumber>GAR-MINCN-CT</PartNumber>
+  </Author>
+</TrainingCenterDatabase>
