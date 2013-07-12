@@ -70,7 +70,7 @@ fit_parser::parse_file(const char *path)
     set_error();
 }
 
-/* parse null 'buf' pointer to seek forwards. */
+/* pass null 'buf' pointer to seek forwards. */
 
 bool
 fit_parser::read_bytes(void *buf, size_t size)

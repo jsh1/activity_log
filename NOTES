@@ -1,0 +1,73 @@
+
+
+## Common Fields
+
+Date: YYYY-MM-DD HH:MM:SS [AM|PM] [TZ]
+Activity: STRING			-- run | bike | note | ...
+Type: STRING				-- easy | ...
+Course: STRING
+Keywords: KEYWORD-LIST			-- mile-reps
+Equipment: KEYWORD-LIST			-- nike-lunar-montreal-grey
+Distance: DISTANCE			-- 8.3 miles
+Duration: DURATION			-- 1:05:10.4
+Pace: PACE				-- 7:10/mi
+Speed: SPEED				-- 10 m/s
+Max-Pace: PACE
+Max-Speed: SPEED
+Rest-HR: NUMBER
+Avg-HR: NUMBER
+Max-HR: NUMBER
+Calories: NUMBER
+Weight: NUMBER UNIT			-- 150 pounds
+Temperature: TEMPERATURE		-- 28C
+Weather: KEYWORD-LIST			-- cloudy drizzle
+Quality: FRACTION
+Effort: FRACTION
+GPS-File: FILENAME			-- 2013-06-26-09-36-12.fit
+
+So semantic field types are:
+
+	Name		Format			Unit
+	----		------			----
+	DATE
+	DISTANCE	NNN DISTANCE-UNIT	m
+	DURATION	[[HH:]MM:]SS[.SS]	s
+	PACE		DURATION PACE-UNIT	m/s
+	SPEED		DISTANCE SPEED-UNIT	m/s
+	TEMPERATURE	NNN TEMPERATURE-UNIT	deg C
+	KEYWORD-LIST	KEY1 KEY2 ... KEY-N
+	FRACTION	N/N, N%
+
+almost using SI units, but C not Kelvin.
+
+Minor format pieces are:
+
+	DISTANCE-UNIT		mi|mile[s], kilometres|km, metres|m, feet|ft
+	PACE-UNIT		/DISTANCE-UNIT
+	SPEED-UNIT		DISTANCE-UNIT / [s|m|h], mph
+	TEMPERATURE-UNIT	[degrees] c[elsius]|f[ahrenheit]
+
+## Example entry
+
+--
+From jsh				-- mbox start line
+Date: 2013-06-26 09:36:12 -0900
+Course: Mission Bay
+Activity: run
+Type: easy
+Distance: 6.28 miles
+Duration: 51:20	
+GPS-File: 2013-06-26-09-36-12.fit
+
+Felt good, slightly sore left hip.
+
+Easy run around the bay path, nice day to be out and about.
+--
+
+this is ~270 bytes. Let's say 500 bytes per entry. For 400 entries per
+year, that is 200KB. So concatenating entries into one file does not
+seem unreasonable, although that might be a bit much for Dropbox to
+sync every time?
+
+So best place to start may be with one file per activity, load them all
+into memory on startup, then optimize as necessary from there.

@@ -75,12 +75,43 @@ print_summary(const T &a)
 static void
 print_laps(const gps::activity &a)
 {
+  printf("\n%-3s  %8s  %6s  %5s %5s  %4s %4s  %4s\n", "Lap", "Time",
+	 "Dist.", "Pace", "Max", "HR", "Max",
+	 "Cal.");
+
   int lap_idx = 0;
   for (std::vector<gps::activity::lap>::const_iterator it = a.laps().begin();
        it != a.laps().end(); it++, lap_idx++)
     {
-      printf("== Lap %d ==\n", lap_idx + 1);
-      print_summary(*it);
+      char dur_buf[8];
+      format_duration(dur_buf, sizeof(dur_buf), it->duration(), true);
+
+      char pace_buf[8], max_pace_buf[8];
+      format_duration(pace_buf, sizeof(pace_buf),
+		      SECS_PER_MILE(it->avg_speed()), false);
+      format_duration(max_pace_buf, sizeof(max_pace_buf),
+		      SECS_PER_MILE(it->max_speed()), false);
+
+      char avg_hr_buf[8], max_hr_buf[8];
+      if (it->avg_heart_rate() != 0)
+	{
+	  snprintf(avg_hr_buf, sizeof(avg_hr_buf), "%d",
+		   (int) it->avg_heart_rate());
+	  snprintf(max_hr_buf, sizeof(max_hr_buf), "%d",
+		   (int) it->max_heart_rate());
+	}
+      else
+	avg_hr_buf[0] = max_hr_buf[0] = 0;
+
+      char cal_buf[8];
+      if (it->calories() != 0)
+	snprintf(cal_buf, sizeof(cal_buf), "%d", (int) it->calories());
+      else
+	cal_buf[0] = 0;
+
+      printf("%-3d  %8s  %6.2f  %5s %5s  %4s %4s  %4s\n", lap_idx + 1, dur_buf,
+	     it->distance() * MILES_PER_METER, pace_buf, max_pace_buf,
+	     avg_hr_buf, max_hr_buf, cal_buf);
     }
 }
 
@@ -146,6 +177,12 @@ main(int argc, char **argv)
 	test_activity.read_fit_file(argv[i]);
       else if (opt_tcx)
 	test_activity.read_tcx_file(argv[i]);
+      else if (strstr(argv[i], ".fit"))
+	test_activity.read_fit_file(argv[i]);
+      else if (strstr(argv[i], ".tcx"))
+	test_activity.read_tcx_file(argv[i]);
+      else
+	continue;
 
       if (opt_print_summary)
 	print_summary(test_activity);
