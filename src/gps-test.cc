@@ -17,6 +17,9 @@ using namespace activity_log;
 static void
 format_duration(char *buf, size_t bufsiz, double dur, bool include_frac)
 {
+  if (!include_frac)
+    dur = floor(dur + .5);
+
   if (dur > 3600)
     snprintf(buf, bufsiz, "%d:%02d:%02d", (int) floor(dur/3600),
 	     (int) fmod(floor(dur/60),60), (int) fmod(dur, 60));
@@ -25,23 +28,20 @@ format_duration(char *buf, size_t bufsiz, double dur, bool include_frac)
   else
     snprintf(buf, bufsiz, "%d", (int) dur);
 
-  if (include_frac)
+  double frac = dur - floor(dur);
+
+  if (frac > 1e-4)
     {
-      double frac = dur - floor(dur);
+      size_t len = strlen(buf);
+      buf += len;
+      bufsiz -= len;
 
-      if (frac > 1e-4)
-	{
-	  size_t len = strlen(buf);
-	  buf += len;
-	  bufsiz -= len;
-
-	  snprintf(buf, bufsiz, ".%02d", (int) floor(frac * 10 + .5));
-	}
+      snprintf(buf, bufsiz, ".%02d", (int) floor(frac * 10 + .5));
     }
 }
 
-template<typename T> static void
-print_summary(const T &a)
+static void
+print_summary(const gps::activity &a)
 {
   char buf[256];
 
@@ -50,32 +50,32 @@ print_summary(const T &a)
   localtime_r(&time, &tm);
 
   strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S %Z", &tm);
-  printf("Date:\t\t%s\n", buf);
+  printf("%16s: %s\n", "Date", buf);
 
   format_duration(buf, sizeof(buf), a.duration(), true);
-  printf("Duration:\t%s\n", buf);
+  printf("%16s: %s\n", "Duration", buf);
 
-  printf("Distance:\t%.2f miles\n", a.distance() * MILES_PER_METER);
+  printf("%16s: %.2f miles\n", "Distance", a.distance() * MILES_PER_METER);
 
   format_duration(buf, sizeof(buf), SECS_PER_MILE(a.avg_speed()), false);
-  printf("Pace:\t\t%s / mile\n", buf);
+  printf("%16s: %s / mile\n", "Avg Pace", buf);
 
   format_duration(buf, sizeof(buf), SECS_PER_MILE(a.max_speed()), false);
-  printf("Max Pace:\t%s / mile\n", buf);
+  printf("%16s: %s / mile\n", "Max Pace", buf);
 
   if (a.avg_heart_rate() != 0)
-    printf("Avg HR:\t\t%d\n", (int) a.avg_heart_rate());
+    printf("%16s: %d\n", "Avg HR", (int) a.avg_heart_rate());
   if (a.max_heart_rate() != 0)
-    printf("Max HR:\t\t%d\n", (int) a.max_heart_rate());
+    printf("%16s: %d\n", "Max HR", (int) a.max_heart_rate());
 
   if (a.calories() != 0)
-    printf("Calories:\t%g\n", a.calories());
+    printf("%16s: %g\n", "Calories", a.calories());
 }
 
 static void
 print_laps(const gps::activity &a)
 {
-  printf("\n%-3s  %8s  %6s  %5s %5s  %4s %4s  %4s\n", "Lap", "Time",
+  printf("\n%-3s  %8s  %6s  %5s %5s  %3s %3s  %4s\n", "Lap", "Time",
 	 "Dist.", "Pace", "Max", "HR", "Max",
 	 "Cal.");
 
@@ -109,7 +109,7 @@ print_laps(const gps::activity &a)
       else
 	cal_buf[0] = 0;
 
-      printf("%-3d  %8s  %6.2f  %5s %5s  %4s %4s  %4s\n", lap_idx + 1, dur_buf,
+      printf("%-3d  %8s  %6.2f  %5s %5s  %3s %3s  %4s\n", lap_idx + 1, dur_buf,
 	     it->distance() * MILES_PER_METER, pace_buf, max_pace_buf,
 	     avg_hr_buf, max_hr_buf, cal_buf);
     }
