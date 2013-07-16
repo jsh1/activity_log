@@ -17,31 +17,34 @@ class activity
 public:
   enum field_id
     {
-      field_date,
       field_activity,
-      field_type,
+      field_average_hr,
+      field_calories,
       field_course,
-      field_keywords,
-      field_equipment,
+      field_custom,
+      field_date,
       field_distance,
       field_duration,
-      field_pace,
-      field_speed,
+      field_effort,
+      field_equipment,
+      field_fit_file,
+      field_keywords,
+      field_max_hr,
       field_max_pace,
       field_max_speed,
-      field_resting_hr,
-      field_average_hr,
-      field_max_hr,
-      field_calories,
-      field_weight,
-      field_temperature,
-      field_weather,
+      field_pace,
       field_quality,
-      field_effort,
-      field_fit_file,
+      field_resting_hr,
+      field_speed,
       field_tcx_file,
-      field_custom,
+      field_temperature,
+      field_type,
+      field_weather,
+      field_weight,
     };
+
+  static field_id lookup_field_id(const char *str);
+  static const char *lookup_field_name(field_id id);
 
   struct field_name : public uncopyable
     {

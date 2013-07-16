@@ -19,7 +19,7 @@ Average-HR: NUMBER
 Max-HR: NUMBER
 Calories: NUMBER
 Weight: NUMBER UNIT			-- 150 pounds
-Temperature: TEMPERATURE		-- 28C
+Temperature: TEMPERATURE		-- 28C | 72 F | 22 celsius
 Weather: KEYWORD-LIST			-- cloudy drizzle
 Quality: FRACTION
 Effort: FRACTION
@@ -50,7 +50,6 @@ Minor format pieces are:
 ## Example entry
 
 --
-From jsh				-- mbox start line
 Date: 2013-06-26 09:36:12 -0900
 Course: Mission Bay
 Activity: run

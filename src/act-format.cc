@@ -245,6 +245,85 @@ parse_decimal(const std::string &str, size_t &idx, size_t max_digits)
   return value;
 }
 
+double
+parse_decimal_fraction(const std::string &str, size_t &idx)
+{
+  double value = 0;
+  double base = 1;
+
+  for (size_t i = idx; i < str.size() && isdigit_l(str[i], 0); i++)
+    {
+      value = value * 10 + str[i] - '0';
+      base = base * 10;
+    }
+
+  if (i == idx)
+    return -1;
+
+  idx = i;
+  return value / base;
+}
+
+bool
+parse_number(const std::string &str, size_t &idx, double &value)
+{
+  const char *ptr = str.c_str() + idx;
+  const char *end_ptr;
+
+  value = strtod_l(ptr, &end_ptr, 0);
+
+  if ((value == 0 && end_ptr == ptr) || !isfinite(value))
+    return false;
+
+  idx = end_ptr - ptr;
+
+  return true;
+}
+
+struct parsable_unit
+{
+  const char *word_list;
+  int unit_type;
+  double multiplier;
+  double offset;
+};
+
+bool
+parse_unit(const parsable_unit *units, const std::string &str,
+	   size_t &idx, double &value, int *unit_ptr)
+{
+  char buf[128];
+
+  size_t i = idx;
+  while (i < str.size() && (isalpha_l(str[i], 0) || str[i] == '/'))
+    i++;
+
+  size_t len = i - idx;
+  if (len + 1 > sizeof(buf))
+    return false;
+
+  memcpy(buf, str.c_str() + idx, len);
+  buf[len] = 0;
+
+  for (; units->word_list; units++)
+    {
+      for (const char *wptr = units->word_list;
+	   *wptr; wptr += strlen(wptr) + 1)
+	{
+	  if (strcasecmp_l(buf, wptr, 0) == 0)
+	    {
+	      value = value * units->multiplier + units->offset;
+	      if (unit_ptr)
+		*unit_ptr = units->unit_type;
+	      idx += len;
+	      return true;
+	    }
+	}
+    }
+
+  return false;
+}
+
 bool
 leap_year_p(int year)
 {
@@ -388,41 +467,250 @@ parse_date(const std::string &str, time_t *date_ptr, time_t *range_ptr)
 
   if (range_ptr)
     *range_ptr = range;
+
+  return true;
+}
+
+bool
+parse_time(const std::string &str, size_t &idx, double *dur_ptr)
+{
+  int hours = 0, minutes = 0, seconds = 0;
+  double seconds_frac = 0;
+
+  hours = parse_decimal(str, idx, 2);
+  if (hours < 0)
+    return false;
+
+  if (idx < str.size() && str[idx] == ':')
+    {
+      idx++;
+
+      minutes = parse_decimal(str, idx, 2);
+      if (minutes < 0)
+	return false;
+
+      if (idx < str.size() && str[idx] == ':')
+	{
+	  idx++;
+
+	  seconds = parse_decimal(str, idx, 2);
+	  if (seconds < 0)
+	    return false;
+	}
+      else
+	seconds = minutes, minutes = hours, hours = 0;
+    }
+  else
+    seconds = hours, hours = 0;
+
+  if (str[idx] == '.')
+    {
+      idx++;
+
+      seconds_frac = parse_decimal_fraction(str, idx);
+      if (seconds_frac < 0)
+	return false;
+    }
+
+  *dur_ptr = (hours * 60 + minutes) * 60 + seconds + seconds_frac;
+
+  return true;
 }
 
 bool
 parse_duration(const std::string &str, double *dur_ptr)
 {
+  size_t idx = skip_whitespace(str, 0);
+
+  return parse_time(str, idx, dur_ptr);
 }
 
 bool
-parse_distance(const std::string &str, double *dist_ptr)
+parse_distance(const std::string &str, double *dist_ptr,
+	       distance_unit *unit_ptr)
 {
+  size_t idx = skip_whitespace(str, 0);
+
+  double value;
+  if (!parse_number(str, idx, value))
+    return false;
+
+  idx = skip_whitespace(str, idx);
+
+  static const parsable_unit distance_units[] =
+    {
+      {"cm\0centimetres\0centimetre\0centimeters\0centimeter\0",
+       unit_centimetres, .01},
+      {"m\0metres\0metre\0meters\0meter\0", unit_metres, 1},
+      {"km\0kilometres\0kilometre\0kilometers\0kilometer\0",
+       unit_kilometres, 1000},
+      {"in\0inches\0inch\0", unit_inches, 1/INCHES_PER_METER},
+      {"ft\0feet\0foot\0", unit_feet, 1/FEET_PER_METER},
+      {"yd\0yards\0yard\0", unit_yards, 1/YARDS_PER_METER},
+      {"mi\0mile\0miles\0", unit_miles, 1/MILES_PER_METER},
+      {0}
+    };
+
+  int unit = unit_metres;
+  parse_unit(distance_units, str, idx, value, &unit);
+
+  *dist_ptr = value;
+
+  if (unit_ptr)
+    *unit_ptr = (distance_unit) unit;
+
+  return true;
 }
 
 bool
-parse_pace(const std::string &str, double *pace_ptr)
+parse_pace(const std::string &str, double *pace_ptr, pace_unit *unit_ptr)
 {
+  double value;
+
+  size_t idx = skip_whitespace(str, 0);
+
+  if (!parse_time(str, idx, &value))
+    return false;
+
+  value = 1/value;
+  int unit = unit_seconds_per_mile;
+
+  idx = skip_whitespace(str, idx);
+
+  if (idx < str.size() && str[idx] == '/')
+    {
+      idx = skip_whitespace(str, idx + 1);
+
+      static const parsable_unit pace_units[] =
+	{
+	  {"mi\0mile\0", unit_seconds_per_mile, 1/MILES_PER_METER},
+	  {"km\0kilometre\0kilometer\0", unit_seconds_per_kilometre, 1000},
+	  {0}
+	};
+
+      if (!parse_unit(pace_units, str, idx, value, &unit))
+	return false;
+    }
+  else
+    value = value * (1/MILES_PER_METER);
+
+  *pace_ptr = value;
+
+  if (unit_ptr)
+    unit_ptr = (pace_unit) unit;
+
+  return true;
 }
 
 bool
-parse_speed(const std::string &str, double *speed_ptr)
+parse_speed(const std::string &str, double *speed_ptr, speed_unit *unit_ptr)
 {
+  size_t idx = skip_whitespace(str, 0);
+
+  double value;
+  if (!parse_number(str, idx, value))
+    return false;
+
+  idx = skip_whitespace(str, idx);
+
+  static const parsable_unit speed_units[] =
+    {
+      {"m/s\0mps\0", unit_metres_per_second, 1},
+      {"km/h\0kmh\0", unit_kilometres_per_hour, 1000/3600.},
+      {"mph\0", unit_miles_per_hour, METERS_PER_MILE/3600.},
+      {0}
+    };
+
+  int unit = unit_metres_per_second;
+  parse_unit(speed_units, str, idx, value, &unit);
+
+  *dist_ptr = value;
+
+  if (unit_ptr)
+    *unit_ptr = (speed_unit) unit;
+
+  return true;
 }
 
 bool
-parse_temperature(const std::string &str, double *temp_ptr)
+parse_temperature(const std::string &str, double *temp_ptr,
+		  temperature_unit *unit_ptr)
 {
+  size_t idx = skip_whitespace(str, 0);
+
+  double value;
+  if (!parse_number(str, idx, value))
+    return false;
+
+  idx = skip_whitespace(str, idx);
+
+  static const parsable_unit temp_units[] =
+    {
+      {"c\0celsius\0centigrade\0", unit_celsius, 1},
+      {"f\0fahrenheit\0", unit_fahrenheit, 5/9., -160*9.},
+      {0}
+    };
+
+  int unit = unit_celsius;
+  parse_unit(temp_units, str, idx, value, &unit);
+
+  *dist_ptr = value;
+
+  if (unit_ptr)
+    *unit_ptr = (temperature_unit) unit;
+
+  return true;
 }
 
 bool
 parse_fraction(const std::string &str, double *frac_ptr)
 {
+  double value;
+
+  if (!parse_number(str, idx, value))
+    return false;
+
+  idx = skip_whitespace(str, idx);
+
+  if (idx < str.size())
+    {
+      if (str[idx] == '/')
+	{
+	  idx++;
+	  double denom;
+	  if (!parse_number(str, idx, denom))
+	    return false;
+	  value = value / denom;
+	}
+      else if (str[idx] == '%')
+	{
+	  idx++;
+	  value = value / 100;
+	}
+    }
+
+  return true;
 }
 
 bool
 parse_keywords(std::string &str, std::vector<std::string> *keys_ptr)
 {
+  size_t idx = skip_whitespace(str, 0);
+
+  while (idx < str.size())
+    {
+      std::string key;
+      while (idx < str.size() && !isspace_l(str[idx]))
+	key.append(str[idx++]);
+
+      size_t k = keys_ptr->size();
+      keys_ptr->resize(k + 1);
+      std::swap((*keys_ptr)[k], key);
+
+      idx = skip_whitespace(str, idx);
+    }
+
+  return true;
 }
 
 } // namespace activity_log
