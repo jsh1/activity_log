@@ -1,5 +1,124 @@
-
-# README
+[ This is -*- indented-text -*- ]
 
 A running / fitness log is evolving here.
 
+The plan is to use directories of plain-text files to track activities,
+with cross references to GPS files and other media (e.g. photos, web
+URLs). Storing the files in a Dropbox directory will sync the ad hoc
+database between systems.
+
+The end state will be a mac application to browse by date and
+examine/edit each entry, with maps and charting for activities with GPS
+data. Initially though, am focusing on a suite of shell commands with a
+common interface to get a feel for how the data format works. Basic
+command structure:
+
+$ act [--dir DIR] [--gps-dir DIR] COMMAND ARGS...
+
+The --dir and --gps-dir options are used to set ACT_DIR and ACT_GPS_DIR
+environment variables if given. Each command is a separate program
+called act-COMMAND. Some possible commands are:
+
+$ act new [--edit] [CREATION-OPTIONS...]
+
+	Creates a new activity file. If no --date option, defaults to
+	current time. (Date: is only required header.) If --edit
+	option is specified launches editor on initial file.
+
+$ act import [--edit] [CREATION-OPTIONS...]
+
+	Finds new Garmin files and creates activities from them. (I.e.
+	calls "act new" with --fit-file option.)
+
+$ act set [--multiple] [CREATION-OPTIONS] [ACTIVITY-RANGE ...]
+
+	Uses the options to change the specified activity. If the spec
+	selects more than one activity exit with an error unless
+	--multiple option was given.
+
+where CREATION-OPTIONS are any of:
+
+	--date DATE
+	--activity X
+	--type X
+	--course X
+	--keywords X[,Y]
+	--equipment X[,Y]
+	--distance X
+	--duration X
+	--pace X
+	--speed X
+	--max-pace X
+	--max-speed X
+	--resting-hr X
+	--average-hr X
+	--max-hr X
+	--calories X
+	--weight X
+	--temperature X[,Y]
+	--weather X
+	--quality X
+	--effort X
+	--fit-file X
+	--tcx-file X
+	--field TAG=X
+
+For identifying activities we have ACTIVITY-RANGE, which is one of these
+forms:
+
+	DATE
+	DATE-ABBREV		-- "today", "this-week", "last-week", etc
+	#10			-- date of 10th most recent activity
+
+given a single item spec like this we can concatenate to form a range, e.g.
+
+	DATE0..DATE1
+	#10..#20
+
+or ask for N items from that point:
+
+	DATE@20
+	@20			-- 20 most recent items (gdb syntax!)
+
+note that underspecified dates already form a range, e.g. "2013-07" is
+the entire month of July, and "12pm" is [12:00, 13:00). Combining two
+dates to form a range does the obvious thing (min/max of endpoints).
+Adding two ranges preserves the hole between them. If no spec is given,
+the command operates on the most recent activity.
+
+$ act edit [ACTIVITY-RANGE ...]
+
+	Runs $EDITOR on the specified file(s).
+
+$ act log [LOG-OPTIONS...] [ACTIVITY-RANGE ...]
+
+	Prints activities. The options allow the range of activities,
+	and what is printed to be controlled.
+
+$ act show [LOG-OPTIONS...] [ACTIVITY-RANGE ...]
+
+	Prints one activity.
+
+$ act summary [SUMMARY-OPTIONS...] ACTIVITY-RANGE
+
+	Summarizes a range of activities. E.g. prints weekly mileage
+	for the past year.
+
+$ act locate [ACTIVITY-RANGE ...]
+
+	Prints file names for all specified activities.
+
+$ act rm [ACTIVITY-RANGE ...]
+
+	Deletes specified activities. Note that this is a "soft"
+	deletion, either by adding a "Deleted: YES" header to the file,
+	or by moving it to a trash directory.
+
+$ act unrm [ACTIVITY-RANGE ...]
+
+	Clears the deleted state.
+
+$ act gc
+
+	Removes any deleted activities, and does any other cleanup that
+	might be needed.
