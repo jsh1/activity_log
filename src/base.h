@@ -28,4 +28,18 @@
 #undef MIN
 #define MIN(x,y) ((x) < (y) ? (x) : (y))
 
+#ifdef __cplusplus
+
+namespace activity_log {
+
+class uncopyable
+{
+private:
+  explicit uncopyable(const uncopyable &rhs);
+  uncopyable &operator=(const uncopyable &rhs);
+};
+
+} // namespace activity_log
+
+#endif /* __cplusplus */
 #endif /* BASE_H */
