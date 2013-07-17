@@ -24,12 +24,6 @@
 # endif
 #endif
 
-#undef MAX
-#define MAX(x,y) ((x) > (y) ? (x) : (y))
-
-#undef MIN
-#define MIN(x,y) ((x) < (y) ? (x) : (y))
-
 #ifdef __cplusplus
 
 namespace act {

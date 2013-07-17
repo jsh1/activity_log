@@ -4,6 +4,7 @@
 
 #include "act-swap-bytes.h"
 
+#include <algorithm>
 #include <stddef.h>
 #include <stdlib.h>
 #include <time.h>
@@ -77,7 +78,7 @@ fit_parser::read_bytes(void *buf, size_t size)
 {
   while (size > 0)
     {
-      size_t n = MIN(size, _buf_size - _buf_idx);
+      size_t n = std::min(size, _buf_size - _buf_idx);
 
       if (n > 0)
 	{

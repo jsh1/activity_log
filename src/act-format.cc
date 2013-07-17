@@ -2,6 +2,7 @@
 
 #include "act-format.h"
 
+#include <algorithm>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -241,7 +242,7 @@ parse_decimal(const std::string &str, size_t &idx, size_t max_digits)
   int value = 0;
 
   size_t i = idx;
-  size_t max_i = MIN(str.size(), idx + max_digits);
+  size_t max_i = std::min(str.size(), idx + max_digits);
 
   while (i < max_i && isdigit_l(str[i], 0))
     {
