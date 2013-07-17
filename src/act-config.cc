@@ -5,12 +5,12 @@
 namespace act {
 
 config::config()
-: _activity_dir(getenv("ACTIVITY_LOG_DIR")),
-  _gps_file_dir(getenv("ACTIVITY_GPS_DIR"))
+: _activity_dir(getenv("ACT_DIR")),
+  _gps_file_dir(getenv("ACT_GPS_DIR"))
 {
   if (!_activity_dir)
     {
-      fprintf(stderr, "You need to set $ACTIVITY_LOG_DIR.\n");
+      fprintf(stderr, "You need to set $ACT_DIR.\n");
       exit(1);
     }
 }

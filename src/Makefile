@@ -2,7 +2,7 @@
 # files
 
 library_products = libact.a
-bin_products = act-new act-gps-test
+bin_products = act act-new act-gps-test
 
 libact.a_objects =		\
 	act-activity.o		\
@@ -13,6 +13,10 @@ libact.a_objects =		\
 	act-gps-parser.o	\
 	act-gps-fit-parser.o	\
 	act-gps-tcx-parser.o
+
+act_libraries = $(libraries)
+act_objects =			\
+	act-driver.o
 
 act-new_libraries = $(libraries)
 act-new_objects =		\

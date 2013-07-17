@@ -10,9 +10,11 @@
 
 using namespace act;
 
+namespace {
+
 enum option_id
 {
-  opt_edit = 1,
+  opt_edit,
   opt_date,
   opt_activity,
   opt_type,
@@ -38,8 +40,6 @@ enum option_id
   opt_tcx_file,
   opt_field,
 };
-
-namespace {
 
 activity::field_id
 option_field_id(option_id opt)
@@ -102,7 +102,7 @@ option_field_id(option_id opt)
 const arguments::option options[] =
 {
   {opt_edit, "edit", 0, false},
-  {opt_date, "date", true, 0},
+  {opt_date, "date", 0, true},
   {opt_activity, "activity", 0, true},
   {opt_type, "type", 0, true},
   {opt_course, "course", 0, true},
@@ -205,7 +205,6 @@ act_new(arguments &args)
 	case arguments::opt_error:
 	  fprintf(stderr, "Error: invalid argument: %s\n", opt_arg);
 	  return 1;
-	  break;
 	}
     }
 

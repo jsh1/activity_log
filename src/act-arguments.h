@@ -23,6 +23,9 @@ public:
   ~arguments();
 
   const char *program_name() const;
+
+  const std::vector<const char *> args() const;
+
   const char *const *argv() const;
   int argc() const;
 
@@ -54,6 +57,12 @@ inline const char *
 arguments::program_name() const
 {
   return _program_name;
+}
+
+inline const std::vector<const char *>
+arguments::args() const
+{
+  return _args;
 }
 
 inline const char *const *
