@@ -46,7 +46,7 @@ define library_rules
 $(1) : $$($(1)_objects)
 	$$(AR) -rcs $$@ $$^
 clean ::
-	rm -f $(1).a $$($(1)_objects)
+	rm -f $(1) $$($(1)_objects)
 -include $$(patsubst %.o,.%.d,$$($(1)_objects))
 endef
 
