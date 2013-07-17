@@ -18,6 +18,11 @@ public:
 
   const char *activity_dir() const;
   const char *gps_file_dir() const;
+
+  bool find_gps_file(std::string &str, bool unique = false) const;
+  bool find_activity_file(std::string &str, bool unique = false) const;
+
+  void edit_file(const char *filename);
 };
 
 const config &shared_config();

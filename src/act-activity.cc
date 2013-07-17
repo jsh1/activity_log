@@ -235,11 +235,15 @@ activity::write_file(const char *path)
 void
 activity::set_date(time_t x)
 {
-  if (_date == x)
-    return;
+  if (_date != x)
+    {
+      _date = x;
 
-  _date = x;
-  format_date(field_value(field_name(field_date)), x);
+      std::string &value = field_value(field_name(field_date));
+
+      value = "";
+      format_date(value, _date);
+    }
 }
 
 void
@@ -261,7 +265,7 @@ activity::field_index(const field_name &name) const
 }
 
 bool
-activity::contains_field(const field_name &name) const
+activity::has_field(const field_name &name) const
 {
   return field_index(name) >= 0;
 }

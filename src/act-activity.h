@@ -90,7 +90,10 @@ public:
   std::string &body();
   void set_body(const std::string &x);
 
-  bool contains_field(const field_name &name) const;
+  bool has_field(const field_name &name) const;
+
+  std::string &field_value(const field_name &name);
+  const std::string &field_value(const field_name &name) const;
 
   bool get_string_field(const field_name &name, const std::string &*ptr) const;
   void set_string_field(const field_name &name, const std::string &x);
@@ -120,7 +123,6 @@ public:
 
 private:
   int field_index(const field_name &name) const;
-  std::string &field_value(const field_name &name);
 };
 
 // implementation details
@@ -161,6 +163,12 @@ inline time_t
 activity::date() const
 {
   return _date;
+}
+
+inline const std::string &
+activity::field_value(const field_name &name) const
+{
+  return const_cast<activity *>(this)->field_value(name);
 }
 
 inline const std::string &

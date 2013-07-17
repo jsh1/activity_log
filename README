@@ -61,7 +61,7 @@ where CREATION-OPTIONS are any of:
 	--effort X
 	--fit-file X
 	--tcx-file X
-	--field TAG=X
+	--field NAME:X
 
 For identifying activities we have ACTIVITY-RANGE, which is one of these
 forms:
