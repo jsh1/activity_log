@@ -209,7 +209,7 @@ activity::read_file(const char *path)
 }
 
 bool
-activity::write_file(const char *path)
+activity::write_file(const char *path) const
 {
   FILE *fh = fopen(path, "w");
   if (!fh)
@@ -230,6 +230,55 @@ activity::write_file(const char *path)
 
   fclose(fh);
   return true;
+}
+
+namespace {
+
+bool
+ensure_path(const char *path)
+{
+  if (path[0] != '/')
+    return false;
+
+  char *buf = malloc(strlen(path) + 1);
+
+  for (const char *ptr = strchr (path + 1, '/');
+       ptr; ptr = strchr(ptr + 1, '/'))
+    {
+      memcpy(buf, path, ptr - path - 1);
+      buf[ptr - path] = 0;
+
+      if (mkdir(buf, 0777) != 0 && errno != EEXIST)
+	{
+	  free(buf);
+	  return false;
+	}
+    }
+
+  free(buf);
+  return true;
+}
+
+} // anonymous namespace
+
+bool
+activity::make_filename(std::string &filename) const
+{
+  if (_date == 0)
+    return false;
+
+  struct tm tm = {0};
+  gmtime_r(&_date, &tm);
+
+  filename = shared_config().activity_file_dir();
+  if (filename.size() > 1 && filename[filename.size() - 1] != '/')
+    filename.append('/');
+
+  char buf[256];
+  strftime(buf, sizeof(buf), "%Y/%m/%Y-%m-%d-%H-%M-%S.txt", &tm);
+  filename.append(buf);
+
+  return ensure_path(filename.c_str());
 }
 
 void

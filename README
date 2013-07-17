@@ -42,8 +42,8 @@ where CREATION-OPTIONS are any of:
 	--activity X
 	--type X
 	--course X
-	--keywords X[,Y]
-	--equipment X[,Y]
+	--keywords X
+	--equipment X
 	--distance X
 	--duration X
 	--pace X
@@ -55,7 +55,7 @@ where CREATION-OPTIONS are any of:
 	--max-hr X
 	--calories X
 	--weight X
-	--temperature X[,Y]
+	--temperature X
 	--weather X
 	--quality X
 	--effort X
@@ -95,14 +95,18 @@ $ act log [LOG-OPTIONS...] [ACTIVITY-RANGE ...]
 	Prints activities. The options allow the range of activities,
 	and what is printed to be controlled.
 
-$ act show [LOG-OPTIONS...] [ACTIVITY-RANGE ...]
-
-	Prints one activity.
-
 $ act summary [SUMMARY-OPTIONS...] ACTIVITY-RANGE
 
 	Summarizes a range of activities. E.g. prints weekly mileage
 	for the past year.
+
+$ act show [LOG-OPTIONS...] [ACTIVITY-RANGE ...]
+
+	Prints one activity, with pretty-print options.
+
+$ act cat [ACTIVITY-RANGE ...]
+
+	Prints unformatted activity files.
 
 $ act locate [ACTIVITY-RANGE ...]
 

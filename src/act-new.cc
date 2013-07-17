@@ -4,7 +4,8 @@
 #include "act-arguments.h"
 #include "act-config.h"
 
-#include <getopt.h>
+#include "fit-parser.h"
+#include "tcx-parser.h"
 
 enum option_id
 {
@@ -135,6 +136,12 @@ string_has_suffix(const std::string &str, const char *suffix)
   return str.compare(str.size() - len, std::string::npos, suffix) == 0;
 }
 
+void
+import_gps_fields(activity &a, const gps::activity &gps_data)
+{
+  // FIXME: implement this.
+}
+
 } // anonymous namespace
 
 int
@@ -148,7 +155,7 @@ act_new(arguments &args)
     {
       const char *opt_arg = 0;
       int opt = args.getopt(options, &opt_arg);
-      if (opt < 0)
+      if (opt == opt_eof)
 	break;
 
       switch (opt)
@@ -176,10 +183,26 @@ act_new(arguments &args)
 	  std::swap(a.field_value(field_name(name)), value);
 	  break; }
 
+	  // keyword arguments concatenate into existing values
+
+	case opt_keywords:
+	case opt_equipment:
+	case opt_weather: {
+	  activity::field_id field = option_field_id(opt);
+	  std::string &value = a.field_value(field_name(field));
+	  value.append(' ');
+	  value.append(opt_arg);
+	  break; }
+
 	default: {
 	  activity::field_id field = option_field_id(opt);
 	  a.field_value(field_name(field)) = *opt_arg;
 	  break; }
+
+	case opt_error:
+	  fprintf(stderr, "Error: invalid argument: %s\n", opt_arg);
+	  return 1;
+	  break;
 	}
     }
 
@@ -206,9 +229,7 @@ act_new(arguments &args)
     }
 
   std::string filename;
-  a.suggest_filename(filename);
-
-  if (!shared_config().find_activity_file(filename, true))
+  if (!a.make_filename(filename))
     return 1;
 
   if (!a.write_file(filename.c_str()))
@@ -223,14 +244,14 @@ act_new(arguments &args)
 }
 
 int
-act_new_main(int argc, const char **argv)
+main(int argc, const char **argv)
 {
   arguments args(argc, argv);
 
   if (args.program_name_p("act-import"))
     {
       std::vector<std::string> new_files;
-      find_new_gps_files(new_files);
+      shared_config().find_new_gps_files(new_files);
 
       for (const auto &it : new_files)
 	{
@@ -246,9 +267,9 @@ act_new_main(int argc, const char **argv)
 	      arguments copy(args);
 
 	      if (string_has_suffix(it, ".fit"))
-		copy.append("--fit-file");
+		copy.push_back("--fit-file");
 	      else if (string_has_suffix(it, ".tcx"))
-		copy.append("--tcx-file");
+		copy.push_back("--tcx-file");
 	      else
 		abort();
 

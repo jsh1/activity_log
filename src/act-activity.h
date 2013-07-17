@@ -81,7 +81,8 @@ public:
   ~activity();
 
   bool read_file(const char *path);
-  bool write_file(const char *path);
+  bool write_file(const char *path) const;
+  bool make_filename(std::string &filename) const;
 
   time_t date() const;
   void set_date(time_t x);

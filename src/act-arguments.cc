@@ -5,7 +5,7 @@
 namespace activity_log {
 
 arguments::arguments(int argc, const char **argv)
-: _program_name (argc > 0 ? argv[0] : 0),
+: _program_name(argc > 0 ? argv[0] : 0),
   _getopt_finished(false)
 {
   for (int i = 1; i < argc; i++)
@@ -13,8 +13,8 @@ arguments::arguments(int argc, const char **argv)
 }
 
 arguments::arguments(const arguments &rhs)
-: _program_name (rhs._program_name),
-  _args (rhs._args),
+: _program_name(rhs._program_name),
+  _args(rhs._args),
   _getopt_finished(rhs._getopt_finished)
 {
 }
@@ -71,7 +71,10 @@ arguments::getopt(const struct option *opts, const char **arg_ptr)
       if (const char *end = strchr(start, "="))
 	{
 	  if (!opts[i].has_arg)
-	    return opt_error;
+	    {
+	      *opt_arg = arg;
+	      return opt_error;
+	    }
 
 	  /* --opt=value */
 
@@ -85,6 +88,7 @@ arguments::getopt(const struct option *opts, const char **arg_ptr)
 	      return opts[i].option_id;
 	    }
 
+          *opt_arg = arg;
 	  return opt_error;
 	}
       else
@@ -99,7 +103,10 @@ arguments::getopt(const struct option *opts, const char **arg_ptr)
 	      if (opts[i].has_arg)
 		{
 		  if (_args.size() < 1)
-		    return opt_error;
+		    {
+		      *opt_arg = arg;
+		      return opt_error;
+		    }
 
 		  *arg_ptr = _args[0].c_str();
 		  _args.erase(_args.begin());
@@ -110,12 +117,14 @@ arguments::getopt(const struct option *opts, const char **arg_ptr)
 	      return opts[i].option_id;
 	    }
 
+          *opt_arg = arg;
 	  return opt_error;
 	}
     }
   else if (arg[0] == '-')
     {
       // FIXME: single character options are not currently supported.
+      *opt_arg = arg;
       return opt_error;
     }
   else

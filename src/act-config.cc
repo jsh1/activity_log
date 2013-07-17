@@ -26,4 +26,34 @@ shared_config()
   return cfg;
 }
 
+void
+config::find_new_gps_files(std::vector<std::string> &files) const
+{
+}
+
+bool
+config::find_gps_file(std::string &str, bool unique = false) const
+{
+  return false;
+}
+
+void
+config::edit_file(const char *filename)
+{
+  const char *editor = getenv("ACT_EDITOR");
+  if (!editor)
+    editor = getenv("VISUAL");
+  if (!editor)
+    editor = getenv("EDITOR");
+
+  char *command = 0;
+  asprintf(&command, "\'%s\' '%s'", editor, filename);
+
+  if (command)
+    {
+      system(command);
+      free(command);
+    }
+}
+
 } // namespace activity_log
