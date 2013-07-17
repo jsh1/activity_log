@@ -36,11 +36,9 @@ namespace act {
 
 struct uncopyable
 {
-  uncopyable() {}
-
-private:
-  explicit uncopyable(const uncopyable &rhs);
-  uncopyable &operator=(const uncopyable &rhs);
+  uncopyable() = default;
+  explicit uncopyable(const uncopyable &rhs) = delete;
+  uncopyable &operator=(const uncopyable &rhs) = delete;
 };
 
 } // namespace act
