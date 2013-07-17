@@ -1,10 +1,10 @@
 // -*- c-style: gnu -*-
 
-#include "gps-parser.h"
+#include "act-gps-parser.h"
 
 #include <stdio.h>
 
-namespace activity_log {
+namespace act {
 namespace gps {
 
 parser::parser(activity &dest)
@@ -18,4 +18,4 @@ parser::~parser()
 }
 
 } // namespace gps
-} // namespace activity_log
+} // namespace act

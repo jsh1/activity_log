@@ -1,10 +1,12 @@
 /* -*- c-style: gnu -*- */
 
-#ifndef BASE_H
-#define BASE_H
+#ifndef ACT_BASE_H
+#define ACT_BASE_H
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <stddef.h>
+#include <stdlib.h>
 
 #ifndef __BIG_ENDIAN
 # define __BIG_ENDIAN 0x1234
@@ -30,16 +32,18 @@
 
 #ifdef __cplusplus
 
-namespace activity_log {
+namespace act {
 
-class uncopyable
+struct uncopyable
 {
+  uncopyable() {}
+
 private:
   explicit uncopyable(const uncopyable &rhs);
   uncopyable &operator=(const uncopyable &rhs);
 };
 
-} // namespace activity_log
+} // namespace act
 
 #endif /* __cplusplus */
-#endif /* BASE_H */
+#endif /* ACT_BASE_H */

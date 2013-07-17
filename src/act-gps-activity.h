@@ -1,14 +1,14 @@
 // -*- c-style: gnu -*-
 
-#ifndef GPS_ACTIVITY_H
-#define GPS_ACTIVITY_H
+#ifndef ACT_GPS_ACTIVITY_H
+#define ACT_GPS_ACTIVITY_H
 
-#include "base.h"
+#include "act-base.h"
 
 #include <string>
 #include <vector>
 
-namespace activity_log {
+namespace act {
 namespace gps {
 
 class activity
@@ -161,6 +161,6 @@ public:
 };
 
 } // namespace gps
-} // namespace activity_log
+} // namespace act
 
-#endif /* GPS_ACTIVITY_H */
+#endif /* ACT_GPS_ACTIVITY_H */

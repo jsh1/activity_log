@@ -1,13 +1,14 @@
 // -*- c-style: gnu -*-
 
-#include "gps-activity.h"
-#include "fit-parser.h"
-#include "tcx-parser.h"
+#include "act-gps-activity.h"
+#include "act-gps-parser.h"
+#include "act-gps-fit-parser.h"
+#include "act-gps-tcx-parser.h"
 
 #include <getopt.h>
 #include <math.h>
 
-using namespace activity_log;
+using namespace act;
 
 #define MILES_PER_METER 0.000621371192
 #define FEET_PER_METER 3.2808399

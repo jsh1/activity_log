@@ -3,9 +3,12 @@
 #include "act-activity.h"
 #include "act-arguments.h"
 #include "act-config.h"
+#include "act-gps-activity.h"
+#include "act-gps-parser.h"
+#include "act-gps-fit-parser.h"
+#include "act-gps-tcx-parser.h"
 
-#include "fit-parser.h"
-#include "tcx-parser.h"
+using namespace act;
 
 enum option_id
 {
@@ -43,8 +46,6 @@ option_field_id(option_id opt)
 {
   switch (opt)
     {
-    case opt_edit:
-      return activity::field_edit;
     case opt_date:
       return activity::field_date;
     case opt_activity:
@@ -93,10 +94,12 @@ option_field_id(option_id opt)
       return activity::field_tcx_file;
     case opt_field:
       return activity::field_custom;
+    case opt_edit:
+      abort();
     }
 }
 
-const arguments::option new_options[] =
+const arguments::option options[] =
 {
   {opt_edit, "edit", 0, false},
   {opt_date, "date", true, 0},
@@ -147,7 +150,6 @@ import_gps_fields(activity &a, const gps::activity &gps_data)
 int
 act_new(arguments &args)
 {
-  int ret = 1;
   bool edit = false;
   activity a;
 
@@ -155,7 +157,7 @@ act_new(arguments &args)
     {
       const char *opt_arg = 0;
       int opt = args.getopt(options, &opt_arg);
-      if (opt == opt_eof)
+      if (opt == arguments::opt_eof)
 	break;
 
       switch (opt)
@@ -171,16 +173,17 @@ act_new(arguments &args)
 	  break; }
 
 	case opt_field: {
+	  std::string arg(opt_arg);
 	  std::string name, value;
-	  size_t idx = opt_arg->find_first_of(':');
+	  size_t idx = arg.find_first_of(':');
 	  if (idx != std::string::npos)
 	    {
-	      name = opt_arg->substr(0, idx);
-	      value = opt_arg->substr(idx, opt_arg->size() - (idx + 1));
+	      name = arg.substr(0, idx);
+	      value = arg.substr(idx, arg.size() - (idx + 1));
 	    }
 	  else
-	    name = *opt_arg;
-	  std::swap(a.field_value(field_name(name)), value);
+	    std::swap(name, arg);
+	  std::swap(a.field_value(activity::field_name(name)), value);
 	  break; }
 
 	  // keyword arguments concatenate into existing values
@@ -188,33 +191,36 @@ act_new(arguments &args)
 	case opt_keywords:
 	case opt_equipment:
 	case opt_weather: {
-	  activity::field_id field = option_field_id(opt);
-	  std::string &value = a.field_value(field_name(field));
-	  value.append(' ');
+	  activity::field_id field = option_field_id((option_id)opt);
+	  std::string &value = a.field_value(activity::field_name(field));
+	  value.push_back(' ');
 	  value.append(opt_arg);
 	  break; }
 
 	default: {
-	  activity::field_id field = option_field_id(opt);
-	  a.field_value(field_name(field)) = *opt_arg;
+	  activity::field_id field = option_field_id((option_id)opt);
+	  a.field_value(activity::field_name(field)) = *opt_arg;
 	  break; }
 
-	case opt_error:
+	case arguments::opt_error:
 	  fprintf(stderr, "Error: invalid argument: %s\n", opt_arg);
 	  return 1;
 	  break;
 	}
     }
 
-  bool has_fit_file = a.has_field(field_name(field_fit_file));
-  bool has_tcx_file = a.has_field(field_name(field_tcx_file));
+  bool has_fit_file = a.has_field(activity::field_fit_file);
+  bool has_tcx_file = a.has_field(activity::field_tcx_file);
 
   if (has_fit_file || has_tcx_file)
     {
-      const std::string filename;
-      a.get_string_field(field_name(has_fit_file ? field_fit_file
-				    : field_tcx_file), &filename);
+      const std::string *s;
+      a.get_string_field(activity::field_name(has_fit_file
+					      ? activity::field_fit_file
+					      : activity::field_tcx_file),
+			 &s);
 
+      std::string filename(*s);
       if (shared_config().find_gps_file(filename))
 	{
 	  gps::activity gps_data;
@@ -238,7 +244,7 @@ act_new(arguments &args)
   fprintf(stderr, "Created %s\n", filename.c_str());
 
   if (edit)
-    shared_config.edit_file(filename.c_str());
+    shared_config().edit_file(filename.c_str());
 
   return 0;
 }
@@ -273,14 +279,14 @@ main(int argc, const char **argv)
 	      else
 		abort();
 
-	      copy.append(it);
+	      copy.push_back(it);
 
-	      int ret = act_new(arguments);
+	      int ret = act_new(copy);
 	      if (ret != 0)
 		return ret;
 	    }
 	}
     }
   else
-    return act_new(arguments);
+    return act_new(args);
 }

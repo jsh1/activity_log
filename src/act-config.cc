@@ -2,7 +2,7 @@
 
 #include "act-config.h"
 
-namespace activity_log {
+namespace act {
 
 config::config()
 : _activity_dir(getenv("ACTIVITY_LOG_DIR")),
@@ -23,7 +23,7 @@ const config &
 shared_config()
 {
   static const config *cfg = new config();
-  return cfg;
+  return *cfg;
 }
 
 void
@@ -32,13 +32,13 @@ config::find_new_gps_files(std::vector<std::string> &files) const
 }
 
 bool
-config::find_gps_file(std::string &str, bool unique = false) const
+config::find_gps_file(std::string &str) const
 {
   return false;
 }
 
 void
-config::edit_file(const char *filename)
+config::edit_file(const char *filename) const
 {
   const char *editor = getenv("ACT_EDITOR");
   if (!editor)
@@ -56,4 +56,4 @@ config::edit_file(const char *filename)
     }
 }
 
-} // namespace activity_log
+} // namespace act

@@ -1,13 +1,13 @@
 // -*- c-style: gnu -*-
 
-#include "gps-activity.h"
+#include "act-gps-activity.h"
 
-#include "fit-parser.h"
-#include "tcx-parser.h"
+#include "act-gps-fit-parser.h"
+#include "act-gps-tcx-parser.h"
 
 #include <math.h>
 
-namespace activity_log {
+namespace act {
 namespace gps {
 
 bool
@@ -59,4 +59,4 @@ activity::update_summary()
 }
 
 } // namespace gps
-} // namespace activity_log
+} // namespace act

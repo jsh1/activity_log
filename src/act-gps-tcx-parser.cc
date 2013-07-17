@@ -1,6 +1,6 @@
 // -*- c-style: gnu -*-
 
-#include "tcx-parser.h"
+#include "act-gps-tcx-parser.h"
 
 #include <stdlib.h>
 #include <time.h>
@@ -10,7 +10,7 @@
 #define ACTIVITY_EXTENSION_NS "http://www.garmin.com/xmlschemas/ActivityExtension/v2"
 #define LOG_ERRORS 1
 
-namespace activity_log {
+namespace act {
 namespace gps {
 
 tcx_parser::tcx_parser(activity &dest)
@@ -65,19 +65,6 @@ tcx_parser::parse_file(const char *path)
 namespace {
 
 const char whitespace[] = " \t\n\r\f";
-
-std::string
-trim_whitespace(const std::string &s)
-{
-  size_t begin = s.find_first_not_of(whitespace);
-  if (begin == std::string::npos)
-    return std::string();
-  size_t end = s.find_last_not_of(whitespace);
-  if (end > begin)
-    return s.substr(begin, end - begin);
-  else
-    return std::string();
-}
 
 double
 parse_double(const std::string &s)
@@ -393,4 +380,4 @@ tcx_parser::sax_error(void *ctx, const char *msg, ...)
 }
 
 } // namespace gps
-} // namespace activity_log
+} // namespace act

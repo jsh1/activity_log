@@ -3,9 +3,12 @@
 #ifndef ACT_CONFIG_H
 #define ACT_CONFIG_H
 
-#include "base.h"
+#include "act-base.h"
 
-namespace activity_log {
+#include <string>
+#include <vector>
+
+namespace act {
 
 class config
 {
@@ -23,7 +26,7 @@ public:
 
   bool find_gps_file(std::string &str) const;
 
-  void edit_file(const char *filename);
+  void edit_file(const char *filename) const;
 };
 
 const config &shared_config();
@@ -42,6 +45,6 @@ config::gps_file_dir() const
   return _gps_file_dir;
 }
 
-} // namespace activity_log
+} // namespace act
 
 #endif /* ACT_CONFIG_H */

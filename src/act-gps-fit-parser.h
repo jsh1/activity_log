@@ -1,11 +1,11 @@
 // -*- c-style: gnu -*-
 
-#ifndef FIT_PARSER_H
-#define FIT_PARSER_H
+#ifndef ACT_GPS_FIT_PARSER_H
+#define ACT_GPS_FIT_PARSER_H
 
-#include "gps-parser.h"
+#include "act-gps-parser.h"
 
-namespace activity_log {
+namespace act {
 namespace gps {
 
 class fit_parser : public parser
@@ -55,6 +55,6 @@ private:
 };
 
 } // namespace gps
-} // namespace activity_log
+} // namespace act
 
-#endif /* FIT_PARSER_H */
+#endif /* ACT_GPS_FIT_PARSER_H */

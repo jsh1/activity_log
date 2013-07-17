@@ -1,13 +1,13 @@
 // -*- c-style: gnu -*-
 
-#ifndef TCX_PARSER_H
-#define TCX_PARSER_H
+#ifndef ACT_GPS_TCX_PARSER_H
+#define ACT_GPS_TCX_PARSER_H
 
-#include "gps-parser.h"
+#include "act-gps-parser.h"
 
 #include <libxml/parser.h>
 
-namespace activity_log {
+namespace act {
 namespace gps {
 
 class tcx_parser : public parser
@@ -78,6 +78,6 @@ private:
 };
 
 } // namespace gps
-} // namespace activity_log
+} // namespace act
 
-#endif /* TCX_PARSER_H */
+#endif /* ACT_GPS_TCX_PARSER_H */

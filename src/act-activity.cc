@@ -2,9 +2,16 @@
 
 #include "act-activity.h"
 
-namespace activity_log {
+#include "act-config.h"
+#include "act-util.h"
 
-field_id
+#include <errno.h>
+#include <sys/stat.h>
+#include <xlocale.h>
+
+namespace act {
+
+activity::field_id
 activity::lookup_field_id(const char *str)
 {
   switch (tolower_l(str[0], 0))
@@ -149,6 +156,21 @@ activity::lookup_field_name(field_id id)
     }
 }
 
+bool
+activity::field::operator==(const field_name &name) const
+{
+  if (id != name.id)
+    return false;
+
+  if (id != field_custom)
+    return true;
+
+  if (name.ptr)
+    return custom == name.ptr;
+  else
+    return custom == *name.str;
+}
+
 activity::activity()
 : _date(0)
 {
@@ -176,7 +198,7 @@ activity::read_file(const char *path)
       if (buf[0] == '\n')
 	break;
 
-      const char *ptr = strchr(buf, ':');
+      char *ptr = strchr(buf, ':');
       if (!ptr)
 	continue;
 
@@ -188,17 +210,17 @@ activity::read_file(const char *path)
       else
 	_header.push_back(field(field_name(buf)));
 
-      while (*ptr && isspace_l(*ptr))
+      while (*ptr && isspace_l(*ptr, 0))
 	ptr++;
 
-      const char *end = ptr + strlen(ptr);
-      while (end > ptr + 1 && isspace_l(end[-1]))
+      char *end = ptr + strlen(ptr);
+      while (end > ptr + 1 && isspace_l(end[-1], 0))
 	*end-- = 0;
 
-      _header.back()->value = ptr;
+      _header.back().value = ptr;
 
       if (id == field_date)
-	parse_date(_header.back()->value, &_date, 0);
+	parse_date(_header.back().value, &_date, 0);
     }
 
   while (fgets(buf, sizeof(buf), fh))
@@ -217,16 +239,16 @@ activity::write_file(const char *path) const
 
   for (const auto &field : _header)
     {
-      const char *field = lookup_field_name(field.id);
-      if (!field)
-	field = field.custom.c_str();
+      const char *field_name = lookup_field_name(field.id);
+      if (!field_name)
+	field_name = field.custom.c_str();
 
-      fprintf(fh, "%s: %s\n", field, field.value.c_str());
+      fprintf(fh, "%s: %s\n", field_name, field.value.c_str());
     }
 
   fputs("\n", fh);
 
-  fputs(_body.c_str());
+  fputs(_body.c_str(), fh);
 
   fclose(fh);
   return true;
@@ -240,22 +262,20 @@ ensure_path(const char *path)
   if (path[0] != '/')
     return false;
 
-  char *buf = malloc(strlen(path) + 1);
+  malloc_ptr<char> buf (strlen(path) + 1);
+  if (!buf)
+    return false;
 
   for (const char *ptr = strchr (path + 1, '/');
        ptr; ptr = strchr(ptr + 1, '/'))
     {
-      memcpy(buf, path, ptr - path - 1);
+      memcpy(&buf[0], path, ptr - path - 1);
       buf[ptr - path] = 0;
 
-      if (mkdir(buf, 0777) != 0 && errno != EEXIST)
-	{
-	  free(buf);
-	  return false;
-	}
+      if (mkdir(&buf[0], 0777) != 0 && errno != EEXIST)
+	return false;
     }
 
-  free(buf);
   return true;
 }
 
@@ -270,9 +290,9 @@ activity::make_filename(std::string &filename) const
   struct tm tm = {0};
   gmtime_r(&_date, &tm);
 
-  filename = shared_config().activity_file_dir();
+  filename = shared_config().activity_dir();
   if (filename.size() > 1 && filename[filename.size() - 1] != '/')
-    filename.append('/');
+    filename.push_back('/');
 
   char buf[256];
   strftime(buf, sizeof(buf), "%Y/%m/%Y-%m-%d-%H-%M-%S.txt", &tm);
@@ -321,13 +341,13 @@ activity::has_field(const field_name &name) const
 
 bool
 activity::get_string_field(const field_name &name,
-			   const std::string &*ptr) const
+			   const std::string **ptr) const
 {
   int i = field_index(name);
 
   if (i >= 0)
     {
-      *ptr = _header[i].str;
+      *ptr = &_header[i].value;
       return true;
     }
   else
@@ -345,35 +365,37 @@ activity::field_value(const field_name &name)
       i = _header.size() - 1;
     }
 
-  return _header[i].str;
+  return _header[i].value;
 }
 
 void
 activity::set_string_field(const field_name &name, const std::string &x)
 {
-  string_field(name) = x;
+  field_value(name) = x;
 }
 
 // FIXME: feels like the code below should use templates?
 
 bool
-activity::get_distance_field(const field_name &name, double *ptr) const
+activity::get_distance_field(const field_name &name, double *ptr,
+			     distance_unit *unit_ptr) const
 {
-  const std::string &s;
-  return get_string_field(name, &s) && parse_distance(s, ptr);
+  const std::string *s;
+  return get_string_field(name, &s) && parse_distance(*s, ptr, unit_ptr);
 }
 
 void
-activity::set_distance_field(const field_name &name, double x)
+activity::set_distance_field(const field_name &name, double x,
+			     distance_unit unit)
 {
-  format_distance(field_value(name), x);
+  format_distance(field_value(name), x, unit);
 }
 
 bool
 activity::get_duration_field(const field_name &name, double *ptr) const
 {
-  const std::string &s;
-  return get_string_field(name, &s) && parse_duration(s, ptr);
+  const std::string *s;
+  return get_string_field(name, &s) && parse_duration(*s, ptr);
 }
 
 void
@@ -383,50 +405,55 @@ activity::set_duration_field(const field_name &name, double x)
 }
 
 bool
-activity::get_pace_field(const field_name &name, double *ptr) const
+activity::get_pace_field(const field_name &name, double *ptr,
+			 pace_unit *unit_ptr) const
 {
-  const std::string &s;
-  return get_string_field(name, &s) && parse_pace(s, ptr);
+  const std::string *s;
+  return get_string_field(name, &s) && parse_pace(*s, ptr, unit_ptr);
 }
 
 void
-activity::set_pace_field(const field_name &name, double x)
+activity::set_pace_field(const field_name &name, double x, pace_unit unit)
 {
-  format_pace(field_value(name), x);
+  format_pace(field_value(name), x, unit);
 }
 
 bool
-activity::get_speed_field(const field_name &name, double *ptr) const
+activity::get_speed_field(const field_name &name, double *ptr,
+			  speed_unit *unit_ptr) const
 {
-  const std::string &s;
-  return get_string_field(name, &s) && parse_speed(s, ptr);
+  const std::string *s;
+  return get_string_field(name, &s) && parse_speed(*s, ptr, unit_ptr);
 }
 
 void
-activity::set_speed_field(const field_name &name, double x)
+activity::set_speed_field(const field_name &name, double x,
+			  speed_unit unit)
 {
-  format_speed(field_value(name), x);
+  format_speed(field_value(name), x, unit);
 }
 
 bool
-activity::get_temperature_field(const field_name &name, double *ptr) const
+activity::get_temperature_field(const field_name &name, double *ptr,
+				temperature_unit *unit_ptr) const
 {
-  const std::string &s;
-  return get_string_field(name, &s) && parse_temperature(s, ptr);
+  const std::string *s;
+  return get_string_field(name, &s) && parse_temperature(*s, ptr, unit_ptr);
 }
 
 void
-activity::set_temperature_field(const field_name &name, double x)
+activity::set_temperature_field(const field_name &name, double x,
+				temperature_unit unit)
 {
-  format_temperature(field_value(name), x);
+  format_temperature(field_value(name), x, unit);
 }
 
 bool
 activity::get_keywords_field(const field_name &name,
 			     std::vector<std::string> *ptr) const
 {
-  const std::string &s;
-  return get_string_field(name, &s) && parse_keywords(s, ptr);
+  const std::string *s;
+  return get_string_field(name, &s) && parse_keywords(*s, ptr);
 }
 
 void
@@ -437,10 +464,10 @@ activity::set_keywords_field(const field_name &name,
 }
 
 bool
-activity::get_fraction_field(const field_name &name, double &ptr) const
+activity::get_fraction_field(const field_name &name, double *ptr) const
 {
-  const std::string &s;
-  return get_string_field(name, &s) && parse_fraction(s, ptr);
+  const std::string *s;
+  return get_string_field(name, &s) && parse_fraction(*s, ptr);
 }
 
 void
@@ -449,4 +476,4 @@ activity::set_fraction_field(const field_name &name, double x)
   format_fraction(field_value(name), x);
 }
 
-} // namespace activity_log
+} // namespace act

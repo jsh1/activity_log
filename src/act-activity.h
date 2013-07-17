@@ -3,14 +3,16 @@
 #ifndef ACT_ACTIVITY_H
 #define ACT_ACTIVITY_H
 
-#include "base.h"
+#include "act-base.h"
+
+#include "act-format.h"
 
 #include <string>
 #include <vector>
 
 #include <time.h>
 
-namespace activity_log {
+namespace act {
 
 class activity
 {
@@ -66,8 +68,8 @@ private:
       std::string custom;
       std::string value;
 
-      explicit field(const field_name &name,
-	const std::string &value = std::string());
+      explicit field(const field_name &name);
+      field(const field_name &name, const std::string &value);
 
       bool operator==(const field_name &name) const;
     };
@@ -91,28 +93,37 @@ public:
   std::string &body();
   void set_body(const std::string &x);
 
+  bool has_field(field_id id) const;
   bool has_field(const field_name &name) const;
 
   std::string &field_value(const field_name &name);
   const std::string &field_value(const field_name &name) const;
 
-  bool get_string_field(const field_name &name, const std::string &*ptr) const;
+  bool get_string_field(const field_name &name, const std::string **ptr) const;
   void set_string_field(const field_name &name, const std::string &x);
 
-  bool get_distance_field(const field_name &name, double *ptr) const;
-  void set_distance_field(const field_name &name, double x);
+  bool get_distance_field(const field_name &name, double *ptr,
+    distance_unit *unit_ptr = 0) const;
+  void set_distance_field(const field_name &name, double x,
+    distance_unit unit = unit_miles);
 
   bool get_duration_field(const field_name &name, double *ptr) const;
   void set_duration_field(const field_name &name, double x);
 
-  bool get_pace_field(const field_name &name, double *ptr) const;
-  void set_pace_field(const field_name &name, double x);
+  bool get_pace_field(const field_name &name, double *ptr,
+    pace_unit *unit_ptr = 0) const;
+  void set_pace_field(const field_name &name, double x,
+    pace_unit unit = unit_seconds_per_mile);
 
-  bool get_speed_field(const field_name &name, double *ptr) const;
-  void set_speed_field(const field_name &name, double x);
+  bool get_speed_field(const field_name &name, double *ptr,
+    speed_unit *unit_ptr = 0) const;
+  void set_speed_field(const field_name &name, double x,
+    speed_unit unit = unit_miles_per_hour);
 
-  bool get_temperature_field(const field_name &name, double *ptr) const;
-  void set_temperature_field(const field_name &name, double x);
+  bool get_temperature_field(const field_name &name, double *ptr,
+    temperature_unit *unit_ptr = 0) const;
+  void set_temperature_field(const field_name &name, double x,
+    temperature_unit unit = unit_celsius);
 
   bool get_keywords_field(const field_name &name,
     std::vector<std::string> *ptr) const;
@@ -136,14 +147,22 @@ activity::field_name::field_name(field_id i)
 
 inline
 activity::field_name::field_name(const char *p)
-: id(field_custom), ptr(ptr)
+: id(field_custom), ptr(p)
 {
 }
 
 inline
 activity::field_name::field_name(const std::string &s)
-: id(field_custom), ptr(0), str(s)
+: id(field_custom), ptr(0), str(&s)
 {
+}
+
+inline
+activity::field::field(const field_name &n)
+: id(n.id)
+{
+  if (id == field_custom)
+    custom = n.ptr ? n.ptr : *n.str;
 }
 
 inline
@@ -151,19 +170,20 @@ activity::field::field(const field_name &n, const std::string &v)
 : id(n.id),
   value(v)
 {
-  if (n.id == field_custom)
-    {
-      if (n.ptr)
-	n.custom = n.ptr;
-      else
-	n.custom = n.str;
-    }
+  if (id == field_custom)
+    custom = n.ptr ? n.ptr : *n.str;
 }
 
 inline time_t
 activity::date() const
 {
   return _date;
+}
+
+inline bool
+activity::has_field(field_id id) const
+{
+  return has_field(field_name(id));
 }
 
 inline const std::string &
@@ -184,6 +204,6 @@ activity::body()
   return _body;
 }
 
-} // namespace activity_log
+} // namespace act
 
 #endif /* ACT_ACTIVITY_H */

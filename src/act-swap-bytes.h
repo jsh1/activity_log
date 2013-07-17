@@ -1,15 +1,15 @@
 // -*- c-style: gnu -*-
 
-#ifndef SWAP_BYTES_H
-#define SWAP_BYTES_H
+#ifndef ACT_SWAP_BYTES_H
+#define ACT_SWAP_BYTES_H
 
-#include "base.h"
+#include "act-base.h"
 
 #if defined(__APPLE__) && __APPLE__
 # include <libkern/OSByteOrder.h>
 #endif
 
-namespace activity_log {
+namespace act {
 
 namespace swap_bytes {
 
@@ -126,6 +126,6 @@ swap_host_to_big(T x)
 
 #endif
 
-} // namespace activity_log
+} // namespace act
 
-#endif /* SWAP_BYTES */
+#endif /* ACT_SWAP_BYTES */

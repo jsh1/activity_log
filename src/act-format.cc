@@ -2,7 +2,9 @@
 
 #include "act-format.h"
 
+#include <math.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <time.h>
 #include <xlocale.h>
 
@@ -17,16 +19,15 @@
 #define SECS_PER_MILE(x) ((1. /  (x)) * (1. / MILES_PER_METER))
 #define SECS_PER_KM(x) ((1. /  (x)) * 1e3)
 
-namespace activity_log {
+namespace act {
 
 void
-format_date(std::string &str, double date)
+format_date(std::string &str, time_t date)
 {
   char buf[256];
 
-  time_t time = (time_t) date;
   struct tm tm;
-  localtime_r(&time, &tm);
+  localtime_r(&date, &tm);
 
   strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S %Z", &tm);
 
@@ -126,43 +127,46 @@ format_distance(std::string &str, double dist, distance_unit unit)
 void
 format_pace(std::string &str, double pace, pace_unit unit)
 {
+  double dur = 0;
   const char *suffix = 0;
 
   switch (unit)
     {
     case unit_seconds_per_mile:
       suffix = " / mile";
-      pace = SECS_PER_MILE(pace);
+      dur = SECS_PER_MILE(pace);
       break;
 
     case unit_seconds_per_kilometre:
       suffix = " / km";
-      pace = SECS_PER_KM(pace);
+      dur = SECS_PER_KM(pace);
       break;
     }
 
-  format_time(str, pace, false, suffix);
+  format_time(str, dur, false, suffix);
 }
 
 void
-format_speed(std::string &str, double speed)
+format_speed(std::string &str, double speed, speed_unit unit)
 {
+  double dist = 0;
   const char *format = 0;
 
   switch (unit)
     {
     case unit_metres_per_second:
       format = "%.1f m/s";
+      dist = speed;
       break;
 
     case unit_kilometres_per_hour:
       format = "%.2f km/h";
-      speed = speed * (3600/1e3);
+      dist = speed * (3600/1e3);
       break;
 
     case unit_miles_per_hour:
       format = "%.2f mph";
-      speed = speed * (3600/METERS_PER_MILE);
+      dist = speed * (3600/METERS_PER_MILE);
       break;
     }
 
@@ -223,7 +227,9 @@ namespace {
 size_t
 skip_whitespace(const std::string &str, size_t idx)
 {
-  for (size_t i = idx; i < str.size() && isspace_l(str[i], 0))
+  size_t i = idx;
+
+  while (i < str.size() && isspace_l(str[i], 0))
     i++;
 
   return i;
@@ -234,9 +240,14 @@ parse_decimal(const std::string &str, size_t &idx, size_t max_digits)
 {
   int value = 0;
 
+  size_t i = idx;
   size_t max_i = MIN(str.size(), idx + max_digits);
-  for (size_t i = idx; i < max_i && isdigit_l(str[i], 0); i++)
-    value = value * 10 + str[i] - '0';
+
+  while (i < max_i && isdigit_l(str[i], 0))
+    {
+      value = value * 10 + str[i] - '0';
+      i++;
+    }
 
   if (i == idx)
     return -1;
@@ -251,10 +262,13 @@ parse_decimal_fraction(const std::string &str, size_t &idx)
   double value = 0;
   double base = 1;
 
-  for (size_t i = idx; i < str.size() && isdigit_l(str[i], 0); i++)
+  size_t i = idx;
+
+  while (i < str.size() && isdigit_l(str[i], 0))
     {
       value = value * 10 + str[i] - '0';
       base = base * 10;
+      i++;
     }
 
   if (i == idx)
@@ -268,7 +282,7 @@ bool
 parse_number(const std::string &str, size_t &idx, double &value)
 {
   const char *ptr = str.c_str() + idx;
-  const char *end_ptr;
+  char *end_ptr;
 
   value = strtod_l(ptr, &end_ptr, 0);
 
@@ -451,7 +465,7 @@ parse_date(const std::string &str, time_t *date_ptr, time_t *range_ptr)
   else
     range = seconds_in_year(year);
 
-  struct timeval tm = {0};
+  struct tm tm = {0};
   tm.tm_year = year - 1900;
   tm.tm_mon = month - 1;
   tm.tm_mday = day;
@@ -597,7 +611,7 @@ parse_pace(const std::string &str, double *pace_ptr, pace_unit *unit_ptr)
   *pace_ptr = value;
 
   if (unit_ptr)
-    unit_ptr = (pace_unit) unit;
+    *unit_ptr = (pace_unit) unit;
 
   return true;
 }
@@ -624,7 +638,7 @@ parse_speed(const std::string &str, double *speed_ptr, speed_unit *unit_ptr)
   int unit = unit_metres_per_second;
   parse_unit(speed_units, str, idx, value, &unit);
 
-  *dist_ptr = value;
+  *speed_ptr = value;
 
   if (unit_ptr)
     *unit_ptr = (speed_unit) unit;
@@ -654,7 +668,7 @@ parse_temperature(const std::string &str, double *temp_ptr,
   int unit = unit_celsius;
   parse_unit(temp_units, str, idx, value, &unit);
 
-  *dist_ptr = value;
+  *temp_ptr = value;
 
   if (unit_ptr)
     *unit_ptr = (temperature_unit) unit;
@@ -666,6 +680,8 @@ bool
 parse_fraction(const std::string &str, double *frac_ptr)
 {
   double value;
+
+  size_t idx = skip_whitespace(str, 0);
 
   if (!parse_number(str, idx, value))
     return false;
@@ -693,15 +709,15 @@ parse_fraction(const std::string &str, double *frac_ptr)
 }
 
 bool
-parse_keywords(std::string &str, std::vector<std::string> *keys_ptr)
+parse_keywords(const std::string &str, std::vector<std::string> *keys_ptr)
 {
   size_t idx = skip_whitespace(str, 0);
 
   while (idx < str.size())
     {
       std::string key;
-      while (idx < str.size() && !isspace_l(str[idx]))
-	key.append(str[idx++]);
+      while (idx < str.size() && !isspace_l(str[idx], 0))
+	key.push_back(str[idx++]);
 
       size_t k = keys_ptr->size();
       keys_ptr->resize(k + 1);
@@ -713,4 +729,4 @@ parse_keywords(std::string &str, std::vector<std::string> *keys_ptr)
   return true;
 }
 
-} // namespace activity_log
+} // namespace act

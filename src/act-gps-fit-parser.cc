@@ -1,14 +1,14 @@
 // -*- c-style: gnu -*-
 
-#include "fit-parser.h"
+#include "act-gps-fit-parser.h"
 
-#include "swap-bytes.h"
+#include "act-swap-bytes.h"
 
 #include <stddef.h>
 #include <stdlib.h>
 #include <time.h>
 
-namespace activity_log {
+namespace act {
 namespace gps {
 
 struct fit_parser::message_field
@@ -582,4 +582,4 @@ fit_parser::skip_message(const message_type &def)
 }
 
 } // namespace gps
-} // namespace activity_log
+} // namespace act

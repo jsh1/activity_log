@@ -2,14 +2,14 @@
 
 #include "act-arguments.h"
 
-namespace activity_log {
+namespace act {
 
 arguments::arguments(int argc, const char **argv)
 : _program_name(argc > 0 ? argv[0] : 0),
   _getopt_finished(false)
 {
   for (int i = 1; i < argc; i++)
-    _args.push_back(argv);
+    _args.push_back(argv[i]);
 }
 
 arguments::arguments(const arguments &rhs)
@@ -68,14 +68,8 @@ arguments::getopt(const struct option *opts, const char **arg_ptr)
 
       const char *start = arg + 2;
 
-      if (const char *end = strchr(start, "="))
+      if (const char *end = strchr(start, '='))
 	{
-	  if (!opts[i].has_arg)
-	    {
-	      *opt_arg = arg;
-	      return opt_error;
-	    }
-
 	  /* --opt=value */
 
 	  for (size_t i = 0; opts[i].option_id >= 0; i++)
@@ -84,11 +78,17 @@ arguments::getopt(const struct option *opts, const char **arg_ptr)
 		  || opts[i].long_option[end - start] != 0)
 		continue;
 
+	      if (!opts[i].has_arg)
+		{
+		  *arg_ptr = arg;
+		  return opt_error;
+		}
+
 	      *arg_ptr = end + 1;
 	      return opts[i].option_id;
 	    }
 
-          *opt_arg = arg;
+          *arg_ptr = arg;
 	  return opt_error;
 	}
       else
@@ -104,11 +104,11 @@ arguments::getopt(const struct option *opts, const char **arg_ptr)
 		{
 		  if (_args.size() < 1)
 		    {
-		      *opt_arg = arg;
+		      *arg_ptr = arg;
 		      return opt_error;
 		    }
 
-		  *arg_ptr = _args[0].c_str();
+		  *arg_ptr = _args[0];
 		  _args.erase(_args.begin());
 		}
 	      else
@@ -117,14 +117,14 @@ arguments::getopt(const struct option *opts, const char **arg_ptr)
 	      return opts[i].option_id;
 	    }
 
-          *opt_arg = arg;
+          *arg_ptr = arg;
 	  return opt_error;
 	}
     }
   else if (arg[0] == '-')
     {
       // FIXME: single character options are not currently supported.
-      *opt_arg = arg;
+      *arg_ptr = arg;
       return opt_error;
     }
   else
@@ -134,4 +134,4 @@ arguments::getopt(const struct option *opts, const char **arg_ptr)
     }
 }
 
-} // namespace activity_log
+} // namespace act

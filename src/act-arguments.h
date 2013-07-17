@@ -3,11 +3,12 @@
 #ifndef ACT_ARGUMENTS_H
 #define ACT_ARGUMENTS_H
 
-#include "base.h"
+#include "act-base.h"
 
+#include <string>
 #include <vector>
 
-namespace activity_log {
+namespace act {
 
 class arguments
 {
@@ -22,7 +23,7 @@ public:
   ~arguments();
 
   const char *program_name() const;
-  const char **argv() const;
+  const char *const *argv() const;
   int argc() const;
 
   bool program_name_p(const char *name) const;
@@ -40,8 +41,8 @@ public:
 
   enum
     {
-      opt_eof = -1;
-      opt_error = -2;
+      opt_eof = -1,
+      opt_error = -2,
     };
 
   int getopt(const struct option *opts, const char **arg_ptr);
@@ -55,7 +56,7 @@ arguments::program_name() const
   return _program_name;
 }
 
-inline const char **
+inline const char *const *
 arguments::argv() const
 {
   return &_args[0];
@@ -68,11 +69,11 @@ arguments::argc() const
 }
 
 inline void
-arguments::append(const std::string &arg)
+arguments::push_back(const std::string &arg)
 {
   push_back(arg.c_str());
 }
 
-} // namespace activity_log
+} // namespace act
 
 #endif /* ACT_ARGUMENTS_H */
