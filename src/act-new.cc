@@ -7,6 +7,7 @@
 #include "act-gps-parser.h"
 #include "act-gps-fit-parser.h"
 #include "act-gps-tcx-parser.h"
+#include "act-util.h"
 
 using namespace act;
 
@@ -135,16 +136,6 @@ print_usage(const arguments &args)
   fputs("usage: act-new [OPTIONS...]\n", stderr);
 
   arguments::print_options(options, stderr);
-}
-
-bool
-string_has_suffix(const std::string &str, const char *suffix)
-{
-  size_t len = strlen(suffix);
-  if (str.size() < len)
-    return false;
-
-  return str.compare(str.size() - len, std::string::npos, suffix) == 0;
 }
 
 void

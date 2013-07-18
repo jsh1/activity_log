@@ -5,8 +5,6 @@
 #include "act-config.h"
 #include "act-util.h"
 
-#include <errno.h>
-#include <sys/stat.h>
 #include <xlocale.h>
 
 namespace act {
@@ -254,33 +252,6 @@ activity::write_file(const char *path) const
   return true;
 }
 
-namespace {
-
-bool
-ensure_path(const char *path)
-{
-  if (path[0] != '/')
-    return false;
-
-  malloc_ptr<char> buf (strlen(path) + 1);
-  if (!buf)
-    return false;
-
-  for (const char *ptr = strchr (path + 1, '/');
-       ptr; ptr = strchr(ptr + 1, '/'))
-    {
-      memcpy(&buf[0], path, ptr - path);
-      buf[ptr - path] = 0;
-
-      if (mkdir(&buf[0], 0777) != 0 && errno != EEXIST)
-	return false;
-    }
-
-  return true;
-}
-
-} // anonymous namespace
-
 bool
 activity::make_filename(std::string &filename) const
 {
@@ -298,7 +269,7 @@ activity::make_filename(std::string &filename) const
   strftime(buf, sizeof(buf), "%Y/%m/%Y-%m-%d-%H-%M-%S.txt", &tm);
   filename.append(buf);
 
-  return ensure_path(filename.c_str());
+  return make_path(filename.c_str());
 }
 
 void

@@ -5,6 +5,8 @@
 
 #include "act-base.h"
 
+#include <string>
+
 namespace act {
 
 template<typename T>
@@ -28,6 +30,17 @@ private:
   explicit malloc_ptr(const malloc_ptr &rhs);
   malloc_ptr &operator=(const malloc_ptr &rhs);
 };
+
+// misc functions
+
+bool string_has_suffix(const std::string &str, const char *suffix);
+
+/* Modifies 'file' to be absolute if the named file is found. */
+
+bool find_file_under_directory(std::string &file, const std::string &dir);
+
+bool make_path(const char *path);
+
 
 } // namespace act
 

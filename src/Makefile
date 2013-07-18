@@ -12,7 +12,8 @@ libact.a_objects =		\
 	act-gps-activity.o	\
 	act-gps-parser.o	\
 	act-gps-fit-parser.o	\
-	act-gps-tcx-parser.o
+	act-gps-tcx-parser.o	\
+	act-util.o
 
 act_libraries = -lact
 act_objects =			\

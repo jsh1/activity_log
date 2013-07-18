@@ -2,9 +2,7 @@
 
 #include "act-config.h"
 
-#include <dirent.h>
-#include <unistd.h>
-#include <sys/stat.h>
+#include "act-util.h"
 
 namespace act {
 
@@ -53,63 +51,6 @@ void
 config::find_new_gps_files(std::vector<std::string> &files) const
 {
 }
-
-namespace {
-
-/* Modifies 'file' to be absolute if the named file is found. */
-
-bool
-find_file_under_directory(std::string &file, const std::string &dir)
-{
-  struct DIR_wrapper
-    {
-      DIR *dir;
-
-      explicit DIR_wrapper(DIR *d) : dir(d) {}
-      ~DIR_wrapper() {closedir(dir);}
-    };
-
-  DIR_wrapper d(opendir(dir.c_str()));
-
-  if (d.dir)
-    {
-      while (struct dirent *de = readdir(d.dir))
-	{
-	  if (de->d_type == DT_DIR)
-	    {
-	      if (de->d_name[0] == '.'
-		  && (de->d_name[1] == 0
-		      || (de->d_name[1] == '.' && de->d_name[2] == 0)))
-		{
-		  /* "." or ".." */
-		  continue;
-		}
-
-	      std::string subdir(dir);
-	      subdir.push_back('/');
-	      subdir.append(de->d_name);
-
-	      if (find_file_under_directory(file, subdir))
-		return true;
-	    }
-	  else
-	    {
-	      if (file == de->d_name)
-		{
-		  file = dir;
-		  file.push_back('/');
-		  file.append(de->d_name);
-
-		  return true;
-		}
-	    }
-	}
-    }
-
-  return false;
-}
-
-} // anonymous namespace
 
 /* Modifies 'str' to be absolute if the named file is found. */
 
