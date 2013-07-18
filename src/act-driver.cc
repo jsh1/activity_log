@@ -17,19 +17,17 @@ enum option_id
 
 const arguments::option options[] =
 {
-  {opt_dir, "dir", 0, true},
-  {opt_gps_dir, "gps-dir", 0, true},
-  {EOF}
+  {opt_dir, "dir", 0, "ACTIVITY-DIR"},
+  {opt_gps_dir, "gps-dir", 0, "GPS-FILE-DIR"},
+  {arguments::opt_eof}
 };
 
 void
 print_usage(const arguments &args)
 {
-  fprintf(stderr, "\n"
-"usage: act [OPTIONS...] COMMAND [ARGS...]\n\n"
-"where OPTIONS are any of:\n\n"
-"    --dir ACTIVITY-DIRECTORY\n"
-"    --gps-dir GPS-DIRECTORY\n\n");
+  fputs("usage: act [OPTIONS...] COMMAND [ARGS...]\n", stderr);
+
+  arguments::print_options(options, stderr);
 }
 
 } // anonymous namespace

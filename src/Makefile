@@ -14,17 +14,20 @@ libact.a_objects =		\
 	act-gps-fit-parser.o	\
 	act-gps-tcx-parser.o
 
-act_libraries = $(libraries)
+act_libraries = -lact
 act_objects =			\
 	act-driver.o
+act_deps = libact.a
 
-act-new_libraries = $(libraries)
+act-new_libraries = -lact -lxml2
 act-new_objects =		\
 	act-new.o
+act-new_deps = libact.a
 
-act-gps-test_libraries = $(libraries)
+act-gps-test_libraries = -lact -lxml2
 act-gps-test_objects =		\
 	act-gps-test.o
+act-gps-test_deps = libact.a
 
 # compilers
 
@@ -32,8 +35,6 @@ CXX = clang++
 CC = clang
 
 includes = -I/usr/include/libxml2
-libraries = -L. -lact -lxml2
-
 cxx_standard_flags = -std=c++11
 optimization_cflags := -O0
 debug_cflags := -g
@@ -55,8 +56,8 @@ clean ::
 endef
 
 define bin_rules
-$(1) : $$($(1)_objects)
-	$$(CXX) $$^ -o $$@ $$(LDFLAGS) $$($(1)_libraries)
+$(1) : $$($(1)_objects) $$($(1)_deps)
+	$$(CXX) $$($(1)_objects) -o $$@ $$(LDFLAGS) -L. $$($(1)_libraries)
 clean ::
 	rm -f $(1) $$($(1)_objects)
 -include $$(patsubst %.o,.%.d,$$($(1)_objects))

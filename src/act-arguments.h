@@ -39,7 +39,8 @@ public:
       int option_id;
       const char *long_option;
       const char short_option;
-      bool has_arg;
+      const char *arg_name;
+      const char *desc;
     };
 
   enum
@@ -49,6 +50,8 @@ public:
     };
 
   int getopt(const struct option *opts, const char **arg_ptr);
+
+  static void print_options(const struct option *opts, FILE *fh);
 };
 
 // implementation

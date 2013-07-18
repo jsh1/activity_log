@@ -269,7 +269,7 @@ ensure_path(const char *path)
   for (const char *ptr = strchr (path + 1, '/');
        ptr; ptr = strchr(ptr + 1, '/'))
     {
-      memcpy(&buf[0], path, ptr - path - 1);
+      memcpy(&buf[0], path, ptr - path);
       buf[ptr - path] = 0;
 
       if (mkdir(&buf[0], 0777) != 0 && errno != EEXIST)
@@ -377,103 +377,109 @@ activity::set_string_field(const field_name &name, const std::string &x)
 // FIXME: feels like the code below should use templates?
 
 bool
-activity::get_distance_field(const field_name &name, double *ptr,
+activity::get_numeric_field(field_id id, double *ptr) const
+{
+  const std::string *s;
+  return get_string_field(id, &s) && parse_number(*s, ptr);
+}
+
+void
+activity::set_numeric_field(field_id id, double x)
+{
+  format_number(field_value(id), x);
+}
+
+bool
+activity::get_distance_field(field_id id, double *ptr,
 			     distance_unit *unit_ptr) const
 {
   const std::string *s;
-  return get_string_field(name, &s) && parse_distance(*s, ptr, unit_ptr);
+  return get_string_field(id, &s) && parse_distance(*s, ptr, unit_ptr);
 }
 
 void
-activity::set_distance_field(const field_name &name, double x,
-			     distance_unit unit)
+activity::set_distance_field(field_id id, double x, distance_unit unit)
 {
-  format_distance(field_value(name), x, unit);
+  format_distance(field_value(id), x, unit);
 }
 
 bool
-activity::get_duration_field(const field_name &name, double *ptr) const
+activity::get_duration_field(field_id id, double *ptr) const
 {
   const std::string *s;
-  return get_string_field(name, &s) && parse_duration(*s, ptr);
+  return get_string_field(id, &s) && parse_duration(*s, ptr);
 }
 
 void
-activity::set_duration_field(const field_name &name, double x)
+activity::set_duration_field(field_id id, double x)
 {
-  format_duration(field_value(name), x);
+  format_duration(field_value(id), x);
 }
 
 bool
-activity::get_pace_field(const field_name &name, double *ptr,
-			 pace_unit *unit_ptr) const
+activity::get_pace_field(field_id id, double *ptr, pace_unit *unit_ptr) const
 {
   const std::string *s;
-  return get_string_field(name, &s) && parse_pace(*s, ptr, unit_ptr);
+  return get_string_field(id, &s) && parse_pace(*s, ptr, unit_ptr);
 }
 
 void
-activity::set_pace_field(const field_name &name, double x, pace_unit unit)
+activity::set_pace_field(field_id id, double x, pace_unit unit)
 {
-  format_pace(field_value(name), x, unit);
+  format_pace(field_value(id), x, unit);
 }
 
 bool
-activity::get_speed_field(const field_name &name, double *ptr,
-			  speed_unit *unit_ptr) const
+activity::get_speed_field(field_id id, double *ptr, speed_unit *unit_ptr) const
 {
   const std::string *s;
-  return get_string_field(name, &s) && parse_speed(*s, ptr, unit_ptr);
+  return get_string_field(id, &s) && parse_speed(*s, ptr, unit_ptr);
 }
 
 void
-activity::set_speed_field(const field_name &name, double x,
-			  speed_unit unit)
+activity::set_speed_field(field_id id, double x, speed_unit unit)
 {
-  format_speed(field_value(name), x, unit);
+  format_speed(field_value(id), x, unit);
 }
 
 bool
-activity::get_temperature_field(const field_name &name, double *ptr,
+activity::get_temperature_field(field_id id, double *ptr,
 				temperature_unit *unit_ptr) const
 {
   const std::string *s;
-  return get_string_field(name, &s) && parse_temperature(*s, ptr, unit_ptr);
+  return get_string_field(id, &s) && parse_temperature(*s, ptr, unit_ptr);
 }
 
 void
-activity::set_temperature_field(const field_name &name, double x,
-				temperature_unit unit)
+activity::set_temperature_field(field_id id, double x, temperature_unit unit)
 {
-  format_temperature(field_value(name), x, unit);
+  format_temperature(field_value(id), x, unit);
 }
 
 bool
-activity::get_keywords_field(const field_name &name,
-			     std::vector<std::string> *ptr) const
+activity::get_keywords_field(field_id id, std::vector<std::string> *ptr) const
 {
   const std::string *s;
-  return get_string_field(name, &s) && parse_keywords(*s, ptr);
+  return get_string_field(id, &s) && parse_keywords(*s, ptr);
 }
 
 void
-activity::set_keywords_field(const field_name &name,
-			     const std::vector<std::string> &x)
+activity::set_keywords_field(field_id id, const std::vector<std::string> &x)
 {
-  format_keywords(field_value(name), x);
+  format_keywords(field_value(id), x);
 }
 
 bool
-activity::get_fraction_field(const field_name &name, double *ptr) const
+activity::get_fraction_field(field_id id, double *ptr) const
 {
   const std::string *s;
-  return get_string_field(name, &s) && parse_fraction(*s, ptr);
+  return get_string_field(id, &s) && parse_fraction(*s, ptr);
 }
 
 void
-activity::set_fraction_field(const field_name &name, double x)
+activity::set_fraction_field(field_id id, double x)
 {
-  format_fraction(field_value(name), x);
+  format_fraction(field_value(id), x);
 }
 
 } // namespace act

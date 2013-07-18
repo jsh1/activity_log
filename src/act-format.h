@@ -46,6 +46,7 @@ enum temperature_unit
 
 void format_date(std::string &str, time_t date);
 void format_duration(std::string &str, double dur);
+void format_number(std::string &str, double value);
 void format_distance(std::string &str, double dist, distance_unit unit);
 void format_pace(std::string &str, double pace, pace_unit unit);
 void format_speed(std::string &str, double speed, speed_unit unit);
@@ -55,6 +56,7 @@ void format_keywords(std::string &str, const std::vector<std::string> &keys);
 
 bool parse_date(const std::string &str, time_t *date_ptr, time_t *range_ptr);
 bool parse_duration(const std::string &str, double *dur_ptr);
+bool parse_number(const std::string &str, double *value_ptr);
 bool parse_distance(const std::string &str, double *dist_ptr,
   distance_unit *unit_ptr);
 bool parse_pace(const std::string &str, double *pace_ptr,

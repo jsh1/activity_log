@@ -101,33 +101,41 @@ option_field_id(option_id opt)
 
 const arguments::option options[] =
 {
-  {opt_edit, "edit", 0, false},
-  {opt_date, "date", 0, true},
-  {opt_activity, "activity", 0, true},
-  {opt_type, "type", 0, true},
-  {opt_course, "course", 0, true},
-  {opt_keywords, "keywords", 0, true},
-  {opt_equipment, "equipment", 0, true},
-  {opt_distance, "distance", 0, true},
-  {opt_duration, "duration", 0, true},
-  {opt_pace, "pace", 0, true},
-  {opt_speed, "speed", 0, true},
-  {opt_max_pace, "max-pace", 0, true},
-  {opt_max_speed, "max-speed", 0, true},
-  {opt_resting_hr, "resting-hr", 0, true},
-  {opt_average_hr, "average-hr", 0, true},
-  {opt_max_hr, "max-hr", 0, true},
-  {opt_calories, "calories", 0, true},
-  {opt_weight, "weight", 0, true},
-  {opt_temperature, "temperature", 0, true},
-  {opt_weather, "weather", 0, true},
-  {opt_quality, "quality", 0, true},
-  {opt_effort, "effort", 0, true},
-  {opt_fit_file, "fit-file", 0, true},
-  {opt_tcx_file, "tcx-file", 0, true},
-  {opt_field, "field", 0, true},
-  {EOF}
+  {opt_edit, "edit", 0, 0, "Open file in editor."},
+  {opt_date, "date", 0, "DATE", 0},
+  {opt_activity, "activity", 0, "ACTIVITY-SPEC"},
+  {opt_type, "type", 0, "ACTIVITY-TYPE"},
+  {opt_course, "course", 0, "COURSE-NAME"},
+  {opt_keywords, "keywords", 0, "KEYWORD-LIST"},
+  {opt_equipment, "equipment", 0, "EQUIPMENT-LIST"},
+  {opt_distance, "distance", 0, "DISTANCE"},
+  {opt_duration, "duration", 0, "DURATION"},
+  {opt_pace, "pace", 0, "PACE"},
+  {opt_speed, "speed", 0, "SPEED"},
+  {opt_max_pace, "max-pace", 0, "MAX-PACE"},
+  {opt_max_speed, "max-speed", 0, "MAX-SPEED"},
+  {opt_resting_hr, "resting-hr", 0, "RESTING-HR"},
+  {opt_average_hr, "average-hr", 0, "AVG-HR"},
+  {opt_max_hr, "max-hr", 0, "MAX-HR"},
+  {opt_calories, "calories", 0, "CALORIES"},
+  {opt_weight, "weight", 0, "WEIGHT"},
+  {opt_temperature, "temperature", 0, "TEMP"},
+  {opt_weather, "weather", 0, "WEATHER-LIST"},
+  {opt_quality, "quality", 0, "QUALITY-RATIO"},
+  {opt_effort, "effort", 0, "EFFORT-RATIO"},
+  {opt_fit_file, "fit-file", 0, "FIT-FILE"},
+  {opt_tcx_file, "tcx-file", 0, "TCX-FILE"},
+  {opt_field, "field", 0, "NAME:VALUE", "Define custom field."},
+  {arguments::opt_eof}
 };
+
+void
+print_usage(const arguments &args)
+{
+  fputs("usage: act-new [OPTIONS...]\n", stderr);
+
+  arguments::print_options(options, stderr);
+}
 
 bool
 string_has_suffix(const std::string &str, const char *suffix)
@@ -140,9 +148,45 @@ string_has_suffix(const std::string &str, const char *suffix)
 }
 
 void
-import_gps_fields(activity &a, const gps::activity &gps_data)
+copy_gps_fields(activity &a, const gps::activity &gps_data)
 {
-  // FIXME: implement this.
+  if (!a.has_field(activity::field_date))
+    a.set_date((time_t) gps_data.time());
+
+  // FIXME: extract activity type from GPS file?
+
+  if (!a.has_field(activity::field_activity))
+    a.set_string_field(activity::field_activity, std::string("run"));
+
+  if (gps_data.duration() > 0
+      && !a.has_field(activity::field_duration))
+    a.set_duration_field(activity::field_duration, gps_data.duration());
+
+  if (gps_data.distance() > 0
+      && !a.has_field(activity::field_distance))
+    a.set_distance_field(activity::field_distance, gps_data.distance());
+
+  // FIXME: set [max-]pace if running, [max-]speed if biking.
+
+  if (gps_data.avg_speed() > 0
+      && !a.has_field(activity::field_pace)
+      && !a.has_field(activity::field_speed))
+    a.set_pace_field(activity::field_pace, gps_data.avg_speed());
+
+  if (gps_data.max_speed() > 0
+      && !a.has_field(activity::field_max_pace)
+      && !a.has_field(activity::field_max_speed))
+    a.set_pace_field(activity::field_max_pace, gps_data.max_speed());
+
+  if (gps_data.avg_heart_rate() > 0
+      && !a.has_field(activity::field_average_hr))
+    a.set_numeric_field(activity::field_average_hr, gps_data.avg_heart_rate());
+
+  if (gps_data.max_heart_rate() > 0
+      && !a.has_field(activity::field_max_hr))
+    a.set_numeric_field(activity::field_max_hr, gps_data.max_heart_rate());
+
+  // FIXME: do something with lap data?
 }
 
 } // anonymous namespace
@@ -192,18 +236,27 @@ act_new(arguments &args)
 	case opt_equipment:
 	case opt_weather: {
 	  activity::field_id field = option_field_id((option_id)opt);
-	  std::string &value = a.field_value(activity::field_name(field));
+	  std::string &value = a.field_value(field);
 	  value.push_back(' ');
 	  value.append(opt_arg);
 	  break; }
 
+	  // GPS files have directories stripped
+
+	case opt_fit_file:
+	case opt_tcx_file:
+	  if (const char *tem = strrchr(opt_arg, '/'))
+	    opt_arg = tem + 1;
+	  /* fall through */
+
 	default: {
 	  activity::field_id field = option_field_id((option_id)opt);
-	  a.field_value(activity::field_name(field)) = *opt_arg;
+	  a.field_value(field) = opt_arg;
 	  break; }
 
 	case arguments::opt_error:
 	  fprintf(stderr, "Error: invalid argument: %s\n", opt_arg);
+	  print_usage(args);
 	  return 1;
 	}
     }
@@ -229,7 +282,7 @@ act_new(arguments &args)
 	  else
 	    gps_data.read_tcx_file(filename.c_str());
 
-	  import_gps_fields(a, gps_data);
+	  copy_gps_fields(a, gps_data);
 	}
     }
 

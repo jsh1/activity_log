@@ -78,7 +78,7 @@ arguments::getopt(const struct option *opts, const char **arg_ptr)
 		  || opts[i].long_option[end - start] != 0)
 		continue;
 
-	      if (!opts[i].has_arg)
+	      if (!opts[i].arg_name)
 		{
 		  *arg_ptr = arg;
 		  return opt_error;
@@ -100,7 +100,7 @@ arguments::getopt(const struct option *opts, const char **arg_ptr)
 	      if (strcasecmp(start, opts[i].long_option) != 0)
 		continue;
 
-	      if (opts[i].has_arg)
+	      if (opts[i].arg_name)
 		{
 		  if (_args.size() < 1)
 		    {
@@ -133,5 +133,41 @@ arguments::getopt(const struct option *opts, const char **arg_ptr)
       return opt_eof;
     }
 }
+
+void
+arguments::print_options(const struct option *opts, FILE *fh)
+{
+  fputs("\nwhere OPTIONS are any of:\n\n", fh);
+
+  for (size_t i = 0; opts[i].option_id >= 0; i++)
+    {
+      char buf[256];
+
+      if (opts[i].long_option)
+	{
+	  if (opts[i].arg_name)
+	    snprintf(buf, sizeof(buf), "--%s=%s", opts[i].long_option, opts[i].arg_name);
+	  else
+	    snprintf(buf, sizeof(buf), "--%s", opts[i].long_option);
+	}
+      else if (opts[i].short_option)
+	{
+	  if (opts[i].arg_name)
+	    snprintf(buf, sizeof(buf), "-%c %s", opts[i].short_option, opts[i].arg_name);
+	  else
+	    snprintf(buf, sizeof(buf), "-%c", opts[i].short_option);
+	}
+      else
+	continue;
+
+      if (!opts[i].desc)
+	fprintf(fh, "    %s\n", buf);
+      else
+	fprintf(fh, "    %-32s %s\n", buf, opts[i].desc);
+    }
+
+  fputs("\n", fh);
+}
+
 
 } // namespace act

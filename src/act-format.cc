@@ -78,6 +78,15 @@ format_duration(std::string &str, double dur)
 }
 
 void
+format_number(std::string &str, double value)
+{
+  char buf[128];
+  snprintf_l(buf, sizeof(buf), 0, "%g", value);
+
+  str.append(buf);
+}
+
+void
 format_distance(std::string &str, double dist, distance_unit unit)
 {
   const char *format = 0;
@@ -538,6 +547,14 @@ parse_duration(const std::string &str, double *dur_ptr)
   size_t idx = skip_whitespace(str, 0);
 
   return parse_time(str, idx, dur_ptr);
+}
+
+bool
+parse_number(const std::string &str, double *value_ptr)
+{
+  size_t idx = skip_whitespace(str, 0);
+
+  return parse_number(str, idx, *value_ptr);
 }
 
 bool

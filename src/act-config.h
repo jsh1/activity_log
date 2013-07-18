@@ -12,8 +12,8 @@ namespace act {
 
 class config
 {
-  const char *_activity_dir;
-  const char *_gps_file_dir;
+  std::string _activity_dir;
+  std::string _gps_file_dir;
 
 public:
   config();
@@ -36,13 +36,13 @@ const config &shared_config();
 inline const char *
 config::activity_dir() const
 {
-  return _activity_dir;
+  return _activity_dir.c_str();
 }
 
 inline const char *
 config::gps_file_dir() const
 {
-  return _gps_file_dir;
+  return _gps_file_dir.c_str();
 }
 
 } // namespace act

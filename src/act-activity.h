@@ -96,44 +96,53 @@ public:
   bool has_field(field_id id) const;
   bool has_field(const field_name &name) const;
 
+  std::string &field_value(field_id id);
+  const std::string &field_value(field_id id) const;
+
   std::string &field_value(const field_name &name);
   const std::string &field_value(const field_name &name) const;
 
+  bool get_string_field(field_id id, const std::string **ptr) const;
   bool get_string_field(const field_name &name, const std::string **ptr) const;
+  void set_string_field(field_id id, const std::string &x);
   void set_string_field(const field_name &name, const std::string &x);
 
-  bool get_distance_field(const field_name &name, double *ptr,
+  bool get_numeric_field(field_id id, double *ptr) const;
+  void set_numeric_field(field_id id, double x);
+
+  bool get_distance_field(field_id id, double *ptr,
     distance_unit *unit_ptr = 0) const;
-  void set_distance_field(const field_name &name, double x,
+  void set_distance_field(field_id id, double x,
     distance_unit unit = unit_miles);
 
-  bool get_duration_field(const field_name &name, double *ptr) const;
-  void set_duration_field(const field_name &name, double x);
+  bool get_duration_field(field_id id, double *ptr) const;
+  void set_duration_field(field_id id, double x);
 
-  bool get_pace_field(const field_name &name, double *ptr,
+  bool get_pace_field(field_id id, double *ptr,
     pace_unit *unit_ptr = 0) const;
-  void set_pace_field(const field_name &name, double x,
+  void set_pace_field(field_id id, double x,
     pace_unit unit = unit_seconds_per_mile);
 
-  bool get_speed_field(const field_name &name, double *ptr,
+  bool get_speed_field(field_id id, double *ptr,
     speed_unit *unit_ptr = 0) const;
-  void set_speed_field(const field_name &name, double x,
+  void set_speed_field(field_id id, double x,
     speed_unit unit = unit_miles_per_hour);
 
-  bool get_temperature_field(const field_name &name, double *ptr,
+  bool get_temperature_field(field_id id, double *ptr,
     temperature_unit *unit_ptr = 0) const;
-  void set_temperature_field(const field_name &name, double x,
+  void set_temperature_field(field_id id, double x,
     temperature_unit unit = unit_celsius);
 
-  bool get_keywords_field(const field_name &name,
+  bool get_keywords_field(field_id id,
     std::vector<std::string> *ptr) const;
-  void set_keywords_field(const field_name &name,
+  void set_keywords_field(field_id id,
     const std::vector<std::string> &x);
 
-  bool get_fraction_field(const field_name &name, double *ptr) const;
-  void set_fraction_field(const field_name &name, double x);
+  bool get_fraction_field(field_id id, double *ptr) const;
+  void set_fraction_field(field_id id, double x);
 
 private:
+  int field_index(field_id id) const;
   int field_index(const field_name &name) const;
 };
 
@@ -187,9 +196,33 @@ activity::has_field(field_id id) const
 }
 
 inline const std::string &
+activity::field_value(field_id id) const
+{
+  return field_value(field_name(id));
+}
+
+inline std::string &
+activity::field_value(field_id id)
+{
+  return field_value(field_name(id));
+}
+
+inline const std::string &
 activity::field_value(const field_name &name) const
 {
   return const_cast<activity *>(this)->field_value(name);
+}
+
+inline bool
+activity::get_string_field(field_id id, const std::string **ptr) const
+{
+  return get_string_field(field_name(id), ptr);
+}
+
+inline void
+activity::set_string_field(field_id id, const std::string &x)
+{
+  set_string_field(field_name(id), x);
 }
 
 inline const std::string &
