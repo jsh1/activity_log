@@ -4,6 +4,7 @@
 #define ACT_FORMAT_H
 
 #include "act-base.h"
+#include "act-types.h"
 
 #include <string>
 #include <vector>
@@ -11,36 +12,6 @@
 #include <time.h>
 
 namespace act {
-
-enum distance_unit
-{
-  unit_centimetres,
-  unit_metres,
-  unit_kilometres,
-  unit_inches,
-  unit_feet,
-  unit_yards,
-  unit_miles,
-};
-
-enum pace_unit
-{
-  unit_seconds_per_mile,
-  unit_seconds_per_kilometre,
-};
-
-enum speed_unit
-{
-  unit_metres_per_second,
-  unit_kilometres_per_hour,
-  unit_miles_per_hour,
-};
-
-enum temperature_unit
-{
-  unit_celsius,
-  unit_fahrenheit,
-};
 
 // string conversion functions
 

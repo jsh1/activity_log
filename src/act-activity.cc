@@ -154,6 +154,48 @@ activity::lookup_field_name(field_id id)
     }
 }
 
+activity::field_data_type
+activity::lookup_field_data_type(field_id id)
+{
+  switch (id)
+    {
+    case field_activity:
+    case field_course:
+    case field_fit_file:
+    case field_tcx_file:
+    case field_type:
+    case field_custom:
+      return type_string;
+    case field_average_hr:
+    case field_calories:
+    case field_max_hr:
+    case field_resting_hr:
+    case field_weight:
+      return type_number;
+    case field_date:
+      return type_date;
+    case field_distance:
+      return type_distance;
+    case field_duration:
+      return type_duration;
+    case field_effort:
+    case field_quality:
+      return type_fraction;
+    case field_equipment:
+    case field_keywords:
+    case field_weather:
+      return type_keywords;
+    case field_max_pace:
+    case field_pace:
+      return type_pace;
+    case field_max_speed:
+    case field_speed:
+      return type_speed;
+    case field_temperature:
+      return type_temperature;
+    }
+}
+
 bool
 activity::field::operator==(const field_name &name) const
 {
@@ -187,7 +229,7 @@ activity::read_file(const char *path)
 
   _date = 0;
   _header.clear();
-  _body = "";
+  _body.clear();
 
   char buf[4096];
 
@@ -281,7 +323,7 @@ activity::set_date(time_t x)
 
       std::string &value = field_value(field_name(field_date));
 
-      value = "";
+      value.clear();
       format_date(value, _date);
     }
 }
@@ -374,6 +416,15 @@ activity::set_distance_field(field_id id, double x, distance_unit unit)
   format_distance(field_value(id), x, unit);
 }
 
+void
+activity::set_distance_field(field_id id, const std::string &str)
+{
+  double dist;
+  distance_unit unit;
+  if (parse_distance(str, &dist, &unit))
+    set_distance_field(id, dist, unit);
+}
+
 bool
 activity::get_duration_field(field_id id, double *ptr) const
 {
@@ -385,6 +436,14 @@ void
 activity::set_duration_field(field_id id, double x)
 {
   format_duration(field_value(id), x);
+}
+
+void
+activity::set_duration_field(field_id id, const std::string &str)
+{
+  double dur;
+  if (parse_duration(str, &dur))
+    set_duration_field(id, dur);
 }
 
 bool
@@ -400,6 +459,15 @@ activity::set_pace_field(field_id id, double x, pace_unit unit)
   format_pace(field_value(id), x, unit);
 }
 
+void
+activity::set_pace_field(field_id id, const std::string &str)
+{
+  double pace;
+  pace_unit unit;
+  if (parse_pace(str, &pace, &unit))
+    set_pace_field(id, pace, unit);
+}
+
 bool
 activity::get_speed_field(field_id id, double *ptr, speed_unit *unit_ptr) const
 {
@@ -411,6 +479,15 @@ void
 activity::set_speed_field(field_id id, double x, speed_unit unit)
 {
   format_speed(field_value(id), x, unit);
+}
+
+void
+activity::set_speed_field(field_id id, const std::string &str)
+{
+  double speed;
+  speed_unit unit;
+  if (parse_speed(str, &speed, &unit))
+    set_speed_field(id, speed, unit);
 }
 
 bool
@@ -427,6 +504,15 @@ activity::set_temperature_field(field_id id, double x, temperature_unit unit)
   format_temperature(field_value(id), x, unit);
 }
 
+void
+activity::set_temperature_field(field_id id, const std::string &str)
+{
+  double temp;
+  temperature_unit unit;
+  if (parse_temperature(str, &temp, &unit))
+    set_temperature_field(id, temp, unit);
+}
+
 bool
 activity::get_keywords_field(field_id id, std::vector<std::string> *ptr) const
 {
@@ -440,6 +526,14 @@ activity::set_keywords_field(field_id id, const std::vector<std::string> &x)
   format_keywords(field_value(id), x);
 }
 
+void
+activity::set_keywords_field(field_id id, const std::string &str)
+{
+  std::vector<std::string> keys;
+  if (parse_keywords(str, &keys))
+    set_keywords_field(id, keys);
+}
+
 bool
 activity::get_fraction_field(field_id id, double *ptr) const
 {
@@ -451,6 +545,120 @@ void
 activity::set_fraction_field(field_id id, double x)
 {
   format_fraction(field_value(id), x);
+}
+
+void
+activity::set_fraction_field(field_id id, const std::string &str)
+{
+  double frac;
+  if (parse_fraction(str, &frac))
+    set_fraction_field(id, frac);
+}
+
+bool
+activity::canonicalize_field_string(field_id id, std::string &str)
+{
+  switch (lookup_field_data_type(id))
+    {
+    case type_string:
+      return true;
+
+    case type_number: {
+      double value;
+      if (parse_number(str, &value))
+	{
+	  str.clear();
+	  format_number(str, value);
+	  return true;
+	}
+      break; }
+
+    case type_date: {
+      time_t date;
+      if (parse_date(str, &date, 0))
+	{
+	  str.clear();
+	  format_date(str, date);
+	  return true;
+	}
+      break; }
+
+    case type_duration: {
+      double dur;
+      if (parse_duration(str, &dur))
+	{
+	  str.clear();
+	  format_duration(str, dur);
+	  return true;
+	}
+      break; }
+
+    case type_distance: {
+      double dist;
+      distance_unit unit;
+      if (parse_distance(str, &dist, &unit))
+	{
+	  str.clear();
+	  format_distance(str, dist, unit);
+	  return true;
+	}
+      break; }
+
+    case type_pace: {
+      double pace;
+      pace_unit unit;
+      if (parse_pace(str, &pace, &unit))
+	{
+	  str.clear();
+	  format_pace(str, pace, unit);
+	  return true;
+	}
+      break; }
+
+    case type_speed: {
+      double speed;
+      speed_unit unit;
+      if (parse_speed(str, &speed, &unit))
+	{
+	  str.clear();
+	  format_speed(str, speed, unit);
+	  return true;
+	}
+      break; }
+
+    case type_temperature: {
+      double temp;
+      temperature_unit unit;
+      if (parse_temperature(str, &temp, &unit))
+	{
+	  str.clear();
+	  format_temperature(str, temp, unit);
+	  return true;
+	}
+      break; }
+
+    case type_fraction: {
+      double value;
+      if (parse_fraction(str, &value))
+	{
+	  str.clear();
+	  format_fraction(str, value);
+	  return true;
+	}
+      break; }
+
+    case type_keywords: {
+      std::vector<std::string> keys;
+      if (parse_keywords(str, &keys))
+	{
+	  str.clear();
+	  format_keywords(str, keys);
+	  return true;
+	}
+      break; }
+    }
+
+  return false;
 }
 
 } // namespace act

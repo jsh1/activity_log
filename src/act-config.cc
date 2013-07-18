@@ -7,6 +7,12 @@
 namespace act {
 
 config::config()
+: _default_distance_unit(unit_miles),
+  _default_pace_unit(unit_seconds_per_mile),
+  _default_speed_unit(unit_miles_per_hour),
+  _default_temperature_unit(unit_celsius),
+  _silent(false),
+  _verbose(false)
 {
   if (const char *dir = getenv("ACT_DIR"))
     _activity_dir = dir;
@@ -34,6 +40,12 @@ config::config()
       _gps_file_dir.append("/Documents/Garmin");
     }
 #endif
+
+  if (const char *opt = getenv("ACT_SILENT"))
+    _silent = atoi(opt) != 0;
+
+  if (const char *opt = getenv("ACT_VERBOSE"))
+    _verbose = atoi(opt) != 0;
 }
 
 config::~config()

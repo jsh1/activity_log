@@ -13,12 +13,16 @@ enum option_id
 {
   opt_dir,
   opt_gps_dir,
+  opt_silent,
+  opt_verbose,
 };
 
 const arguments::option options[] =
 {
   {opt_dir, "dir", 0, "ACTIVITY-DIR"},
   {opt_gps_dir, "gps-dir", 0, "GPS-FILE-DIR"},
+  {opt_silent, "silent", 0, 0},
+  {opt_verbose, "verbose", 0, 0},
   {arguments::opt_eof}
 };
 
@@ -26,8 +30,11 @@ void
 print_usage(const arguments &args)
 {
   fputs("usage: act [OPTIONS...] COMMAND [ARGS...]\n", stderr);
+  fputs("\nwhere OPTIONS are any of:\n\n", stderr);
 
   arguments::print_options(options, stderr);
+
+  fputs("\n", stderr);
 }
 
 } // anonymous namespace
@@ -52,6 +59,14 @@ main(int argc, const char **argv)
 
 	case opt_gps_dir:
 	  setenv("ACT_GPS_DIR", opt_arg, true);
+	  break;
+
+	case opt_silent:
+	  setenv("ACT_SILENT", "1", true);
+	  break;
+
+	case opt_verbose:
+	  setenv("ACT_VERBOSE", "1", true);
 	  break;
 
 	case arguments::opt_error:

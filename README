@@ -86,6 +86,10 @@ dates to form a range does the obvious thing (min/max of endpoints).
 Adding two ranges preserves the hole between them. If no spec is given,
 the command operates on the most recent activity.
 
+$ act unset [--multiple] [FIELD-OPTIONS...] [ACTIVITY-RANGE ...]
+
+	Similar to set command, but removes fields.
+
 $ act edit [ACTIVITY-RANGE ...]
 
 	Runs $EDITOR on the specified file(s).

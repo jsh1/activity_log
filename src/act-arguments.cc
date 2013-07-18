@@ -127,18 +127,13 @@ arguments::getopt(const struct option *opts, const char **arg_ptr)
       *arg_ptr = arg;
       return opt_error;
     }
-  else
-    {
-      _getopt_finished = true;
-      return opt_eof;
-    }
+
+  return opt_eof;
 }
 
 void
 arguments::print_options(const struct option *opts, FILE *fh)
 {
-  fputs("\nwhere OPTIONS are any of:\n\n", fh);
-
   for (size_t i = 0; opts[i].option_id >= 0; i++)
     {
       char buf[256];
@@ -165,8 +160,6 @@ arguments::print_options(const struct option *opts, FILE *fh)
       else
 	fprintf(fh, "    %-32s %s\n", buf, opts[i].desc);
     }
-
-  fputs("\n", fh);
 }
 
 

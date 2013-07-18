@@ -15,6 +15,7 @@ namespace {
 
 enum option_id
 {
+  // new options
   opt_edit,
   opt_date,
   opt_activity,
@@ -40,6 +41,8 @@ enum option_id
   opt_fit_file,
   opt_tcx_file,
   opt_field,
+  // import options
+  opt_import_all,
 };
 
 activity::field_id
@@ -96,13 +99,14 @@ option_field_id(option_id opt)
     case opt_field:
       return activity::field_custom;
     case opt_edit:
+    case opt_import_all:
       abort();
     }
 }
 
-const arguments::option options[] =
+const arguments::option new_options[] =
 {
-  {opt_edit, "edit", 0, 0, "Open file in editor."},
+  {opt_edit, "edit", 0, 0, "Open new file in editor."},
   {opt_date, "date", 0, "DATE", 0},
   {opt_activity, "activity", 0, "ACTIVITY-SPEC"},
   {opt_type, "type", 0, "ACTIVITY-TYPE"},
@@ -130,12 +134,24 @@ const arguments::option options[] =
   {arguments::opt_eof}
 };
 
+const arguments::option import_options[] =
+{
+  {opt_import_all, "import-all", 0, 0, "Import all new GPS files."},
+  {arguments::opt_eof}
+};
+
 void
-print_usage(const arguments &args)
+print_usage(const arguments &args, bool for_import)
 {
   fputs("usage: act-new [OPTIONS...]\n", stderr);
+  fputs("\nwhere OPTIONS are any of:\n\n", stderr);
 
-  arguments::print_options(options, stderr);
+  if (for_import)
+    arguments::print_options(import_options, stderr);
+
+  arguments::print_options(new_options, stderr);
+
+  fputs("\n", stderr);
 }
 
 void
@@ -159,10 +175,12 @@ copy_gps_fields(activity &a, const gps::activity &gps_data)
 
   // FIXME: set [max-]pace if running, [max-]speed if biking.
 
+#if 0
   if (gps_data.avg_speed() > 0
       && !a.has_field(activity::field_pace)
       && !a.has_field(activity::field_speed))
     a.set_pace_field(activity::field_pace, gps_data.avg_speed());
+#endif
 
   if (gps_data.max_speed() > 0
       && !a.has_field(activity::field_max_pace)
@@ -191,7 +209,7 @@ act_new(arguments &args)
   while (1)
     {
       const char *opt_arg = 0;
-      int opt = args.getopt(options, &opt_arg);
+      int opt = args.getopt(new_options, &opt_arg);
       if (opt == arguments::opt_eof)
 	break;
 
@@ -207,6 +225,26 @@ act_new(arguments &args)
 	  a.set_date(date);
 	  break; }
 
+	  // keyword arguments concatenate into existing values
+
+	case opt_keywords:
+	case opt_equipment:
+	case opt_weather: {
+	  activity::field_id field = option_field_id((option_id)opt);
+	  std::vector<std::string> keys;
+	  a.get_keywords_field(field, &keys);
+	  keys.push_back(std::string(opt_arg));
+	  a.set_keywords_field(field, keys);
+	  break; }
+
+	  // GPS files have directories stripped
+
+	case opt_fit_file:
+	case opt_tcx_file:
+	  if (const char *tem = strrchr(opt_arg, '/'))
+	    opt_arg = tem + 1;
+	  /* fall through */
+
 	case opt_field: {
 	  std::string arg(opt_arg);
 	  std::string name, value;
@@ -221,33 +259,16 @@ act_new(arguments &args)
 	  std::swap(a.field_value(activity::field_name(name)), value);
 	  break; }
 
-	  // keyword arguments concatenate into existing values
-
-	case opt_keywords:
-	case opt_equipment:
-	case opt_weather: {
-	  activity::field_id field = option_field_id((option_id)opt);
-	  std::string &value = a.field_value(field);
-	  value.push_back(' ');
-	  value.append(opt_arg);
-	  break; }
-
-	  // GPS files have directories stripped
-
-	case opt_fit_file:
-	case opt_tcx_file:
-	  if (const char *tem = strrchr(opt_arg, '/'))
-	    opt_arg = tem + 1;
-	  /* fall through */
-
 	default: {
 	  activity::field_id field = option_field_id((option_id)opt);
-	  a.field_value(field) = opt_arg;
+	  std::string str(opt_arg);
+	  a.canonicalize_field_string(field, str);
+	  std::swap(a.field_value(field), str);
 	  break; }
 
 	case arguments::opt_error:
 	  fprintf(stderr, "Error: invalid argument: %s\n", opt_arg);
-	  print_usage(args);
+	  print_usage(args, false);
 	  return 1;
 	}
     }
@@ -293,16 +314,48 @@ act_new(arguments &args)
 }
 
 int
-main(int argc, const char **argv)
+act_import(arguments &args)
 {
-  arguments args(argc, argv);
+  bool import_all = false;
 
-  if (args.program_name_p("act-import"))
+  while (1)
     {
-      std::vector<std::string> new_files;
-      shared_config().find_new_gps_files(new_files);
+      const char *opt_arg = 0;
+      int opt = args.getopt(import_options, &opt_arg);
+      if (opt == arguments::opt_eof)
+	break;
 
-      for (const auto &it : new_files)
+      switch (opt)
+	{
+	case opt_import_all:
+	  import_all = true;
+	  break;
+
+	case arguments::opt_error:
+	  fprintf(stderr, "Error: invalid argument: %s\n", opt_arg);
+	  print_usage(args, true);
+	  return 1;
+	}
+    }
+
+  std::vector<std::string> new_files;
+  shared_config().find_new_gps_files(new_files);
+
+  if (new_files.size() == 0)
+    {
+      if (!shared_config().silent())
+	fprintf(stderr, "No new GPS activities.\n");
+
+      return 0;
+    }
+
+  for (const auto &it : new_files)
+    {
+      bool should_import = false;
+
+      if (import_all)
+	should_import = true;
+      else
 	{
 	  fprintf(stderr, "Import %s? (y/n) [y] ", it.c_str());
 	  fflush(stderr);
@@ -312,24 +365,38 @@ main(int argc, const char **argv)
 	    return 0;
 
 	  if (buf[0] == '\n' || (buf[0] == 'y' && buf[1] == '\n'))
-	    {
-	      arguments copy(args);
+	    should_import = true;
+	}
 
-	      if (string_has_suffix(it, ".fit"))
-		copy.push_back("--fit-file");
-	      else if (string_has_suffix(it, ".tcx"))
-		copy.push_back("--tcx-file");
-	      else
-		abort();
+      if (should_import)
+	{
+	  arguments copy(args);
 
-	      copy.push_back(it);
+	  if (string_has_suffix(it, ".fit"))
+	    copy.push_back("--fit-file");
+	  else if (string_has_suffix(it, ".tcx"))
+	    copy.push_back("--tcx-file");
+	  else
+	    abort();
 
-	      int ret = act_new(copy);
-	      if (ret != 0)
-		return ret;
-	    }
+	  copy.push_back(it);
+
+	  int ret = act_new(copy);
+	  if (ret != 0)
+	    return ret;
 	}
     }
+
+  return 0;
+}
+
+int
+main(int argc, const char **argv)
+{
+  arguments args(argc, argv);
+
+  if (args.program_name_p("act-import"))
+    return act_import(args);
   else
     return act_new(args);
 }

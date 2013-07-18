@@ -45,8 +45,23 @@ public:
       field_weight,
     };
 
+  enum field_data_type
+    {
+      type_string,
+      type_number,
+      type_date,
+      type_duration,
+      type_distance,
+      type_pace,
+      type_speed,
+      type_temperature,
+      type_fraction,
+      type_keywords,
+    };
+
   static field_id lookup_field_id(const char *str);
   static const char *lookup_field_name(field_id id);
+  static field_data_type lookup_field_data_type(field_id id);
 
   struct field_name : public uncopyable
     {
@@ -102,6 +117,8 @@ public:
   std::string &field_value(const field_name &name);
   const std::string &field_value(const field_name &name) const;
 
+  bool canonicalize_field_string(field_id id, std::string &str);
+
   bool get_string_field(field_id id, const std::string **ptr) const;
   bool get_string_field(const field_name &name, const std::string **ptr) const;
   void set_string_field(field_id id, const std::string &x);
@@ -114,32 +131,39 @@ public:
     distance_unit *unit_ptr = 0) const;
   void set_distance_field(field_id id, double x,
     distance_unit unit = unit_miles);
+  void set_distance_field(field_id id, const std::string &str);
 
   bool get_duration_field(field_id id, double *ptr) const;
   void set_duration_field(field_id id, double x);
+  void set_duration_field(field_id id, const std::string &str);
 
   bool get_pace_field(field_id id, double *ptr,
     pace_unit *unit_ptr = 0) const;
   void set_pace_field(field_id id, double x,
     pace_unit unit = unit_seconds_per_mile);
+  void set_pace_field(field_id id, const std::string &str);
 
   bool get_speed_field(field_id id, double *ptr,
     speed_unit *unit_ptr = 0) const;
   void set_speed_field(field_id id, double x,
     speed_unit unit = unit_miles_per_hour);
+  void set_speed_field(field_id id, const std::string &str);
 
   bool get_temperature_field(field_id id, double *ptr,
     temperature_unit *unit_ptr = 0) const;
   void set_temperature_field(field_id id, double x,
     temperature_unit unit = unit_celsius);
+  void set_temperature_field(field_id id, const std::string &str);
 
   bool get_keywords_field(field_id id,
     std::vector<std::string> *ptr) const;
   void set_keywords_field(field_id id,
     const std::vector<std::string> &x);
+  void set_keywords_field(field_id id, const std::string &str);
 
   bool get_fraction_field(field_id id, double *ptr) const;
   void set_fraction_field(field_id id, double x);
+  void set_fraction_field(field_id id, const std::string &str);
 
 private:
   int field_index(field_id id) const;

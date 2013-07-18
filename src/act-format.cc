@@ -2,6 +2,8 @@
 
 #include "act-format.h"
 
+#include "act-config.h"
+
 #include <algorithm>
 #include <math.h>
 #include <stdio.h>
@@ -223,10 +225,13 @@ format_fraction(std::string &str, double frac)
 void
 format_keywords(std::string &str, const std::vector<std::string> &keys)
 {
-  for (auto it = keys.begin(); it != keys.end(); it++)
+  bool first = true;
+
+  for (auto it = keys.begin(); it != keys.end(); it++, first = false)
     {
-      if (it != keys.begin())
+      if (!first)
 	str.push_back(' ');
+
       // FIXME: quoting?
       str.append(*it);
     }
@@ -314,7 +319,7 @@ struct parsable_unit
 
 bool
 parse_unit(const parsable_unit *units, const std::string &str,
-	   size_t &idx, double &value, int *unit_ptr)
+	   size_t &idx, double &value, int &unit)
 {
   char buf[128];
 
@@ -329,19 +334,29 @@ parse_unit(const parsable_unit *units, const std::string &str,
   memcpy(buf, str.c_str() + idx, len);
   buf[len] = 0;
 
-  for (; units->word_list; units++)
+  for (const parsable_unit *uptr = units; uptr->word_list; uptr++)
     {
-      for (const char *wptr = units->word_list;
+      for (const char *wptr = uptr->word_list;
 	   *wptr; wptr += strlen(wptr) + 1)
 	{
 	  if (strcasecmp_l(buf, wptr, 0) == 0)
 	    {
-	      value = value * units->multiplier + units->offset;
-	      if (unit_ptr)
-		*unit_ptr = units->unit_type;
+	      value = value * uptr->multiplier + uptr->offset;
+	      unit = uptr->unit_type;
 	      idx += len;
 	      return true;
 	    }
+	}
+    }
+
+  /* Apply default unit conversion if none specified. */
+
+  for (const parsable_unit *uptr = units; uptr->word_list; uptr++)
+    {
+      if (uptr->unit_type == unit)
+	{
+	  value = value * uptr->multiplier + uptr->offset;
+	  return true;
 	}
     }
 
@@ -483,6 +498,7 @@ parse_date(const std::string &str, time_t *date_ptr, time_t *range_ptr)
   tm.tm_min = minutes;
   tm.tm_sec = seconds;
   tm.tm_gmtoff = zone_offset;
+  tm.tm_isdst = -1;
 
   if (has_zone)
     *date_ptr = timegm(&tm);
@@ -583,8 +599,9 @@ parse_distance(const std::string &str, double *dist_ptr,
       {0}
     };
 
-  int unit = unit_metres;
-  parse_unit(distance_units, str, idx, value, &unit);
+  int unit = shared_config().default_distance_unit();
+
+  parse_unit(distance_units, str, idx, value, unit);
 
   *dist_ptr = value;
 
@@ -620,7 +637,9 @@ parse_pace(const std::string &str, double *pace_ptr, pace_unit *unit_ptr)
 	  {0}
 	};
 
-      if (!parse_unit(pace_units, str, idx, value, &unit))
+      unit = shared_config().default_pace_unit();
+
+      if (!parse_unit(pace_units, str, idx, value, unit))
 	return false;
     }
   else
@@ -653,8 +672,9 @@ parse_speed(const std::string &str, double *speed_ptr, speed_unit *unit_ptr)
       {0}
     };
 
-  int unit = unit_metres_per_second;
-  parse_unit(speed_units, str, idx, value, &unit);
+  int unit = shared_config().default_speed_unit();
+
+  parse_unit(speed_units, str, idx, value, unit);
 
   *speed_ptr = value;
 
@@ -683,8 +703,9 @@ parse_temperature(const std::string &str, double *temp_ptr,
       {0}
     };
 
-  int unit = unit_celsius;
-  parse_unit(temp_units, str, idx, value, &unit);
+  int unit = shared_config().default_temperature_unit();
+
+  parse_unit(temp_units, str, idx, value, unit);
 
   *temp_ptr = value;
 
@@ -737,9 +758,12 @@ parse_keywords(const std::string &str, std::vector<std::string> *keys_ptr)
       while (idx < str.size() && !isspace_l(str[idx], 0))
 	key.push_back(str[idx++]);
 
-      size_t k = keys_ptr->size();
-      keys_ptr->resize(k + 1);
-      std::swap((*keys_ptr)[k], key);
+      if (key.size() > 0)
+	{
+	  size_t k = keys_ptr->size();
+	  keys_ptr->resize(k + 1);
+	  std::swap((*keys_ptr)[k], key);
+	}
 
       idx = skip_whitespace(str, idx);
     }
