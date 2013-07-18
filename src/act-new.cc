@@ -225,8 +225,8 @@ act_new(arguments &args)
 
 	case opt_date: {
 	  time_t date;
-	  parse_date(std::string(opt_arg), &date, 0);
-	  a.set_date(date);
+	  if (parse_date_time(std::string(opt_arg), &date, 0))
+	    a.set_date(date);
 	  break; }
 
 	  // keyword arguments concatenate into existing values

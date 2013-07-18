@@ -15,7 +15,7 @@ namespace act {
 
 // string conversion functions
 
-void format_date(std::string &str, time_t date);
+void format_date_time(std::string &str, time_t date);
 void format_duration(std::string &str, double dur);
 void format_number(std::string &str, double value);
 void format_distance(std::string &str, double dist, distance_unit unit);
@@ -25,7 +25,10 @@ void format_temperature(std::string &str, double temp, temperature_unit unit);
 void format_fraction(std::string &str, double frac);
 void format_keywords(std::string &str, const std::vector<std::string> &keys);
 
-bool parse_date(const std::string &str, time_t *date_ptr, time_t *range_ptr);
+bool parse_date_time(const std::string &str, time_t *date_ptr,
+  time_t *range_ptr);
+bool parse_date_range(const std::string &str, time_t *date_ptr,
+  time_t *range_ptr);
 bool parse_duration(const std::string &str, double *dur_ptr);
 bool parse_number(const std::string &str, double *value_ptr);
 bool parse_distance(const std::string &str, double *dist_ptr,

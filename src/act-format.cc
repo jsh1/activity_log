@@ -5,6 +5,7 @@
 #include "act-config.h"
 
 #include <algorithm>
+#include <errno.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -25,7 +26,7 @@
 namespace act {
 
 void
-format_date(std::string &str, time_t date)
+format_date_time(std::string &str, time_t date)
 {
   char buf[256];
 
@@ -239,6 +240,73 @@ format_keywords(std::string &str, const std::vector<std::string> &keys)
 
 namespace {
 
+bool
+leap_year_p(int year)
+{
+  return (year % 4) == 0 && (year % 100) != 0 && (year % 400) == 0;
+}
+
+time_t
+seconds_in_year(int year)
+{
+  return !leap_year_p(year) ? 365*SECONDS_PER_DAY : 366*SECONDS_PER_DAY;
+}
+
+time_t
+seconds_in_month(int year, int month)
+{
+  while (month < 0)
+    year--, month += 12;
+  while (month > 11)
+    year++, month -= 12;
+
+  int seconds_in_month[12] = {31*SECONDS_PER_DAY, 0, 31*SECONDS_PER_DAY,
+    30*SECONDS_PER_DAY, 31*SECONDS_PER_DAY, 30*SECONDS_PER_DAY,
+    31*SECONDS_PER_DAY, 31*SECONDS_PER_DAY, 30*SECONDS_PER_DAY,
+    31*SECONDS_PER_DAY, 30*SECONDS_PER_DAY, 31*SECONDS_PER_DAY};
+
+  if (month != 1)
+    return seconds_in_month[month];
+  else
+    return !leap_year_p(year) ? 28*SECONDS_PER_DAY : 29*SECONDS_PER_DAY;
+}
+
+int
+day_of_week_index(const char *str)
+{
+  static const char *names[7] = {"sunday", "monday", "tuesday",
+    "wednesday", "thursday", "friday", "saturday"};
+  static const char *abbrevs[7] = {"sun", "mon", "tue", "wed", "thu",
+     "fri", "sat"};
+
+  for (int i = 0; i < 7; i++)
+    {
+      if (strcasecmp(str, names[i]) == 0 || strcasecmp(str, abbrevs[i]) == 0)
+	return i;
+    }
+
+  return -1;
+}
+
+int
+month_index(const char *str)
+{
+  static const char *names[12] = {"january", "february", "march",
+    "april", "may", "june", "july", "august", "september", "october",
+    "november", "december"};
+
+  static const char *abbrevs[12] = {"jan", "feb", "mar", "apr", "may",
+    "jun", "jul", "aug", "sep", "oct", "nov", "dec"};
+
+  for (int i = 0; i < 12; i++)
+    {
+      if (strcasecmp(str, names[i]) == 0 || strcasecmp(str, abbrevs[i]) == 0)
+	return i;
+    }
+
+  return -1;
+}
+
 size_t
 skip_whitespace(const std::string &str, size_t idx)
 {
@@ -248,6 +316,35 @@ skip_whitespace(const std::string &str, size_t idx)
     i++;
 
   return i;
+}
+
+size_t
+next_token(const std::string &str, size_t idx, std::string &token)
+{
+  size_t i = idx;
+  while (i < str.size() && isalnum_l(str[i], 0))
+    i++;
+
+  token = str.substr(idx, i - idx);
+  return i;
+}
+
+bool
+check_trailer(const std::string &str, size_t idx)
+{
+  while (idx < str.size())
+    {
+      if (!isspace_l(str[idx], 0))
+	{
+	  if (!shared_config().silent())
+	    fprintf(stderr, "Error: trailing garbage in string: \"%s\"\n", str.c_str());
+	  return false;
+	}
+
+      idx++;
+    }
+
+  return true;
 }
 
 int
@@ -364,143 +461,340 @@ parse_unit(const parsable_unit *units, const std::string &str,
 }
 
 bool
-leap_year_p(int year)
+parse_date(const std::string &str, size_t &idx,
+	   struct tm *tm, time_t *range_ptr)
 {
-  return (year % 4) == 0 && (year % 100) != 0 && (year % 400) == 0;
-}
+  /* Possible date formats:
 
-time_t
-seconds_in_year(int year)
-{
-  return !leap_year_p(year) ? 365*SECONDS_PER_DAY : 366*SECONDS_PER_DAY;
-}
+	today
+	yesterday
+	N days ago
+	last N days
+	this week
+	last week
+	this month
+	last month
+	last N months
+	this year
+	last year
+	last N years
+	DAY			-- monday, etc
+	MONTH D+		-- July 7
+	MONTH			-- July
+	YYYY			-- 2013
+	YYYY-MM			-- 2013-07
+	YYYY-MM-DD		-- 2013-07-18  */
 
-time_t
-seconds_in_month(int year, int month)
-{
-  int seconds_in_month[12] = {31*SECONDS_PER_DAY, 0, 31*SECONDS_PER_DAY,
-    30*SECONDS_PER_DAY, 31*SECONDS_PER_DAY, 30*SECONDS_PER_DAY,
-    31*SECONDS_PER_DAY, 31*SECONDS_PER_DAY, 30*SECONDS_PER_DAY,
-    31*SECONDS_PER_DAY, 30*SECONDS_PER_DAY, 31*SECONDS_PER_DAY};
+  std::string token;
 
-  if (month != 1)
-    return seconds_in_month[month];
-  else
-    return !leap_year_p(year) ? 28*SECONDS_PER_DAY : 29*SECONDS_PER_DAY;
-}
+  idx = skip_whitespace(str, idx);
+  idx = next_token(str, idx, token);
 
-} // anonymous namespace
-
-/* Date format is "YYYY-MM-DD HH:MM:SS [AM|PM] [ZONE]" where ZONE is
-   "[+-]HHMM". If no ZONE, local time is assumed. */
-
-bool
-parse_date(const std::string &str, time_t *date_ptr, time_t *range_ptr)
-{
-  int year = 0, month = 0, day = 0;
-  int hours = 0, minutes = 0, seconds = 0;
-  int zone_offset = 0;
-  bool has_zone = false;
-  time_t range;
-
-  size_t idx = skip_whitespace(str, 0);
-
-  year = parse_decimal(str, idx, 4);
-  if (year < 0)
+  if (token.size() == 0)
     return false;
 
-  if (idx < str.size() && str[idx] == '-')
+  if (!isdigit_l(token[0], 0))
     {
-      idx++;
+      time_t now = time(0);
+      struct tm now_tm = {0};
+      localtime_r(&now, &now_tm);
 
-      month = parse_decimal(str, idx, 2);
-      if (month < 0)
+      tm->tm_mday = now_tm.tm_mday;
+      tm->tm_mon = now_tm.tm_mon;
+      tm->tm_year = now_tm.tm_year;
+
+      const char *tstr = token.c_str();
+
+      if (strcasecmp(tstr, "today") == 0)
+	{
+	  *range_ptr = SECONDS_PER_DAY;
+	  return true;
+	}
+      else if (strcasecmp(tstr, "yesterday") == 0)
+	{
+	  tm->tm_mday--;
+	  *range_ptr = SECONDS_PER_DAY;
+	  return true;
+	}
+      else if (strcasecmp(tstr, "this") == 0 || strcasecmp(tstr, "last") == 0)
+	{
+	  int delta = strcasecmp(tstr, "this") == 0 ? 0 : -1;
+
+	  idx = skip_whitespace(str, idx);
+	  idx = next_token(str, idx, token);
+
+	  if (token.size() == 0)
+	    return false;
+
+	  if (delta == -1 && isdigit_l(token[0], 0))
+	    {
+	      /* last N ... */
+
+	      char *end;
+	      long n = strtol_l(token.c_str(), &end, 10, 0);
+	      if ((n == 0 && errno == EINVAL)
+		  || (end - token.c_str()) != token.size())
+		return false;
+
+	      delta = -n;
+
+	      idx = skip_whitespace(str, idx);
+	      idx = next_token(str, idx, token);
+
+	      if (token.size() == 0)
+		return false;
+	    }
+
+	  const char *tstr = token.c_str();
+
+	  if (strcasecmp(tstr, "day") == 0)
+	    {
+	      tm->tm_mday += delta;
+	      *range_ptr = SECONDS_PER_DAY;
+	    }
+	  else if (strcasecmp(tstr, "week") == 0)
+	    {
+	      /* FIXME: hardcodes sunday as start of week. */
+	      tm->tm_mday -= now_tm.tm_wday;
+	      tm->tm_mday += delta * 7;
+	      *range_ptr = SECONDS_PER_DAY * 7;
+	    }
+	  else if (strcasecmp(tstr, "month") == 0)
+	    {
+	      tm->tm_mday = 1;
+	      tm->tm_mon += delta;
+	      *range_ptr = seconds_in_month(tm->tm_year+1900, tm->tm_mon);
+	    }
+	  else if (strcasecmp(tstr, "year") == 0)
+	    {
+	      tm->tm_mon = 0;
+	      tm->tm_mday = 1;
+	      tm->tm_year += delta;
+	      *range_ptr = seconds_in_year(tm->tm_year+1900);
+	    }
+	  else
+	    return false;
+	}
+      else
+	{
+	  int idx;
+
+	  idx = day_of_week_index(tstr);
+	  if (idx >= 0)
+	    {
+	      tm->tm_mday += idx - now_tm.tm_wday;
+	      *range_ptr = SECONDS_PER_DAY;
+	      return true;
+	    }
+
+	  idx = month_index(tstr);
+	  if (idx >= 0)
+	    {
+	      tm->tm_mon = idx;
+
+	      /* Speculatively try to parse "MONTH D+". */
+
+	      size_t tidx = skip_whitespace(str, idx);
+	      tidx = next_token(str, tidx, token);
+
+	      if (token.size() != 0 && isdigit_l(token[0], 0))
+		{
+		  long n = strtol_l(token.c_str(), 0, 10, 0);
+
+		  if (n > 0)
+		    {
+		      idx = tidx;
+		      tm->tm_mday = n;
+		      *range_ptr = SECONDS_PER_DAY;
+		      return true;
+		    }
+		}
+
+	      tm->tm_mday = 1;
+	      *range_ptr = seconds_in_month(tm->tm_year+1900, tm->tm_mon);
+	      return true;
+	    }
+
+	  return false;
+	}
+    }
+  else
+    {
+      if (str[idx] == ' ' && (str[idx+1] == 'd' || str[idx+1] == 'D'))
+	{
+	  size_t tidx = idx + 1;
+	  std::string ttoken;
+	  tidx = next_token(str, tidx, ttoken);
+
+	  if (strcasecmp(ttoken.c_str(), "days") == 0)
+	    {
+	      tidx = skip_whitespace(str, tidx);
+	      tidx = next_token(str, tidx, ttoken);
+
+	      if (strcasecmp(ttoken.c_str(), "ago") == 0)
+		{
+		  idx = tidx;
+
+		  tidx = 0;
+		  int n = parse_decimal(token, tidx, 100);
+		  if (tidx != token.size())
+		    return false;
+
+		  tm->tm_mday -= n;
+		  *range_ptr = SECONDS_PER_DAY;
+		  return true;
+		}
+	    }
+	}
+
+      if (token.size() == 4)
+	{
+	  /* YYYY... */
+
+	  size_t tidx = 0;
+	  int year = parse_decimal(token, tidx, 4);
+	  if (tidx != 4)
+	    return false;
+
+	  tm->tm_year = year - 1900;
+
+	  if (str[idx] != '-')
+	    {
+	      *range_ptr = seconds_in_year(year);
+	      return true;
+	    }
+
+	  idx = next_token(str, idx + 1, token);
+	  if (token.size() != 2 || !isdigit_l(token[0], 0))
+	    return false;
+
+	  tidx = 0;
+	  int month = parse_decimal(token, tidx, 2);
+	  if (tidx != 2)
+	    return false;
+
+	  tm->tm_mon = month;
+
+	  if (str[idx] != '-')
+	    {
+	      *range_ptr = seconds_in_month(year, month);
+	      return true;
+	    }
+
+	  idx = next_token(str, idx + 1, token);
+	  if (token.size() != 2 || !isdigit_l(token[0], 0))
+	    return false;
+
+	  tidx = 0;
+	  int day = parse_decimal(token, tidx, 2);
+	  if (tidx != 2)
+	    return false;
+
+	  tm->tm_mday = day + 1;
+	  *range_ptr = SECONDS_PER_DAY;
+	  return true;
+	}
+    }
+
+  return false;
+}
+
+bool
+parse_date_time(const std::string &str, size_t &idx,
+		time_t *date_ptr, time_t *range_ptr)
+{
+  struct tm tm = {0};
+  tm.tm_isdst = -1;
+  bool tm_utc = false;
+  time_t range = 0;
+
+  /* Check for "now". */
+
+  {
+    const char *ptr = str.c_str() + idx;
+
+    if ((ptr[0] == 'n' || ptr[0] == 'N')
+	&& (ptr[1] == 'o' || ptr[1] == 'O')
+	&& (ptr[2] == 'w' || ptr[2] == 'W')
+	&& (ptr[3] == 0 || isspace_l(ptr[3], 0)))
+      {
+	*date_ptr = time(0);
+	if (range_ptr)
+	  *range_ptr = 1;
+	idx += 3;
+	return check_trailer(str, idx);
+      }
+  }
+
+  if (!parse_date(str, idx, &tm, &range))
+    return false;
+
+  idx = skip_whitespace(str, idx);
+
+  if (range == SECONDS_PER_DAY && isdigit_l(str[idx], 0))
+    {
+      int hours = 0, minutes = 0, seconds = 0;
+      int zone_offset = 0;
+
+      hours = parse_decimal(str, idx, 2);
+      if (hours < 0)
 	return false;
 
-      if (idx < str.size() && str[idx] == '-')
+      if (idx < str.size() && str[idx] == ':')
 	{
 	  idx++;
 
-	  day = parse_decimal(str, idx, 2);
-	  if (day < 0)
+	  minutes = parse_decimal(str, idx, 2);
+	  if (minutes < 0)
 	    return false;
 
-	  if (idx < str.size() && isspace_l(str[idx], 0))
+	  if (idx < str.size() && str[idx] == ':')
 	    {
-	      idx = skip_whitespace(str, idx);
+	      idx++;
 
-	      hours = parse_decimal(str, idx, 2);
-	      if (hours < 0)
+	      seconds = parse_decimal(str, idx, 2);
+	      if (seconds < 0)
 		return false;
 
-	      if (idx < str.size() && str[idx] == ':')
-		{
-		  idx++;
+	      range = 1;
 
-		  minutes = parse_decimal(str, idx, 2);
-		  if (minutes < 0)
+	      idx = skip_whitespace(str, idx);
+
+	      if (idx + 1 < str.size())
+		{
+		  int c0 = str[idx], c1 = str[idx+1];
+		  if (c0 == 'A' && c1 == 'M')
+		    idx += 2;
+		  else if (c0 == 'P' && c1 == 'M')
+		    idx += 2, hours += 12;
+
+		  idx = skip_whitespace(str, idx);
+		}
+
+	      if (idx + 3 < str.size() && isdigit_l(str[idx], 0))
+		{
+		  int zone_hrs = parse_decimal(str, idx, 2);
+		  int zone_mins = parse_decimal(str, idx, 2);
+		  if (zone_hrs < 0 || zone_mins < 0)
 		    return false;
 
-		  if (idx < str.size() && str[idx] == ':')
-		    {
-		      idx++;
-
-		      seconds = parse_decimal(str, idx, 2);
-		      if (seconds < 0)
-			return false;
-
-		      range = 1;
-
-		      idx = skip_whitespace(str, idx);
-
-		      if (idx + 1 < str.size())
-			{
-			  int c0 = str[idx], c1 = str[idx+1];
-			  if (c0 == 'A' && c1 == 'M')
-			    idx += 2;
-			  else if (c0 == 'P' && c1 == 'M')
-			    idx += 2, hours += 12;
-
-			  idx = skip_whitespace(str, idx);
-			}
-
-		      if (idx + 3 < str.size() && isdigit_l(str[idx], 0))
-			{
-			  int zone_hrs = parse_decimal(str, idx, 2);
-			  int zone_mins = parse_decimal(str, idx, 2);
-			  if (zone_hrs < 0 || zone_mins < 0)
-			    return false;
-
-			  zone_offset = (zone_hrs * 60 + zone_mins) * 60;
-			  has_zone = true;
-			}
-		    }
-		  else
-		    range = 60;
+		  zone_offset = (zone_hrs * 60 + zone_mins) * 60;
+		  tm_utc = true;
 		}
-	      else
-		range = 3600;
 	    }
 	  else
-	    range = 24*3600;
+	    range = 60;
 	}
       else
-	range = seconds_in_month(year, month - 1);
+	range = 3600;
+
+      tm.tm_hour = hours;
+      tm.tm_min = minutes;
+      tm.tm_sec = seconds;
+      tm.tm_gmtoff = zone_offset;
     }
-  else
-    range = seconds_in_year(year);
 
-  struct tm tm = {0};
-  tm.tm_year = year - 1900;
-  tm.tm_mon = month - 1;
-  tm.tm_mday = day;
-  tm.tm_hour = hours;
-  tm.tm_min = minutes;
-  tm.tm_sec = seconds;
-  tm.tm_gmtoff = zone_offset;
-  tm.tm_isdst = -1;
-
-  if (has_zone)
+  if (tm_utc)
     *date_ptr = timegm(&tm);
   else
     *date_ptr = mktime(&tm);
@@ -509,6 +803,66 @@ parse_date(const std::string &str, time_t *date_ptr, time_t *range_ptr)
     *range_ptr = range;
 
   return true;
+}
+
+} // anonymous namespace
+
+/* Date format is "now" or "DATE [TIME]", where TIME is "[HH:MM[:SS]
+   [AM|PM] [ZONE]" and ZONE is "[+-]HHMM". If no ZONE, local time is
+   assumed. */
+
+bool
+parse_date_time(const std::string &str, time_t *date_ptr, time_t *range_ptr)
+{
+  size_t idx = skip_whitespace(str, 0);
+
+  if (!parse_date_time(str, idx, date_ptr, range_ptr))
+    return false;
+
+  return check_trailer(str, idx);
+}
+
+bool
+parse_date_range(const std::string &str, time_t *date_ptr, time_t *range_ptr)
+{
+  size_t idx = skip_whitespace(str, 0);
+
+  time_t now = time(0);
+  time_t date0 = 0, range0 = 0;
+  time_t date1 = 0, range1 = 0;
+
+  if (str[idx] != '.' && str[idx+1] != '.')
+    {
+      if (!parse_date_time(str, idx, &date0, &range0))
+	return false;
+    }
+  else
+    {
+      date0 = now;
+      range0 = 1;
+    }
+
+  if (str[idx] == '.' && str[idx+1] == '.')
+    {
+      idx += 2;
+
+      if (idx != str.size() && !isspace_l(str[idx], 0))
+	{
+	  if (!parse_date_time(str, idx, &date1, &range1))
+	    return false;
+	}
+      else
+	{
+	  date1 = now;
+	  range0 = 1;
+	}
+    }
+
+  *date_ptr = std::min(date0, date1);
+
+  *range_ptr = std::max(date0 + range0, date1 + range1) - *date_ptr;
+
+  return check_trailer(str, idx);
 }
 
 bool
@@ -562,7 +916,10 @@ parse_duration(const std::string &str, double *dur_ptr)
 {
   size_t idx = skip_whitespace(str, 0);
 
-  return parse_time(str, idx, dur_ptr);
+  if (!parse_time(str, idx, dur_ptr))
+    return false;
+
+  return check_trailer(str, idx);
 }
 
 bool
@@ -570,7 +927,10 @@ parse_number(const std::string &str, double *value_ptr)
 {
   size_t idx = skip_whitespace(str, 0);
 
-  return parse_number(str, idx, *value_ptr);
+  if (!parse_number(str, idx, *value_ptr))
+    return false;
+
+  return check_trailer(str, idx);
 }
 
 bool
@@ -608,7 +968,7 @@ parse_distance(const std::string &str, double *dist_ptr,
   if (unit_ptr)
     *unit_ptr = (distance_unit) unit;
 
-  return true;
+  return check_trailer(str, idx);
 }
 
 bool
@@ -650,7 +1010,7 @@ parse_pace(const std::string &str, double *pace_ptr, pace_unit *unit_ptr)
   if (unit_ptr)
     *unit_ptr = (pace_unit) unit;
 
-  return true;
+  return check_trailer(str, idx);
 }
 
 bool
@@ -681,7 +1041,7 @@ parse_speed(const std::string &str, double *speed_ptr, speed_unit *unit_ptr)
   if (unit_ptr)
     *unit_ptr = (speed_unit) unit;
 
-  return true;
+  return check_trailer(str, idx);
 }
 
 bool
@@ -712,7 +1072,7 @@ parse_temperature(const std::string &str, double *temp_ptr,
   if (unit_ptr)
     *unit_ptr = (temperature_unit) unit;
 
-  return true;
+  return check_trailer(str, idx);
 }
 
 bool
@@ -744,7 +1104,7 @@ parse_fraction(const std::string &str, double *frac_ptr)
 	}
     }
 
-  return true;
+  return check_trailer(str, idx);
 }
 
 bool

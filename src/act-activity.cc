@@ -255,7 +255,7 @@ activity::read_file(const char *path)
       _header.back().value = ptr;
 
       if (id == field_date)
-	parse_date(_header.back().value, &_date, 0);
+	parse_date_time(_header.back().value, &_date, 0);
     }
 
   while (fgets(buf, sizeof(buf), fh))
@@ -319,7 +319,7 @@ activity::set_date(time_t x)
       std::string &value = field_value(field_name(field_date));
 
       value.clear();
-      format_date(value, _date);
+      format_date_time(value, _date);
     }
 }
 
@@ -570,10 +570,10 @@ activity::canonicalize_field_string(field_id id, std::string &str)
 
     case type_date: {
       time_t date;
-      if (parse_date(str, &date, 0))
+      if (parse_date_time(str, &date, 0))
 	{
 	  str.clear();
-	  format_date(str, date);
+	  format_date_time(str, date);
 	  return true;
 	}
       break; }
