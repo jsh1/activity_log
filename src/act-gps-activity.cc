@@ -4,11 +4,36 @@
 
 #include "act-gps-fit-parser.h"
 #include "act-gps-tcx-parser.h"
+#include "act-util.h"
 
 #include <math.h>
 
 namespace act {
 namespace gps {
+
+activity::activity()
+: _sport(sport_unknown),
+  _time(0),
+  _duration(0),
+  _distance(0),
+  _avg_speed(0),
+  _max_speed(0),
+  _calories(0),
+  _avg_heart_rate(0),
+  _max_heart_rate(0)
+{
+}
+
+bool
+activity::read_file(const char *path)
+{
+  if (path_has_extension(path, "fit"))
+    return read_fit_file(path);
+  else if (path_has_extension(path, "tcx"))
+    return read_tcx_file(path);
+  else
+    return false;
+}
 
 bool
 activity::read_fit_file(const char *path)

@@ -28,7 +28,7 @@ $ act new [--edit] [CREATION-OPTIONS...]
 $ act import [--edit] [CREATION-OPTIONS...]
 
 	Finds new Garmin files and creates activities from them. (I.e.
-	calls "act new" with --fit-file option.)
+	calls "act new" with --gps-file option.)
 
 $ act set [--multiple] [CREATION-OPTIONS] [ACTIVITY-RANGE ...]
 
@@ -59,8 +59,7 @@ where CREATION-OPTIONS are any of:
 	--weather X
 	--quality X
 	--effort X
-	--fit-file X
-	--tcx-file X
+	--gps-file X
 	--field NAME:X
 
 For identifying activities we have ACTIVITY-RANGE, which is one of these

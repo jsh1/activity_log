@@ -396,6 +396,22 @@ make_time(uint32_t timestamp)
   return timestamp + offset;
 }
 
+activity::sport_type
+make_sport(int32_t value)
+{
+  switch (value)
+    {
+    case 2:
+      return activity::sport_running;
+    case 4:
+      return activity::sport_running;
+    case 32:
+      return activity::sport_swimming;
+    default:
+      return activity::sport_unknown;
+    }
+}
+
 inline double
 make_lat_long(int32_t value)
 {
@@ -537,6 +553,9 @@ fit_parser::read_session_message(const message_type &def, uint32_t timestamp)
 	case 2:				/* start_time */
 	  d.set_time(make_time(read_field(def, *it)));
 	  break;
+
+	case 5:				/* sport */
+	  d.set_sport(make_sport(read_field(def, *it)));
 
 	case 8:				/* total_timer_time */
 	  d.set_duration(make_duration(read_field(def, *it)));

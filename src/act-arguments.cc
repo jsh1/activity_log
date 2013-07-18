@@ -47,7 +47,8 @@ arguments::push_back(const char *arg)
 }
 
 int
-arguments::getopt(const struct option *opts, const char **arg_ptr)
+arguments::getopt(const struct option *opts,
+		  const char **arg_ptr, uint32_t flags)
 {
   if (_getopt_finished || _args.size() < 1)
     return opt_eof;
@@ -80,6 +81,9 @@ arguments::getopt(const struct option *opts, const char **arg_ptr)
 
 	      if (!opts[i].arg_name)
 		{
+		  if (flags & opt_partial)
+		    return opt_eof;
+
 		  *arg_ptr = arg;
 		  return opt_error;
 		}
@@ -116,6 +120,9 @@ arguments::getopt(const struct option *opts, const char **arg_ptr)
 
 	      return opts[i].option_id;
 	    }
+
+	  if (flags & opt_partial)
+	    return opt_eof;
 
           *arg_ptr = arg;
 	  return opt_error;

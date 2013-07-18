@@ -14,6 +14,14 @@ namespace gps {
 class activity
 {
 public:
+  enum sport_type
+    {
+      sport_unknown,
+      sport_running,
+      sport_cycling,
+      sport_swimming,
+    };
+
   class point
     {
       double _time;
@@ -99,7 +107,7 @@ public:
 
 private:
   std::string _activity_id;
-  std::string _sport;
+  sport_type _sport;
   std::string _device;
 
   double _time;
@@ -114,17 +122,18 @@ private:
   std::vector<lap> _laps;
 
 public:
-  activity()
-  : _time(0), _duration(0), _distance(0), _avg_speed(0), _max_speed(0),
-    _calories(0), _avg_heart_rate(0), _max_heart_rate(0) {}
+  activity();
+
+  // uses file extension to deduce format
+  bool read_file(const char *path);
 
   bool read_fit_file(const char *path);
   bool read_tcx_file(const char *path);
 
   void update_summary();
 
-  void set_sport(const std::string &s) {_sport = s;}
-  const std::string &sport() const {return _sport;}
+  void set_sport(sport_type x) {_sport = x;}
+  sport_type sport() const {return _sport;}
 
   void set_activity_id(const std::string &s) {_activity_id = s;}
   const std::string &activity_id() const {return _activity_id;}

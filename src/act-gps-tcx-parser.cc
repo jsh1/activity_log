@@ -144,7 +144,16 @@ tcx_parser::sax_start_element(void *ctx, const xmlChar *name,
 	      new_state = ACTIVITY;
 	      std::string s;
 	      if (find_attr(s, n_attr, attr, "Sport"))
-		p->destination().set_sport(s);
+		{
+		  activity::sport_type sport = activity::sport_unknown;
+		  if (s == "Running")
+		    sport = activity::sport_running;
+		  else if (s == "Cycling")
+		    sport = activity::sport_cycling;
+		  else if (s == "Swimming")
+		    sport = activity::sport_swimming;
+		  p->destination().set_sport(sport);
+		}
 	    }
 	  break;
 	case ACTIVITY:

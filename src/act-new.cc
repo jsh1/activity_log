@@ -4,9 +4,6 @@
 #include "act-arguments.h"
 #include "act-config.h"
 #include "act-gps-activity.h"
-#include "act-gps-parser.h"
-#include "act-gps-fit-parser.h"
-#include "act-gps-tcx-parser.h"
 #include "act-util.h"
 
 using namespace act;
@@ -21,7 +18,7 @@ enum option_id
   opt_activity,
   opt_type,
   opt_course,
-  opt_keywords,
+  opt_keyword,
   opt_equipment,
   opt_distance,
   opt_duration,
@@ -38,8 +35,7 @@ enum option_id
   opt_weather,
   opt_quality,
   opt_effort,
-  opt_fit_file,
-  opt_tcx_file,
+  opt_gps_file,
   opt_field,
   // import options
   opt_import_all,
@@ -58,7 +54,7 @@ option_field_id(option_id opt)
       return activity::field_type;
     case opt_course:
       return activity::field_course;
-    case opt_keywords:
+    case opt_keyword:
       return activity::field_keywords;
     case opt_equipment:
       return activity::field_equipment;
@@ -92,10 +88,8 @@ option_field_id(option_id opt)
       return activity::field_quality;
     case opt_effort:
       return activity::field_effort;
-    case opt_fit_file:
-      return activity::field_fit_file;
-    case opt_tcx_file:
-      return activity::field_tcx_file;
+    case opt_gps_file:
+      return activity::field_gps_file;
     case opt_field:
       return activity::field_custom;
     case opt_edit:
@@ -111,8 +105,8 @@ const arguments::option new_options[] =
   {opt_activity, "activity", 0, "ACTIVITY-SPEC"},
   {opt_type, "type", 0, "ACTIVITY-TYPE"},
   {opt_course, "course", 0, "COURSE-NAME"},
-  {opt_keywords, "keywords", 0, "KEYWORD-LIST"},
-  {opt_equipment, "equipment", 0, "EQUIPMENT-LIST"},
+  {opt_keyword, "keyword", 0, "KEYWORD"},
+  {opt_equipment, "equipment", 0, "EQUIPMENT"},
   {opt_distance, "distance", 0, "DISTANCE"},
   {opt_duration, "duration", 0, "DURATION"},
   {opt_pace, "pace", 0, "PACE"},
@@ -125,11 +119,10 @@ const arguments::option new_options[] =
   {opt_calories, "calories", 0, "CALORIES"},
   {opt_weight, "weight", 0, "WEIGHT"},
   {opt_temperature, "temperature", 0, "TEMP"},
-  {opt_weather, "weather", 0, "WEATHER-LIST"},
+  {opt_weather, "weather", 0, "WEATHER"},
   {opt_quality, "quality", 0, "QUALITY-RATIO"},
   {opt_effort, "effort", 0, "EFFORT-RATIO"},
-  {opt_fit_file, "fit-file", 0, "FIT-FILE"},
-  {opt_tcx_file, "tcx-file", 0, "TCX-FILE"},
+  {opt_gps_file, "gps-file", 0, "GPS-FILE"},
   {opt_field, "field", 0, "NAME:VALUE", "Define custom field."},
   {arguments::opt_eof}
 };
@@ -160,10 +153,20 @@ copy_gps_fields(activity &a, const gps::activity &gps_data)
   if (!a.has_field(activity::field_date))
     a.set_date((time_t) gps_data.time());
 
-  // FIXME: extract activity type from GPS file?
-
-  if (!a.has_field(activity::field_activity))
-    a.set_string_field(activity::field_activity, std::string("run"));
+  if (gps_data.sport() != gps::activity::sport_unknown
+      && !a.has_field(activity::field_activity))
+    {
+      gps::activity::sport_type sport = gps_data.sport();
+      std::string type;
+      if (sport == gps::activity::sport_running)
+	type = "run";
+      else if (sport == gps::activity::sport_cycling)
+	type = "bike";
+      if (sport == gps::activity::sport_swimming)
+	type = "swim";
+      if (type.size() != 0)
+	a.set_string_field(activity::field_activity, type);
+    }
 
   if (gps_data.duration() > 0
       && !a.has_field(activity::field_duration))
@@ -173,19 +176,20 @@ copy_gps_fields(activity &a, const gps::activity &gps_data)
       && !a.has_field(activity::field_distance))
     a.set_distance_field(activity::field_distance, gps_data.distance());
 
-  // FIXME: set [max-]pace if running, [max-]speed if biking.
-
 #if 0
+  /* FIXME: Decide whether or not to copy these fields. They seem
+     gratuitous. Also, set [max-]pace if running, speed if biking. */
+
   if (gps_data.avg_speed() > 0
       && !a.has_field(activity::field_pace)
       && !a.has_field(activity::field_speed))
     a.set_pace_field(activity::field_pace, gps_data.avg_speed());
-#endif
 
   if (gps_data.max_speed() > 0
       && !a.has_field(activity::field_max_pace)
       && !a.has_field(activity::field_max_speed))
     a.set_pace_field(activity::field_max_pace, gps_data.max_speed());
+#endif
 
   if (gps_data.avg_heart_rate() > 0
       && !a.has_field(activity::field_average_hr))
@@ -227,7 +231,7 @@ act_new(arguments &args)
 
 	  // keyword arguments concatenate into existing values
 
-	case opt_keywords:
+	case opt_keyword:
 	case opt_equipment:
 	case opt_weather: {
 	  activity::field_id field = option_field_id((option_id)opt);
@@ -238,12 +242,6 @@ act_new(arguments &args)
 	  break; }
 
 	  // GPS files have directories stripped
-
-	case opt_fit_file:
-	case opt_tcx_file:
-	  if (const char *tem = strrchr(opt_arg, '/'))
-	    opt_arg = tem + 1;
-	  /* fall through */
 
 	case opt_field: {
 	  std::string arg(opt_arg);
@@ -259,6 +257,11 @@ act_new(arguments &args)
 	  std::swap(a.field_value(activity::field_name(name)), value);
 	  break; }
 
+	case opt_gps_file:
+	  if (const char *tem = strrchr(opt_arg, '/'))
+	    opt_arg = tem + 1;
+	  /* fall through */
+
 	default: {
 	  activity::field_id field = option_field_id((option_id)opt);
 	  std::string str(opt_arg);
@@ -273,28 +276,17 @@ act_new(arguments &args)
 	}
     }
 
-  bool has_fit_file = a.has_field(activity::field_fit_file);
-  bool has_tcx_file = a.has_field(activity::field_tcx_file);
-
-  if (has_fit_file || has_tcx_file)
+  if (a.has_field(activity::field_gps_file))
     {
       const std::string *s;
-      a.get_string_field(activity::field_name(has_fit_file
-					      ? activity::field_fit_file
-					      : activity::field_tcx_file),
-			 &s);
+      a.get_string_field(activity::field_name(activity::field_gps_file), &s);
 
       std::string filename(*s);
       if (shared_config().find_gps_file(filename))
 	{
 	  gps::activity gps_data;
-
-	  if (has_fit_file)
-	    gps_data.read_fit_file(filename.c_str());
-	  else
-	    gps_data.read_tcx_file(filename.c_str());
-
-	  copy_gps_fields(a, gps_data);
+	  if (gps_data.read_file(filename.c_str()))
+	    copy_gps_fields(a, gps_data);
 	}
     }
 
@@ -321,7 +313,7 @@ act_import(arguments &args)
   while (1)
     {
       const char *opt_arg = 0;
-      int opt = args.getopt(import_options, &opt_arg);
+      int opt = args.getopt(import_options, &opt_arg, arguments::opt_partial);
       if (opt == arguments::opt_eof)
 	break;
 
@@ -371,14 +363,7 @@ act_import(arguments &args)
       if (should_import)
 	{
 	  arguments copy(args);
-
-	  if (string_has_suffix(it, ".fit"))
-	    copy.push_back("--fit-file");
-	  else if (string_has_suffix(it, ".tcx"))
-	    copy.push_back("--tcx-file");
-	  else
-	    abort();
-
+	  copy.push_back("--gps-file");
 	  copy.push_back(it);
 
 	  int ret = act_new(copy);

@@ -41,6 +41,7 @@ bool find_file_under_directory(std::string &file, const std::string &dir);
 
 bool make_path(const char *path);
 
+bool path_has_extension(const char *path, const char *ext);
 
 } // namespace act
 

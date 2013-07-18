@@ -49,7 +49,13 @@ public:
       opt_error = -2,
     };
 
-  int getopt(const struct option *opts, const char **arg_ptr);
+  enum
+    {
+      opt_partial = 1U << 0,
+    };
+
+  int getopt(const struct option *opts, const char **arg_ptr,
+    uint32_t flags = 0);
 
   static void print_options(const struct option *opts, FILE *fh);
 };

@@ -94,4 +94,14 @@ make_path(const char *path)
   return true;
 }
 
+bool
+path_has_extension(const char *path, const char *ext)
+{
+  path = strrchr(path, '.');
+  if (!path)
+    return false;
+
+  return strcasecmp(path + 1, ext) == 0;
+}
+
 } // namespace act

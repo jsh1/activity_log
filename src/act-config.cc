@@ -14,6 +14,8 @@ config::config()
   _silent(false),
   _verbose(false)
 {
+  // FIXME: read options from $HOME/.actconfig as well
+
   if (const char *dir = getenv("ACT_DIR"))
     _activity_dir = dir;
   else if (const char *home = getenv("HOME"))

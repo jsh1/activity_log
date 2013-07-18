@@ -178,12 +178,8 @@ main(int argc, char **argv)
 	test_activity.read_fit_file(argv[i]);
       else if (opt_tcx)
 	test_activity.read_tcx_file(argv[i]);
-      else if (strstr(argv[i], ".fit"))
-	test_activity.read_fit_file(argv[i]);
-      else if (strstr(argv[i], ".tcx"))
-	test_activity.read_tcx_file(argv[i]);
       else
-	continue;
+	test_activity.read_file(argv[i]);
 
       if (opt_print_summary)
 	print_summary(test_activity);

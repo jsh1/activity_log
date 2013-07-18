@@ -44,9 +44,9 @@ activity::lookup_field_id(const char *str)
 	return field_equipment;
       break;
 
-    case 'f':
-      if (strcasecmp(str, "fit-file") == 0)
-	return field_fit_file;
+    case 'g':
+      if (strcasecmp(str, "gps-file") == 0)
+	return field_gps_file;
       break;
 
     case 'k':
@@ -79,9 +79,7 @@ activity::lookup_field_id(const char *str)
       break;
 
     case 't':
-      if (strcasecmp(str, "tcx-file") == 0)
-	return field_tcx_file;
-      else if (strcasecmp(str, "temperature") == 0)
+      if (strcasecmp(str, "temperature") == 0)
 	return field_temperature;
       else if (strcasecmp(str, "type") == 0)
 	return field_type;
@@ -123,8 +121,8 @@ activity::lookup_field_name(field_id id)
       return "Effort";
     case field_equipment:
       return "Equipment";
-    case field_fit_file:
-      return "FIT-File";
+    case field_gps_file:
+      return "GPS-File";
     case field_keywords:
       return "Keywords";
     case field_max_hr:
@@ -141,8 +139,6 @@ activity::lookup_field_name(field_id id)
       return "Resting-HR";
     case field_speed:
       return "Speed";
-    case field_tcx_file:
-      return "TCX-File";
     case field_temperature:
       return "Temperature";
     case field_type:
@@ -161,8 +157,7 @@ activity::lookup_field_data_type(field_id id)
     {
     case field_activity:
     case field_course:
-    case field_fit_file:
-    case field_tcx_file:
+    case field_gps_file:
     case field_type:
     case field_custom:
       return type_string;
@@ -301,14 +296,14 @@ activity::make_filename(std::string &filename) const
     return false;
 
   struct tm tm = {0};
-  gmtime_r(&_date, &tm);
+  localtime_r(&_date, &tm);
 
   filename = shared_config().activity_dir();
   if (filename.size() > 1 && filename[filename.size() - 1] != '/')
     filename.push_back('/');
 
   char buf[256];
-  strftime(buf, sizeof(buf), "%Y/%m/%Y-%m-%d-%H-%M-%S.txt", &tm);
+  strftime(buf, sizeof(buf), "%Y/%m/%Y-%m-%d-%H-%M.txt", &tm);
   filename.append(buf);
 
   return make_path(filename.c_str());
