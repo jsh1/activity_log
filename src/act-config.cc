@@ -86,7 +86,7 @@ config::edit_file(const char *filename) const
   if (!editor)
     editor = getenv("EDITOR");
 
-  char *command = 0;
+  char *command = nullptr;
   asprintf(&command, "\'%s\' '%s'", editor, filename);
 
   if (command)

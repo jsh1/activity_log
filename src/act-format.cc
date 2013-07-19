@@ -23,6 +23,8 @@
 #define SECS_PER_MILE(x) ((1. /  (x)) * (1. / MILES_PER_METER))
 #define SECS_PER_KM(x) ((1. /  (x)) * 1e3)
 
+#define DEBUG_DATE_RANGES 0
+
 namespace act {
 
 void
@@ -48,20 +50,27 @@ format_time(std::string &str, double dur,
   char buf[256];
 
   if (dur > 3600)
-    snprintf_l(buf, sizeof(buf), 0, "%d:%02d:%02d", (int) floor(dur/3600),
-	     (int) fmod(floor(dur/60),60), (int) fmod(dur, 60));
+    {
+      snprintf_l(buf, sizeof(buf), nullptr, "%d:%02d:%02d",
+		 (int) floor(dur/3600), (int) fmod(floor(dur/60),60),
+		 (int) fmod(dur, 60));
+    }
   else if (dur > 60)
-    snprintf_l(buf, sizeof(buf), 0, "%d:%02d", (int) floor(dur/60),
-	     (int) fmod(dur, 60));
+    {
+      snprintf_l(buf, sizeof(buf), nullptr, "%d:%02d",
+		 (int) floor(dur/60), (int) fmod(dur, 60));
+    }
   else
-    snprintf_l(buf, sizeof(buf), 0, "%d", (int) dur);
+    {
+      snprintf_l(buf, sizeof(buf), nullptr, "%d", (int) dur);
+    }
 
   double frac = dur - floor(dur);
 
   if (frac > 1e-4)
     {
       size_t len = strlen(buf);
-      snprintf_l(buf + len, sizeof(buf) - len, 0,
+      snprintf_l(buf + len, sizeof(buf) - len, nullptr,
 	       ".%02d", (int) floor(frac * 10 + .5));
     }
 
@@ -77,14 +86,14 @@ format_time(std::string &str, double dur,
 void
 format_duration(std::string &str, double dur)
 {
-  format_time(str, dur, true, 0);
+  format_time(str, dur, true, nullptr);
 }
 
 void
 format_number(std::string &str, double value)
 {
   char buf[128];
-  snprintf_l(buf, sizeof(buf), 0, "%g", value);
+  snprintf_l(buf, sizeof(buf), nullptr, "%g", value);
 
   str.append(buf);
 }
@@ -92,7 +101,7 @@ format_number(std::string &str, double value)
 void
 format_distance(std::string &str, double dist, distance_unit unit)
 {
-  const char *format = 0;
+  const char *format = nullptr;
 
   switch (unit)
     {
@@ -132,7 +141,7 @@ format_distance(std::string &str, double dist, distance_unit unit)
     }
 
   char buf[128];
-  snprintf_l(buf, sizeof(buf), 0, format, dist);
+  snprintf_l(buf, sizeof(buf), nullptr, format, dist);
 
   str.append(buf);
 }
@@ -141,7 +150,7 @@ void
 format_pace(std::string &str, double pace, pace_unit unit)
 {
   double dur = 0;
-  const char *suffix = 0;
+  const char *suffix = nullptr;
 
   switch (unit)
     {
@@ -163,7 +172,7 @@ void
 format_speed(std::string &str, double speed, speed_unit unit)
 {
   double dist = 0;
-  const char *format = 0;
+  const char *format = nullptr;
 
   switch (unit)
     {
@@ -184,7 +193,7 @@ format_speed(std::string &str, double speed, speed_unit unit)
     }
 
   char buf[128];
-  snprintf_l(buf, sizeof(buf), 0, format, dist);
+  snprintf_l(buf, sizeof(buf), nullptr, format, dist);
 
   str.append(buf);
 }
@@ -192,7 +201,7 @@ format_speed(std::string &str, double speed, speed_unit unit)
 void
 format_temperature(std::string &str, double temp, temperature_unit unit)
 {
-  const char *format = 0;
+  const char *format = nullptr;
 
   switch (unit)
     {
@@ -208,7 +217,7 @@ format_temperature(std::string &str, double temp, temperature_unit unit)
 
   char buf[64];
 
-  snprintf_l(buf, sizeof(buf), 0, format, temp);
+  snprintf_l(buf, sizeof(buf), nullptr, format, temp);
 
   str.append(buf);
 }
@@ -218,7 +227,7 @@ format_fraction(std::string &str, double frac)
 {
   char buf[32];
 
-  snprintf_l(buf, sizeof(buf), 0, "%.1f/10", frac * 10);
+  snprintf_l(buf, sizeof(buf), nullptr, "%.1f/10", frac * 10);
 
   str.append(buf);
 }
@@ -312,7 +321,18 @@ skip_whitespace(const std::string &str, size_t idx)
 {
   size_t i = idx;
 
-  while (i < str.size() && isspace_l(str[i], 0))
+  while (i < str.size() && isspace_l(str[i], nullptr))
+    i++;
+
+  return i;
+}
+
+size_t
+skip_whitespace_and_dashes(const std::string &str, size_t idx)
+{
+  size_t i = idx;
+
+  while (i < str.size() && (str[i] == '-' || isspace_l(str[i], nullptr)))
     i++;
 
   return i;
@@ -322,10 +342,14 @@ size_t
 next_token(const std::string &str, size_t idx, std::string &token)
 {
   size_t i = idx;
-  while (i < str.size() && isalnum_l(str[i], 0))
+  while (i < str.size() && isalnum_l(str[i], nullptr))
     i++;
 
-  token = str.substr(idx, i - idx);
+  if (i > idx)
+    token = str.substr(idx, i - idx);
+  else
+    token.clear();
+
   return i;
 }
 
@@ -334,7 +358,7 @@ check_trailer(const std::string &str, size_t idx)
 {
   while (idx < str.size())
     {
-      if (!isspace_l(str[idx], 0))
+      if (!isspace_l(str[idx], nullptr))
 	{
 	  if (!shared_config().silent())
 	    fprintf(stderr, "Error: trailing garbage in string: \"%s\"\n", str.c_str());
@@ -355,7 +379,7 @@ parse_decimal(const std::string &str, size_t &idx, size_t max_digits)
   size_t i = idx;
   size_t max_i = std::min(str.size(), idx + max_digits);
 
-  while (i < max_i && isdigit_l(str[i], 0))
+  while (i < max_i && isdigit_l(str[i], nullptr))
     {
       value = value * 10 + str[i] - '0';
       i++;
@@ -376,7 +400,7 @@ parse_decimal_fraction(const std::string &str, size_t &idx)
 
   size_t i = idx;
 
-  while (i < str.size() && isdigit_l(str[i], 0))
+  while (i < str.size() && isdigit_l(str[i], nullptr))
     {
       value = value * 10 + str[i] - '0';
       base = base * 10;
@@ -396,7 +420,7 @@ parse_number(const std::string &str, size_t &idx, double &value)
   const char *ptr = str.c_str() + idx;
   char *end_ptr;
 
-  value = strtod_l(ptr, &end_ptr, 0);
+  value = strtod_l(ptr, &end_ptr, nullptr);
 
   if ((value == 0 && end_ptr == ptr) || !isfinite(value))
     return false;
@@ -421,7 +445,7 @@ parse_unit(const parsable_unit *units, const std::string &str,
   char buf[128];
 
   size_t i = idx;
-  while (i < str.size() && (isalpha_l(str[i], 0) || str[i] == '/'))
+  while (i < str.size() && (isalpha_l(str[i], nullptr) || str[i] == '/'))
     i++;
 
   size_t len = i - idx;
@@ -436,7 +460,7 @@ parse_unit(const parsable_unit *units, const std::string &str,
       for (const char *wptr = uptr->word_list;
 	   *wptr; wptr += strlen(wptr) + 1)
 	{
-	  if (strcasecmp_l(buf, wptr, 0) == 0)
+	  if (strcasecmp_l(buf, wptr, nullptr) == 0)
 	    {
 	      value = value * uptr->multiplier + uptr->offset;
 	      unit = uptr->unit_type;
@@ -493,9 +517,9 @@ parse_date(const std::string &str, size_t &idx,
   if (token.size() == 0)
     return false;
 
-  if (!isdigit_l(token[0], 0))
+  if (!isdigit_l(token[0], nullptr))
     {
-      time_t now = time(0);
+      time_t now = time(nullptr);
       struct tm now_tm = {0};
       localtime_r(&now, &now_tm);
 
@@ -520,25 +544,25 @@ parse_date(const std::string &str, size_t &idx,
 	{
 	  int delta = strcasecmp(tstr, "this") == 0 ? 0 : -1;
 
-	  idx = skip_whitespace(str, idx);
+	  idx = skip_whitespace_and_dashes(str, idx);
 	  idx = next_token(str, idx, token);
 
 	  if (token.size() == 0)
 	    return false;
 
-	  if (delta == -1 && isdigit_l(token[0], 0))
+	  if (delta == -1 && isdigit_l(token[0], nullptr))
 	    {
 	      /* last N ... */
 
 	      char *end;
-	      long n = strtol_l(token.c_str(), &end, 10, 0);
+	      long n = strtol_l(token.c_str(), &end, 10, nullptr);
 	      if ((n == 0 && errno == EINVAL)
 		  || (end - token.c_str()) != token.size())
 		return false;
 
 	      delta = -n;
 
-	      idx = skip_whitespace(str, idx);
+	      idx = skip_whitespace_and_dashes(str, idx);
 	      idx = next_token(str, idx, token);
 
 	      if (token.size() == 0)
@@ -551,6 +575,7 @@ parse_date(const std::string &str, size_t &idx,
 	    {
 	      tm->tm_mday += delta;
 	      *range_ptr = SECONDS_PER_DAY;
+	      return true;
 	    }
 	  else if (strcasecmp(tstr, "week") == 0)
 	    {
@@ -558,12 +583,14 @@ parse_date(const std::string &str, size_t &idx,
 	      tm->tm_mday -= now_tm.tm_wday;
 	      tm->tm_mday += delta * 7;
 	      *range_ptr = SECONDS_PER_DAY * 7;
+	      return true;
 	    }
 	  else if (strcasecmp(tstr, "month") == 0)
 	    {
 	      tm->tm_mday = 1;
 	      tm->tm_mon += delta;
 	      *range_ptr = seconds_in_month(tm->tm_year+1900, tm->tm_mon);
+	      return true;
 	    }
 	  else if (strcasecmp(tstr, "year") == 0)
 	    {
@@ -571,6 +598,7 @@ parse_date(const std::string &str, size_t &idx,
 	      tm->tm_mday = 1;
 	      tm->tm_year += delta;
 	      *range_ptr = seconds_in_year(tm->tm_year+1900);
+	      return true;
 	    }
 	  else
 	    return false;
@@ -594,12 +622,12 @@ parse_date(const std::string &str, size_t &idx,
 
 	      /* Speculatively try to parse "MONTH D+". */
 
-	      size_t tidx = skip_whitespace(str, idx);
+	      size_t tidx = skip_whitespace_and_dashes(str, idx);
 	      tidx = next_token(str, tidx, token);
 
-	      if (token.size() != 0 && isdigit_l(token[0], 0))
+	      if (token.size() != 0 && isdigit_l(token[0], nullptr))
 		{
-		  long n = strtol_l(token.c_str(), 0, 10, 0);
+		  long n = strtol_l(token.c_str(), nullptr, 10, nullptr);
 
 		  if (n > 0)
 		    {
@@ -620,7 +648,10 @@ parse_date(const std::string &str, size_t &idx,
     }
   else
     {
-      if (str[idx] == ' ' && (str[idx+1] == 'd' || str[idx+1] == 'D'))
+      /* Check for "N days ago". */
+
+      if ((str[idx] == ' ' || str[idx] == '-')
+	  && (str[idx+1] == 'd' || str[idx+1] == 'D'))
 	{
 	  size_t tidx = idx + 1;
 	  std::string ttoken;
@@ -628,7 +659,7 @@ parse_date(const std::string &str, size_t &idx,
 
 	  if (strcasecmp(ttoken.c_str(), "days") == 0)
 	    {
-	      tidx = skip_whitespace(str, tidx);
+	      tidx = skip_whitespace_and_dashes(str, tidx);
 	      tidx = next_token(str, tidx, ttoken);
 
 	      if (strcasecmp(ttoken.c_str(), "ago") == 0)
@@ -639,6 +670,14 @@ parse_date(const std::string &str, size_t &idx,
 		  int n = parse_decimal(token, tidx, 100);
 		  if (tidx != token.size())
 		    return false;
+
+		  time_t now = time(nullptr);
+		  struct tm now_tm = {0};
+		  localtime_r(&now, &now_tm);
+				      
+		  tm->tm_mday = now_tm.tm_mday;
+		  tm->tm_mon = now_tm.tm_mon;
+		  tm->tm_year = now_tm.tm_year;
 
 		  tm->tm_mday -= n;
 		  *range_ptr = SECONDS_PER_DAY;
@@ -657,6 +696,8 @@ parse_date(const std::string &str, size_t &idx,
 	    return false;
 
 	  tm->tm_year = year - 1900;
+	  tm->tm_mon = 0;
+	  tm->tm_mday = 1;
 
 	  if (str[idx] != '-')
 	    {
@@ -665,7 +706,7 @@ parse_date(const std::string &str, size_t &idx,
 	    }
 
 	  idx = next_token(str, idx + 1, token);
-	  if (token.size() != 2 || !isdigit_l(token[0], 0))
+	  if (token.size() != 2 || !isdigit_l(token[0], nullptr))
 	    return false;
 
 	  tidx = 0;
@@ -673,7 +714,7 @@ parse_date(const std::string &str, size_t &idx,
 	  if (tidx != 2)
 	    return false;
 
-	  tm->tm_mon = month;
+	  tm->tm_mon = month - 1;
 
 	  if (str[idx] != '-')
 	    {
@@ -682,7 +723,7 @@ parse_date(const std::string &str, size_t &idx,
 	    }
 
 	  idx = next_token(str, idx + 1, token);
-	  if (token.size() != 2 || !isdigit_l(token[0], 0))
+	  if (token.size() != 2 || !isdigit_l(token[0], nullptr))
 	    return false;
 
 	  tidx = 0;
@@ -690,7 +731,7 @@ parse_date(const std::string &str, size_t &idx,
 	  if (tidx != 2)
 	    return false;
 
-	  tm->tm_mday = day + 1;
+	  tm->tm_mday = day;
 	  *range_ptr = SECONDS_PER_DAY;
 	  return true;
 	}
@@ -716,13 +757,14 @@ parse_date_time(const std::string &str, size_t &idx,
     if ((ptr[0] == 'n' || ptr[0] == 'N')
 	&& (ptr[1] == 'o' || ptr[1] == 'O')
 	&& (ptr[2] == 'w' || ptr[2] == 'W')
-	&& (ptr[3] == 0 || isspace_l(ptr[3], 0)))
+	&& (ptr[3] == 0 || isspace_l(ptr[3], nullptr)
+	    || ispunct_l(ptr[3], nullptr)))
       {
-	*date_ptr = time(0);
+	*date_ptr = time(nullptr);
 	if (range_ptr)
 	  *range_ptr = 1;
 	idx += 3;
-	return check_trailer(str, idx);
+	return true;
       }
   }
 
@@ -731,7 +773,7 @@ parse_date_time(const std::string &str, size_t &idx,
 
   idx = skip_whitespace(str, idx);
 
-  if (range == SECONDS_PER_DAY && isdigit_l(str[idx], 0))
+  if (range == SECONDS_PER_DAY && isdigit_l(str[idx], nullptr))
     {
       int hours = 0, minutes = 0, seconds = 0;
       int zone_offset = 0;
@@ -828,40 +870,51 @@ parse_date_range(const std::string &str, time_t *date_ptr, time_t *range_ptr)
 {
   size_t idx = skip_whitespace(str, 0);
 
-  time_t now = time(0);
-  time_t date0 = 0, range0 = 0;
-  time_t date1 = 0, range1 = 0;
+  time_t now = time(nullptr);
 
-  if (str[idx] != '.' && str[idx+1] != '.')
+  time_t date = now, range = 1;
+
+  if (str[idx] != '.' && str[idx+1] != '.'
+      && !parse_date_time(str, idx, &date, &range))
     {
-      if (!parse_date_time(str, idx, &date0, &range0))
-	return false;
-    }
-  else
-    {
-      date0 = now;
-      range0 = 1;
+      return false;
     }
 
   if (str[idx] == '.' && str[idx+1] == '.')
     {
       idx += 2;
 
-      if (idx != str.size() && !isspace_l(str[idx], 0))
+      time_t date1 = 0, range1 = 1;
+
+      if (idx != str.size()
+	  && !isspace_l(str[idx], nullptr)
+	  && !parse_date_time(str, idx, &date1, &range1))
 	{
-	  if (!parse_date_time(str, idx, &date1, &range1))
-	    return false;
+	  return false;
 	}
-      else
-	{
-	  date1 = now;
-	  range0 = 1;
-	}
+
+      time_t date0 = date, range0 = range;
+
+      date = std::min(date0, date1);
+      range = std::max(date0 + range0, date1 + range1) - date;
     }
 
-  *date_ptr = std::min(date0, date1);
+  *date_ptr = date;
+  *range_ptr = range;
 
-  *range_ptr = std::max(date0 + range0, date1 + range1) - *date_ptr;
+  if (DEBUG_DATE_RANGES)
+    {
+      fprintf(stderr, "date range: %s\n", str.c_str());
+      struct tm tm;
+      localtime_r(date_ptr, &tm);
+      char buf[128];
+      strftime(buf, sizeof(buf), "%F %R %z", &tm);
+      fprintf(stderr, "  from: %s\n", buf);
+      time_t to = *date_ptr + *range_ptr;
+      localtime_r(&to, &tm);
+      strftime(buf, sizeof(buf), "%F %R %z", &tm);
+      fprintf(stderr, "    to: %s\n", buf);
+    }
 
   return check_trailer(str, idx);
 }
@@ -1116,14 +1169,15 @@ parse_keywords(const std::string &str, std::vector<std::string> *keys_ptr)
   while (idx < str.size())
     {
       std::string key;
-      while (idx < str.size() && !isspace_l(str[idx], 0))
+      while (idx < str.size() && !isspace_l(str[idx], nullptr))
 	key.push_back(str[idx++]);
 
       if (key.size() > 0)
 	{
 	  size_t k = keys_ptr->size();
 	  keys_ptr->resize(k + 1);
-	  std::swap((*keys_ptr)[k], key);
+	  using std::swap;
+	  swap((*keys_ptr)[k], key);
 	}
 
       idx = skip_whitespace(str, idx);

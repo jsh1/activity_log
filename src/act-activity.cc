@@ -12,7 +12,7 @@ namespace act {
 activity::field_id
 activity::lookup_field_id(const char *str)
 {
-  switch (tolower_l(str[0], 0))
+  switch (tolower_l(str[0], nullptr))
     {
     case 'a':
       if (strcasecmp(str, "activity") == 0)
@@ -211,7 +211,7 @@ activity::field::operator==(const field_name &name) const
   else
     str2 = name.str->c_str();
 
-  return strcasecmp_l(str1, str2, 0) == 0;
+  return strcasecmp_l(str1, str2, nullptr) == 0;
 }
 
 activity::activity()
@@ -246,7 +246,7 @@ activity::read_file(const char *path)
       if (buf[0] == '\n')
 	break;
 
-      if (_header.size() == 0 || !isspace_l(buf[0], 0))
+      if (_header.size() == 0 || !isspace_l(buf[0], nullptr))
 	{
 	  char *ptr = strchr(buf, ':');
 	  if (!ptr)
@@ -261,7 +261,7 @@ activity::read_file(const char *path)
 	  else
 	    _header.push_back(field(field_name(buf)));
 
-	  while (*ptr && isspace_l(*ptr, 0))
+	  while (*ptr && isspace_l(*ptr, nullptr))
 	    ptr++;
 
 	  trim_newline_characters(ptr);
@@ -274,7 +274,7 @@ activity::read_file(const char *path)
 	}
 
       if (last_field == field_date)
-	parse_date_time(_header.back().value, &_date, 0);
+	parse_date_time(_header.back().value, &_date, nullptr);
     }
 
   while (fgets(buf, sizeof(buf), fh))
@@ -533,10 +533,10 @@ activity::set_body(const std::string &x)
 int
 activity::field_index(const field_name &name) const
 {
-  for (int i = 0; i < _header.size(); i++)
+  for (const auto &it : _header)
     {
-      if (_header[i] == name)
-	return i;
+      if (it == name)
+	return &it - &_header[0];
     }
 
   return -1;
@@ -771,7 +771,7 @@ activity::canonicalize_field_string(field_id id, std::string &str)
 
     case type_date: {
       time_t date;
-      if (parse_date_time(str, &date, 0))
+      if (parse_date_time(str, &date, nullptr))
 	{
 	  str.clear();
 	  format_date_time(str, date);

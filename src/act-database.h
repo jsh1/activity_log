@@ -14,7 +14,7 @@ class database : public uncopyable
   struct db_activity
     {
       std::string path;
-      activity data;
+      std::unique_ptr<activity> data;
     };
 
   std::vector<db_activity> _activities;

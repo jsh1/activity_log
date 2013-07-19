@@ -43,7 +43,7 @@ fit_parser::fit_parser(activity &dest)
   _buf_size (0)
 {
   for (size_t i = 0; i < MAX_MESSAGE_TYPES; i++)
-    _message_types[i] = 0;
+    _message_types[i] = nullptr;
 }
 
 fit_parser::~fit_parser()
@@ -145,7 +145,7 @@ fit_parser::read_header()
 
   /* Skip rest of header. Note, first two bytes may contain CRC? */
 
-  read_bytes(0, _header_size - 12);
+  read_bytes(nullptr, _header_size - 12);
 }
 
 void
@@ -368,7 +368,7 @@ fit_parser::skip_field (const message_field &field)
       break;
 
     default:
-      read_bytes(0, field.size);
+      read_bytes(nullptr, field.size);
     }
 }
 
@@ -536,7 +536,8 @@ fit_parser::read_lap_message(const message_type &def, uint32_t timestamp)
 	}
     }
 
-  std::swap(lap.track(), _records);
+  using std::swap;
+  swap(lap.track(), _records);
   _records.resize(0);
 }
 

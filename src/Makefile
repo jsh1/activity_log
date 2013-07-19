@@ -3,7 +3,7 @@
 
 library_products = libact.a
 bin_products = act act-log act-new act-gps-test
-symlink_products = act-cat act-import act-locate act-show act-slog
+symlink_products = act-cat act-import act-list act-locate act-show act-slog
 
 libact.a_objects =		\
 	act-activity.o		\
@@ -24,6 +24,7 @@ act_deps = libact.a
 
 act-cat_src = act-log
 
+act-list_src = act-log
 act-locate_src = act-log
 
 act-log_libraries = -lact -lxml2
@@ -52,13 +53,14 @@ CXX = clang++
 CC = clang
 
 includes = -I/usr/include/libxml2
-cxx_standard_flags = -std=c++11
+cxx_standard_flags = -std=c++11 -stdlib=libc++
 optimization_cflags := -O0
 debug_cflags := -g
 warning_cflags := -Wall -Werror
 
 compiler_flags = $(includes) $(CXXFLAGS) $(cxx_standard_flags) \
 	$(optimization_cflags) $(debug_cflags) $(warning_cflags)
+linker_flags = $(LDFLAGS) $(cxx_standard_flags) $(debug_cflags)
 
 # rules
 
@@ -74,7 +76,7 @@ endef
 
 define bin_rules
 $(1) : $$($(1)_objects) $$($(1)_deps)
-	$$(CXX) $$($(1)_objects) -o $$@ $$(LDFLAGS) -L. $$($(1)_libraries)
+	$$(CXX) $$($(1)_objects) -o $$@ $$(linker_flags) -L. $$($(1)_libraries)
 clean ::
 	rm -f $(1) $$($(1)_objects)
 -include $$(patsubst %.o,.%.d,$$($(1)_objects))

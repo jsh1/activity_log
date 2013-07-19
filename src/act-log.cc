@@ -46,7 +46,7 @@ act_log(arguments &args, const char *format)
 
   while (1)
     {
-      const char *opt_arg = 0;
+      const char *opt_arg = nullptr;
       int opt = args.getopt(options, &opt_arg);
       if (opt == arguments::opt_eof)
 	break;
@@ -58,11 +58,11 @@ act_log(arguments &args, const char *format)
 	  break;
 
 	case opt_max_count:
-	  max_count = strtol(opt_arg, 0, 10);
+	  max_count = strtol(opt_arg, nullptr, 10);
 	  break;
 
 	case opt_skip:
-	  skip_count = strtol(opt_arg, 0, 10);
+	  skip_count = strtol(opt_arg, nullptr, 10);
 	  break;
 
 	case arguments::opt_error:
@@ -79,8 +79,8 @@ act_log(arguments &args, const char *format)
     }
   else if (strcasecmp(format, "short") == 0)
     {
-      format = "%[Date]%[Activity]%[Type]%[Distance]"
-        "%[Duration]%n%{body-first-para}%n";
+      format = "%{date} %{Activity} %{Type} %{Distance}%n"
+        "%n%{body-first-para}%n";
     }
   else if (strcasecmp(format, "medium") == 0)
     {
@@ -114,13 +114,10 @@ act_log(arguments &args, const char *format)
   if (args.argc() != 0)
     {
       if (!args.make_date_range(dates))
-	{
-	  fprintf(stderr, "Error: unable to create date range.\n");
-	  return 1;
-	}
+	return 1;
     }
   else
-    dates.push_back(date_range(0, time(0)));
+    dates.push_back(date_range(0, time(nullptr)));
 
   database db;
 
@@ -155,6 +152,10 @@ main(int argc, const char **argv)
       format = "full";
     }
   else if (args.program_name_p("act-slog"))
+    {
+      format = "short";
+    }
+  else if (args.program_name_p("act-list"))
     {
       format = "oneline";
     }

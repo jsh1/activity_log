@@ -100,8 +100,8 @@ option_field_id(option_id opt)
 
 const arguments::option new_options[] =
 {
-  {opt_edit, "edit", 0, 0, "Open new file in editor."},
-  {opt_date, "date", 0, "DATE", 0},
+  {opt_edit, "edit", 0, nullptr, "Open new file in editor."},
+  {opt_date, "date", 0, "DATE", nullptr},
   {opt_activity, "activity", 0, "ACTIVITY-SPEC"},
   {opt_type, "type", 0, "ACTIVITY-TYPE"},
   {opt_course, "course", 0, "COURSE-NAME"},
@@ -129,7 +129,7 @@ const arguments::option new_options[] =
 
 const arguments::option import_options[] =
 {
-  {opt_import_all, "import-all", 0, 0, "Import all new GPS files."},
+  {opt_import_all, "import-all", 0, nullptr, "Import all new GPS files."},
   {arguments::opt_eof}
 };
 
@@ -207,12 +207,14 @@ copy_gps_fields(activity &a, const gps::activity &gps_data)
 int
 act_new(arguments &args)
 {
+  using std::swap;
+
   bool edit = false;
   activity a;
 
   while (1)
     {
-      const char *opt_arg = 0;
+      const char *opt_arg = nullptr;
       int opt = args.getopt(new_options, &opt_arg);
       if (opt == arguments::opt_eof)
 	break;
@@ -225,7 +227,7 @@ act_new(arguments &args)
 
 	case opt_date: {
 	  time_t date;
-	  if (parse_date_time(std::string(opt_arg), &date, 0))
+	  if (parse_date_time(std::string(opt_arg), &date, nullptr))
 	    a.set_date(date);
 	  break; }
 
@@ -253,8 +255,8 @@ act_new(arguments &args)
 	      value = arg.substr(idx, arg.size() - (idx + 1));
 	    }
 	  else
-	    std::swap(name, arg);
-	  std::swap(a.field_value(activity::field_name(name)), value);
+	    swap(name, arg);
+	  swap(a.field_value(activity::field_name(name)), value);
 	  break; }
 
 	case opt_gps_file:
@@ -266,7 +268,7 @@ act_new(arguments &args)
 	  activity::field_id field = option_field_id((option_id)opt);
 	  std::string str(opt_arg);
 	  a.canonicalize_field_string(field, str);
-	  std::swap(a.field_value(field), str);
+	  swap(a.field_value(field), str);
 	  break; }
 
 	case arguments::opt_error:
@@ -312,7 +314,7 @@ act_import(arguments &args)
 
   while (1)
     {
-      const char *opt_arg = 0;
+      const char *opt_arg = nullptr;
       int opt = args.getopt(import_options, &opt_arg, arguments::opt_partial);
       if (opt == arguments::opt_eof)
 	break;

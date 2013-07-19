@@ -42,8 +42,26 @@ struct date_range
   time_t start;
   time_t length;
 
-  date_range(time_t s, time_t l) : start(s), length(l) {}
+  date_range(time_t s, time_t l);
+
+  bool contains(time_t t) const;
 };
+
+// implementation
+
+inline
+date_range::date_range(time_t s, time_t l)
+: start(s),
+  length(l)
+{
+}
+
+inline bool
+date_range::contains(time_t t) const
+{
+  time_t delta = t - start;
+  return delta >= 0 && delta < length;
+}
 
 } // namespace act
 

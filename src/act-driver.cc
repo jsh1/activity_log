@@ -46,7 +46,7 @@ main(int argc, const char **argv)
 
   while (1)
     {
-      const char *opt_arg = 0;
+      const char *opt_arg = nullptr;
       int opt = args.getopt(options, &opt_arg);
       if (opt == arguments::opt_eof)
 	break;
@@ -88,7 +88,7 @@ main(int argc, const char **argv)
   program.append(exec_args[0]);
   exec_args[0] = program.c_str();
 
-  exec_args.push_back(0);
+  exec_args.push_back(nullptr);
 
   execvp(exec_args[0], (char **) &exec_args[0]);
 

@@ -15,9 +15,9 @@ namespace gps {
 
 tcx_parser::tcx_parser(activity &dest)
 : parser(dest),
-  _ctx(0),
+  _ctx(nullptr),
   _state(1, ROOT),
-  _characters(0)
+  _characters(nullptr)
 {
   memset(&_sax_vtable, 0, sizeof(_sax_vtable));
   _sax_vtable.initialized = XML_SAX2_MAGIC;
@@ -28,7 +28,7 @@ tcx_parser::tcx_parser(activity &dest)
   _sax_vtable.error = sax_error;
   _sax_vtable.fatalError = sax_error;
 
-  _ctx = xmlCreatePushParserCtxt(&_sax_vtable, this, 0, 0, 0);
+  _ctx = xmlCreatePushParserCtxt(&_sax_vtable, this, nullptr, 0, nullptr);
   if (!_ctx)
     set_error ();
 }
@@ -69,7 +69,7 @@ const char whitespace[] = " \t\n\r\f";
 double
 parse_double(const std::string &s)
 {
-  return strtod_l(s.c_str(), 0, 0);
+  return strtod_l(s.c_str(), nullptr, nullptr);
 }
 
 double
@@ -82,7 +82,7 @@ parse_time(const std::string &s)
   struct tm tm = {0};
   double seconds_frac = 0;
 
-  if (sscanf_l(s.c_str() + start, 0, "%4d-%2d-%2dT%2d:%2d:%2d%lf",
+  if (sscanf_l(s.c_str() + start, nullptr, "%4d-%2d-%2dT%2d:%2d:%2d%lf",
 	       &tm.tm_year, &tm.tm_mon, &tm.tm_mday, &tm.tm_hour,
 	       &tm.tm_min, &tm.tm_sec, &seconds_frac) != 7)
     return 0;
@@ -251,7 +251,7 @@ tcx_parser::sax_start_element(void *ctx, const xmlChar *name,
   p->push_state(new_state);
 
   if (p->_characters)
-    delete p->_characters, p->_characters = 0;
+    delete p->_characters, p->_characters = nullptr;
 }
 
 void
@@ -357,7 +357,7 @@ tcx_parser::sax_end_element(void *ctx, const xmlChar *name,
   p->pop_state ();
 
   if (p->_characters)
-    delete p->_characters, p->_characters = 0;
+    delete p->_characters, p->_characters = nullptr;
 }
 
 void

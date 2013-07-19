@@ -7,7 +7,7 @@
 namespace act {
 
 arguments::arguments(int argc, const char **argv)
-: _program_name(argc > 0 ? argv[0] : 0),
+: _program_name(argc > 0 ? argv[0] : nullptr),
   _getopt_finished(false)
 {
   for (int i = 1; i < argc; i++)
@@ -118,7 +118,7 @@ arguments::getopt(const struct option *opts,
 		  _args.erase(_args.begin());
 		}
 	      else
-		*arg_ptr = 0;
+		*arg_ptr = nullptr;
 
 	      return opts[i].option_id;
 	    }
