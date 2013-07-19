@@ -72,7 +72,7 @@ bool
 config::find_gps_file(std::string &str) const
 {
   if (_gps_file_dir.size() > 0)
-    return find_file_under_directory(str, _gps_file_dir);
+    return find_file_under_directory(str, _gps_file_dir.c_str());
   else
     return false;
 }

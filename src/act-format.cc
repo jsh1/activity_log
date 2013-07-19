@@ -33,7 +33,7 @@ format_date_time(std::string &str, time_t date)
   struct tm tm;
   localtime_r(&date, &tm);
 
-  strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S %Z", &tm);
+  strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S %z", &tm);
 
   str.append(buf);
 }
@@ -771,14 +771,15 @@ parse_date_time(const std::string &str, size_t &idx,
 		  idx = skip_whitespace(str, idx);
 		}
 
-	      if (idx + 3 < str.size() && isdigit_l(str[idx], 0))
+	      if (idx + 4 < str.size() && (str[idx] == '+' || str[idx] == '-'))
 		{
+		  int sign = str[idx++] == '+' ? 1 : -1;
 		  int zone_hrs = parse_decimal(str, idx, 2);
 		  int zone_mins = parse_decimal(str, idx, 2);
 		  if (zone_hrs < 0 || zone_mins < 0)
 		    return false;
 
-		  zone_offset = (zone_hrs * 60 + zone_mins) * 60;
+		  zone_offset = (zone_hrs * 60 + zone_mins) * 60 * sign;
 		  tm_utc = true;
 		}
 	    }

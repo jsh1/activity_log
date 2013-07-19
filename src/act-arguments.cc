@@ -2,6 +2,8 @@
 
 #include "act-arguments.h"
 
+#include "act-format.h"
+
 namespace act {
 
 arguments::arguments(int argc, const char **argv)
@@ -136,6 +138,28 @@ arguments::getopt(const struct option *opts,
     }
 
   return opt_eof;
+}
+
+bool
+arguments::make_date_range(std::vector<date_range> &dates)
+{
+  dates.clear();
+
+  for (const std::string &str : _args)
+    {
+      time_t start, length;
+
+      if (!parse_date_range(str, &start, &length))
+	{
+	  fprintf(stderr, "Error: unable to parse date range: \"%s\".\n",
+		  str.c_str());
+	  return false;
+	}
+
+      dates.push_back(date_range(start, length));
+    }
+
+  return true;
 }
 
 void

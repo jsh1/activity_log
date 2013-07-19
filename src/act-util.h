@@ -35,9 +35,16 @@ private:
 
 bool string_has_suffix(const std::string &str, const char *suffix);
 
-/* Modifies 'file' to be absolute if the named file is found. */
+void trim_newline_characters(char *ptr);
 
-bool find_file_under_directory(std::string &file, const std::string &dir);
+// Modifies 'file' to be absolute if the named file is found.
+
+bool find_file_under_directory(std::string &file, const char *dir);
+
+// Ignores common garbage file names, e.g ".*" and "*~"
+
+void map_directory_files(const char *dir,
+  void (*fun) (const char *path, void *ctx), void *ctx);
 
 bool make_path(const char *path);
 

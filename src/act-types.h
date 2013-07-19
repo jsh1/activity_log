@@ -3,6 +3,8 @@
 #ifndef ACT_TYPES_H
 #define ACT_TYPES_H
 
+#include <time.h>
+
 namespace act {
 
 enum distance_unit
@@ -33,6 +35,14 @@ enum temperature_unit
 {
   unit_celsius,
   unit_fahrenheit,
+};
+
+struct date_range
+{
+  time_t start;
+  time_t length;
+
+  date_range(time_t s, time_t l) : start(s), length(l) {}
 };
 
 } // namespace act

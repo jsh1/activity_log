@@ -194,16 +194,24 @@ activity::lookup_field_data_type(field_id id)
 bool
 activity::field::operator==(const field_name &name) const
 {
-  if (id != name.id)
-    return false;
-
-  if (id != field_custom)
+  if (id == name.id && id != field_custom)
     return true;
 
-  if (name.ptr)
-    return custom == name.ptr;
+  const char *str1;
+  if (id != field_custom)
+    str1 = lookup_field_name(id);
   else
-    return custom == *name.str;
+    str1 = custom.c_str();
+
+  const char *str2;
+  if (name.id != field_custom)
+    str2 = lookup_field_name(name.id);
+  else if (name.ptr)
+    str2 = name.ptr;
+  else
+    str2 = name.str->c_str();
+
+  return strcasecmp_l(str1, str2, 0) == 0;
 }
 
 activity::activity()
@@ -226,35 +234,46 @@ activity::read_file(const char *path)
   _header.clear();
   _body.clear();
 
-  char buf[4096];
+  field_id last_field = activity::field_custom;
 
+  /* Using normal email-header rules: first empty line completes header
+     section, and leading whitespace can be used to append a line onto
+     the previous header. */
+
+  char buf[4096];
   while (fgets(buf, sizeof(buf), fh))
     {
       if (buf[0] == '\n')
 	break;
 
-      char *ptr = strchr(buf, ':');
-      if (!ptr)
-	continue;
+      if (_header.size() == 0 || !isspace_l(buf[0], 0))
+	{
+	  char *ptr = strchr(buf, ':');
+	  if (!ptr)
+	    continue;
 
-      *ptr++ = 0;
+	  *ptr++ = 0;
 
-      field_id id = lookup_field_id(buf);
-      if (id != field_custom)
-	_header.push_back(field(field_name(id)));
+	  last_field = lookup_field_id(buf);
+
+	  if (last_field != field_custom)
+	    _header.push_back(field(field_name(last_field)));
+	  else
+	    _header.push_back(field(field_name(buf)));
+
+	  while (*ptr && isspace_l(*ptr, 0))
+	    ptr++;
+
+	  trim_newline_characters(ptr);
+	  _header.back().value = ptr;
+	}
       else
-	_header.push_back(field(field_name(buf)));
+	{
+	  trim_newline_characters(buf);
+	  _header.back().value.append(buf);
+	}
 
-      while (*ptr && isspace_l(*ptr, 0))
-	ptr++;
-
-      char *end = ptr + strlen(ptr);
-      while (end > ptr + 1 && isspace_l(end[-1], 0))
-	*end-- = 0;
-
-      _header.back().value = ptr;
-
-      if (id == field_date)
+      if (last_field == field_date)
 	parse_date_time(_header.back().value, &_date, 0);
     }
 
@@ -307,6 +326,188 @@ activity::make_filename(std::string &filename) const
   filename.append(buf);
 
   return make_path(filename.c_str());
+}
+
+namespace {
+
+unsigned int
+convert_hexdigit(int c)
+{
+  if (c >= '0' && c <= '9')
+    return c - '0';
+  else if (c >= 'A' && c <= 'F')
+    return 10 + c - 'A';
+  else if (c >= 'a' && c <= 'f')
+    return 10 + c - 'a';
+  else
+    return 0;
+}
+
+void
+print_indented_string(const char *str, size_t len, FILE *fh)
+{
+  const char *ptr = str;
+
+  while (ptr < str + len)
+    {
+      const char *eol = strchr(ptr, '\n');
+      if (!eol)
+	break;
+
+      if (eol > str + len)
+	eol = str + len;
+
+      fputs("    ", fh);
+      fwrite(ptr, 1, eol - ptr, fh);
+      fputc('\n', fh);
+
+      ptr = eol + 1;
+    }
+}
+
+} // anonymous namespace
+
+void
+activity::printf(FILE *fh, const char *format) const
+{
+  while (*format != 0)
+    {
+      if (const char *ptr = strchr(format, '%'))
+	{
+	  if (ptr > format)
+	    fwrite(format, 1, ptr - format, fh);
+
+	  ptr++;
+	  switch (*ptr++)
+	    {
+	    case 'n':
+	      fputc('\n', fh);
+	      break;
+
+	    case '%':
+	      fputc('\n', fh);
+	      break;
+
+	    case 'x':
+	      if (ptr[0] != 0 && ptr[1] != 0)
+		{
+		  int c0 = convert_hexdigit(ptr[0]);
+		  int c1 = convert_hexdigit(ptr[1]);
+		  fputc((c0 << 4) | c1, fh);
+		}
+	      break;
+
+	    case '{': {
+	      const char *end = strchr(ptr, '}');
+	      char token[128];
+	      if (end && end - ptr < sizeof(token)-1)
+		{
+		  memcpy(token, ptr, end - ptr);
+		  token[end - ptr] = 0;
+
+		  if (strcasecmp(token, "all-fields") == 0)
+		    {
+		      for (const auto &field : _header)
+			{
+			  const char *field_name = lookup_field_name(field.id);
+			  if (!field_name)
+			    field_name = field.custom.c_str();
+
+			  fprintf(fh, "%s: %s\n", field_name,
+				  field.value.c_str());
+			}
+		    }
+		  else if (strcasecmp(token, "body") == 0)
+		    {
+		      print_indented_string(_body.c_str(), _body.size(), fh);
+		    }
+		  else if (strcasecmp(token, "body-first-line") == 0)
+		    {
+		      const char *body = _body.c_str();
+		      const char *end = strchr(body, '\n');
+		      if (!end)
+			end = body + strlen(body);
+		      print_indented_string(body, end - body, fh);
+		    }
+		  else if (strcasecmp(token, "body-first-para") == 0)
+		    {
+		      const char *body = _body.c_str();
+		      const char *end = strstr(body, "\n\n");
+		      if (!end)
+			end = body + strlen(body);
+		      print_indented_string(body, end - body, fh);
+		    }
+		  else if (strcasecmp(token, "activity-data") == 0)
+		    {
+		    }
+		  else if (strcasecmp(token, "activity-path") == 0)
+		    {
+		    }
+		  else if (strcasecmp(token, "date") == 0)
+		    {
+		    }
+		  else if (strcasecmp(token, "date-abbrev") == 0)
+		    {
+		    }
+		  else if (strcasecmp(token, "date-time") == 0)
+		    {
+		    }
+		  else if (strcasecmp(token, "time") == 0)
+		    {
+		    }
+		  else if (strcasecmp(token, "time-abbrev") == 0)
+		    {
+		    }
+		  else if (strcasecmp(token, "hours") == 0)
+		    {
+		    }
+		  else if (strcasecmp(token, "minutes") == 0)
+		    {
+		    }
+		  else if (strcasecmp(token, "seconds") == 0)
+		    {
+		    }
+		  else if (strcasecmp(token, "am-pm") == 0)
+		    {
+		    }
+		  else
+		    {
+		      /* FIXME: add a better way to access generic
+			 fields, with unit conversions, etc. */
+
+		      activity::field_name name(token);
+		      const std::string *str;
+		      if (get_string_field(name, &str))
+			fwrite(str->c_str(), 1, str->size(), fh);
+		    }
+		}
+	      ptr = end ? end + 1 : ptr + strlen(ptr);
+	      break; }
+
+	    case '[': {
+	      const char *end = strchr(ptr, ']');
+	      char token[128];
+	      if (end && end - ptr < sizeof(token)-1)
+		{
+		  memcpy(token, ptr, end - ptr);
+		  token[end - ptr] = 0;
+
+		  activity::field_name name(token);
+		  const std::string *str;
+		  if (get_string_field(name, &str))
+		    fprintf(fh, "%s: %s\n", token, str->c_str());
+		}
+	      ptr = end ? end + 1 : ptr + strlen(ptr);
+	      break; }
+	    }
+	  format = ptr;
+	}
+      else
+	{
+	  fputs(format, fh);
+	  break;
+	}
+    }
 }
 
 void

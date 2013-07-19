@@ -4,6 +4,7 @@
 #define ACT_ARGUMENTS_H
 
 #include "act-base.h"
+#include "act-types.h"
 
 #include <string>
 #include <vector>
@@ -56,6 +57,8 @@ public:
 
   int getopt(const struct option *opts, const char **arg_ptr,
     uint32_t flags = 0);
+
+  bool make_date_range(std::vector<date_range> &dates);
 
   static void print_options(const struct option *opts, FILE *fh);
 };

@@ -1,5 +1,10 @@
 act
+act-cat
 act-gps-test
 act-import
+act-locate
+act-log
 act-new
+act-show
+act-slog
 .*.d

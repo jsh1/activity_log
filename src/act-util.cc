@@ -20,18 +20,41 @@ string_has_suffix(const std::string &str, const char *suffix)
   return str.compare(str.size() - len, std::string::npos, suffix) == 0;
 }
 
-bool
-find_file_under_directory(std::string &file, const std::string &dir)
+void
+trim_newline_characters(char *ptr)
 {
-  struct DIR_wrapper
+  char *end = ptr + strlen(ptr);
+  while (end > ptr + 1)
     {
-      DIR *dir;
+      switch (end[-1])
+	{
+	case '\n':
+	case '\r':
+	  end[-1] = 0;
+	  end--;
+	  break;
+	default:
+	  return;
+	}
+    }
+}	 
 
-      explicit DIR_wrapper(DIR *d) : dir(d) {}
-      ~DIR_wrapper() {closedir(dir);}
-    };
+namespace {
 
-  DIR_wrapper d(opendir(dir.c_str()));
+struct DIR_wrapper
+{
+  DIR *dir;
+
+  explicit DIR_wrapper(DIR *d) : dir(d) {}
+  ~DIR_wrapper() {closedir(dir);}
+};
+
+} // anonymous namespace
+
+bool
+find_file_under_directory(std::string &file, const char *dir)
+{
+  DIR_wrapper d(opendir(dir));
 
   if (d.dir)
     {
@@ -51,7 +74,7 @@ find_file_under_directory(std::string &file, const std::string &dir)
 	      subdir.push_back('/');
 	      subdir.append(de->d_name);
 
-	      if (find_file_under_directory(file, subdir))
+	      if (find_file_under_directory(file, subdir.c_str()))
 		return true;
 	    }
 	  else
@@ -69,6 +92,41 @@ find_file_under_directory(std::string &file, const std::string &dir)
     }
 
   return false;
+}
+
+void
+map_directory_files(const char *dir,
+		    void (*fun) (const char *path, void *ctx), void *ctx)
+{
+  DIR_wrapper d(opendir(dir));
+
+  if (d.dir)
+    {
+      while (struct dirent *de = readdir(d.dir))
+	{
+	  if (de->d_type == DT_DIR)
+	    {
+	      if (de->d_name[0] == '.'
+		  || de->d_name[de->d_namlen-1] == '~')
+		{
+		  continue;
+		}
+
+	      std::string subdir(dir);
+	      subdir.push_back('/');
+	      subdir.append(de->d_name);
+
+	      map_directory_files(subdir.c_str(), fun, ctx);
+	    }
+	  else
+	    {
+	      std::string file(dir);
+	      file.push_back('/');
+	      file.append(de->d_name);
+	      fun(file.c_str(), ctx);
+	    }
+	}
+    }      
 }
 
 bool

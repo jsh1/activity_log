@@ -136,8 +136,8 @@ const arguments::option import_options[] =
 void
 print_usage(const arguments &args, bool for_import)
 {
-  fputs("usage: act-new [OPTIONS...]\n", stderr);
-  fputs("\nwhere OPTIONS are any of:\n\n", stderr);
+  fprintf(stderr, "usage: %s [OPTIONS...]\n\n", args.program_name());
+  fputs("where OPTIONS are any of:\n\n", stderr);
 
   if (for_import)
     arguments::print_options(import_options, stderr);
@@ -270,7 +270,7 @@ act_new(arguments &args)
 	  break; }
 
 	case arguments::opt_error:
-	  fprintf(stderr, "Error: invalid argument: %s\n", opt_arg);
+	  fprintf(stderr, "Error: invalid argument: %s\n\n", opt_arg);
 	  print_usage(args, false);
 	  return 1;
 	}
@@ -324,7 +324,7 @@ act_import(arguments &args)
 	  break;
 
 	case arguments::opt_error:
-	  fprintf(stderr, "Error: invalid argument: %s\n", opt_arg);
+	  fprintf(stderr, "Error: invalid argument: %s\n\n", opt_arg);
 	  print_usage(args, true);
 	  return 1;
 	}
