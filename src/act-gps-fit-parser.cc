@@ -401,11 +401,11 @@ make_sport(int32_t value)
 {
   switch (value)
     {
+    case 1:
+      return activity::sport_running;
     case 2:
-      return activity::sport_running;
-    case 4:
-      return activity::sport_running;
-    case 32:
+      return activity::sport_cycling;
+    case 5:
       return activity::sport_swimming;
     default:
       return activity::sport_unknown;
@@ -557,6 +557,7 @@ fit_parser::read_session_message(const message_type &def, uint32_t timestamp)
 
 	case 5:				/* sport */
 	  d.set_sport(make_sport(read_field(def, *it)));
+	  break;
 
 	case 8:				/* total_timer_time */
 	  d.set_duration(make_duration(read_field(def, *it)));
