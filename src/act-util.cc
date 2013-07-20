@@ -104,27 +104,20 @@ map_directory_files(const char *dir,
     {
       while (struct dirent *de = readdir(d.dir))
 	{
+	  if (de->d_name[0] == '.'
+	      || de->d_name[de->d_namlen-1] == '~')
+	    {
+	      continue;
+	    }
+
+	  std::string file(dir);
+	  file.push_back('/');
+	  file.append(de->d_name);
+
 	  if (de->d_type == DT_DIR)
-	    {
-	      if (de->d_name[0] == '.'
-		  || de->d_name[de->d_namlen-1] == '~')
-		{
-		  continue;
-		}
-
-	      std::string subdir(dir);
-	      subdir.push_back('/');
-	      subdir.append(de->d_name);
-
-	      map_directory_files(subdir.c_str(), fun, ctx);
-	    }
+	    map_directory_files(file.c_str(), fun, ctx);
 	  else
-	    {
-	      std::string file(dir);
-	      file.push_back('/');
-	      file.append(de->d_name);
-	      fun(file.c_str(), ctx);
-	    }
+	    fun(file.c_str(), ctx);
 	}
     }      
 }
