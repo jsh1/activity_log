@@ -296,6 +296,8 @@ act_new(arguments &args)
   if (!a.make_filename(filename))
     return 1;
 
+  a.canonicalize_field_order();
+
   if (!a.write_file(filename.c_str()))
     return 1;
 

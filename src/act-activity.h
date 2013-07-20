@@ -19,29 +19,30 @@ class activity
 public:
   enum field_id
     {
-      field_activity,
-      field_average_hr,
-      field_calories,
-      field_course,
-      field_custom,
+      // ordered by canonical output order
       field_date,
-      field_distance,
-      field_duration,
-      field_effort,
-      field_equipment,
       field_gps_file,
-      field_keywords,
-      field_max_hr,
-      field_max_pace,
-      field_max_speed,
+      field_activity,
+      field_type,
+      field_course,
+      field_duration,
+      field_distance,
       field_pace,
+      field_max_pace,
+      field_speed,
+      field_max_speed,
+      field_effort,
       field_quality,
       field_resting_hr,
-      field_speed,
+      field_average_hr,
+      field_max_hr,
+      field_calories,
+      field_equipment,
       field_temperature,
-      field_type,
       field_weather,
       field_weight,
+      field_keywords,
+      field_custom,
     };
 
   enum field_data_type
@@ -118,6 +119,7 @@ public:
   std::string &field_value(const field_name &name);
   const std::string &field_value(const field_name &name) const;
 
+  void canonicalize_field_order();
   bool canonicalize_field_string(field_id id, std::string &str);
 
   bool get_string_field(field_id id, const std::string **ptr) const;
