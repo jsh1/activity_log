@@ -405,81 +405,11 @@ activity::printf(FILE *fh, const char *format) const
 		  memcpy(token, ptr, end - ptr);
 		  token[end - ptr] = 0;
 
-		  if (strcasecmp(token, "all-fields") == 0)
-		    {
-		      for (const auto &field : _header)
-			{
-			  const char *field_name = lookup_field_name(field.id);
-			  if (!field_name)
-			    field_name = field.custom.c_str();
+		  char *arg = strchr(token, ':');
+		  if (arg)
+		    *arg++ = 0;
 
-			  fprintf(fh, "%s: %s\n", field_name,
-				  field.value.c_str());
-			}
-		    }
-		  else if (strcasecmp(token, "body") == 0)
-		    {
-		      print_indented_string(_body.c_str(), _body.size(), fh);
-		    }
-		  else if (strcasecmp(token, "body-first-line") == 0)
-		    {
-		      const char *body = _body.c_str();
-		      const char *end = strchr(body, '\n');
-		      if (!end)
-			end = body + strlen(body);
-		      print_indented_string(body, end - body, fh);
-		    }
-		  else if (strcasecmp(token, "body-first-para") == 0)
-		    {
-		      const char *body = _body.c_str();
-		      const char *end = strstr(body, "\n\n");
-		      if (!end)
-			end = body + strlen(body);
-		      print_indented_string(body, end - body, fh);
-		    }
-		  else if (strcasecmp(token, "activity-data") == 0)
-		    {
-		    }
-		  else if (strcasecmp(token, "activity-path") == 0)
-		    {
-		    }
-		  else if (strcasecmp(token, "date") == 0)
-		    {
-		    }
-		  else if (strcasecmp(token, "date-abbrev") == 0)
-		    {
-		    }
-		  else if (strcasecmp(token, "date-time") == 0)
-		    {
-		    }
-		  else if (strcasecmp(token, "time") == 0)
-		    {
-		    }
-		  else if (strcasecmp(token, "time-abbrev") == 0)
-		    {
-		    }
-		  else if (strcasecmp(token, "hours") == 0)
-		    {
-		    }
-		  else if (strcasecmp(token, "minutes") == 0)
-		    {
-		    }
-		  else if (strcasecmp(token, "seconds") == 0)
-		    {
-		    }
-		  else if (strcasecmp(token, "am-pm") == 0)
-		    {
-		    }
-		  else
-		    {
-		      /* FIXME: add a better way to access generic
-			 fields, with unit conversions, etc. */
-
-		      activity::field_name name(token);
-		      const std::string *str;
-		      if (get_string_field(name, &str))
-			fwrite(str->c_str(), 1, str->size(), fh);
-		    }
+		  print_expansion(fh, token, arg);
 		}
 	      ptr = end ? end + 1 : ptr + strlen(ptr);
 	      break; }
@@ -507,6 +437,83 @@ activity::printf(FILE *fh, const char *format) const
 	  fputs(format, fh);
 	  break;
 	}
+    }
+}
+
+void
+activity::print_expansion(FILE *fh, const char *name, const char *arg) const
+{
+  if (strcasecmp(name, "all-fields") == 0)
+    {
+      for (const auto &field : _header)
+	{
+	  const char *field_name = lookup_field_name(field.id);
+	  if (!field_name)
+	    field_name = field.custom.c_str();
+
+	  fprintf(fh, "%s: %s\n", field_name, field.value.c_str());
+	}
+    }
+  else if (strcasecmp(name, "body") == 0)
+    {
+      const char *body = _body.c_str();
+
+      if (!arg || strcasecmp(arg, "all") == 0)
+	{
+	  print_indented_string(body, _body.size(), fh);
+	}
+      else if (strcasecmp(arg, "first-line") == 0)
+	{
+	  const char *end = strchr(body, '\n');
+	  size_t len;
+	  if (!end)
+	    len = strlen(body);
+	  else
+	    len = end - body;
+	  fwrite(body, 1, len, fh);
+	}
+      else if (strcasecmp(arg, "first-para") == 0)
+	{
+	  const char *end = strstr(body, "\n\n");
+	  size_t len;
+	  if (!end)
+	    len = strlen(body);
+	  else
+	    len = end - body;
+	  print_indented_string(body, len, fh);
+	}
+    }
+  else if (strcasecmp(name, "date") == 0)
+    {
+      if (arg == nullptr)
+	arg = "%F %r %z";
+
+      struct tm tm = {0};
+      localtime_r(&_date, &tm);
+
+      char buf[1024];
+      strftime(buf, sizeof(buf), arg, &tm);
+
+      fputs(buf, fh);
+    }
+  else if (strcasecmp(name, "relative-date") == 0)
+    {
+    }
+  else if (strcasecmp(name, "activity-data") == 0)
+    {
+    }
+  else if (strcasecmp(name, "activity-path") == 0)
+    {
+    }
+  else
+    {
+      /* FIXME: add a better way to access generic fields, with unit
+	 conversions, etc. */
+
+      activity::field_name field(name);
+      const std::string *str;
+      if (get_string_field(field, &str))
+	fwrite(str->c_str(), 1, str->size(), fh);
     }
 }
 

@@ -11,10 +11,11 @@ config::config()
   _default_pace_unit(unit_seconds_per_mile),
   _default_speed_unit(unit_miles_per_hour),
   _default_temperature_unit(unit_celsius),
+  _start_of_week(1),
   _silent(false),
   _verbose(false)
 {
-  // FIXME: read options from $HOME/.actconfig as well
+  // FIXME: read options from $HOME/.actconfig as well.
 
   if (const char *dir = getenv("ACT_DIR"))
     _activity_dir = dir;
@@ -42,6 +43,11 @@ config::config()
       _gps_file_dir.append("/Documents/Garmin");
     }
 #endif
+
+  // FIXME: support named days.
+
+  if (const char *opt = getenv("ACT_START_OF_WEEK"))
+    _start_of_week = atoi(opt);
 
   if (const char *opt = getenv("ACT_SILENT"))
     _silent = atoi(opt) != 0;

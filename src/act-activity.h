@@ -169,6 +169,8 @@ public:
 private:
   int field_index(field_id id) const;
   int field_index(const field_name &name) const;
+
+  void print_expansion(FILE *fh, const char *name, const char *arg) const;
 };
 
 // implementation details

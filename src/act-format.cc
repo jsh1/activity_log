@@ -543,6 +543,7 @@ parse_date(const std::string &str, size_t &idx,
       else if (strcasecmp(tstr, "this") == 0 || strcasecmp(tstr, "last") == 0)
 	{
 	  int delta = strcasecmp(tstr, "this") == 0 ? 0 : -1;
+	  int range_scale = 1;
 
 	  idx = skip_whitespace_and_dashes(str, idx);
 	  idx = next_token(str, idx, token);
@@ -560,7 +561,14 @@ parse_date(const std::string &str, size_t &idx,
 		  || (end - token.c_str()) != token.size())
 		return false;
 
-	      delta = -n;
+	      delta = (int) -n;
+	      range_scale = (int) n;
+
+	      tm->tm_hour = now_tm.tm_hour;
+	      tm->tm_min = now_tm.tm_min;
+	      tm->tm_sec = now_tm.tm_sec;
+	      tm->tm_gmtoff = now_tm.tm_gmtoff;
+	      tm->tm_isdst = now_tm.tm_isdst;
 
 	      idx = skip_whitespace_and_dashes(str, idx);
 	      idx = next_token(str, idx, token);
@@ -571,33 +579,40 @@ parse_date(const std::string &str, size_t &idx,
 
 	  const char *tstr = token.c_str();
 
-	  if (strcasecmp(tstr, "day") == 0)
+	  if (strcasecmp(tstr, "day") == 0
+	      || strcasecmp(tstr, "days") == 0)
 	    {
 	      tm->tm_mday += delta;
-	      *range_ptr = SECONDS_PER_DAY;
+	      *range_ptr = SECONDS_PER_DAY * range_scale;
 	      return true;
 	    }
-	  else if (strcasecmp(tstr, "week") == 0)
+	  else if (strcasecmp(tstr, "week") == 0
+		   || strcasecmp(tstr, "weeks") == 0)
 	    {
-	      /* FIXME: hardcodes sunday as start of week. */
-	      tm->tm_mday -= now_tm.tm_wday;
+	      tm->tm_mday -= now_tm.tm_wday - shared_config().start_of_week();
 	      tm->tm_mday += delta * 7;
-	      *range_ptr = SECONDS_PER_DAY * 7;
+	      *range_ptr = SECONDS_PER_DAY * 7 * range_scale;
 	      return true;
 	    }
-	  else if (strcasecmp(tstr, "month") == 0)
+	  else if (strcasecmp(tstr, "month") == 0
+		   || strcasecmp(tstr, "months") == 0)
 	    {
 	      tm->tm_mday = 1;
 	      tm->tm_mon += delta;
 	      *range_ptr = seconds_in_month(tm->tm_year+1900, tm->tm_mon);
+	      // FIXME: bogus multiplication by range_scale
+	      *range_ptr *= range_scale;
 	      return true;
 	    }
-	  else if (strcasecmp(tstr, "year") == 0)
+	  else if (strcasecmp(tstr, "year") == 0
+		   || strcasecmp(tstr, "years") == 0)
 	    {
 	      tm->tm_mon = 0;
 	      tm->tm_mday = 1;
 	      tm->tm_year += delta;
 	      *range_ptr = seconds_in_year(tm->tm_year+1900);
+	      // FIXME: bogus multiplication by range_scale
+	      *range_ptr *= range_scale;
 	      return true;
 	    }
 	  else
@@ -648,21 +663,25 @@ parse_date(const std::string &str, size_t &idx,
     }
   else
     {
-      /* Check for "N days ago". */
+      /* Check for "N day[s] ago". */
 
       if ((str[idx] == ' ' || str[idx] == '-')
 	  && (str[idx+1] == 'd' || str[idx+1] == 'D'))
 	{
 	  size_t tidx = idx + 1;
-	  std::string ttoken;
-	  tidx = next_token(str, tidx, ttoken);
+	  std::string token1;
+	  tidx = next_token(str, tidx, token1);
 
-	  if (strcasecmp(ttoken.c_str(), "days") == 0)
+	  tidx = skip_whitespace_and_dashes(str, tidx);
+	  std::string token2;
+	  tidx = next_token(str, tidx, token2);
+
+	  if (strcasecmp(token2.c_str(), "ago") == 0)
 	    {
-	      tidx = skip_whitespace_and_dashes(str, tidx);
-	      tidx = next_token(str, tidx, ttoken);
+	      // FIXME: also handle "N {week,month,year}[s] ago"
 
-	      if (strcasecmp(ttoken.c_str(), "ago") == 0)
+	      if (strcasecmp(token1.c_str(), "day") == 0
+		  || strcasecmp(token1.c_str(), "days") == 0)
 		{
 		  idx = tidx;
 
@@ -746,7 +765,7 @@ parse_date_time(const std::string &str, size_t &idx,
 {
   struct tm tm = {0};
   tm.tm_isdst = -1;
-  bool tm_utc = false;
+  bool is_utc = false;
   time_t range = 0;
 
   /* Check for "now". */
@@ -776,7 +795,6 @@ parse_date_time(const std::string &str, size_t &idx,
   if (range == SECONDS_PER_DAY && isdigit_l(str[idx], nullptr))
     {
       int hours = 0, minutes = 0, seconds = 0;
-      int zone_offset = 0;
 
       hours = parse_decimal(str, idx, 2);
       if (hours < 0)
@@ -813,16 +831,17 @@ parse_date_time(const std::string &str, size_t &idx,
 		  idx = skip_whitespace(str, idx);
 		}
 
+	      /* If no zone information, assume local time. Otherwise
+		 add the zone offset and convert from UTC to time_t. */
+
 	      if (idx + 4 < str.size() && (str[idx] == '+' || str[idx] == '-'))
 		{
 		  int sign = str[idx++] == '+' ? 1 : -1;
 		  int zone_hrs = parse_decimal(str, idx, 2);
 		  int zone_mins = parse_decimal(str, idx, 2);
-		  if (zone_hrs < 0 || zone_mins < 0)
-		    return false;
-
-		  zone_offset = (zone_hrs * 60 + zone_mins) * 60 * sign;
-		  tm_utc = true;
+		  hours -= sign * zone_hrs;
+		  minutes -= sign * zone_mins;
+		  is_utc = true;
 		}
 	    }
 	  else
@@ -834,10 +853,9 @@ parse_date_time(const std::string &str, size_t &idx,
       tm.tm_hour = hours;
       tm.tm_min = minutes;
       tm.tm_sec = seconds;
-      tm.tm_gmtoff = zone_offset;
     }
 
-  if (tm_utc)
+  if (is_utc)
     *date_ptr = timegm(&tm);
   else
     *date_ptr = mktime(&tm);

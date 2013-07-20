@@ -21,6 +21,8 @@ class config
   speed_unit _default_speed_unit;
   temperature_unit _default_temperature_unit;
 
+  int _start_of_week;
+
   bool _silent;
   bool _verbose;
 
@@ -35,6 +37,10 @@ public:
   pace_unit default_pace_unit() const;
   speed_unit default_speed_unit() const;
   temperature_unit default_temperature_unit() const;
+
+  // delta from sunday, i.e. -1 = saturday, +1 = monday.
+
+  int start_of_week() const;
 
   bool silent() const;
   bool verbose() const;
@@ -83,6 +89,12 @@ inline temperature_unit
 config::default_temperature_unit() const
 {
   return _default_temperature_unit;
+}
+
+inline int
+config::start_of_week() const
+{
+  return _start_of_week;
 }
 
 inline bool

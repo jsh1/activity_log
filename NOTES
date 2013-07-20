@@ -1,5 +1,27 @@
 [ This is -*- indented-text -*- ]
 
+## Issues
+
+1. Refactor activity class.
+
+   Currently there's just one class act::activity, that handles
+   everything. Split it into at least two pieces:
+
+   act::activity
+
+     High-level class. Lazily caches known fields and their units in
+     parsed form. Has a reference to an activity_storage instance. Adds
+     extra semantic knowledge, e.g. if no pace field, compute it from
+     duration and distance. If unable to compute a field, pull values
+     from any associated GPS file.
+
+   act::activity_storage
+
+     Manages key-value store and its file I/O -- only strings, no
+     interpretation of data, but does separate headers from body.
+     Constructed with a path? Stores the mtime of the file?
+
+
 ## File Format Notes
 
 Date: YYYY-MM-DD HH:MM:SS [AM|PM] [TZ]
@@ -46,6 +68,7 @@ Minor format pieces are:
 	PACE-UNIT		/DISTANCE-UNIT
 	SPEED-UNIT		DISTANCE-UNIT / [s|m|h], mph
 	TEMPERATURE-UNIT	[degrees] c[elsius]|f[ahrenheit]
+
 
 ## Example entry
 
