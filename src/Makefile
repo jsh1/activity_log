@@ -18,8 +18,7 @@ libact.a_objects =		\
 	act-util.o
 
 act_libraries = -lact
-act_objects =			\
-	act-driver.o
+act_objects = act-driver.o
 act_deps = libact.a
 
 act-cat_src = act-log
@@ -28,20 +27,17 @@ act-list_src = act-log
 act-locate_src = act-log
 
 act-log_libraries = -lact -lxml2
-act-log_objects =		\
-	act-log.o
+act-log_objects = act-log.o
 act-log_deps = libact.a
 
 act-import_src = act-new
 
 act-new_libraries = -lact -lxml2
-act-new_objects =		\
-	act-new.o
+act-new_objects = act-new.o
 act-new_deps = libact.a
 
 act-gps-test_libraries = -lact -lxml2
-act-gps-test_objects =		\
-	act-gps-test.o
+act-gps-test_objects = act-gps-test.o
 act-gps-test_deps = libact.a
 
 act-show_src = act-log
