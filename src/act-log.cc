@@ -74,7 +74,8 @@ act_log(arguments &args, const char *format)
 
   if (strcasecmp(format, "oneline") == 0)
     {
-      format = "%{date:%F %-l%p}: %{distance} %{type}, %{duration} %{pace}%n";
+      format = "%{date:%F %-l%p}: %{distance} %{type} %{activity},"
+	" %{duration} %{pace}%n";
     }
   else if (strcasecmp(format, "short") == 0)
     {
@@ -105,7 +106,7 @@ act_log(arguments &args, const char *format)
   else
     {
       fprintf(stderr, "Error: unknown format method \"%s\".", format);
-      exit(1);
+      return 1;
     }
 
   std::vector<date_range> dates;
