@@ -589,7 +589,10 @@ parse_date(const std::string &str, size_t &idx,
 	  else if (strcasecmp(tstr, "week") == 0
 		   || strcasecmp(tstr, "weeks") == 0)
 	    {
-	      tm->tm_mday -= now_tm.tm_wday - shared_config().start_of_week();
+	      int dow = now_tm.tm_wday - shared_config().start_of_week();
+	      if (dow < 0) dow += 7;
+	      else if (dow >= 7) dow -= 7;
+ 	      tm->tm_mday -= dow;
 	      tm->tm_mday += delta * 7;
 	      *range_ptr = SECONDS_PER_DAY * 7 * range_scale;
 	      return true;
