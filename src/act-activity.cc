@@ -761,16 +761,10 @@ activity::set_fraction_field(field_id id, const std::string &str)
 void
 activity::canonicalize_field_order()
 {
-  struct compare
-    {
-      bool operator() (const field &a, const field &b)
-        {
-	  return a.id < b.id;
-	}
-    };
-
-  compare cmp;
-  std::sort(_header.begin(), _header.end(), cmp);
+  std::sort(_header.begin(), _header.end(),
+	    [] (const field &a, const field &b) {
+	      return a.id < b.id;
+	    });
 }
 
 bool

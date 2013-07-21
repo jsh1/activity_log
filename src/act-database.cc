@@ -22,16 +22,10 @@ database::read_activities()
   map_directory_files(shared_config().activity_dir(),
 		      read_activities_callback, this);
 
-  struct compare
-    {
-      bool operator() (const db_activity &a, const db_activity &b)
-        {
-	  return !(a.data->date() < b.data->date());
-	}
-    };
-
-  compare cmp;
-  std::sort(_activities.begin(), _activities.end(), cmp);
+  std::sort(_activities.begin(), _activities.end(),
+	    [] (const db_activity &a, const db_activity &b) {
+	      return a.data->date() > b.data->date();
+	    });
 }
 
 void
