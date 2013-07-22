@@ -31,6 +31,18 @@ private:
   malloc_ptr &operator=(const malloc_ptr &rhs);
 };
 
+struct case_insensitive_string_hash
+{
+  size_t operator() (const std::string &name) const;
+  size_t operator() (const char *name) const;
+};
+
+struct case_insensitive_string_pred
+{
+  bool operator() (const std::string &a, const std::string &b) const;
+  bool operator() (const char *a, const char *b) const;
+};
+
 // misc functions
 
 bool string_has_suffix(const std::string &str, const char *suffix);
@@ -49,6 +61,24 @@ void map_directory_files(const char *dir,
 bool make_path(const char *path);
 
 bool path_has_extension(const char *path, const char *ext);
+
+// implementation details
+
+inline size_t
+case_insensitive_string_hash::operator() (const std::string &name) const
+{
+  return operator() (name.c_str());
+}
+
+inline bool
+case_insensitive_string_pred::operator() (const std::string &a,
+					  const std::string &b) const
+{
+  if (a.size() != b.size())
+    return false;
+  else
+    return operator() (a.c_str(), b.c_str());
+}
 
 } // namespace act
 

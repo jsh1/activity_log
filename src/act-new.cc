@@ -3,6 +3,7 @@
 #include "act-activity.h"
 #include "act-arguments.h"
 #include "act-config.h"
+#include "act-format.h"
 #include "act-gps-activity.h"
 #include "act-util.h"
 
@@ -41,57 +42,57 @@ enum option_id
   opt_import_all,
 };
 
-activity::field_id
+field_id
 option_field_id(option_id opt)
 {
   switch (opt)
     {
     case opt_date:
-      return activity::field_date;
+      return field_date;
     case opt_activity:
-      return activity::field_activity;
+      return field_activity;
     case opt_type:
-      return activity::field_type;
+      return field_type;
     case opt_course:
-      return activity::field_course;
+      return field_course;
     case opt_keyword:
-      return activity::field_keywords;
+      return field_keywords;
     case opt_equipment:
-      return activity::field_equipment;
+      return field_equipment;
     case opt_distance:
-      return activity::field_distance;
+      return field_distance;
     case opt_duration:
-      return activity::field_duration;
+      return field_duration;
     case opt_pace:
-      return activity::field_pace;
+      return field_pace;
     case opt_speed:
-      return activity::field_speed;
+      return field_speed;
     case opt_max_pace:
-      return activity::field_max_pace;
+      return field_max_pace;
     case opt_max_speed:
-      return activity::field_max_speed;
+      return field_max_speed;
     case opt_resting_hr:
-      return activity::field_resting_hr;
+      return field_resting_hr;
     case opt_average_hr:
-      return activity::field_average_hr;
+      return field_average_hr;
     case opt_max_hr:
-      return activity::field_max_hr;
+      return field_max_hr;
     case opt_calories:
-      return activity::field_calories;
+      return field_calories;
     case opt_weight:
-      return activity::field_weight;
+      return field_weight;
     case opt_temperature:
-      return activity::field_temperature;
+      return field_temperature;
     case opt_weather:
-      return activity::field_weather;
+      return field_weather;
     case opt_quality:
-      return activity::field_quality;
+      return field_quality;
     case opt_effort:
-      return activity::field_effort;
+      return field_effort;
     case opt_gps_file:
-      return activity::field_gps_file;
+      return field_gps_file;
     case opt_field:
-      return activity::field_custom;
+      return field_custom;
     case opt_edit:
     case opt_import_all:
       abort();
@@ -148,13 +149,13 @@ print_usage(const arguments &args, bool for_import)
 }
 
 void
-copy_gps_fields(activity &a, const gps::activity &gps_data)
+copy_gps_fields(activity_storage &a, const gps::activity &gps_data)
 {
-  if (!a.has_field(activity::field_date))
-    a.set_date((time_t) gps_data.time());
+  if (a.field_ptr("Date") == nullptr)
+    format_date_time(a["Date"], (time_t) gps_data.time());
 
   if (gps_data.sport() != gps::activity::sport_unknown
-      && !a.has_field(activity::field_activity))
+      && a.field_ptr("Activity") == nullptr)
     {
       gps::activity::sport_type sport = gps_data.sport();
       std::string type;
@@ -165,41 +166,18 @@ copy_gps_fields(activity &a, const gps::activity &gps_data)
       if (sport == gps::activity::sport_swimming)
 	type = "swim";
       if (type.size() != 0)
-	a.set_string_field(activity::field_activity, type);
+	a["Activity"] = type;
     }
 
   if (gps_data.duration() > 0
-      && !a.has_field(activity::field_duration))
-    a.set_duration_field(activity::field_duration, gps_data.duration());
+      && a.field_ptr("Duration") == nullptr)
+    format_duration(a["Duration"], gps_data.duration());
 
   if (gps_data.distance() > 0
-      && !a.has_field(activity::field_distance))
-    a.set_distance_field(activity::field_distance, gps_data.distance());
+      && a.field_ptr("Distance") == nullptr)
+    format_distance(a["Distance"], gps_data.distance(), unit_miles);
 
-#if 0
-  /* FIXME: Decide whether or not to copy these fields. They seem
-     gratuitous. Also, set [max-]pace if running, speed if biking. */
-
-  if (gps_data.avg_speed() > 0
-      && !a.has_field(activity::field_pace)
-      && !a.has_field(activity::field_speed))
-    a.set_pace_field(activity::field_pace, gps_data.avg_speed());
-
-  if (gps_data.max_speed() > 0
-      && !a.has_field(activity::field_max_pace)
-      && !a.has_field(activity::field_max_speed))
-    a.set_pace_field(activity::field_max_pace, gps_data.max_speed());
-#endif
-
-  if (gps_data.avg_heart_rate() > 0
-      && !a.has_field(activity::field_average_hr))
-    a.set_numeric_field(activity::field_average_hr, gps_data.avg_heart_rate());
-
-  if (gps_data.max_heart_rate() > 0
-      && !a.has_field(activity::field_max_hr))
-    a.set_numeric_field(activity::field_max_hr, gps_data.max_heart_rate());
-
-  // FIXME: do something with lap data?
+  // Let other fields be read as needed.
 }
 
 } // anonymous namespace
@@ -210,7 +188,8 @@ act_new(arguments &args)
   using std::swap;
 
   bool edit = false;
-  activity a;
+
+  std::shared_ptr<activity_storage> storage (new activity_storage);
 
   while (1)
     {
@@ -228,7 +207,7 @@ act_new(arguments &args)
 	case opt_date: {
 	  time_t date;
 	  if (parse_date_time(std::string(opt_arg), &date, nullptr))
-	    a.set_date(date);
+	    format_date_time((*storage)["Date"], date);
 	  break; }
 
 	  // keyword arguments concatenate into existing values
@@ -236,14 +215,13 @@ act_new(arguments &args)
 	case opt_keyword:
 	case opt_equipment:
 	case opt_weather: {
-	  activity::field_id field = option_field_id((option_id)opt);
+	  field_id id = option_field_id((option_id)opt);
+	  std::string &value = (*storage)[canonical_field_name(id)];
 	  std::vector<std::string> keys;
-	  a.get_keywords_field(field, &keys);
+	  parse_keywords(value, &keys);
 	  keys.push_back(std::string(opt_arg));
-	  a.set_keywords_field(field, keys);
+	  format_keywords(value, keys);
 	  break; }
-
-	  // GPS files have directories stripped
 
 	case opt_field: {
 	  std::string arg(opt_arg);
@@ -256,8 +234,10 @@ act_new(arguments &args)
 	    }
 	  else
 	    swap(name, arg);
-	  swap(a.field_value(activity::field_name(name)), value);
+	  swap((*storage)[name], value);
 	  break; }
+
+	  // GPS files have directories stripped
 
 	case opt_gps_file:
 	  if (const char *tem = strrchr(opt_arg, '/'))
@@ -265,10 +245,10 @@ act_new(arguments &args)
 	  /* fall through */
 
 	default: {
-	  activity::field_id field = option_field_id((option_id)opt);
-	  std::string str(opt_arg);
-	  a.canonicalize_field_string(field, str);
-	  swap(a.field_value(field), str);
+	  field_id id = option_field_id((option_id)opt);
+	  std::string &value = (*storage)[canonical_field_name(id)];
+	  value = opt_arg;
+	  canonicalize_field_string(lookup_field_data_type(id), value);
 	  break; }
 
 	case arguments::opt_error:
@@ -278,27 +258,21 @@ act_new(arguments &args)
 	}
     }
 
-  if (a.has_field(activity::field_gps_file))
+  activity a (storage);
+  
+  if (const gps::activity *gps_data = a.gps_data())
     {
-      const std::string *s;
-      a.get_string_field(activity::field_name(activity::field_gps_file), &s);
-
-      std::string filename(*s);
-      if (shared_config().find_gps_file(filename))
-	{
-	  gps::activity gps_data;
-	  if (gps_data.read_file(filename.c_str()))
-	    copy_gps_fields(a, gps_data);
-	}
+      copy_gps_fields(*storage, *gps_data);
+      a.invalidate_cached_values();
     }
 
   std::string filename;
   if (!a.make_filename(filename))
     return 1;
 
-  a.canonicalize_field_order();
+  storage->canonicalize_field_order();
 
-  if (!a.write_file(filename.c_str()))
+  if (!storage->write_file(filename.c_str()))
     return 1;
 
   fprintf(stderr, "Created %s\n", filename.c_str());

@@ -7,8 +7,24 @@
 #include <sys/stat.h>
 #include <string.h>
 #include <unistd.h>
+#include <xlocale.h>
 
 namespace act {
+
+size_t
+case_insensitive_string_hash::operator() (const char *ptr) const
+{
+  size_t h = 0;
+  while (int c = *ptr++)
+    h = h * 33 + tolower_l(c, nullptr);
+  return h;
+}
+
+bool
+case_insensitive_string_pred::operator() (const char *a, const char *b) const
+{
+  return strcasecmp_l(a, b, nullptr);
+}
 
 bool
 string_has_suffix(const std::string &str, const char *suffix)

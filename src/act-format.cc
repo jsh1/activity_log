@@ -18,6 +18,7 @@
 #define MILES_PER_METER 0.000621371192
 #define METERS_PER_MILE 1609.34
 #define SECONDS_PER_DAY 86400
+#define POUNDS_PER_KILO 2.2046
 
 #define MINUTES_PER_MILE(x) ((1. / (x)) * (1. / (MILES_PER_METER * 60.)))
 #define SECS_PER_MILE(x) ((1. /  (x)) * (1. / MILES_PER_METER))
@@ -99,7 +100,7 @@ format_number(std::string &str, double value)
 }
 
 void
-format_distance(std::string &str, double dist, distance_unit unit)
+format_distance(std::string &str, double dist, unit_type unit)
 {
   const char *format = nullptr;
 
@@ -135,6 +136,7 @@ format_distance(std::string &str, double dist, distance_unit unit)
       break;
 
     case unit_miles:
+    default:
       format = "%.2f miles";
       dist = dist * MILES_PER_METER;
       break;
@@ -147,7 +149,7 @@ format_distance(std::string &str, double dist, distance_unit unit)
 }
 
 void
-format_pace(std::string &str, double pace, pace_unit unit)
+format_pace(std::string &str, double pace, unit_type unit)
 {
   double dur = 0;
   const char *suffix = nullptr;
@@ -155,6 +157,7 @@ format_pace(std::string &str, double pace, pace_unit unit)
   switch (unit)
     {
     case unit_seconds_per_mile:
+    default:
       suffix = " / mile";
       dur = SECS_PER_MILE(pace);
       break;
@@ -169,7 +172,7 @@ format_pace(std::string &str, double pace, pace_unit unit)
 }
 
 void
-format_speed(std::string &str, double speed, speed_unit unit)
+format_speed(std::string &str, double speed, unit_type unit)
 {
   double dist = 0;
   const char *format = nullptr;
@@ -187,6 +190,7 @@ format_speed(std::string &str, double speed, speed_unit unit)
       break;
 
     case unit_miles_per_hour:
+    default:
       format = "%.2f mph";
       dist = speed * (3600/METERS_PER_MILE);
       break;
@@ -199,13 +203,14 @@ format_speed(std::string &str, double speed, speed_unit unit)
 }
 
 void
-format_temperature(std::string &str, double temp, temperature_unit unit)
+format_temperature(std::string &str, double temp, unit_type unit)
 {
   const char *format = nullptr;
 
   switch (unit)
     {
     case unit_celsius:
+    default:
       format = "%.fC";
       break;
 
@@ -223,6 +228,31 @@ format_temperature(std::string &str, double temp, temperature_unit unit)
 }
 
 void
+format_weight(std::string &str, double weight, unit_type unit)
+{
+  const char *format = nullptr;
+
+  switch (unit)
+    {
+    case unit_kilogrammes:
+    default:
+      format = "%.f kg";
+      break;
+
+    case unit_pounds:
+      format = "%.f lbs";
+      weight = weight * POUNDS_PER_KILO;
+      break;
+    }
+
+  char buf[64];
+
+  snprintf_l(buf, sizeof(buf), nullptr, format, weight);
+
+  str.append(buf);
+}
+
+void
 format_fraction(std::string &str, double frac)
 {
   char buf[32];
@@ -230,6 +260,51 @@ format_fraction(std::string &str, double frac)
   snprintf_l(buf, sizeof(buf), nullptr, "%.1f/10", frac * 10);
 
   str.append(buf);
+}
+
+void
+format_value(std::string &str, field_data_type type,
+	     double value, unit_type unit)
+{
+  switch (type)
+    {
+    case type_number:
+      format_number(str, value);
+      break;
+
+    case type_duration:
+      format_duration(str, value);
+      break;
+
+    case type_distance:
+      format_distance(str, value, unit);
+      break;
+
+    case type_pace:
+      format_pace(str, value, unit);
+      break;
+
+    case type_speed:
+      format_speed(str, value, unit);
+      break;
+
+    case type_temperature:
+      format_temperature(str, value, unit);
+      break;
+
+    case type_fraction:
+      format_fraction(str, value);
+      break;
+
+    case type_weight:
+      format_weight(str, value, unit);
+      break;
+
+    case type_string:
+    case type_date:
+    case type_keywords:
+      abort();
+    }
 }
 
 void
@@ -433,14 +508,14 @@ parse_number(const std::string &str, size_t &idx, double &value)
 struct parsable_unit
 {
   const char *word_list;
-  int unit_type;
+  unit_type unit;
   double multiplier;
   double offset;
 };
 
 bool
 parse_unit(const parsable_unit *units, const std::string &str,
-	   size_t &idx, double &value, int &unit)
+	   size_t &idx, double &value, unit_type &unit)
 {
   char buf[128];
 
@@ -463,7 +538,7 @@ parse_unit(const parsable_unit *units, const std::string &str,
 	  if (strcasecmp_l(buf, wptr, nullptr) == 0)
 	    {
 	      value = value * uptr->multiplier + uptr->offset;
-	      unit = uptr->unit_type;
+	      unit = uptr->unit;
 	      idx += len;
 	      return true;
 	    }
@@ -474,7 +549,7 @@ parse_unit(const parsable_unit *units, const std::string &str,
 
   for (const parsable_unit *uptr = units; uptr->word_list; uptr++)
     {
-      if (uptr->unit_type == unit)
+      if (uptr->unit == unit)
 	{
 	  value = value * uptr->multiplier + uptr->offset;
 	  return true;
@@ -1009,8 +1084,7 @@ parse_number(const std::string &str, double *value_ptr)
 }
 
 bool
-parse_distance(const std::string &str, double *dist_ptr,
-	       distance_unit *unit_ptr)
+parse_distance(const std::string &str, double *dist_ptr, unit_type *unit_ptr)
 {
   size_t idx = skip_whitespace(str, 0);
 
@@ -1034,20 +1108,20 @@ parse_distance(const std::string &str, double *dist_ptr,
       {0}
     };
 
-  int unit = shared_config().default_distance_unit();
+  unit_type unit = shared_config().default_distance_unit();
 
   parse_unit(distance_units, str, idx, value, unit);
 
   *dist_ptr = value;
 
   if (unit_ptr)
-    *unit_ptr = (distance_unit) unit;
+    *unit_ptr = unit;
 
   return check_trailer(str, idx);
 }
 
 bool
-parse_pace(const std::string &str, double *pace_ptr, pace_unit *unit_ptr)
+parse_pace(const std::string &str, double *pace_ptr, unit_type *unit_ptr)
 {
   double value;
 
@@ -1057,7 +1131,7 @@ parse_pace(const std::string &str, double *pace_ptr, pace_unit *unit_ptr)
     return false;
 
   value = 1/value;
-  int unit = unit_seconds_per_mile;
+  unit_type unit = unit_seconds_per_mile;
 
   idx = skip_whitespace(str, idx);
 
@@ -1083,13 +1157,13 @@ parse_pace(const std::string &str, double *pace_ptr, pace_unit *unit_ptr)
   *pace_ptr = value;
 
   if (unit_ptr)
-    *unit_ptr = (pace_unit) unit;
+    *unit_ptr = unit;
 
   return check_trailer(str, idx);
 }
 
 bool
-parse_speed(const std::string &str, double *speed_ptr, speed_unit *unit_ptr)
+parse_speed(const std::string &str, double *speed_ptr, unit_type *unit_ptr)
 {
   size_t idx = skip_whitespace(str, 0);
 
@@ -1107,21 +1181,21 @@ parse_speed(const std::string &str, double *speed_ptr, speed_unit *unit_ptr)
       {0}
     };
 
-  int unit = shared_config().default_speed_unit();
+  unit_type unit = shared_config().default_speed_unit();
 
   parse_unit(speed_units, str, idx, value, unit);
 
   *speed_ptr = value;
 
   if (unit_ptr)
-    *unit_ptr = (speed_unit) unit;
+    *unit_ptr = unit;
 
   return check_trailer(str, idx);
 }
 
 bool
 parse_temperature(const std::string &str, double *temp_ptr,
-		  temperature_unit *unit_ptr)
+		  unit_type *unit_ptr)
 {
   size_t idx = skip_whitespace(str, 0);
 
@@ -1138,14 +1212,45 @@ parse_temperature(const std::string &str, double *temp_ptr,
       {0}
     };
 
-  int unit = shared_config().default_temperature_unit();
+  unit_type unit = shared_config().default_temperature_unit();
 
   parse_unit(temp_units, str, idx, value, unit);
 
   *temp_ptr = value;
 
   if (unit_ptr)
-    *unit_ptr = (temperature_unit) unit;
+    *unit_ptr = unit;
+
+  return check_trailer(str, idx);
+}
+
+bool
+parse_weight(const std::string &str, double *weight_ptr, unit_type *unit_ptr)
+{
+  size_t idx = skip_whitespace(str, 0);
+
+  double value;
+  if (!parse_number(str, idx, value))
+    return false;
+
+  idx = skip_whitespace(str, idx);
+
+  static const parsable_unit weight_units[] =
+    {
+      {"kg\0kilos\0kilogram\0kilograms\0kilogramme\0kilogrammes\0",
+       unit_kilogrammes, 1},
+      {"lbs\0pound\0pounds\0", unit_pounds, 1/POUNDS_PER_KILO},
+      {0}
+    };
+
+  unit_type unit = shared_config().default_weight_unit();
+
+  parse_unit(weight_units, str, idx, value, unit);
+
+  *weight_ptr = value;
+
+  if (unit_ptr)
+    *unit_ptr = unit;
 
   return check_trailer(str, idx);
 }

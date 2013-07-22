@@ -75,12 +75,12 @@ act_log(arguments &args, const char *format)
   if (strcasecmp(format, "oneline") == 0)
     {
       format = "%{date:%F %-l%p}: %{distance} %{type} %{activity},"
-	" %{duration} %{pace}%n";
+	" %{duration}%n";
     }
   else if (strcasecmp(format, "short") == 0)
     {
       format = "%{date:%a %b %-e %-l%p}: %{distance} %{type}"
-	" %{activity}, %{duration} %{pace}%n%n%{body:first-para}%n";
+	" %{activity}, %{duration}%n%n%{body:first-para}%n";
     }
   else if (strcasecmp(format, "medium") == 0)
     {
@@ -121,12 +121,13 @@ act_log(arguments &args, const char *format)
 
   database db;
 
-  std::vector<database::activity_ref> activities;
-  db.enumerate_activities(activities, dates, skip_count, max_count);
+  std::vector<database::item_ref> items;
+  db.copy_items(items, dates, skip_count, max_count);
 
-  for (const auto &a : activities)
+  for (const auto &it : items)
     {
-      a->printf(stdout, format);
+      activity a (it->storage());
+      a.printf(stdout, format);
     }
 
   return 0;

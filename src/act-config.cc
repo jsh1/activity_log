@@ -11,6 +11,7 @@ config::config()
   _default_pace_unit(unit_seconds_per_mile),
   _default_speed_unit(unit_miles_per_hour),
   _default_temperature_unit(unit_celsius),
+  _default_weight_unit(unit_kilogrammes),
   _start_of_week(1),
   _silent(false),
   _verbose(false)

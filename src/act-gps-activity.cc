@@ -38,6 +38,7 @@ activity::read_file(const char *path)
 bool
 activity::read_fit_file(const char *path)
 {
+  printf("reading %s\n", path);
   fit_parser parser(*this);
   parser.parse_file(path);
   return !parser.had_error();
@@ -46,6 +47,7 @@ activity::read_fit_file(const char *path)
 bool
 activity::read_tcx_file(const char *path)
 {
+  printf("reading %s\n", path);
   tcx_parser parser(*this);
   parser.parse_file(path);
   return !parser.had_error();

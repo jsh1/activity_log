@@ -3,6 +3,7 @@
 #include "act-database.h"
 
 #include "act-config.h"
+#include "act-format.h"
 #include "act-util.h"
 
 #include <algorithm>
@@ -17,52 +18,54 @@ database::database()
 void
 database::read_activities()
 {
-  _activities.clear();
+  _items.clear();
 
   map_directory_files(shared_config().activity_dir(),
 		      read_activities_callback, this);
 
-  std::sort(_activities.begin(), _activities.end(),
-	    [] (const db_activity &a, const db_activity &b) {
-	      return a.data->date() > b.data->date();
+  std::sort(_items.begin(), _items.end(),
+	    [] (const item &a, const item &b) {
+	      return a.date() > b.date();
 	    });
 }
 
 void
 database::read_activities_callback(const char *path, void *ctx)
 {
-  std::unique_ptr<activity> a (new activity);
-
-  a->read_file(path);
-
-  if (a->date() == 0)
-    return;
-
   database *db = static_cast<database *>(ctx);
 
-  db->_activities.resize(db->_activities.size() + 1);
-  db_activity &dba = db->_activities.back();
-  dba.path = path;
+  std::shared_ptr<activity_storage> storage (new activity_storage);
+  storage->read_file(path);
+
+  const std::string *date = storage->field_ptr("Date");
+  if (!date)
+    return;
+
+  db->_items.resize(db->_items.size() + 1);
+  item &it = db->_items.back();
+
+  it._path = path;
+  parse_date_time(*date, &it._date, nullptr);
 
   using std::swap;
-  swap(dba.data, a);
+  swap(it._storage, storage);
 }
 
 void
-database::enumerate_activities(std::vector<activity_ref> &result,
+database::copy_items(std::vector<item_ref> &result,
   const std::vector<date_range> &dates, size_t skip, size_t max_count)
 {
   result.clear();
 
   /* FIXME: this blows. */
 
-  for (const auto &it : _activities)
+  for (auto &it : _items)
     {
       bool matched = false;
 
       for (const auto &range : dates)
 	{
-	  if (range.contains(it.data->date()))
+	  if (range.contains(it.date()))
 	    {
 	      matched = true;
 	      break;
@@ -78,7 +81,7 @@ database::enumerate_activities(std::vector<activity_ref> &result,
 	  continue;
 	}
 
-      result.push_back(it.data.get());
+      result.push_back(&it);
 
       if (--max_count == 0)
 	break;

@@ -16,10 +16,11 @@ class config
   std::string _activity_dir;
   std::string _gps_file_dir;
 
-  distance_unit _default_distance_unit;
-  pace_unit _default_pace_unit;
-  speed_unit _default_speed_unit;
-  temperature_unit _default_temperature_unit;
+  unit_type _default_distance_unit;
+  unit_type _default_pace_unit;
+  unit_type _default_speed_unit;
+  unit_type _default_temperature_unit;
+  unit_type _default_weight_unit;
 
   int _start_of_week;
 
@@ -33,10 +34,11 @@ public:
   const char *activity_dir() const;
   const char *gps_file_dir() const;
 
-  distance_unit default_distance_unit() const;
-  pace_unit default_pace_unit() const;
-  speed_unit default_speed_unit() const;
-  temperature_unit default_temperature_unit() const;
+  unit_type default_distance_unit() const;
+  unit_type default_pace_unit() const;
+  unit_type default_speed_unit() const;
+  unit_type default_temperature_unit() const;
+  unit_type default_weight_unit() const;
 
   // delta from sunday, i.e. -1 = saturday, +1 = monday.
 
@@ -67,28 +69,34 @@ config::gps_file_dir() const
   return _gps_file_dir.c_str();
 }
 
-inline distance_unit
+inline unit_type
 config::default_distance_unit() const
 {
   return _default_distance_unit;
 }
 
-inline pace_unit
+inline unit_type
 config::default_pace_unit() const
 {
   return _default_pace_unit;
 }
 
-inline speed_unit
+inline unit_type
 config::default_speed_unit() const
 {
   return _default_speed_unit;
 }
 
-inline temperature_unit
+inline unit_type
 config::default_temperature_unit() const
 {
   return _default_temperature_unit;
+}
+
+inline unit_type
+config::default_weight_unit() const
+{
+  return _default_weight_unit;
 }
 
 inline int
