@@ -24,7 +24,7 @@ public:
 
   bool make_filename(std::string &filename) const;
 
-  void printf(FILE *fh, const char *format) const;
+  void printf(const char *format) const;
 
   const std::string &body() const;
   std::string &body();

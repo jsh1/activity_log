@@ -135,13 +135,13 @@ act_log(arguments &args, const char *format)
 	printf("%s\n", it->path().c_str());
 
       if (print_raw_contents)
-	cat_file(it->path().c_str());
+	{
+	  cat_file(it->path().c_str());
+	  fputc('\n', stdout);
+	}
 
       if (format != nullptr)
-	{
-	  activity a (it->storage());
-	  a.printf(stdout, format);
-	}
+	activity(it->storage()).printf(format);
     }
 
   return 0;

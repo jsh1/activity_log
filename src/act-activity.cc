@@ -450,24 +450,24 @@ print_indented_string(const char *str, size_t len, FILE *fh)
 } // anonymous namespace
 
 void
-activity::printf(FILE *fh, const char *format) const
+activity::printf(const char *format) const
 {
   while (*format != 0)
     {
       if (const char *ptr = strchr(format, '%'))
 	{
 	  if (ptr > format)
-	    fwrite(format, 1, ptr - format, fh);
+	    fwrite(format, 1, ptr - format, stdout);
 
 	  ptr++;
 	  switch (*ptr++)
 	    {
 	    case 'n':
-	      fputc('\n', fh);
+	      fputc('\n', stdout);
 	      break;
 
 	    case '%':
-	      fputc('\n', fh);
+	      fputc('\n', stdout);
 	      break;
 
 	    case 'x':
@@ -475,7 +475,7 @@ activity::printf(FILE *fh, const char *format) const
 		{
 		  int c0 = convert_hexdigit(ptr[0]);
 		  int c1 = convert_hexdigit(ptr[1]);
-		  fputc((c0 << 4) | c1, fh);
+		  fputc((c0 << 4) | c1, stdout);
 		}
 	      break;
 
@@ -491,7 +491,7 @@ activity::printf(FILE *fh, const char *format) const
 		  if (arg)
 		    *arg++ = 0;
 
-		  print_expansion(fh, token, arg);
+		  print_expansion(stdout, token, arg);
 		}
 	      ptr = end ? end + 1 : ptr + strlen(ptr);
 	      break; }
@@ -505,7 +505,7 @@ activity::printf(FILE *fh, const char *format) const
 		  token[end - ptr] = 0;
 
 		  if (const std::string *str = field_ptr(std::string(token)))
-		    fprintf(fh, "%s: %s\n", token, str->c_str());
+		    fprintf(stdout, "%s: %s\n", token, str->c_str());
 		}
 	      ptr = end ? end + 1 : ptr + strlen(ptr);
 	      break; }
@@ -514,7 +514,7 @@ activity::printf(FILE *fh, const char *format) const
 	}
       else
 	{
-	  fputs(format, fh);
+	  fputs(format, stdout);
 	  break;
 	}
     }

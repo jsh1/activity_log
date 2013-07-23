@@ -107,16 +107,16 @@ format_distance(std::string &str, double dist, unit_type unit)
   switch (unit)
     {
     case unit_centimetres:
-      format = "%.0fcm";
+      format = "%.0f cm";
       dist = dist * 1e2;
       break;
 
     case unit_metres:
-      format = "%.1fm";
+      format = "%.1f m";
       break;
 
     case unit_kilometres:
-      format = "%.2fkm";
+      format = "%.2f km";
       dist = dist * 1e-3;
       break;
 
@@ -126,7 +126,7 @@ format_distance(std::string &str, double dist, unit_type unit)
       break;
 
     case unit_feet:
-      format = "%.0f ft";
+      format = "%.0f feet";
       dist = dist * FEET_PER_METER;
       break;
 
@@ -158,12 +158,12 @@ format_pace(std::string &str, double pace, unit_type unit)
     {
     case unit_seconds_per_mile:
     default:
-      suffix = " / mile";
+      suffix = " /mile";
       dur = SECS_PER_MILE(pace);
       break;
 
     case unit_seconds_per_kilometre:
-      suffix = " / km";
+      suffix = " /km";
       dur = SECS_PER_KM(pace);
       break;
     }
@@ -240,7 +240,7 @@ format_weight(std::string &str, double weight, unit_type unit)
       break;
 
     case unit_pounds:
-      format = "%.f lbs";
+      format = "%.f lb";
       weight = weight * POUNDS_PER_KILO;
       break;
     }
@@ -1239,7 +1239,7 @@ parse_weight(const std::string &str, double *weight_ptr, unit_type *unit_ptr)
     {
       {"kg\0kilos\0kilogram\0kilograms\0kilogramme\0kilogrammes\0",
        unit_kilogrammes, 1},
-      {"lbs\0pound\0pounds\0", unit_pounds, 1/POUNDS_PER_KILO},
+      {"lb\0lbs\0pound\0pounds\0", unit_pounds, 1/POUNDS_PER_KILO},
       {0}
     };
 
