@@ -574,12 +574,6 @@ activity::print_expansion(FILE *fh, const char *name, const char *arg) const
   else if (strcasecmp(name, "relative-date") == 0)
     {
     }
-  else if (strcasecmp(name, "activity-data") == 0)
-    {
-    }
-  else if (strcasecmp(name, "activity-path") == 0)
-    {
-    }
   else
     {
       field_id id = lookup_field_id(name);

@@ -58,6 +58,8 @@ bool find_file_under_directory(std::string &file, const char *dir);
 void map_directory_files(const char *dir,
   void (*fun) (const char *path, void *ctx), void *ctx);
 
+void cat_file(const char *src);
+
 bool make_path(const char *path);
 
 bool path_has_extension(const char *path, const char *ext);

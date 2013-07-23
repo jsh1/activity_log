@@ -57,6 +57,14 @@ trim_newline_characters(char *ptr)
 
 namespace {
 
+struct FILE_wrapper
+{
+  FILE *fh;
+
+  explicit FILE_wrapper(FILE *f) : fh(f) {}
+  ~FILE_wrapper() {fclose(fh);}
+};
+
 struct DIR_wrapper
 {
   DIR *dir;
@@ -136,6 +144,19 @@ map_directory_files(const char *dir,
 	    fun(file.c_str(), ctx);
 	}
     }      
+}
+
+void
+cat_file(const char *src)
+{
+  FILE_wrapper f(fopen(src, "r"));
+
+  if (f.fh)
+    {
+      char buf[4096];
+      while (size_t n = fread(buf, 1, sizeof(buf), f.fh))
+	fwrite(buf, 1, n, stdout);
+    }
 }
 
 bool

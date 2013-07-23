@@ -4,6 +4,7 @@
 #include "act-arguments.h"
 #include "act-config.h"
 #include "act-database.h"
+#include "act-util.h"
 
 using namespace act;
 
@@ -72,6 +73,8 @@ act_log(arguments &args, const char *format)
 	}
     }
 
+  bool print_path = false, print_raw_contents = false;
+
   if (strcasecmp(format, "oneline") == 0)
     {
       format = "%{date:%F %-l%p}: %{distance} %{type} %{activity},"
@@ -93,11 +96,13 @@ act_log(arguments &args, const char *format)
     }
   else if (strcasecmp(format, "raw") == 0)
     {
-      format = "%{activity-data}";
+      print_raw_contents = true;
+      format = nullptr;
     }
   else if (strcasecmp(format, "path") == 0)
     {
-      format = "%{activity-path}%n";
+      print_path = true;
+      format = nullptr;
     }
   else if (strncasecmp(format, "format:", strlen("format:")) == 0)
     {
@@ -126,8 +131,17 @@ act_log(arguments &args, const char *format)
 
   for (const auto &it : items)
     {
-      activity a (it->storage());
-      a.printf(stdout, format);
+      if (print_path)
+	printf("%s\n", it->path().c_str());
+
+      if (print_raw_contents)
+	cat_file(it->path().c_str());
+
+      if (format != nullptr)
+	{
+	  activity a (it->storage());
+	  a.printf(stdout, format);
+	}
     }
 
   return 0;
@@ -142,7 +156,7 @@ main(int argc, const char **argv)
 
   if (args.program_name_p("act-cat"))
     {
-      format = "full";
+      format = "raw";
     }
   else if (args.program_name_p("act-locate"))
     {
