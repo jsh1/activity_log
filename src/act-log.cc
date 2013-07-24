@@ -92,7 +92,7 @@ act_log(arguments &args, const char *format)
     }
   else if (strcasecmp(format, "full") == 0)
     {
-      format = "%{all-fields}%n%{body}%n";
+      format = "%{all-fields}%n%{body}%n%[GPS-Laps]";
     }
   else if (strcasecmp(format, "raw") == 0)
     {

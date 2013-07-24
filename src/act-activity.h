@@ -126,6 +126,7 @@ private:
   void read_cached_values(unsigned int groups) const;
 
   void print_expansion(FILE *fh, const char *name, const char *arg) const;
+  void print_field(FILE *fh, const char *name, const char *arg) const;
 };
 
 // implementation details

@@ -132,6 +132,9 @@ public:
 
   void update_summary();
 
+  void print_summary(FILE *fh) const;
+  void print_laps(FILE *fh) const;
+
   void set_sport(sport_type x) {_sport = x;}
   sport_type sport() const {return _sport;}
 

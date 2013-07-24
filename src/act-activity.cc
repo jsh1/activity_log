@@ -504,8 +504,11 @@ activity::printf(const char *format) const
 		  memcpy(token, ptr, end - ptr);
 		  token[end - ptr] = 0;
 
-		  if (const std::string *str = field_ptr(std::string(token)))
-		    fprintf(stdout, "%s: %s\n", token, str->c_str());
+		  char *arg = strchr(token, ':');
+		  if (arg)
+		    *arg++ = 0;
+
+		  print_field(stdout, token, arg);
 		}
 	      ptr = end ? end + 1 : ptr + strlen(ptr);
 	      break; }
@@ -620,6 +623,20 @@ activity::print_expansion(FILE *fh, const char *name, const char *arg) const
 
       if (str)
 	fwrite(str->c_str(), 1, str->size(), fh);
+    }
+}
+
+void
+activity::print_field(FILE *fh, const char *field, const char *arg) const
+{
+  if (const std::string *str = field_ptr(std::string(field)))
+    {
+      fprintf(stdout, "%s: %s\n", field, str->c_str());
+    }
+  else if (strcasecmp(field, "GPS-Laps") == 0)
+    {
+      if (const gps::activity *a = gps_data())
+	a->print_laps(fh);
     }
 }
 
