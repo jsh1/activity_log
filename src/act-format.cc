@@ -578,6 +578,7 @@ parse_date(const std::string &str, size_t &idx,
 	last year
 	last N years
 	DAY			-- monday, etc
+	last DAY		-- monday, etc
 	MONTH D+		-- July 7
 	MONTH			-- July
 	YYYY			-- 2013
@@ -694,7 +695,18 @@ parse_date(const std::string &str, size_t &idx,
 	      return true;
 	    }
 	  else
-	    return false;
+	    {
+	      int idx = day_of_week_index(tstr);
+	      if (idx >= 0)
+		{
+		  tm->tm_mday += idx - now_tm.tm_wday;
+		  // "last DAY" subtracts a week if day is after today
+		  if (delta < 0)
+		    tm->tm_mday += idx >= now_tm.tm_wday ? -7 : 0;
+		  *range_ptr = SECONDS_PER_DAY;
+		  return true;
+		}
+	    }
 	}
       else
 	{
@@ -704,6 +716,8 @@ parse_date(const std::string &str, size_t &idx,
 	  if (idx >= 0)
 	    {
 	      tm->tm_mday += idx - now_tm.tm_wday;
+	      // "DAY" always picks the last day (except today)
+	      tm->tm_mday += idx > now_tm.tm_wday ? -7 : 0;
 	      *range_ptr = SECONDS_PER_DAY;
 	      return true;
 	    }
