@@ -88,11 +88,11 @@ act_log(arguments &args, const char *format)
   else if (strcasecmp(format, "medium") == 0)
     {
       format = "%[Date]%[Activity]%[Type]%[Course]%[Distance]"
-        "%[Duration]%n%{body}%n";
+        "%[Duration]%n%[Body]%n";
     }
   else if (strcasecmp(format, "full") == 0)
     {
-      format = "%{all-fields}%n%{body}%n%[GPS-Laps]";
+      format = "%[Header]%n%[Body]%n%[Laps]";
     }
   else if (strcasecmp(format, "raw") == 0)
     {

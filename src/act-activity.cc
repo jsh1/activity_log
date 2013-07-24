@@ -526,12 +526,7 @@ activity::printf(const char *format) const
 void
 activity::print_expansion(FILE *fh, const char *name, const char *arg) const
 {
-  if (strcasecmp(name, "all-fields") == 0)
-    {
-      for (const auto &it : *_storage)
-	fprintf(fh, "%s: %s\n", it.first.c_str(), it.second.c_str());
-    }
-  else if (strcasecmp(name, "body") == 0)
+  if (strcasecmp(name, "body") == 0)
     {
       const char *body = this->body().c_str();
 
@@ -633,7 +628,16 @@ activity::print_field(FILE *fh, const char *field, const char *arg) const
     {
       fprintf(stdout, "%s: %s\n", field, str->c_str());
     }
-  else if (strcasecmp(field, "GPS-Laps") == 0)
+  else if (strcasecmp(field, "Header") == 0)
+    {
+      for (const auto &it : *_storage)
+	fprintf(fh, "%s: %s\n", it.first.c_str(), it.second.c_str());
+    }
+  else if (strcasecmp(field, "Body") == 0)
+    {
+      print_indented_string(body().c_str(), body().size(), fh);
+    }
+  else if (strcasecmp(field, "Laps") == 0)
     {
       if (const gps::activity *a = gps_data())
 	a->print_laps(fh);
