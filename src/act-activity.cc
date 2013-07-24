@@ -626,12 +626,20 @@ activity::print_field(FILE *fh, const char *field, const char *arg) const
 {
   if (const std::string *str = field_ptr(std::string(field)))
     {
-      fprintf(stdout, "%s: %s\n", field, str->c_str());
+      field_id id = lookup_field_id(field);
+      std::string tem(*str);
+      canonicalize_field_string(lookup_field_data_type(id), tem);
+      fprintf(stdout, "%s: %s\n", field, tem.c_str());
     }
   else if (strcasecmp(field, "Header") == 0)
     {
       for (const auto &it : *_storage)
-	fprintf(fh, "%s: %s\n", it.first.c_str(), it.second.c_str());
+	{
+	  field_id id = lookup_field_id(it.first.c_str());
+	  std::string tem(it.second);
+	  canonicalize_field_string(lookup_field_data_type(id), tem);
+	  fprintf(stdout, "%s: %s\n", it.first.c_str(), tem.c_str());
+	}
     }
   else if (strcasecmp(field, "Body") == 0)
     {
