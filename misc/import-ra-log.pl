@@ -8,12 +8,18 @@ use strict;
 use warnings;
 use diagnostics;
 
-use File::Basename qw(dirname);
+use File::Basename qw(dirname basename);
 use File::Path qw(mkpath);
+use Getopt::Long;
 use Text::Wrap;
 $Text::Wrap::columns = 72;
 
-my $activities_dir = "$ENV{HOME}/Documents/RA-Activities";
+my $activities_dir = "$ENV{HOME}/Documents/Activities";
+my $garmin_dir = "$ENV{HOME}/Documents/Garmin";
+
+my $opt_overwrite = 0;
+
+GetOptions ("overwrite" => \$opt_overwrite);
 
 my $ra_log_file = shift;
 
@@ -67,7 +73,38 @@ my %weight_unit_map = (
 my %temperature_unit_map = (
 );
 
-open INPUT, "<$ra_log_file"
+sub find_garmin_file {
+    my $year = shift;
+    my $month = shift;
+    my $day = shift;
+    my $hour = shift;
+    my $min = shift;
+
+    my $pattern = sprintf("%04d-%02d-%02d-%02d-%02d-*",
+			  $year, $month, $day, $hour, $min);
+
+    my @files = ();
+
+    my $out = `/usr/bin/find $garmin_dir -name $pattern -print`;
+    foreach (split('\n', $out)) {
+	if (/.(fit|FIT|tcx|TCX)$/) {
+	    push @files, $_;
+	}
+    }
+
+    my $file_count = scalar @files;
+
+    if ($file_count == 1) {
+	return $files[0];
+    } else {
+	if ($file_count > 1) {
+	    print STDOUT "warning multiple GPS files found for $pattern: @files\n";
+	}
+	return "";
+    }
+}
+
+open INPUT, '<', $ra_log_file
     or die "can't open $ra_log_file";
 
 # skip first line
@@ -81,35 +118,49 @@ while (<INPUT>) {
 	next;
     }
 
-    my $output_file;
+    my ($year, $month, $day, $hour, $minute);
     if ($TimeOfDay) {
 	my $date_time = "$Date $TimeOfDay";
 	if ($date_time =~ /(\d+)-(\d+)-(\d+) (\d+):(\d+)/) {
-	    $output_file = "$1/$2/$1-$2-$3-$4-$5.txt"
+	    $year = $1; $month = $2; $day = $3; $hour = $4; $minute = $5;
 	} else {
 	    die "Weird date format: $date_time";
 	}
     } else {
 	if ($Date =~ /(\d+)-(\d+)-(\d+)/) {
-	    $output_file = "$1/$2/$1-$2-$3-0-0.txt"
+	    $year = $1; $month = $2; $day = $3; $hour = 0; $minute = 0;
 	} else {
 	    die "Weird date format: $Date";
 	}
     }
 
+    my $output_file = sprintf("%04d/%02d/%04d-%02d-%02d-%02d-%02d.txt", $year,
+			      $month, $year, $month, $day, $hour, $minute);
     my $output_dir = dirname($output_file);
+
+    if (!$opt_overwrite && -f "$activities_dir/$output_file") {
+	next;
+    }
+
     if (! -d "$activities_dir/$output_dir") {
 	mkpath("$activities_dir/$output_dir")
 	    or die "can't create output directory";
     }
 
-    open OUTPUT, ">$activities_dir/$output_file"
+    open OUTPUT, '>', "$activities_dir/$output_file"
 	or die "can't create output file";
 
     if ($TimeOfDay) {
 	print OUTPUT "Date: $Date $TimeOfDay\n";
     } else {
 	print OUTPUT "Date: $Date\n";
+    }
+
+    my $gps_file = find_garmin_file($year, $month, $day, $hour, $minute);
+
+    if ($gps_file) {
+	my $file = basename($gps_file);
+	print OUTPUT "GPS-File: $file\n";
     }
 
     $Type = lc($Type);
@@ -192,7 +243,7 @@ while (<INPUT>) {
 	if ($TempUnit) {
 	    my $unit = $temperature_unit_map{$TempUnit};
 	    if (!$unit) {
-		$unit = lc($TempUnit);
+		$unit = $TempUnit;
 	    }
 	    $temperature = "$temperature $unit";
 	}
@@ -243,6 +294,8 @@ while (<INPUT>) {
     }
 
     close OUTPUT;
+
+    print STDOUT "Created $output_file\n";
 }
 
 close INPUT;
