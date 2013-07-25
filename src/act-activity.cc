@@ -466,6 +466,10 @@ activity::printf(const char *format) const
 	      fputc('\n', stdout);
 	      break;
 
+	    case 't':
+	      fputc('\t', stdout);
+	      break;
+
 	    case '%':
 	      fputc('\n', stdout);
 	      break;
@@ -631,7 +635,7 @@ activity::print_field(FILE *fh, const char *field, const char *arg) const
       canonicalize_field_string(lookup_field_data_type(id), tem);
       fprintf(stdout, "%s: %s\n", field, tem.c_str());
     }
-  else if (strcasecmp(field, "Header") == 0)
+  else if (strcasecmp(field, "header") == 0)
     {
       for (const auto &it : *_storage)
 	{
@@ -641,11 +645,11 @@ activity::print_field(FILE *fh, const char *field, const char *arg) const
 	  fprintf(stdout, "%s: %s\n", it.first.c_str(), tem.c_str());
 	}
     }
-  else if (strcasecmp(field, "Body") == 0)
+  else if (strcasecmp(field, "body") == 0)
     {
       print_indented_string(body().c_str(), body().size(), fh);
     }
-  else if (strcasecmp(field, "Laps") == 0)
+  else if (strcasecmp(field, "laps") == 0)
     {
       if (const gps::activity *a = gps_data())
 	a->print_laps(fh);

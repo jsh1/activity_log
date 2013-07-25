@@ -89,6 +89,11 @@ $ act unset [--multiple] [FIELD-OPTIONS...] [ACTIVITY-RANGE ...]
 
 	Similar to set command, but removes fields.
 
+$ act sed [--multiple] [CREATION-OPTIONS...] [ACTIVITY-RANGE ...]
+
+	Similar to set command, but removes fields. Value of each field
+	option is taken as a list of sed comannds.
+
 $ act edit [ACTIVITY-RANGE ...]
 
 	Runs $EDITOR on the specified file(s).
@@ -96,7 +101,49 @@ $ act edit [ACTIVITY-RANGE ...]
 $ act log [LOG-OPTIONS...] [ACTIVITY-RANGE ...]
 
 	Prints activities. The options allow the range of activities,
-	and what is printed to be controlled.
+	and what is printed to be controlled:
+
+	--max-count=N
+	--skip=N
+	--format FORMAT-EXP
+	--grep FIELD:REGEXP
+	--query QUERY-EXP
+
+	FORMAT-EXP is the name of a format method (oneline, short,
+	medium, full, raw, path) or a custom format method:
+	"format:STRING" where STRING contains % escapes such as:
+
+		%t		TAB character
+		%n		newline character
+		%%		literal percent character
+		%XX		hex character
+		%{FIELD}	field value
+		%{FIELD:ARGS}
+		%[FIELD]	field "name: value"
+		%[FIELD:ARGS]
+
+	special %{FIELD} strings include:
+
+		%{date:STRFTIME-FORMAT}
+		%{body}
+		%{body:first-line}
+		%{body:first-para}
+
+	special %[FIELD] strings include:
+
+		%[header]	all header fields
+		%[body]		complete body string
+		%[laps]		tabulated laps from GPS file
+
+	QUERY-EXP is more work, but would be things like:
+
+		${distance} > 5 miles
+		${duration} < 30:00
+		${weather} CONTAINS cloudy AND ${temperature} > 20 C
+		${body} CONTAINS "tired"
+		DEFINED ${avg-hr} AND ${avg-hr} < 150
+
+	Note --grep and --query options are currently unimplemented.
 
 $ act summary [SUMMARY-OPTIONS...] ACTIVITY-RANGE
 
