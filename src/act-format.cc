@@ -211,11 +211,11 @@ format_temperature(std::string &str, double temp, unit_type unit)
     {
     case unit_celsius:
     default:
-      format = "%.fC";
+      format = "%.f C";
       break;
 
     case unit_fahrenheit:
-      format = "%.fF";
+      format = "%.f F";
       temp = temp * 9/5 + 32;
       break;
     }
@@ -300,8 +300,11 @@ format_value(std::string &str, field_data_type type,
       format_weight(str, value, unit);
       break;
 
-    case type_string:
     case type_date:
+      format_date_time(str, (time_t) value);
+      break;
+
+    case type_string:
     case type_keywords:
       abort();
     }
