@@ -143,7 +143,7 @@ $ act log [LOG-OPTIONS...] [ACTIVITY-RANGE ...]
 		${body} CONTAINS "tired"
 		DEFINED ${avg-hr} AND ${avg-hr} < 150
 
-	Note --grep and --query options are currently unimplemented.
+	Note --query option is currently unimplemented.
 
 $ act summary [SUMMARY-OPTIONS...] ACTIVITY-RANGE
 

@@ -52,18 +52,20 @@ database::read_activities_callback(const char *path, void *ctx)
 }
 
 void
-database::copy_items(std::vector<item_ref> &result,
-  const std::vector<date_range> &dates, size_t skip, size_t max_count)
+database::execute_query(const query &q, std::vector<item_ref> &result)
 {
   result.clear();
 
   /* FIXME: this blows. */
 
+  size_t to_skip = q.skip_count();
+  size_t to_add = q.max_count();
+
   for (auto &it : _items)
     {
       bool matched = false;
 
-      for (const auto &range : dates)
+      for (const auto &range : q.date_ranges())
 	{
 	  if (range.contains(it.date()))
 	    {
@@ -75,17 +77,110 @@ database::copy_items(std::vector<item_ref> &result,
       if (!matched)
 	continue;
 
-      if (skip != 0)
+      if (q.term() && !(*q.term())(it))
+	continue;
+
+      if (to_skip != 0)
 	{
-	  skip--;
+	  to_skip--;
 	  continue;
 	}
 
       result.push_back(&it);
 
-      if (--max_count == 0)
+      if (--to_add == 0)
 	break;
     }
+}
+
+database::not_term::not_term(const std::shared_ptr<const query_term> &t)
+: term(t)
+{
+}
+
+bool
+database::not_term::operator() (const item &it) const
+{
+  return !(*term)(it);
+}
+
+database::and_term::and_term()
+{
+}
+
+database::and_term::and_term(const std::shared_ptr<const query_term> &l,
+			     const std::shared_ptr<const query_term> &r)
+{
+  terms.push_back(l);
+  terms.push_back(r);
+}
+
+void
+database::and_term::add_term(const std::shared_ptr<const query_term> &t)
+{
+  terms.push_back(t);
+}
+
+bool
+database::and_term::operator() (const item &it) const
+{
+  for (const auto &t : terms)
+    if (!(*t)(it))
+      return false;
+
+  return true;
+}
+
+database::or_term::or_term()
+{
+}
+
+database::or_term::or_term(const std::shared_ptr<const query_term> &l,
+			   const std::shared_ptr<const query_term> &r)
+{
+  terms.push_back(l);
+  terms.push_back(r);
+}
+
+void
+database::or_term::add_term(const std::shared_ptr<const query_term> &t)
+{
+  terms.push_back(t);
+}
+
+bool
+database::or_term::operator() (const item &it) const
+{
+  for (const auto &t : terms)
+    if ((*t)(it))
+      return true;
+
+  return false;
+}
+
+database::grep_term::grep_term(const std::string &f, const std::string &re)
+: field(f),
+  regexp(re)
+{
+  status = regcomp(&compiled, regexp.c_str(), REG_EXTENDED | REG_ICASE);
+}
+
+bool
+database::grep_term::operator()(const item &it) const
+{
+  if (status != 0)
+    return false;
+
+  if (const std::string *str = it.storage()->field_ptr(field))
+    {
+      if (regexp.size() == 0)
+	return true;
+
+      if (regexec(&compiled, str->c_str(), 0, nullptr, 0) == 0)
+	return true;
+    }
+
+  return false;
 }
 
 } // namespace act

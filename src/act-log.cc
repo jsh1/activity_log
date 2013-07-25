@@ -15,6 +15,7 @@ enum option_id
   opt_format,
   opt_max_count,
   opt_skip,
+  opt_grep,
 };
 
 const arguments::option options[] =
@@ -23,6 +24,7 @@ const arguments::option options[] =
   {opt_format, "pretty", 0, "FORMAT", "Same as --format=FORMAT."},
   {opt_max_count, "max-count", 'n', "N", "Maximum number of activities."},
   {opt_skip, "skip", 0, "N", "First skip N activities."},
+  {opt_grep, "grep", 0, "FIELD:REGEXP", "Add grep query term."},
   {arguments::opt_eof},
 };
 
@@ -42,8 +44,10 @@ print_usage(const arguments &args)
 int
 act_log(arguments &args, const char *format)
 {
-  size_t max_count = SIZE_T_MAX;
-  size_t skip_count = 0;
+  database::query query;
+
+  std::shared_ptr<database::and_term> query_and (new database::and_term);
+  query.set_term(query_and);
 
   while (1)
     {
@@ -59,12 +63,23 @@ act_log(arguments &args, const char *format)
 	  break;
 
 	case opt_max_count:
-	  max_count = strtol(opt_arg, nullptr, 10);
+	  query.set_max_count (strtol(opt_arg, nullptr, 10));
 	  break;
 
 	case opt_skip:
-	  skip_count = strtol(opt_arg, nullptr, 10);
+	  query.set_skip_count (strtol(opt_arg, nullptr, 10));
 	  break;
+
+	case opt_grep: {
+	  const char *arg = strchr(opt_arg, ':');
+	  if (!arg)
+	    arg = opt_arg + strlen(opt_arg);
+	  std::string field(opt_arg, arg - opt_arg);
+	  std::string re(arg + 1);
+	  std::shared_ptr<database::query_term>
+	    grep (new database::grep_term(field, re));
+	  query_and->add_term(grep);
+	  break; }
 
 	case arguments::opt_error:
 	  fprintf(stderr, "Error: invalid argument: %s\n\n", opt_arg);
@@ -114,20 +129,22 @@ act_log(arguments &args, const char *format)
       return 1;
     }
 
-  std::vector<date_range> dates;
-
   if (args.argc() != 0)
     {
+      std::vector<date_range> dates;
+
       if (!args.make_date_range(dates))
 	return 1;
+
+      query.set_date_ranges(dates);
     }
   else
-    dates.push_back(date_range(0, time(nullptr)));
+    query.add_date_range(date_range(0, time(nullptr)));
 
   database db;
 
   std::vector<database::item_ref> items;
-  db.copy_items(items, dates, skip_count, max_count);
+  db.execute_query(query, items);
 
   for (const auto &it : items)
     {
