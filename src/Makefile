@@ -61,7 +61,7 @@ CC = clang
 
 includes = -I/usr/include/libxml2
 cxx_standard_flags = -std=c++11 -stdlib=libc++
-optimization_cflags := -O0
+optimization_cflags := -Os
 debug_cflags := -g
 warning_cflags := -Wall -Werror
 
