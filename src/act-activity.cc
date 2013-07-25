@@ -404,7 +404,7 @@ activity::make_filename(std::string &filename) const
     filename.push_back('/');
 
   char buf[256];
-  strftime(buf, sizeof(buf), "%Y/%m/%Y-%m-%d-%H-%M.txt", &tm);
+  strftime(buf, sizeof(buf), "%Y/%m/%d-%H%M.txt", &tm);
   filename.append(buf);
 
   return make_path(filename.c_str());

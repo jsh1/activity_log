@@ -134,8 +134,8 @@ while (<INPUT>) {
 	}
     }
 
-    my $output_file = sprintf("%04d/%02d/%04d-%02d-%02d-%02d-%02d.txt", $year,
-			      $month, $year, $month, $day, $hour, $minute);
+    my $output_file = sprintf("%04d/%02d/%02d-%02d%02d.txt",
+			      $year, $month, $day, $hour, $minute);
     my $output_dir = dirname($output_file);
 
     if (!$opt_overwrite && -f "$activities_dir/$output_file") {
@@ -179,7 +179,9 @@ while (<INPUT>) {
     }
 
     if ($Duration) {
-	print OUTPUT "Duration: $Duration\n";
+	my $dur = $Duration;
+	$dur =~ s/^0://;
+	print OUTPUT "Duration: $dur\n";
     }
 
     if ($Distance) {
