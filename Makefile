@@ -1,7 +1,7 @@
 
 subdirs = src
 
-all clean install ::
+all clean install uninstall ::
 	set -e; for d in $(subdirs); do cd $$d && $(MAKE) $@; done
 
 clean ::

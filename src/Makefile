@@ -5,6 +5,15 @@ library_products = libact.a
 bin_products = act act-log act-new act-gps-test
 symlink_products = act-cat act-import act-list act-locate act-show act-slog
 
+prefix = /opt
+exec_prefix = ${prefix}
+datarootdir=${prefix}/share
+datadir=${datarootdir}
+bindir = ${prefix}/bin
+includedir=${prefix}/include
+libdir=${exec_prefix}/lib
+libexecdir=${exec_prefix}/libexec
+
 libact.a_objects =		\
 	act-activity.o		\
 	act-activity-storage.o	\
@@ -67,22 +76,39 @@ all : $(library_products) $(bin_products) $(symlink_products)
 define library_rules
 $(1) : $$($(1)_objects)
 	$$(AR) -rcs $$@ $$^
+
 clean ::
 	rm -f $(1) $$($(1)_objects)
+
 -include $$(patsubst %.o,.%.d,$$($(1)_objects))
 endef
 
 define bin_rules
 $(1) : $$($(1)_objects) $$($(1)_deps)
 	$$(CXX) $$($(1)_objects) -o $$@ $$(linker_flags) -L. $$($(1)_libraries)
+
+install :: $(1)
+	install $(1) $$(DESTDIR)$$(bindir)
+
+uninstall ::
+	rm -f $$(DESTDIR)$$(bindir)/$(1)
+
 clean ::
 	rm -f $(1) $$($(1)_objects)
+
 -include $$(patsubst %.o,.%.d,$$($(1)_objects))
 endef
 
 define symlink_rules
 $(1) :
 	ln -sf $$($(1)_src) $$@
+
+install ::
+	ln -sf $$($(1)_src) $$(DESTDIR)$$(bindir)/$(1)
+
+uninstall ::
+	rm -f $$(DESTDIR)$$(bindir)/$(1)
+
 clean ::
 	rm -f $(1)
 endef
