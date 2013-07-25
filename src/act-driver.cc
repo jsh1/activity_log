@@ -13,6 +13,7 @@ enum option_id
 {
   opt_dir,
   opt_gps_dir,
+  opt_exec_dir,
   opt_silent,
   opt_verbose,
 };
@@ -21,6 +22,7 @@ const arguments::option options[] =
 {
   {opt_dir, "dir", 0, "ACTIVITY-DIR"},
   {opt_gps_dir, "gps-dir", 0, "GPS-FILE-DIR"},
+  {opt_exec_dir, "exec-dir", 0, "EXEC-DIR"},
   {opt_silent, "silent", 0, 0},
   {opt_verbose, "verbose", 0, 0},
   {arguments::opt_eof}
@@ -61,6 +63,10 @@ main(int argc, const char **argv)
 	  setenv("ACT_GPS_DIR", opt_arg, true);
 	  break;
 
+	case opt_exec_dir:
+	  setenv("ACT_EXEC_DIR", opt_arg, true);
+	  break;
+
 	case opt_silent:
 	  setenv("ACT_SILENT", "1", true);
 	  break;
@@ -84,10 +90,19 @@ main(int argc, const char **argv)
 
   std::vector<const char *> exec_args (args.args());
 
-  std::string program("act-");
-  program.append(exec_args[0]);
-  exec_args[0] = program.c_str();
+  std::string program;
 
+  if (const char *dir = getenv("ACT_EXEC_DIR"))
+    {
+      program.append(dir);
+      if (program.back() != '/')
+	program.push_back('/');
+    }
+
+  program.append("act-");
+  program.append(exec_args[0]);
+
+  exec_args[0] = program.c_str();
   exec_args.push_back(nullptr);
 
   execvp(exec_args[0], (char **) &exec_args[0]);
