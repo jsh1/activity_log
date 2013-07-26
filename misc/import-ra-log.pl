@@ -35,9 +35,9 @@ my %subtype_map = (
 
 my %equipment_map = (
     # adidas
-    "Mana 5 (blue)" => "mana-5-blue",
-    "Mana 5 (white)" => "mana-5-white",
-    "Mana 5 (yellow)" => "mana-5-yellow",
+    "Adizero Mana 5 (blue)" => "mana-5-blue",
+    "Adizero Mana 5 (white)" => "mana-5-white",
+    "Adizero Mana 5 (yellow)" => "mana-5-yellow",
     # asics
     "Gel Tarther" => "tarther-1",
     "Gel Tarther (2)" => "tarther-2",
@@ -288,6 +288,7 @@ while (<INPUT>) {
 	print OUTPUT "\n";
 	my $notes = $Notes;
 	$notes =~ s/<br>/\n/g;
+	$notes =~ s/<tab>/\t/g;
 	$notes =~ s/— /-- /g;
 	$notes =~ s/—/--/g;
 	$notes =~ s/…/.../g;
