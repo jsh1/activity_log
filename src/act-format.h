@@ -51,6 +51,9 @@ bool parse_fraction(const std::string &str, double *frac_ptr);
 bool parse_keywords(const std::string &str,
   std::vector<std::string> *keys_ptr);
 
+bool parse_value(const std::string &str, field_data_type type,
+  double *value_ptr, unit_type *unit_ptr);
+
 } // namespace act
 
 #endif /* ACT_FORMAT_H */

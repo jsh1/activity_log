@@ -103,11 +103,27 @@ $ act log [LOG-OPTIONS...] [ACTIVITY-RANGE ...]
 	Prints activities. The options allow the range of activities,
 	and what is printed to be controlled:
 
+	--grep REGEXP			-- body regexp match
+	--defines FIELD			-- if field is defined
+	--matches FIELD:REGEXP		-- field regexp match
+	--contains FIELD:KEYWORD	-- keyword field search
+	--compare FIELDxKEYWORD		-- numeric comparison
+	--query QUERY-EXP		-- complex query
+	--format FORMAT-EXP		-- output format
 	--max-count=N
 	--skip=N
-	--format FORMAT-EXP
-	--grep FIELD:REGEXP
-	--query QUERY-EXP
+
+	The 'x' in --compare is one of: = != < > <= >=
+
+	QUERY-EXP is currently unimplemented, but would be things like:
+
+		${distance} > 5 miles
+		${duration} < 30:00
+		${weather} CONTAINS cloudy AND ${temperature} > 20 C
+		${body} MATCHES "tired"
+		DEFINES ${avg-hr} AND ${avg-hr} < 150
+
+	i.e. an alternative infix syntax for the existing options.
 
 	FORMAT-EXP is the name of a format method (oneline, short,
 	medium, full, raw, path) or a custom format method:
@@ -134,16 +150,6 @@ $ act log [LOG-OPTIONS...] [ACTIVITY-RANGE ...]
 		%[header]	all header fields
 		%[body]		complete body string
 		%[laps]		tabulated laps from GPS file
-
-	QUERY-EXP is more work, but would be things like:
-
-		${distance} > 5 miles
-		${duration} < 30:00
-		${weather} CONTAINS cloudy AND ${temperature} > 20 C
-		${body} CONTAINS "tired"
-		DEFINED ${avg-hr} AND ${avg-hr} < 150
-
-	Note --query option is currently unimplemented.
 
 $ act summary [SUMMARY-OPTIONS...] ACTIVITY-RANGE
 

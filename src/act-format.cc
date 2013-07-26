@@ -1038,7 +1038,7 @@ parse_time(const std::string &str, size_t &idx, double *dur_ptr)
   int hours = 0, minutes = 0, seconds = 0;
   double seconds_frac = 0;
 
-  hours = parse_decimal(str, idx, 2);
+  hours = parse_decimal(str, idx, 4);
   if (hours < 0)
     return false;
 
@@ -1046,7 +1046,7 @@ parse_time(const std::string &str, size_t &idx, double *dur_ptr)
     {
       idx++;
 
-      minutes = parse_decimal(str, idx, 2);
+      minutes = parse_decimal(str, idx, 4);
       if (minutes < 0)
 	return false;
 
@@ -1054,7 +1054,7 @@ parse_time(const std::string &str, size_t &idx, double *dur_ptr)
 	{
 	  idx++;
 
-	  seconds = parse_decimal(str, idx, 2);
+	  seconds = parse_decimal(str, idx, 4);
 	  if (seconds < 0)
 	    return false;
 	}
@@ -1327,6 +1327,56 @@ parse_keywords(const std::string &str, std::vector<std::string> *keys_ptr)
     }
 
   return true;
+}
+
+bool
+parse_value(const std::string &str, field_data_type type,
+	    double *value_ptr, unit_type *unit_ptr)
+{
+  if (unit_ptr)
+    *unit_ptr = unit_unknown;
+
+  switch (type)
+    {
+    case type_number:
+      return parse_number(str, value_ptr);
+
+    case type_duration:
+      return parse_duration(str, value_ptr);
+
+    case type_distance:
+      return parse_distance(str, value_ptr, unit_ptr);
+
+    case type_pace:
+      return parse_pace(str, value_ptr, unit_ptr);
+
+    case type_speed:
+      return parse_speed(str, value_ptr, unit_ptr);
+
+    case type_temperature:
+      return parse_temperature(str, value_ptr, unit_ptr);
+
+    case type_fraction:
+      return parse_fraction(str, value_ptr);
+
+    case type_weight:
+      return parse_weight(str, value_ptr, unit_ptr);
+
+    case type_date: {
+      time_t time = 0;
+      if (parse_date_time(str, &time, nullptr))
+	{
+	  *value_ptr = time;
+	  return true;
+	}
+      return false; }
+
+    case type_string:
+    case type_keywords:
+      return false;
+    }
+
+  return false;
 }
 
 } // namespace act

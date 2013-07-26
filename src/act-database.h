@@ -82,7 +82,7 @@ public:
       virtual bool operator() (const item &it) const;
     };
 
-  class grep_term : public query_term
+  class matches_term : public query_term
     {
       std::string field;
       std::string regexp;
@@ -90,7 +90,64 @@ public:
       int status;
 
     public:
-      grep_term(const std::string &f, const std::string &re);
+      matches_term(const std::string &field, const std::string &regexp);
+
+      virtual bool operator() (const item &it) const;
+    };
+
+  class contains_term : public query_term
+    {
+      std::string field;
+      std::string keyword;
+
+    public:
+      contains_term(const std::string &field, const std::string &key);
+
+      virtual bool operator() (const item &it) const;
+    };
+
+  class defines_term : public query_term
+    {
+      std::string field;
+
+    public:
+      defines_term(const std::string &field);
+
+      virtual bool operator() (const item &it) const;
+    };
+
+  class compare_term : public query_term
+    {
+    public:
+      enum compare_op
+	{
+	  op_equal,
+	  op_not_equal,
+	  op_greater,
+	  op_greater_or_equal,
+	  op_less,
+	  op_less_or_equal
+	};
+
+    private:
+      std::string field;
+      compare_op op;
+      double rhs;
+
+    public:
+      compare_term(const std::string &field, compare_op op, double rhs);
+
+      virtual bool operator() (const item &it) const;
+    };
+
+  class grep_term : public query_term
+    {
+      std::string regexp;
+      regex_t compiled;
+      int status;
+
+    public:
+      grep_term(const std::string &regexp);
 
       virtual bool operator() (const item &it) const;
     };

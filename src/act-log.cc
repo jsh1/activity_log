@@ -4,6 +4,7 @@
 #include "act-arguments.h"
 #include "act-config.h"
 #include "act-database.h"
+#include "act-format.h"
 #include "act-util.h"
 
 using namespace act;
@@ -12,19 +13,27 @@ namespace {
 
 enum option_id
 {
+  opt_grep,
+  opt_defines,
+  opt_matches,
+  opt_compare,
   opt_format,
   opt_max_count,
   opt_skip,
-  opt_grep,
+  opt_contains,
 };
 
 const arguments::option options[] =
 {
+  {opt_grep, "grep", 0, "REGEXP", "Add grep-body query term."},
+  {opt_defines, "defines", 0, "FIELD", "Add defines-field query term."},
+  {opt_matches, "matches", 0, "FIELD:REGEXP", "Add re-match query term."},
+  {opt_contains, "contains", 0, "FIELD:KEYWORD", "Add keyword query term."},
+  {opt_compare, "compare", 0, "FIELDxKEYWORD", "Add compare query term. 'x' from: = != < > <= >="},
   {opt_format, "format", 0, "FORMAT", "Format method."},
   {opt_format, "pretty", 0, "FORMAT", "Same as --format=FORMAT."},
   {opt_max_count, "max-count", 'n', "N", "Maximum number of activities."},
   {opt_skip, "skip", 0, "N", "First skip N activities."},
-  {opt_grep, "grep", 0, "FIELD:REGEXP", "Add grep query term."},
   {arguments::opt_eof},
 };
 
@@ -58,6 +67,103 @@ act_log(arguments &args, const char *format)
 
       switch (opt)
 	{
+	case opt_grep: {
+	  std::string re(opt_arg);
+	  std::shared_ptr<database::query_term>
+	    term (new database::grep_term(re));
+	  query_and->add_term(term);
+	  break; }
+
+	case opt_defines: {
+	  std::string field(opt_arg);
+	  std::shared_ptr<database::query_term>
+	    term (new database::defines_term(field));
+	  query_and->add_term(term);
+	  break; }
+
+	case opt_matches: {
+	  const char *arg = strchr(opt_arg, ':');
+	  if (arg)
+	    {
+	      std::string field(opt_arg, arg - opt_arg);
+	      std::string re(arg + 1);
+	      std::shared_ptr<database::query_term>
+		term (new database::matches_term(field, re));
+	      query_and->add_term(term);
+	    }
+	  else
+	    {
+	      print_usage(args);
+	      return 1;
+	    }
+	  break; }
+
+	case opt_contains: {
+	  const char *arg = strchr(opt_arg, ':');
+	  if (arg)
+	    {
+	      std::string field(opt_arg, arg - opt_arg);
+	      std::string key(arg + 1);
+	      std::shared_ptr<database::query_term>
+		term (new database::contains_term(field, key));
+	      query_and->add_term(term);
+	    }
+	  else
+	    {
+	      print_usage(args);
+	      return 1;
+	    }
+	  break; }
+
+	case opt_compare: {
+	  const char *arg = opt_arg;
+	  arg += strcspn(arg, "=!<>");
+	  if (*arg)
+	    {
+	      std::string field(opt_arg, arg - opt_arg);
+	      database::compare_term::compare_op op;
+	      if (arg[0] == '=')
+		op = database::compare_term::op_equal, arg += 1;
+	      else if (arg[0] == '!' && arg[1] == '=')
+		op = database::compare_term::op_not_equal, arg += 2;
+	      else if (arg[0] == '<' && arg[1] == '=')
+		op = database::compare_term::op_less_or_equal, arg += 2;
+	      else if (arg[0] == '<')
+		op = database::compare_term::op_less, arg += 1;
+	      else if (arg[0] == '>' && arg[1] == '=')
+		op = database::compare_term::op_greater_or_equal, arg += 2;
+	      else if (arg[0] == '>')
+		op = database::compare_term::op_greater, arg += 1;
+	      else
+		{
+		  print_usage(args);
+		  return 1;
+		}
+	      field_id id = lookup_field_id(field.c_str());
+	      field_data_type type = lookup_field_data_type(id);
+	      if (type == type_string)
+		type = type_number;
+	      std::string tem(arg);
+	      double rhs;
+	      if (parse_value(tem, type, &rhs, nullptr))
+		{
+		  std::shared_ptr<database::query_term>
+		    term (new database::compare_term(field, op, rhs));
+		  query_and->add_term(term);
+		}
+	      else
+		{
+		  print_usage(args);
+		  return 1;
+		}
+	    }
+	  else
+	    {
+	      print_usage(args);
+	      return 1;
+	    }
+	  break; }
+
 	case opt_format:
 	  format = opt_arg;
 	  break;
@@ -69,17 +175,6 @@ act_log(arguments &args, const char *format)
 	case opt_skip:
 	  query.set_skip_count (strtol(opt_arg, nullptr, 10));
 	  break;
-
-	case opt_grep: {
-	  const char *arg = strchr(opt_arg, ':');
-	  if (!arg)
-	    arg = opt_arg + strlen(opt_arg);
-	  std::string field(opt_arg, arg - opt_arg);
-	  std::string re(arg + 1);
-	  std::shared_ptr<database::query_term>
-	    grep (new database::grep_term(field, re));
-	  query_and->add_term(grep);
-	  break; }
 
 	case arguments::opt_error:
 	  fprintf(stderr, "Error: invalid argument: %s\n\n", opt_arg);

@@ -158,9 +158,111 @@ database::or_term::operator() (const item &it) const
   return false;
 }
 
-database::grep_term::grep_term(const std::string &f, const std::string &re)
+database::matches_term::matches_term(const std::string &f,
+				     const std::string &re)
 : field(f),
   regexp(re)
+{
+  status = regcomp(&compiled, regexp.c_str(), REG_EXTENDED | REG_ICASE);
+}
+
+bool
+database::matches_term::operator()(const item &it) const
+{
+  if (status != 0)
+    return false;
+
+  if (const std::string *str = it.storage()->field_ptr(field))
+    {
+      if (regexec(&compiled, str->c_str(), 0, nullptr, 0) == 0)
+	return true;
+    }
+
+  return false;
+}
+
+database::defines_term::defines_term(const std::string &f)
+: field(f)
+{
+}
+
+bool
+database::defines_term::operator()(const item &it) const
+{
+  return it.storage()->field_ptr(field) != nullptr;
+}
+
+database::contains_term::contains_term(const std::string &f,
+				       const std::string &k)
+: field(f),
+  keyword(k)
+{
+}
+
+bool
+database::contains_term::operator()(const item &it) const
+{
+  if (const std::string *str = it.storage()->field_ptr(field))
+    {
+      std::vector<std::string> keys;
+      if (parse_keywords(*str, &keys))
+	{
+	  for (const auto &it : keys)
+	    {
+	      if (strcasecmp(it.c_str(), keyword.c_str()) == 0)
+		return true;
+	    }
+	}
+    }
+
+  return false;
+}
+
+database::compare_term::compare_term(const std::string &f,
+				     compare_op o, double r)
+: field(f),
+  op(o),
+  rhs(r)
+{
+}
+
+bool
+database::compare_term::operator()(const item &it) const
+{
+  if (const std::string *str = it.storage()->field_ptr(field))
+    {
+      field_id id = lookup_field_id(field.c_str());
+
+      field_data_type type = lookup_field_data_type(id);
+      if (type == type_string)
+	type = type_number;
+
+      double lhs;
+      if (parse_value(*str, type, &lhs, nullptr))
+	{
+	  switch (op)
+	    {
+	    case op_equal:
+	      return lhs == rhs;
+	    case op_not_equal:
+	      return lhs != rhs;
+	    case op_greater:
+	      return lhs > rhs;
+	    case op_greater_or_equal:
+	      return lhs >= rhs;
+	    case op_less:
+	      return lhs < rhs;
+	    case op_less_or_equal:
+	      return lhs <= rhs;
+	    }
+	}
+    }
+
+  return false;
+}
+
+database::grep_term::grep_term(const std::string &re)
+: regexp(re)
 {
   status = regcomp(&compiled, regexp.c_str(), REG_EXTENDED | REG_ICASE);
 }
@@ -171,16 +273,7 @@ database::grep_term::operator()(const item &it) const
   if (status != 0)
     return false;
 
-  if (const std::string *str = it.storage()->field_ptr(field))
-    {
-      if (regexp.size() == 0)
-	return true;
-
-      if (regexec(&compiled, str->c_str(), 0, nullptr, 0) == 0)
-	return true;
-    }
-
-  return false;
+  return regexec(&compiled, it.storage()->body().c_str(), 0, nullptr, 0) == 0;
 }
 
 } // namespace act
