@@ -13,7 +13,7 @@ data. Initially though, am focusing on a suite of shell commands with a
 common interface to get a feel for how the data format works. Basic
 command structure:
 
-$ act [--dir DIR] [--gps-dir DIR] COMMAND ARGS...
+$ act [--dir DIR] [--gps-dir DIR] [--exec-dir DIR] COMMAND ARGS...
 
 The --dir and --gps-dir options are used to set ACT_DIR and ACT_GPS_DIR
 environment variables if given. Each command is a separate program
