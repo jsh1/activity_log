@@ -41,7 +41,7 @@ public:
     {
     public:
       virtual ~query_term() {}
-      virtual bool operator() (const item &it) const = 0;
+      virtual bool operator() (const activity &a) const = 0;
     };
 
   class not_term : public query_term
@@ -51,7 +51,7 @@ public:
     public:
       explicit not_term(const std::shared_ptr<const query_term> &t);
 
-      virtual bool operator() (const item &it) const;
+      virtual bool operator() (const activity &a) const;
     };
 
   class and_term : public query_term
@@ -65,7 +65,7 @@ public:
 
       void add_term(const std::shared_ptr<const query_term> &t);
 
-      virtual bool operator() (const item &it) const;
+      virtual bool operator() (const activity &a) const;
     };
 
   class or_term : public query_term
@@ -79,7 +79,7 @@ public:
 
       void add_term(const std::shared_ptr<const query_term> &t);
 
-      virtual bool operator() (const item &it) const;
+      virtual bool operator() (const activity &a) const;
     };
 
   class matches_term : public query_term
@@ -92,7 +92,7 @@ public:
     public:
       matches_term(const std::string &field, const std::string &regexp);
 
-      virtual bool operator() (const item &it) const;
+      virtual bool operator() (const activity &a) const;
     };
 
   class contains_term : public query_term
@@ -103,7 +103,7 @@ public:
     public:
       contains_term(const std::string &field, const std::string &key);
 
-      virtual bool operator() (const item &it) const;
+      virtual bool operator() (const activity &a) const;
     };
 
   class defines_term : public query_term
@@ -113,7 +113,7 @@ public:
     public:
       defines_term(const std::string &field);
 
-      virtual bool operator() (const item &it) const;
+      virtual bool operator() (const activity &a) const;
     };
 
   class compare_term : public query_term
@@ -137,7 +137,7 @@ public:
     public:
       compare_term(const std::string &field, compare_op op, double rhs);
 
-      virtual bool operator() (const item &it) const;
+      virtual bool operator() (const activity &a) const;
     };
 
   class grep_term : public query_term
@@ -149,7 +149,7 @@ public:
     public:
       grep_term(const std::string &regexp);
 
-      virtual bool operator() (const item &it) const;
+      virtual bool operator() (const activity &a) const;
     };
 
   class query

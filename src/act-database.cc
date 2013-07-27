@@ -77,8 +77,12 @@ database::execute_query(const query &q, std::vector<item_ref> &result)
       if (!matched)
 	continue;
 
-      if (q.term() && !(*q.term())(it))
-	continue;
+      if (q.term())
+	{
+	  activity a (it.storage());
+	  if (!(*q.term())(a))
+	    continue;
+	}
 
       if (to_skip != 0)
 	{
@@ -99,9 +103,9 @@ database::not_term::not_term(const std::shared_ptr<const query_term> &t)
 }
 
 bool
-database::not_term::operator() (const item &it) const
+database::not_term::operator() (const activity &a) const
 {
-  return !(*term)(it);
+  return !(*term)(a);
 }
 
 database::and_term::and_term()
@@ -122,10 +126,10 @@ database::and_term::add_term(const std::shared_ptr<const query_term> &t)
 }
 
 bool
-database::and_term::operator() (const item &it) const
+database::and_term::operator() (const activity &a) const
 {
   for (const auto &t : terms)
-    if (!(*t)(it))
+    if (!(*t)(a))
       return false;
 
   return true;
@@ -149,10 +153,10 @@ database::or_term::add_term(const std::shared_ptr<const query_term> &t)
 }
 
 bool
-database::or_term::operator() (const item &it) const
+database::or_term::operator() (const activity &a) const
 {
   for (const auto &t : terms)
-    if ((*t)(it))
+    if ((*t)(a))
       return true;
 
   return false;
@@ -167,12 +171,12 @@ database::matches_term::matches_term(const std::string &f,
 }
 
 bool
-database::matches_term::operator()(const item &it) const
+database::matches_term::operator()(const activity &a) const
 {
   if (status != 0)
     return false;
 
-  if (const std::string *str = it.storage()->field_ptr(field))
+  if (const std::string *str = a.storage()->field_ptr(field))
     {
       if (regexec(&compiled, str->c_str(), 0, nullptr, 0) == 0)
 	return true;
@@ -187,9 +191,9 @@ database::defines_term::defines_term(const std::string &f)
 }
 
 bool
-database::defines_term::operator()(const item &it) const
+database::defines_term::operator()(const activity &a) const
 {
-  return it.storage()->field_ptr(field) != nullptr;
+  return a.storage()->field_ptr(field) != nullptr;
 }
 
 database::contains_term::contains_term(const std::string &f,
@@ -200,9 +204,9 @@ database::contains_term::contains_term(const std::string &f,
 }
 
 bool
-database::contains_term::operator()(const item &it) const
+database::contains_term::operator()(const activity &a) const
 {
-  if (const std::string *str = it.storage()->field_ptr(field))
+  if (const std::string *str = a.storage()->field_ptr(field))
     {
       std::vector<std::string> keys;
       if (parse_keywords(*str, &keys))
@@ -227,35 +231,52 @@ database::compare_term::compare_term(const std::string &f,
 }
 
 bool
-database::compare_term::operator()(const item &it) const
+database::compare_term::operator()(const activity &a) const
 {
-  if (const std::string *str = it.storage()->field_ptr(field))
+  field_id id = lookup_field_id(field.c_str());
+
+  field_data_type type = lookup_field_data_type(id);
+  if (type == type_string)
+    type = type_number;
+
+  /* Use activity to read known fields, e.g. this ensures we fill in
+     missing fields from any GPS file. */
+
+  double lhs;
+ if (id != field_custom)
+   {
+     lhs = a.field_value(id);
+     if (lhs == 0)
+       return false;
+   }
+  else
     {
-      field_id id = lookup_field_id(field.c_str());
+      const std::string *str = a.storage()->field_ptr(field);
+      if (!str || !parse_value(*str, type, &lhs, nullptr))
+	return false;
+    }
 
-      field_data_type type = lookup_field_data_type(id);
-      if (type == type_string)
-	type = type_number;
+  /* FIXME: hack -- comparison order needs to be inverted for pace, as
+     the values are converted to speed (1/pace). */
 
-      double lhs;
-      if (parse_value(*str, type, &lhs, nullptr))
-	{
-	  switch (op)
-	    {
-	    case op_equal:
-	      return lhs == rhs;
-	    case op_not_equal:
-	      return lhs != rhs;
-	    case op_greater:
-	      return lhs > rhs;
-	    case op_greater_or_equal:
-	      return lhs >= rhs;
-	    case op_less:
-	      return lhs < rhs;
-	    case op_less_or_equal:
-	      return lhs <= rhs;
-	    }
-	}
+  double rhs = this->rhs;
+  if (type == type_pace)
+    lhs = 1/lhs, rhs = 1/rhs;
+
+  switch (op)
+    {
+    case op_equal:
+      return lhs == rhs;
+    case op_not_equal:
+      return lhs != rhs;
+    case op_greater:
+      return lhs > rhs;
+    case op_greater_or_equal:
+      return lhs >= rhs;
+    case op_less:
+      return lhs < rhs;
+    case op_less_or_equal:
+      return lhs <= rhs;
     }
 
   return false;
@@ -268,12 +289,12 @@ database::grep_term::grep_term(const std::string &re)
 }
 
 bool
-database::grep_term::operator()(const item &it) const
+database::grep_term::operator()(const activity &a) const
 {
   if (status != 0)
     return false;
 
-  return regexec(&compiled, it.storage()->body().c_str(), 0, nullptr, 0) == 0;
+  return regexec(&compiled, a.body().c_str(), 0, nullptr, 0) == 0;
 }
 
 } // namespace act
