@@ -234,7 +234,7 @@ act_new(arguments &args)
 	  if (idx != std::string::npos)
 	    {
 	      name = arg.substr(0, idx);
-	      value = arg.substr(idx, arg.size() - (idx + 1));
+	      value = arg.substr(idx + 1, arg.size() - (idx + 1));
 	    }
 	  else
 	    swap(name, arg);
