@@ -243,12 +243,12 @@ database::compare_term::operator()(const activity &a) const
      missing fields from any GPS file. */
 
   double lhs;
- if (id != field_custom)
-   {
-     lhs = a.field_value(id);
-     if (lhs == 0)
-       return false;
-   }
+  if (id != field_custom)
+    {
+      lhs = a.field_value(id);
+      if (lhs == 0)
+	return false;
+    }
   else
     {
       const std::string *str = a.storage()->field_ptr(field);
