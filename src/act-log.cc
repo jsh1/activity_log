@@ -188,13 +188,13 @@ act_log(arguments &args, const char *format)
 
   if (strcasecmp(format, "oneline") == 0)
     {
-      format = "%{date:%F %-l%p}: %{distance} %{type} %{activity},"
+      format = "%{date:%F %-l%p}: %{activity} %{distance} %{type},"
 	" %{duration}%n";
     }
   else if (strcasecmp(format, "short") == 0)
     {
-      format = "%{date:%a %b %-e %-l%p}: %{distance} %{type}"
-	" %{activity}, %{duration}%n%n%{body:first-para}%n";
+      format = "%{date:%a %b %-e %-l%p}: %{activity} %{distance} %{type},"
+	" %{duration}%n%n%{body:first-para}%n";
     }
   else if (strcasecmp(format, "medium") == 0)
     {
