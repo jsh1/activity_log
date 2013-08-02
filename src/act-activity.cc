@@ -54,6 +54,8 @@ activity::read_cached_values(unsigned int groups) const
       _quality = 0;
       _temperature = 0;
       _temperature_unit = unit_celsius;
+      _dew_point = 0;
+      _dew_point_unit = unit_celsius;
     }
 
   // Pull values out of the file
@@ -115,6 +117,9 @@ activity::read_cached_values(unsigned int groups) const
 
       if (const std::string *s = field_ptr("temperature"))
 	parse_temperature(*s, &_temperature, &_temperature_unit);
+
+      if (const std::string *s = field_ptr("dew-point"))
+	parse_temperature(*s, &_dew_point, &_dew_point_unit);
 
       if (const std::string *s = field_ptr("equipment"))
 	parse_keywords(*s, &_equipment);
@@ -197,6 +202,8 @@ activity::field_value(field_id id) const
       return weight();
     case field_temperature:
       return temperature();
+    case field_dew_point:
+      return dew_point();
     default:
       return 0;
     }
@@ -237,6 +244,8 @@ activity::field_unit(field_id id) const
       return weight_unit();
     case field_temperature:
       return temperature_unit();
+    case field_dew_point:
+      return dew_point_unit();
     default:
       return unit_unknown;
     }
@@ -373,6 +382,20 @@ activity::temperature_unit() const
 {
   validate_cached_values(group_other);
   return _temperature_unit;
+}
+
+double
+activity::dew_point() const
+{
+  validate_cached_values(group_other);
+  return _dew_point;
+}
+
+unit_type
+activity::dew_point_unit() const
+{
+  validate_cached_values(group_other);
+  return _dew_point_unit;
 }
 
 const std::vector<std::string> &

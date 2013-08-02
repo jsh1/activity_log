@@ -32,6 +32,8 @@ lookup_field_id(const char *str)
     case 'd':
       if (strcasecmp(str, "date") == 0)
 	return field_date;
+      else if (strcasecmp(str, "dew-point") == 0)
+	return field_dew_point;
       else if (strcasecmp(str, "distance") == 0)
 	return field_distance;
       else if (strcasecmp(str, "duration") == 0)
@@ -114,6 +116,8 @@ canonical_field_name(field_id id)
       return 0;
     case field_date:
       return "Date";
+    case field_dew_point:
+      return "Dew-Point";
     case field_distance:
       return "Distance";
     case field_duration:
@@ -186,6 +190,7 @@ lookup_field_data_type(const field_id id)
     case field_max_speed:
     case field_speed:
       return type_speed;
+    case field_dew_point:
     case field_temperature:
       return type_temperature;
     case field_weight:

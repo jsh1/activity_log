@@ -69,6 +69,9 @@ public:
   double temperature() const;
   unit_type temperature_unit() const;
 
+  double dew_point() const;
+  unit_type dew_point_unit() const;
+
   const std::vector<std::string> &weather() const;
 
   const std::vector<std::string> &keywords() const;
@@ -114,7 +117,9 @@ private:
   mutable double _effort;
   mutable double _quality;
   mutable double _temperature;
+  mutable double _dew_point;
   mutable unit_type _temperature_unit;
+  mutable unit_type _dew_point_unit;
 
   mutable std::vector<std::string> _equipment;
   mutable std::vector<std::string> _weather;

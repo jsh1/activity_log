@@ -30,6 +30,7 @@ enum field_id
   field_calories,
   field_equipment,
   field_temperature,
+  field_dew_point,
   field_weather,
   field_weight,
   field_keywords,

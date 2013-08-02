@@ -33,6 +33,7 @@ enum option_id
   opt_calories,
   opt_weight,
   opt_temperature,
+  opt_dew_point,
   opt_weather,
   opt_quality,
   opt_effort,
@@ -83,6 +84,8 @@ option_field_id(option_id opt)
       return field_weight;
     case opt_temperature:
       return field_temperature;
+    case opt_dew_point:
+      return field_dew_point;
     case opt_weather:
       return field_weather;
     case opt_quality:
@@ -120,6 +123,7 @@ const arguments::option new_options[] =
   {opt_calories, "calories", 0, "CALORIES"},
   {opt_weight, "weight", 0, "WEIGHT"},
   {opt_temperature, "temperature", 0, "TEMP"},
+  {opt_dew_point, "dew-point", 0, "TEMP"},
   {opt_weather, "weather", 0, "WEATHER"},
   {opt_quality, "quality", 0, "QUALITY-RATIO"},
   {opt_effort, "effort", 0, "EFFORT-RATIO"},
