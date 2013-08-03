@@ -25,16 +25,16 @@ enum option_id
 
 const arguments::option options[] =
 {
-  {opt_grep, "grep", 0, "REGEXP", "Add grep-body query term."},
-  {opt_defines, "defines", 0, "FIELD", "Add defines-field query term."},
-  {opt_matches, "matches", 0, "FIELD:REGEXP", "Add re-match query term."},
-  {opt_contains, "contains", 0, "FIELD:KEYWORD", "Add keyword query term."},
-  {opt_compare, "compare", 0, "FIELDxVALUE",
+  {opt_grep, "grep", 'g', "REGEXP", "Add grep-body query term."},
+  {opt_defines, "defines", 'd', "FIELD", "Add defines-field query term."},
+  {opt_matches, "matches", 'm', "FIELD:REGEXP", "Add re-match query term."},
+  {opt_contains, "contains", 'c', "FIELD:KEYWORD", "Add keyword query term."},
+  {opt_compare, "compare", 'C', "FIELDxVALUE",
    "Add compare query term. 'x' from: = != < > <= >="},
-  {opt_format, "format", 0, "FORMAT", "Format method."},
-  {opt_format, "pretty", 0, "FORMAT", "Same as --format=FORMAT."},
+  {opt_format, "format", 'f', "FORMAT", "Format method."},
+  {opt_format, "pretty", 'p', "FORMAT", "Same as --format=FORMAT."},
   {opt_max_count, "max-count", 'n', "N", "Maximum number of activities."},
-  {opt_skip, "skip", 0, "N", "First skip N activities."},
+  {opt_skip, "skip", 's', "N", "First skip N activities."},
   {arguments::opt_eof},
 };
 

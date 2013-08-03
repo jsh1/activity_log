@@ -104,7 +104,7 @@ option_field_id(option_id opt)
 
 const arguments::option new_options[] =
 {
-  {opt_edit, "edit", 0, nullptr, "Open new file in editor."},
+  {opt_edit, "edit", 'e', nullptr, "Open new file in editor."},
   {opt_date, "date", 0, "DATE", nullptr},
   {opt_activity, "activity", 0, "ACTIVITY-SPEC"},
   {opt_type, "type", 0, "ACTIVITY-TYPE"},
@@ -128,7 +128,7 @@ const arguments::option new_options[] =
   {opt_quality, "quality", 0, "QUALITY-RATIO"},
   {opt_effort, "effort", 0, "EFFORT-RATIO"},
   {opt_gps_file, "gps-file", 0, "GPS-FILE"},
-  {opt_field, "field", 0, "NAME:VALUE", "Define custom field."},
+  {opt_field, "field", 'f', "NAME:VALUE", "Define custom field."},
   {arguments::opt_eof}
 };
 

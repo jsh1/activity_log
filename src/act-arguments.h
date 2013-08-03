@@ -16,6 +16,7 @@ class arguments
   const char *_program_name;
   std::vector<const char *> _args;
   std::vector<char *> _allocations;
+  ptrdiff_t _short_opt_offset;
   bool _getopt_finished;
 
 public:
