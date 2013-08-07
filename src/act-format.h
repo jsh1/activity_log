@@ -35,6 +35,7 @@ bool parse_date_time(const std::string &str, time_t *date_ptr,
   time_t *range_ptr);
 bool parse_date_range(const std::string &str, time_t *date_ptr,
   time_t *range_ptr);
+bool parse_date_interval(const std::string &str, date_interval *interval_ptr);
 bool parse_duration(const std::string &str, double *dur_ptr);
 bool parse_number(const std::string &str, double *value_ptr);
 bool parse_distance(const std::string &str, double *dist_ptr,

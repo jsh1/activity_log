@@ -103,6 +103,19 @@ struct date_range
   bool contains(time_t t) const;
 };
 
+struct date_interval
+{
+  enum unit_type
+    {
+      days, weeks, months, years
+    };
+
+  unit_type unit;
+  int count;
+
+  date_interval(unit_type u, int n) : unit(u), count(n) {}
+};
+
 // implementation
 
 inline

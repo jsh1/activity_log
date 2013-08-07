@@ -1079,6 +1079,65 @@ parse_time(const std::string &str, size_t &idx, double *dur_ptr)
 }
 
 bool
+parse_date_interval(const std::string &str, date_interval *interval_ptr)
+{
+  /* Possible interval formats:
+
+	day
+	week
+	month
+	year
+	N day[s]
+	N week[s]
+	N month[s]
+	N year[s]  */
+
+  size_t idx = skip_whitespace(str, 0);
+
+  std::string token;
+
+  idx = next_token(str, idx, token);
+
+  if (token.size() == 0)
+    return false;
+
+  date_interval::unit_type unit = date_interval::days;
+  int count = 1;
+
+  if (!isdigit_l(token[0], nullptr))
+    {
+      size_t tidx = idx;
+      count = parse_decimal(token, tidx, 100);
+      if (tidx != token.size())
+	return false;
+
+      idx = skip_whitespace_and_dashes(str, idx);
+      idx = next_token(str, idx, token);
+
+      if (token.size() == 0)
+	return false;
+    }
+
+  const char *tstr = token.c_str();
+
+  if (strcasecmp(tstr, "day") == 0 || strcasecmp(tstr, "days") == 0)
+    unit = date_interval::days;
+  else if (strcasecmp(tstr, "week") == 0 || strcasecmp(tstr, "weeks") == 0)
+    unit = date_interval::weeks;
+  else if (strcasecmp(tstr, "month") == 0 || strcasecmp(tstr, "months") == 0)
+    unit = date_interval::months;
+  else if (strcasecmp(tstr, "year") == 0 || strcasecmp(tstr, "years") == 0)
+    unit = date_interval::years;
+  else
+    return false;
+
+  if (interval_ptr)
+    *interval_ptr = date_interval(unit, count);
+
+  return true;
+}
+
+bool
 parse_duration(const std::string &str, double *dur_ptr)
 {
   size_t idx = skip_whitespace(str, 0);
