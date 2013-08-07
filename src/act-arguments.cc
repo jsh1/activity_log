@@ -43,6 +43,14 @@ arguments::program_name_p(const char *name) const
 }
 
 void
+arguments::push_front(const char *arg)
+{
+  char *copy = strdup(arg);
+  _allocations.push_back(copy);
+  _args.insert(_args.begin(), copy);
+}
+
+void
 arguments::push_back(const char *arg)
 {
   char *copy = strdup(arg);

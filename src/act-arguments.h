@@ -33,6 +33,9 @@ public:
 
   bool program_name_p(const char *name) const;
 
+  void push_front(const char *arg);
+  void push_front(const std::string &arg);
+
   void push_back(const char *arg);
   void push_back(const std::string &arg);
 
@@ -88,6 +91,12 @@ inline int
 arguments::argc() const
 {
   return _args.size();
+}
+
+inline void
+arguments::push_front(const std::string &arg)
+{
+  push_front(arg.c_str());
 }
 
 inline void
