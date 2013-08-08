@@ -23,7 +23,7 @@ case_insensitive_string_hash::operator() (const char *ptr) const
 bool
 case_insensitive_string_pred::operator() (const char *a, const char *b) const
 {
-  return strcasecmp_l(a, b, nullptr);
+  return strcasecmp_l(a, b, nullptr) == 0;
 }
 
 bool
