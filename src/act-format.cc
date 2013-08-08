@@ -277,18 +277,26 @@ format_value(std::string &str, field_data_type type,
       break;
 
     case type_distance:
+      if (unit == unit_unknown)
+	unit = shared_config().default_distance_unit();
       format_distance(str, value, unit);
       break;
 
     case type_pace:
+      if (unit == unit_unknown)
+	unit = shared_config().default_pace_unit();
       format_pace(str, value, unit);
       break;
 
     case type_speed:
+      if (unit == unit_unknown)
+	unit = shared_config().default_speed_unit();
       format_speed(str, value, unit);
       break;
 
     case type_temperature:
+      if (unit == unit_unknown)
+	unit = shared_config().default_temperature_unit();
       format_temperature(str, value, unit);
       break;
 
@@ -297,6 +305,8 @@ format_value(std::string &str, field_data_type type,
       break;
 
     case type_weight:
+      if (unit == unit_unknown)
+	unit = shared_config().default_weight_unit();
       format_weight(str, value, unit);
       break;
 
