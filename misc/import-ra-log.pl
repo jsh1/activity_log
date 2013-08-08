@@ -39,8 +39,8 @@ my %equipment_map = (
     "Adizero Mana 5 (white)" => "mana-5-white",
     "Adizero Mana 5 (yellow)" => "mana-5-yellow",
     # asics
-    "Gel Tarther" => "tarther-1",
-    "Gel Tarther (2)" => "tarther-2",
+    "Gel-Tarther" => "tarther-1",
+    "Gel-Tarther (2)" => "tarther-2",
     "GT-2140" => "asics-gt2140",
     # brooks
     "Mach 11 Spikeless" => "mach11",
