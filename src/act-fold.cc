@@ -225,17 +225,7 @@ interval_group::insert(const activity &a)
 void
 interval_group::format_key(std::string &buf, int key) const
 {
-  // FIXME: implement this
-
-  char tem[512];
-  snprintf_l(tem, sizeof(tem), nullptr, "[%d %s @ %d]",
-	     interval.count, interval.unit == date_interval::days ? "days"
-	     : interval.unit == date_interval::weeks ? "weeks"
-	     : interval.unit == date_interval::months ? "months"
-	     : interval.unit == date_interval::years ? "years"
-	     : "unknown", key);
-
-  buf.append(tem);
+  interval.append_date(buf, key);
 }
 
 template<typename T> void
@@ -268,7 +258,7 @@ act_fold(arguments &args)
   double group_size = 0;
   date_interval interval(date_interval::days, 0);
 
-  const char *format = "%32{key} %4{count} %16{distance} %16{duration}%n";
+  const char *format = "%16{key} %4{count} %16{distance} %16{duration}%n";
 
   while (1)
     {

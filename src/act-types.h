@@ -116,6 +116,7 @@ struct date_interval
   date_interval(unit_type u, int n);
 
   int date_index(time_t date) const;
+  void append_date(std::string &str, int x) const;
 };
 
 // implementation

@@ -332,6 +332,18 @@ days_since_1970(const struct tm &tm)
 	  + year*365 - 719499);
 }
 
+void
+append_days_date(std::string &str, int days)
+{
+  time_t date = days * (time_t) (24*60*60);
+  struct tm tm = {0};
+  localtime_r(&date, &tm);
+
+  char buf[128];
+  strftime_l(buf, sizeof(buf), "%F", &tm, nullptr);
+  str.append(buf);
+}
+
 } // anonymous namespace
 
 int
@@ -355,6 +367,40 @@ date_interval::date_index(time_t date) const
 
     case years:
       return tm.tm_year - 70;
+    }
+}
+
+void
+date_interval::append_date(std::string &str, int x) const
+{
+  switch (unit)
+    {
+    case days:
+      append_days_date(str, x);
+      break;
+
+    case weeks: {
+      static int week_offset = 4 - shared_config().start_of_week();
+      int days = x * 7 + week_offset;
+      append_days_date(str, days);
+      break; }
+
+    case months: {
+      int month = x % 12;
+      int year = 1970 + x / 12;
+      char buf[128];
+      static const char *names[] = {"January", "February", "March",
+	"April", "May", "June", "July", "August", "September",
+	"October", "November", "December"};
+      snprintf_l(buf, sizeof(buf), nullptr, "%s %04d", names[month], year);
+      str.append(buf);
+      break; }
+
+    case years: {
+      char buf[64];
+      snprintf_l(buf, sizeof(buf), nullptr, "%d", 1970 + x);
+      str.append(buf);
+      break; }
     }
 }
 
