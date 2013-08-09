@@ -113,7 +113,9 @@ struct date_interval
   unit_type unit;
   int count;
 
-  date_interval(unit_type u, int n) : unit(u), count(n) {}
+  date_interval(unit_type u, int n);
+
+  int date_index(time_t date) const;
 };
 
 // implementation
@@ -130,6 +132,13 @@ date_range::contains(time_t t) const
 {
   time_t delta = t - start;
   return delta >= 0 && delta < length;
+}
+
+inline
+date_interval::date_interval(unit_type u, int n)
+: unit(u),
+  count(n)
+{
 }
 
 } // namespace act

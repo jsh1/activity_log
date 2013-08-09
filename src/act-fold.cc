@@ -217,10 +217,7 @@ interval_group::insert(const activity &a)
   if (date == 0)
     return;
 
-  // FIXME: how is this going to work? Need to include date as well?
-
-//  int idx = interval.date_index(date);
-  int idx = 0;
+  int idx = interval.date_index(date);
 
   map[idx].add(a);
 }

@@ -53,6 +53,8 @@ void print_indented_string(const char *str, size_t len, FILE *fh);
 
 unsigned int convert_hexdigit(int c);
 
+bool matches_word_list(const char *str, const char *lst);
+
 // Modifies 'file' to be absolute if the named file is found.
 
 bool find_file_under_directory(std::string &file, const char *dir);

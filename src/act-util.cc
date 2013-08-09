@@ -90,6 +90,18 @@ convert_hexdigit(int c)
     return 0;
 }
 
+bool
+matches_word_list(const char *str, const char *lst)
+{
+  for (const char *wptr = lst; *wptr; wptr += strlen(wptr) + 1)
+    {
+      if (strcasecmp_l(str, wptr, nullptr) == 0)
+	return true;
+    }
+
+  return false;
+}
+
 namespace {
 
 struct FILE_wrapper

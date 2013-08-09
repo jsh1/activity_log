@@ -3,6 +3,7 @@
 #include "act-format.h"
 
 #include "act-config.h"
+#include "act-util.h"
 
 #include <algorithm>
 #include <errno.h>
@@ -33,7 +34,7 @@ format_date_time(std::string &str, time_t date)
 {
   char buf[256];
 
-  struct tm tm;
+  struct tm tm = {0};
   localtime_r(&date, &tm);
 
   strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S %z", &tm);
@@ -545,16 +546,12 @@ parse_unit(const parsable_unit *units, const std::string &str,
 
   for (const parsable_unit *uptr = units; uptr->word_list; uptr++)
     {
-      for (const char *wptr = uptr->word_list;
-	   *wptr; wptr += strlen(wptr) + 1)
+      if (matches_word_list(buf, uptr->word_list))
 	{
-	  if (strcasecmp_l(buf, wptr, nullptr) == 0)
-	    {
-	      value = value * uptr->multiplier + uptr->offset;
-	      unit = uptr->unit;
-	      idx += len;
-	      return true;
-	    }
+	  value = value * uptr->multiplier + uptr->offset;
+	  unit = uptr->unit;
+	  idx += len;
+	  return true;
 	}
     }
 
@@ -1093,10 +1090,10 @@ parse_date_interval(const std::string &str, date_interval *interval_ptr)
 {
   /* Possible interval formats:
 
-	day
-	week
-	month
-	year
+	day|daily
+	week|weekly
+	month|monthly
+	year|yearly
 	N day[s]
 	N week[s]
 	N month[s]
@@ -1114,7 +1111,7 @@ parse_date_interval(const std::string &str, date_interval *interval_ptr)
   date_interval::unit_type unit = date_interval::days;
   int count = 1;
 
-  if (!isdigit_l(token[0], nullptr))
+  if (isdigit_l(token[0], nullptr))
     {
       size_t tidx = idx;
       count = parse_decimal(token, tidx, 100);
@@ -1130,13 +1127,13 @@ parse_date_interval(const std::string &str, date_interval *interval_ptr)
 
   const char *tstr = token.c_str();
 
-  if (strcasecmp(tstr, "day") == 0 || strcasecmp(tstr, "days") == 0)
+  if (matches_word_list(tstr, "day\0days\0daily\0"))
     unit = date_interval::days;
-  else if (strcasecmp(tstr, "week") == 0 || strcasecmp(tstr, "weeks") == 0)
+  else if (matches_word_list(tstr, "week\0weeks\0weekly\0"))
     unit = date_interval::weeks;
-  else if (strcasecmp(tstr, "month") == 0 || strcasecmp(tstr, "months") == 0)
+  else if (matches_word_list(tstr, "month\0months\0monthly\0"))
     unit = date_interval::months;
-  else if (strcasecmp(tstr, "year") == 0 || strcasecmp(tstr, "years") == 0)
+  else if (matches_word_list(tstr, "year\0years\0yearly\0"))
     unit = date_interval::years;
   else
     return false;

@@ -315,4 +315,47 @@ canonicalize_field_string(field_data_type type, std::string &str)
   return false;
 }
 
+namespace {
+
+int
+days_since_1970(const struct tm &tm)
+{
+  /* Adapted from Linux kernel's mktime(). */
+
+  int year = tm.tm_year + 1900;
+  int month = tm.tm_mon - 1;	/* 0..11 -> 11,12,1..10 */
+  if (month < 0)
+    month += 12, year -= 1;
+  int day = tm.tm_mday;
+
+  return ((year/4 - year/100 + year/400 + 367*month/12 + day)
+	  + year*365 - 719499);
+}
+
+} // anonymous namespace
+
+int
+date_interval::date_index(time_t date) const
+{
+  struct tm tm = {0};
+  localtime_r(&date, &tm);
+
+  switch (unit)
+    {
+    case days:
+      return days_since_1970(tm);
+
+    case weeks: {
+      // 1970-01-01 was a thursday.
+      static int week_offset = 4 - shared_config().start_of_week();
+      return (days_since_1970(tm) - week_offset) / 7; }
+
+    case months:
+      return (tm.tm_year - 70) * 12 + tm.tm_mon;
+
+    case years:
+      return tm.tm_year - 70;
+    }
+}
+
 } // namespace act
