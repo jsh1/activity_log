@@ -27,7 +27,6 @@ enum option_id
   opt_course,
   opt_keywords,
   opt_equipment,
-  opt_size,
   opt_format,
 };
 
@@ -40,14 +39,13 @@ const arguments::option options[] =
   {opt_compare, "compare", 'C', "FIELDxVALUE",
    "Add compare query term. 'x' from: = != < > <= >="},
   {opt_interval, "interval", 'i', "INTERVAL", "Group by date-interval."},
-  {opt_field, "field", 'f', "FIELD", "Group by the named field."},
+  {opt_field, "field", 'f', "FIELD[:SIZE]", "Group by the named field."},
   {opt_course, "course", 0, nullptr, "Group by Course field."},
   {opt_keywords, "keywords", 'k', "FIELD", "Group by keyword."},
   {opt_equipment, "equipment", 0, nullptr, "Group by equipment."},
-  {opt_size, "size", 's', "SIZE", "Group by numeric field value."},
   {opt_format, "format", 'f', "FORMAT", "Format method."},
   {arguments::opt_eof},
- };
+};
 
 void
 print_usage(const arguments &args)
@@ -94,7 +92,8 @@ struct keyword_group
 
 struct value_group
 {
-  field_id field;
+  const char *field;
+  field_id field_id;
   double bucket_size;
   double bucket_scale;
 
@@ -166,7 +165,8 @@ keyword_group::format_key(std::string &buf, const std::string &key) const
 }
 
 value_group::value_group(const char *f, double size)
-: field(lookup_field_id(f)),
+: field(f),
+  field_id(lookup_field_id(f)),
   bucket_size(size),
   bucket_scale(1 / size)
 {
@@ -175,7 +175,13 @@ value_group::value_group(const char *f, double size)
 void
 value_group::insert(const activity &a)
 {
-  double value = a.field_value(field);
+  double value = 0;
+
+  if (field_id != field_custom)
+    value = a.field_value(field_id);
+  else if (const std::string *ptr = a.field_ptr(field))
+    parse_number(*ptr, &value);
+
   if (value == 0)
     return;
 
@@ -190,7 +196,7 @@ value_group::format_key(std::string &buf, int key) const
   double min = key * bucket_size;
   double max = (key + 1) * bucket_size;
 
-  field_data_type type = lookup_field_data_type(field);
+  field_data_type type = lookup_field_data_type(field_id);
 
   buf.push_back('[');
   format_value(buf, type, min, unit_unknown);
@@ -260,9 +266,9 @@ act_fold(arguments &args)
   std::shared_ptr<database::and_term> query_and (new database::and_term);
   query.set_term(query_and);
 
-  const char *group_field = nullptr;
+  std::string group_field;
   bool group_keywords = false;
-  double bucket_size = 0;
+  double group_size = 0;
   date_interval interval(date_interval::days, 0);
 
   const char *format = "%32{key} %4{count} %16{distance} %16{duration}%n";
@@ -382,7 +388,29 @@ act_fold(arguments &args)
 	  break;
 
 	case opt_field:
-	  group_field = opt_arg;
+	  if (const char *ptr = strchr(opt_arg, ':'))
+	    {
+	      if (group_keywords)
+		{
+		  fputs("Error: cannot specify both keywords and size\n",
+			stderr);
+		  return 1;
+		}
+
+	      group_field.clear();
+	      group_field.append(opt_arg, ptr - opt_arg);
+
+	      field_id id = lookup_field_id(group_field.c_str());
+	      field_data_type type = lookup_field_data_type(id);
+
+	      if (!parse_value(std::string(ptr+1), type, &group_size, nullptr))
+		{
+		  fprintf(stderr, "Error: invalid group size: %s\n", ptr+1);
+		  return 1;
+		}
+	    }
+	  else
+	    group_field = opt_arg;
 	  break;
 
 	case opt_course:
@@ -390,6 +418,11 @@ act_fold(arguments &args)
 	  break;
 
 	case opt_keywords:
+	  if (group_size != 0)
+	    {
+	      fputs("Error: cannot specify both keywords and size\n", stderr);
+	      return 1;
+	    }
 	  group_field = opt_arg;
 	  group_keywords = true;
 	  break;
@@ -397,17 +430,6 @@ act_fold(arguments &args)
 	case opt_equipment:
 	  group_field = "equipment";
 	  group_keywords = true;
-	  break;
-
-	case opt_size:
-	  if (group_field)
-	    {
-	      field_id id = lookup_field_id(group_field);
-	      field_data_type type = lookup_field_data_type(id);
-	      if (parse_value(std::string(opt_arg), type, &bucket_size, nullptr))
-		break;
-	    }
-	  bucket_size = strtod(opt_arg, nullptr);
 	  break;
 
 	case opt_format:
@@ -438,21 +460,21 @@ act_fold(arguments &args)
   std::vector<database::item_ref> items;
   db.execute_query(query, items);
 
-  if (group_field)
+  if (group_field.size() != 0)
     {
       if (group_keywords)
 	{
-	  keyword_group g(group_field);
+	  keyword_group g(group_field.c_str());
 	  apply_group(g, items, format);
 	}
-      else if (bucket_size > 0)
+      else if (group_size > 0)
 	{
-	  value_group g(group_field, bucket_size);
+	  value_group g(group_field.c_str(), group_size);
 	  apply_group(g, items, format);
 	}
       else
 	{
-	  string_group g(group_field);
+	  string_group g(group_field.c_str());
 	  apply_group(g, items, format);
 	}
     }

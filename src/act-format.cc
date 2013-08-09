@@ -269,6 +269,7 @@ format_value(std::string &str, field_data_type type,
   switch (type)
     {
     case type_number:
+    case type_string:
       format_number(str, value);
       break;
 
@@ -314,7 +315,6 @@ format_value(std::string &str, field_data_type type,
       format_date_time(str, (time_t) value);
       break;
 
-    case type_string:
     case type_keywords:
       abort();
     }
@@ -1408,6 +1408,7 @@ parse_value(const std::string &str, field_data_type type,
   switch (type)
     {
     case type_number:
+    case type_string:
       return parse_number(str, value_ptr);
 
     case type_duration:
@@ -1440,7 +1441,6 @@ parse_value(const std::string &str, field_data_type type,
 	}
       return false; }
 
-    case type_string:
     case type_keywords:
       return false;
     }
