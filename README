@@ -171,11 +171,10 @@ $ act fold [FOLD-OPTIONS...] [ACTIVITY-RANGE...]
 	FOLD-OPTIONS would include:
 
 		--interval=INTERVAL
-		--field=FIELD
+		--field=FIELD[:BUCKET-SIZE]
 		--course		--field=course
 		--keywords=FIELD
 		--equipment		--keywords=equipment
-		--size=SIZE		numeric bucket size
 		--format=FORMAT
 
 	and INTERVAL is one of:
