@@ -27,6 +27,13 @@ case_insensitive_string_pred::operator() (const char *a, const char *b) const
 }
 
 bool
+case_insensitive_string_compare::operator() (const char *a,
+					     const char *b) const
+{
+  return strcasecmp_l(a, b, nullptr) < 0;
+}
+
+bool
 string_has_suffix(const std::string &str, const char *suffix)
 {
   size_t len = strlen(suffix);
