@@ -1,10 +1,4 @@
 
-# files
-
-library_products = libact.a
-bin_products = act act-fold act-log act-new act-gps-test
-symlink_products = act-cat act-daily act-import act-list act-locate act-monthly act-show act-slog act-weekly act-yearly
-
 prefix = /opt
 exec_prefix = ${prefix}
 datarootdir=${prefix}/share
@@ -13,6 +7,29 @@ bindir = ${prefix}/bin
 includedir=${prefix}/include
 libdir=${exec_prefix}/lib
 libexecdir=${exec_prefix}/libexec
+
+# files
+
+library_products = libact.a
+
+bin_products =			\
+	act			\
+	act-fold		\
+	act-log			\
+	act-new			\
+	act-gps-test
+
+symlink_products =		\
+	act-cat			\
+	act-daily		\
+	act-import		\
+	act-list		\
+	act-locate		\
+	act-monthly		\
+	act-show		\
+	act-slog		\
+	act-weekly		\
+	act-yearly
 
 libact.a_objects =		\
 	act-activity.o		\
