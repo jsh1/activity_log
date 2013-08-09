@@ -1,6 +1,7 @@
 // -*- c-style: gnu -*-
 
 #include "act-activity.h"
+#include "act-activity-accum.h"
 #include "act-arguments.h"
 #include "act-config.h"
 #include "act-database.h"
@@ -59,41 +60,11 @@ print_usage(const arguments &args)
   fputs("\n", stderr);
 }
 
-struct activity_sum
-{
-  int _count;
-  double _distance;
-  int _distance_samples;
-  double _duration;
-  int _duration_samples;
-  double _average_hr;
-  int _average_hr_samples;
-  double _max_hr;
-  double _resting_hr;
-  int _resting_hr_samples;
-  double _calories;
-  double _weight;
-  int _weight_samples;
-  double _effort;
-  int _effort_samples;
-  double _quality;
-  int _quality_samples;
-  double _temperature;
-  int _temperature_samples;
-  double _dew_point;
-  int _dew_point_samples;
-
-  activity_sum();
-
-  void add(const activity &a);
-  void print(const std::string &key) const;
-};
-
 struct string_group
 {
   const char *field;
 
-  typedef std::unordered_map<std::string, activity_sum,
+  typedef std::unordered_map<std::string, activity_accum,
     case_insensitive_string_hash, case_insensitive_string_pred> group_map;
 
   group_map map;
@@ -109,7 +80,7 @@ struct keyword_group
 {
   field_id field;
 
-  typedef std::unordered_map<std::string, activity_sum,
+  typedef std::unordered_map<std::string, activity_accum,
     case_insensitive_string_hash, case_insensitive_string_pred> group_map;
 
   group_map map;
@@ -127,7 +98,7 @@ struct value_group
   double bucket_size;
   double bucket_scale;
 
-  typedef std::unordered_map<int, activity_sum> group_map;
+  typedef std::unordered_map<int, activity_accum> group_map;
 
   group_map map;
 
@@ -142,7 +113,7 @@ struct interval_group
 {
   date_interval interval;
 
-  typedef std::unordered_map<int, activity_sum> group_map;
+  typedef std::unordered_map<int, activity_accum> group_map;
 
   group_map map;
 
@@ -152,107 +123,6 @@ struct interval_group
 
   void format_key(std::string &buf, int key) const;
 };
-
-activity_sum::activity_sum()
-: _count(0),
-  _distance(0),
-  _distance_samples(0),
-  _duration(0),
-  _duration_samples(0),
-  _average_hr(0),
-  _average_hr_samples(0),
-  _max_hr(0),
-  _resting_hr(0),
-  _resting_hr_samples(0),
-  _calories(0),
-  _weight(0),
-  _weight_samples(0),
-  _effort(0),
-  _effort_samples(0),
-  _quality(0),
-  _quality_samples(0),
-  _temperature(0),
-  _temperature_samples(0),
-  _dew_point(0),
-  _dew_point_samples(0)
-{
-}
-
-void
-activity_sum::add(const activity &a)
-{
-  _count++;
-
-  if (a.distance() != 0)
-    _distance += a.distance(), _distance_samples++;
-
-  if (a.duration() != 0)
-    _duration += a.duration(), _duration_samples++;
-
-  if (a.average_hr() != 0)
-    _average_hr += a.average_hr(), _average_hr_samples++;
-
-  _max_hr = std::max(_max_hr, a.max_hr());
-
-  if (a.resting_hr() != 0)
-    _resting_hr += a.resting_hr(), _resting_hr_samples++;
-
-  _calories += a.calories();
-
-  if (a.weight() != 0)
-    _weight += a.weight(), _weight_samples++;
-
-  if (a.effort() != 0)
-    _effort += a.effort(), _effort_samples++;
-
-  if (a.quality() != 0)
-    _quality += a.quality(), _quality_samples++;
-
-  if (a.temperature() != 0)
-    _temperature += a.temperature(), _temperature_samples++;
-
-  if (a.dew_point() != 0)
-    _dew_point += a.dew_point(), _dew_point_samples++;
-}
-
-void
-activity_sum::print(const std::string &key) const
-{
-  std::string dist;
-  format_distance(dist, _distance, shared_config().default_distance_unit());
-
-  std::string dur;
-  format_time(dur, _duration, true, "");
-
-  std::string avg_hr, max_hr, rest_hr;
-  if (_average_hr != 0)
-    format_number(avg_hr, _average_hr / (double)_average_hr_samples);
-  if (_max_hr != 0)
-    format_number(max_hr, _max_hr);
-  if (_resting_hr != 0)
-    format_number(rest_hr, _resting_hr / (double)_resting_hr_samples);
-
-  std::string weight;
-  if (_weight != 0)
-    format_weight(weight, _weight, shared_config().default_weight_unit());
-
-  std::string temp, dew;
-  if (_temperature != 0)
-    format_temperature(temp, _temperature / (double)_temperature_samples, shared_config().default_temperature_unit());
-  if (_dew_point != 0)
-    format_temperature(dew, _dew_point / (double)_dew_point_samples, shared_config().default_temperature_unit());
-
-  std::string effort, quality;
-  if (_effort != 0)
-    format_fraction(effort, _effort / (double)_effort_samples);
-  if (_quality != 0)
-    format_fraction(quality, _quality / (double)_quality_samples);
-
-  printf("%s\t%d\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n", key.c_str(),
-	 _count, dist.c_str(), dur.c_str(), avg_hr.c_str(), max_hr.c_str(),
-	 rest_hr.c_str(), weight.c_str(), temp.c_str(), dew.c_str(),
-	 effort.c_str(), quality.c_str());
-}
 
 string_group::string_group(const char *f)
 : field(f)
@@ -366,18 +236,17 @@ interval_group::format_key(std::string &buf, int key) const
 }
 
 template<typename T> void
-apply_group(T &g, const std::vector<database::item_ref> &items)
+apply_group(T &g, const std::vector<database::item_ref> &items,
+	    const char *format)
 {
   for (const auto &it : items)
     g.insert(activity(it->storage()));
-
-  // FIXME: ignoring format string
 
   for (const auto &it : g.map)
     {
       std::string key;
       g.format_key(key, it.first);
-      it.second.print(key);
+      it.second.printf(format, key.c_str());
     }
 }
 
@@ -395,7 +264,8 @@ act_fold(arguments &args)
   bool group_keywords = false;
   double bucket_size = 0;
   date_interval interval(date_interval::days, 0);
-  const char *format = nullptr;
+
+  const char *format = "%32{key} %4{count} %16{distance} %16{duration}%n";
 
   while (1)
     {
@@ -573,23 +443,23 @@ act_fold(arguments &args)
       if (group_keywords)
 	{
 	  keyword_group g(group_field);
-	  apply_group(g, items);
+	  apply_group(g, items, format);
 	}
       else if (bucket_size > 0)
 	{
 	  value_group g(group_field, bucket_size);
-	  apply_group(g, items);
+	  apply_group(g, items, format);
 	}
       else
 	{
 	  string_group g(group_field);
-	  apply_group(g, items);
+	  apply_group(g, items, format);
 	}
     }
   else if (interval.count > 0)
     {
       interval_group g(interval);
-      apply_group(g, items);
+      apply_group(g, items, format);
     }
 
   return 0;

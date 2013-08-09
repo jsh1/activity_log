@@ -433,45 +433,6 @@ activity::make_filename(std::string &filename) const
   return make_path(filename.c_str());
 }
 
-namespace {
-
-unsigned int
-convert_hexdigit(int c)
-{
-  if (c >= '0' && c <= '9')
-    return c - '0';
-  else if (c >= 'A' && c <= 'F')
-    return 10 + c - 'A';
-  else if (c >= 'a' && c <= 'f')
-    return 10 + c - 'a';
-  else
-    return 0;
-}
-
-void
-print_indented_string(const char *str, size_t len, FILE *fh)
-{
-  const char *ptr = str;
-
-  while (ptr < str + len)
-    {
-      const char *eol = strchr(ptr, '\n');
-      if (!eol)
-	break;
-
-      if (eol > str + len)
-	eol = str + len;
-
-      fputs("    ", fh);
-      fwrite(ptr, 1, eol - ptr, fh);
-      fputc('\n', fh);
-
-      ptr = eol + 1;
-    }
-}
-
-} // anonymous namespace
-
 void
 activity::printf(const char *format) const
 {
@@ -483,6 +444,11 @@ activity::printf(const char *format) const
 	    fwrite(format, 1, ptr - format, stdout);
 
 	  ptr++;
+
+	  int field_width = 0;
+	  while (isdigit(*ptr))
+	    field_width = field_width * 10 + (*ptr++ - '0');
+
 	  switch (*ptr++)
 	    {
 	    case 'n':
@@ -518,7 +484,7 @@ activity::printf(const char *format) const
 		  if (arg)
 		    *arg++ = 0;
 
-		  print_expansion(stdout, token, arg);
+		  print_expansion(stdout, token, arg, field_width);
 		}
 	      ptr = end ? end + 1 : ptr + strlen(ptr);
 	      break; }
@@ -551,7 +517,8 @@ activity::printf(const char *format) const
 }
 
 void
-activity::print_expansion(FILE *fh, const char *name, const char *arg) const
+activity::print_expansion(FILE *fh, const char *name,
+			  const char *arg, int field_width) const
 {
   if (strcasecmp(name, "body") == 0)
     {
@@ -594,7 +561,10 @@ activity::print_expansion(FILE *fh, const char *name, const char *arg) const
       char buf[1024];
       strftime(buf, sizeof(buf), arg, &tm);
 
-      fputs(buf, fh);
+      if (field_width == 0)
+	fputs(buf, fh);
+      else
+	fprintf(fh, "%*s", field_width, buf);
     }
   else if (strcasecmp(name, "relative-date") == 0)
     {
@@ -644,7 +614,12 @@ activity::print_expansion(FILE *fh, const char *name, const char *arg) const
 	}
 
       if (str)
-	fwrite(str->c_str(), 1, str->size(), fh);
+	{
+	  if (field_width == 0)
+	    fwrite(str->c_str(), 1, str->size(), fh);
+	  else
+	    fprintf(fh, "%*s", field_width, str->c_str());
+	}
     }
 }
 

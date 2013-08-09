@@ -16,6 +16,7 @@ libexecdir=${exec_prefix}/libexec
 
 libact.a_objects =		\
 	act-activity.o		\
+	act-activity-accum.o	\
 	act-activity-storage.o	\
 	act-arguments.o		\
 	act-config.o		\

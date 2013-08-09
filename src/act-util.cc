@@ -55,6 +55,41 @@ trim_newline_characters(char *ptr)
     }
 }	 
 
+void
+print_indented_string(const char *str, size_t len, FILE *fh)
+{
+  const char *ptr = str;
+
+  while (ptr < str + len)
+    {
+      const char *eol = strchr(ptr, '\n');
+      if (!eol)
+	break;
+
+      if (eol > str + len)
+	eol = str + len;
+
+      fputs("    ", fh);
+      fwrite(ptr, 1, eol - ptr, fh);
+      fputc('\n', fh);
+
+      ptr = eol + 1;
+    }
+}
+
+unsigned int
+convert_hexdigit(int c)
+{
+  if (c >= '0' && c <= '9')
+    return c - '0';
+  else if (c >= 'A' && c <= 'F')
+    return 10 + c - 'A';
+  else if (c >= 'a' && c <= 'f')
+    return 10 + c - 'a';
+  else
+    return 0;
+}
+
 namespace {
 
 struct FILE_wrapper

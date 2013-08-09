@@ -49,6 +49,10 @@ bool string_has_suffix(const std::string &str, const char *suffix);
 
 void trim_newline_characters(char *ptr);
 
+void print_indented_string(const char *str, size_t len, FILE *fh);
+
+unsigned int convert_hexdigit(int c);
+
 // Modifies 'file' to be absolute if the named file is found.
 
 bool find_file_under_directory(std::string &file, const char *dir);
