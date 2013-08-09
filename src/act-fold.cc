@@ -8,7 +8,8 @@
 #include "act-format.h"
 #include "act-util.h"
 
-#include <unordered_map>
+#include <cmath>
+#include <map>
 #include <xlocale.h>
 
 using namespace act;
@@ -62,8 +63,8 @@ struct string_group
 {
   const char *field;
 
-  typedef std::unordered_map<std::string, activity_accum,
-    case_insensitive_string_hash, case_insensitive_string_pred> group_map;
+  typedef std::map<std::string, activity_accum,
+    case_insensitive_string_compare> group_map;
 
   group_map map;
 
@@ -78,8 +79,8 @@ struct keyword_group
 {
   field_id field;
 
-  typedef std::unordered_map<std::string, activity_accum,
-    case_insensitive_string_hash, case_insensitive_string_pred> group_map;
+  typedef std::map<std::string, activity_accum,
+    case_insensitive_string_compare> group_map;
 
   group_map map;
 
@@ -97,7 +98,7 @@ struct value_group
   double bucket_size;
   double bucket_scale;
 
-  typedef std::unordered_map<int, activity_accum> group_map;
+  typedef std::map<int, activity_accum> group_map;
 
   group_map map;
 
@@ -112,7 +113,7 @@ struct interval_group
 {
   date_interval interval;
 
-  typedef std::unordered_map<int, activity_accum> group_map;
+  typedef std::map<int, activity_accum> group_map;
 
   group_map map;
 
