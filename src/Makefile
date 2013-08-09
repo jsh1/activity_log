@@ -3,7 +3,7 @@
 
 library_products = libact.a
 bin_products = act act-fold act-log act-new act-gps-test
-symlink_products = act-cat act-import act-list act-locate act-show act-slog
+symlink_products = act-cat act-daily act-import act-list act-locate act-monthly act-show act-slog act-weekly act-yearly
 
 prefix = /opt
 exec_prefix = ${prefix}
@@ -35,9 +35,13 @@ act_deps = libact.a
 
 act-cat_src = act-log
 
+act-daily_src = act-fold
+
 act-fold_libraries = -lact -lxml2
 act-fold_objects = act-fold.o
 act-fold_deps = libact.a
+
+act-import_src = act-new
 
 act-list_src = act-log
 act-locate_src = act-log
@@ -46,7 +50,7 @@ act-log_libraries = -lact -lxml2
 act-log_objects = act-log.o
 act-log_deps = libact.a
 
-act-import_src = act-new
+act-monthly_src = act-fold
 
 act-new_libraries = -lact -lxml2
 act-new_objects = act-new.o
@@ -58,6 +62,10 @@ act-gps-test_deps = libact.a
 
 act-show_src = act-log
 act-slog_src = act-log
+
+act-weekly_src = act-fold
+
+act-yearly_src = act-fold
 
 # compilers
 

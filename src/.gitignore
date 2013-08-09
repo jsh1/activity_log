@@ -1,12 +1,16 @@
 act
 act-cat
+act-daily
 act-fold
 act-gps-test
 act-import
 act-list
 act-locate
 act-log
+act-monthly
 act-new
 act-show
 act-slog
+act-weekly
+act-yearly
 .*.d
