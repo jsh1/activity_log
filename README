@@ -151,11 +151,6 @@ $ act log [LOG-OPTIONS...] [ACTIVITY-RANGE ...]
 		%[body]		complete body string
 		%[laps]		tabulated laps from GPS file
 
-$ act summary [SUMMARY-OPTIONS...] ACTIVITY-RANGE
-
-	Summarizes a range of activities. E.g. prints weekly mileage
-	for the past year.
-
 $ act show [LOG-OPTIONS...] [ACTIVITY-RANGE ...]
 
 	Prints one activity, with pretty-print options.
@@ -167,6 +162,53 @@ $ act cat [ACTIVITY-RANGE ...]
 $ act locate [ACTIVITY-RANGE ...]
 
 	Prints file names for all specified activities.
+
+$ act fold [FOLD-OPTIONS...] [ACTIVITY-RANGE...]
+
+	Summarizes a range of activities. E.g. prints weekly mileage
+	for the past year.
+
+	FOLD-OPTIONS would include:
+
+		--interval=INTERVAL
+		--field=FIELD
+		--course		--field=course
+		--keywords=FIELD
+		--equipment		--keywords=equipment
+		--size=SIZE		numeric bucket size
+		--format=FORMAT
+
+	and INTERVAL is one of:
+
+		day
+		week
+		month
+		year
+		N day[s]
+		N week[s]
+		N month[s]
+		N year[s]
+
+	Operation is identify sets of activies, either date ranges,
+	field string matches or histograms of numeric fields, then
+	combine those records (sum distance, time, etc) and log the
+	results.
+
+$ act daily [FOLD-OPTIONS] [ACTIVITY-RANGE...]
+
+	Alias for "fold --range=day ..."
+
+$ act weekly [FOLD-OPTIONS] [ACTIVITY-RANGE...]
+
+	Alias for "fold --range=week ..."
+
+$ act monthly [FOLD-OPTIONS] [ACTIVITY-RANGE...]
+
+	Alias for "fold --range=month ..."
+
+$ act yearly [FOLD-OPTIONS] [ACTIVITY-RANGE...]
+
+	Alias for "fold --range=year ..."
 
 $ act rm [ACTIVITY-RANGE ...]
 

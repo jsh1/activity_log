@@ -2,7 +2,7 @@
 # files
 
 library_products = libact.a
-bin_products = act act-log act-new act-gps-test
+bin_products = act act-fold act-log act-new act-gps-test
 symlink_products = act-cat act-import act-list act-locate act-show act-slog
 
 prefix = /opt
@@ -33,6 +33,10 @@ act_objects = act-driver.o
 act_deps = libact.a
 
 act-cat_src = act-log
+
+act-fold_libraries = -lact -lxml2
+act-fold_objects = act-fold.o
+act-fold_deps = libact.a
 
 act-list_src = act-log
 act-locate_src = act-log
