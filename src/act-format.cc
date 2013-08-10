@@ -1113,7 +1113,7 @@ parse_date_interval(const std::string &str, date_interval *interval_ptr)
 
   if (isdigit_l(token[0], nullptr))
     {
-      size_t tidx = idx;
+      size_t tidx = 0;
       count = parse_decimal(token, tidx, 100);
       if (tidx != token.size())
 	return false;
