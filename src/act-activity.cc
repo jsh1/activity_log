@@ -445,6 +445,10 @@ activity::printf(const char *format) const
 
 	  ptr++;
 
+	  bool left_relative = false;
+	  if (ptr[0] == '-' && isdigit(ptr[1]))
+	    left_relative = true, ptr++;
+
 	  int field_width = 0;
 	  while (isdigit(*ptr))
 	    field_width = field_width * 10 + (*ptr++ - '0');
@@ -484,7 +488,8 @@ activity::printf(const char *format) const
 		  if (arg)
 		    *arg++ = 0;
 
-		  print_expansion(stdout, token, arg, field_width);
+		  print_expansion(stdout, token, arg, !left_relative
+				  ? field_width : -field_width);
 		}
 	      ptr = end ? end + 1 : ptr + strlen(ptr);
 	      break; }

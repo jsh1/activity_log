@@ -259,7 +259,7 @@ act_fold(arguments &args)
   double group_size = 0;
   date_interval interval(date_interval::days, 0);
 
-  const char *format = "%16{key} %4{count} %16{distance} %16{duration}%n";
+  const char *format = "%-16{key} %4{count} %16{distance} %16{duration}%n";
 
   while (1)
     {

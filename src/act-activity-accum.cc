@@ -120,6 +120,10 @@ activity_accum::printf(const char *format, const char *key) const
 
 	  ptr++;
 
+	  bool left_relative = false;
+	  if (ptr[0] == '-' && isdigit(ptr[1]))
+	    left_relative = true, ptr++;
+
 	  int field_width = 0;
 	  while (isdigit(*ptr))
 	    field_width = field_width * 10 + (*ptr++ - '0');
@@ -159,7 +163,8 @@ activity_accum::printf(const char *format, const char *key) const
 		  if (arg)
 		    *arg++ = 0;
 
-		  print_expansion(token, arg, key, field_width);
+		  print_expansion(token, arg, key, !left_relative
+				  ? field_width : -field_width);
 		}
 	      ptr = end ? end + 1 : ptr + strlen(ptr);
 	      break; }
