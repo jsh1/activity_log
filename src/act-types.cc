@@ -352,27 +352,36 @@ date_interval::date_index(time_t date) const
   struct tm tm = {0};
   localtime_r(&date, &tm);
 
+  int x = 0;
+
   switch (unit)
     {
     case days:
-      return days_since_1970(tm);
+      return days_since_1970(tm) / count;
 
     case weeks: {
       // 1970-01-01 was a thursday.
       static int week_offset = 4 - shared_config().start_of_week();
-      return (days_since_1970(tm) + week_offset) / 7; }
+      x = (days_since_1970(tm) + week_offset) / 7;
+      break; }
 
     case months:
-      return (tm.tm_year - 70) * 12 + tm.tm_mon;
+      x = (tm.tm_year - 70) * 12 + tm.tm_mon;
+      break;
 
     case years:
-      return tm.tm_year - 70;
+      x = tm.tm_year - 70;
+      break;
     }
+
+  return x / count;
 }
 
 void
 date_interval::append_date(std::string &str, int x) const
 {
+  x = x * count;
+
   switch (unit)
     {
     case days:
