@@ -360,7 +360,7 @@ date_interval::date_index(time_t date) const
     case weeks: {
       // 1970-01-01 was a thursday.
       static int week_offset = 4 - shared_config().start_of_week();
-      return (days_since_1970(tm) - week_offset) / 7; }
+      return (days_since_1970(tm) + week_offset) / 7; }
 
     case months:
       return (tm.tm_year - 70) * 12 + tm.tm_mon;
@@ -381,7 +381,7 @@ date_interval::append_date(std::string &str, int x) const
 
     case weeks: {
       static int week_offset = 4 - shared_config().start_of_week();
-      int days = x * 7 + week_offset;
+      int days = x * 7 - week_offset;
       append_days_date(str, days);
       break; }
 
