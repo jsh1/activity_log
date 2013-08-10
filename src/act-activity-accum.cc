@@ -80,6 +80,12 @@ activity_accum::add(const activity &a)
   if (a.duration() != 0)
     _accum[accum_duration].add(a.duration());
 
+  if (a.speed() != 0)
+    _accum[accum_speed].add(a.speed());
+
+  if (a.max_speed() != 0)
+    _accum[accum_max_speed].add(a.max_speed());
+
   if (a.average_hr() != 0)
     _accum[accum_average_hr].add(a.average_hr());
 
@@ -208,6 +214,18 @@ activity_accum::print_expansion(const char *name, const char *arg,
 	  a_id = accum_duration;
 	  if (!arg)
 	    arg = "total";
+	  break;
+	case field_speed:
+	case field_pace:
+	  a_id = accum_speed;
+	  if (!arg)
+	    arg = "average";
+	  break;
+	case field_max_speed:
+	case field_max_pace:
+	  a_id = accum_max_speed;
+	  if (!arg)
+	    arg = "max";
 	  break;
 	case field_average_hr:
 	  a_id = accum_average_hr;

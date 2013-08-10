@@ -35,6 +35,8 @@ class activity_accum
     {
       accum_distance,
       accum_duration,
+      accum_speed,
+      accum_max_speed,
       accum_average_hr,
       accum_max_hr,
       accum_resting_hr,
