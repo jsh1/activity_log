@@ -122,7 +122,7 @@ format_distance(std::string &str, double dist, unit_type unit)
       break;
 
     case unit_inches:
-      format = "%.0f inches";
+      format = "%.0f in";
       dist = dist * INCHES_PER_METER;
       break;
 
@@ -132,13 +132,13 @@ format_distance(std::string &str, double dist, unit_type unit)
       break;
 
     case unit_yards:
-      format = "%.1f yards";
+      format = "%.1f yd";
       dist = dist * YARDS_PER_METER;
       break;
 
     case unit_miles:
     default:
-      format = "%.2f miles";
+      format = "%.2f mi";
       dist = dist * MILES_PER_METER;
       break;
     }
@@ -159,12 +159,12 @@ format_pace(std::string &str, double pace, unit_type unit)
     {
     case unit_seconds_per_mile:
     default:
-      suffix = " /mile";
+      suffix = " / mi";
       dur = SECS_PER_MILE(pace);
       break;
 
     case unit_seconds_per_kilometre:
-      suffix = " /km";
+      suffix = " / km";
       dur = SECS_PER_KM(pace);
       break;
     }
