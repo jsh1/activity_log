@@ -43,6 +43,7 @@ libact.a_objects =		\
 	act-gps-parser.o	\
 	act-gps-fit-parser.o	\
 	act-gps-tcx-parser.o	\
+	act-output-table.o	\
 	act-types.o		\
 	act-util.o
 

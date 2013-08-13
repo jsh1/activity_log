@@ -6,6 +6,7 @@
 #include "act-config.h"
 #include "act-database.h"
 #include "act-format.h"
+#include "act-output-table.h"
 #include "act-util.h"
 
 #include <cmath>
@@ -29,6 +30,7 @@ enum option_id
   opt_keywords,
   opt_equipment,
   opt_format,
+  opt_table,
 };
 
 const arguments::option options[] =
@@ -44,7 +46,8 @@ const arguments::option options[] =
   {opt_course, "course", 0, nullptr, "Group by Course field."},
   {opt_keywords, "keywords", 'k', "FIELD", "Group by keyword."},
   {opt_equipment, "equipment", 0, nullptr, "Group by equipment."},
-  {opt_format, "format", 'f', "FORMAT", "Format method."},
+  {opt_format, "format", 'f', "FORMAT", "Format string."},
+  {opt_table, "table", 't', "FORMAT", "Table format string."},
   {arguments::opt_eof},
 };
 
@@ -230,18 +233,47 @@ interval_group::format_key(std::string &buf, int key) const
 }
 
 template<typename T> void
-apply_group(T &g, const std::vector<database::item_ref> &items,
-	    const char *format)
+output_group_format(T &g, const char *format)
 {
-  for (const auto &it : items)
-    g.insert(activity(it->storage()));
-
   for (const auto &it : g.map)
     {
       std::string key;
       g.format_key(key, it.first);
       it.second.printf(format, key.c_str());
     }
+}
+
+template<typename T> void
+output_group_table(T &g, const char *format)
+{
+  output_table tab;
+
+  for (const auto &it : g.map)
+    {
+      tab.begin_row();
+
+      std::string key;
+      g.format_key(key, it.first);
+      it.second.print_row(tab, format, key.c_str());
+
+      tab.end_row();
+    }
+
+  tab.print();
+}
+
+template<typename T> void
+apply_group(T &g, const std::vector<database::item_ref> &items,
+	    const char *format, const char *table_format)
+{
+  for (const auto &it : items)
+    g.insert(activity(it->storage()));
+  
+  if (format != nullptr)
+    output_group_format(g, format);
+
+  if (table_format != nullptr)
+    output_group_table(g, table_format);
 }
 
 } // anonymous namespace
@@ -259,7 +291,8 @@ act_fold(arguments &args)
   double group_size = 0;
   date_interval interval(date_interval::days, 0);
 
-  const char *format = "%-16{key} %4{count} %16{distance} %16{duration} %16{pace}%n";
+  const char *format = nullptr;
+  const char *table_format = nullptr;
 
   while (1)
     {
@@ -431,6 +464,9 @@ act_fold(arguments &args)
 	}
     }
 
+  if (format == nullptr && table_format == nullptr)
+    table_format = "%-{key} %{distance} %@{distance}";
+
   if (args.argc() != 0)
     {
       std::vector<date_range> dates;
@@ -453,23 +489,23 @@ act_fold(arguments &args)
       if (group_keywords)
 	{
 	  keyword_group g(group_field.c_str());
-	  apply_group(g, items, format);
+	  apply_group(g, items, format, table_format);
 	}
       else if (group_size > 0)
 	{
 	  value_group g(group_field.c_str(), group_size);
-	  apply_group(g, items, format);
+	  apply_group(g, items, format, table_format);
 	}
       else
 	{
 	  string_group g(group_field.c_str());
-	  apply_group(g, items, format);
+	  apply_group(g, items, format, table_format);
 	}
     }
   else if (interval.count > 0)
     {
       interval_group g(interval);
-      apply_group(g, items, format);
+      apply_group(g, items, format, table_format);
     }
 
   return 0;

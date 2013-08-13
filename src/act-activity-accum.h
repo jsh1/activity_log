@@ -8,6 +8,7 @@
 namespace act {
 
 class activity;
+class output_table;
 
 class activity_accum
 {
@@ -59,9 +60,13 @@ public:
 
   void printf(const char *format, const char *key) const;
 
+  void print_row(output_table &out, const char *format, const char *key) const;
+
 private:
-  void print_expansion(const char *name, const char *arg, const char *key,
-    int field_width) const;
+  bool get_field_value(const char *name, const char *arg,
+    field_data_type &type, double &value) const;
+  void print_expansion(const char *name, const char *arg,
+    const char *key, int field_width) const;
 };
 
 // implementation details

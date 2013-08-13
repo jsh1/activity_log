@@ -5,6 +5,7 @@
 #include "act-activity.h"
 #include "act-config.h"
 #include "act-format.h"
+#include "act-output-table.h"
 #include "act-util.h"
 
 #include <cmath>
@@ -185,6 +186,105 @@ activity_accum::printf(const char *format, const char *key) const
     }
 }
 
+bool
+activity_accum::get_field_value(const char *name, const char *arg,
+				field_data_type &type, double &value) const
+{
+  field_id f_id = lookup_field_id(name);
+
+  type = lookup_field_data_type(f_id);
+
+  accum_id a_id;
+  switch (f_id)
+    {
+    case field_distance:
+      a_id = accum_distance;
+      if (!arg)
+	arg = "total";
+      break;
+    case field_duration:
+      a_id = accum_duration;
+      if (!arg)
+	arg = "total";
+      break;
+    case field_speed:
+    case field_pace:
+      a_id = accum_speed;
+      if (!arg)
+	arg = "average";
+      break;
+    case field_max_speed:
+    case field_max_pace:
+      a_id = accum_max_speed;
+      if (!arg)
+	arg = "max";
+      break;
+    case field_average_hr:
+      a_id = accum_average_hr;
+      if (!arg)
+	arg = "average";
+      break;
+    case field_max_hr:
+      a_id = accum_max_hr;
+      if (!arg)
+	arg = "max";
+      break;
+    case field_resting_hr:
+      a_id = accum_resting_hr;
+      if (!arg)
+	arg = "min";
+      break;
+    case field_calories:
+      a_id = accum_calories;
+      if (!arg)
+	arg = "total";
+      break;
+    case field_weight:
+      a_id = accum_weight;
+      if (!arg)
+	arg = "average";
+      break;
+    case field_effort:
+      a_id = accum_effort;
+      if (!arg)
+	arg = "average";
+      break;
+    case field_quality:
+      a_id = accum_quality;
+      if (!arg)
+	arg = "average";
+      break;
+    case field_temperature:
+      a_id = accum_temperature;
+      if (!arg)
+	arg = "average";
+      break;
+    case field_dew_point:
+      a_id = accum_dew_point;
+      if (!arg)
+	arg = "average";
+      break;
+    default:
+      return false;
+    }
+
+  value = 0;
+  if (strcasecmp(arg, "total") == 0 || strcasecmp(arg, "sum") == 0)
+    value = _accum[a_id].get_total();
+  else if (strcasecmp(arg, "average") == 0 || strcasecmp(arg, "mean") == 0)
+    value = _accum[a_id].get_mean();
+  else if (strcasecmp(arg, "sd") == 0 || strcasecmp(arg, "sdev") == 0)
+    value = _accum[a_id].get_sdev();
+  else if (strcasecmp(arg, "min") == 0 || strcasecmp(arg, "minimum") == 0)
+    value = _accum[a_id].get_min();
+  else if (strcasecmp(arg, "max") == 0 || strcasecmp(arg, "maximum") == 0)
+    value = _accum[a_id].get_max();
+  else
+    return false;
+
+  return true;
+}
+
 void
 activity_accum::print_expansion(const char *name, const char *arg,
 				const char *key, int field_width) const
@@ -199,95 +299,10 @@ activity_accum::print_expansion(const char *name, const char *arg,
     }
   else
     {
-      field_id f_id = lookup_field_id(name);
-      field_data_type type = lookup_field_data_type(f_id);
+      field_data_type type;
+      double value;
 
-      accum_id a_id;
-      switch (f_id)
-	{
-	case field_distance:
-	  a_id = accum_distance;
-	  if (!arg)
-	    arg = "total";
-	  break;
-	case field_duration:
-	  a_id = accum_duration;
-	  if (!arg)
-	    arg = "total";
-	  break;
-	case field_speed:
-	case field_pace:
-	  a_id = accum_speed;
-	  if (!arg)
-	    arg = "average";
-	  break;
-	case field_max_speed:
-	case field_max_pace:
-	  a_id = accum_max_speed;
-	  if (!arg)
-	    arg = "max";
-	  break;
-	case field_average_hr:
-	  a_id = accum_average_hr;
-	  if (!arg)
-	    arg = "average";
-	  break;
-	case field_max_hr:
-	  a_id = accum_max_hr;
-	  if (!arg)
-	    arg = "max";
-	  break;
-	case field_resting_hr:
-	  a_id = accum_resting_hr;
-	  if (!arg)
-	    arg = "min";
-	  break;
-	case field_calories:
-	  a_id = accum_calories;
-	  if (!arg)
-	    arg = "total";
-	  break;
-	case field_weight:
-	  a_id = accum_weight;
-	  if (!arg)
-	    arg = "average";
-	  break;
-	case field_effort:
-	  a_id = accum_effort;
-	  if (!arg)
-	    arg = "average";
-	  break;
-	case field_quality:
-	  a_id = accum_quality;
-	  if (!arg)
-	    arg = "average";
-	  break;
-	case field_temperature:
-	  a_id = accum_temperature;
-	  if (!arg)
-	    arg = "average";
-	  break;
-	case field_dew_point:
-	  a_id = accum_dew_point;
-	  if (!arg)
-	    arg = "average";
-	  break;
-	default:
-	  return;
-	}
-
-      double value = 0;
-      if (strcasecmp(arg, "total") == 0 || strcasecmp(arg, "sum") == 0)
-	value = _accum[a_id].get_total();
-      else if (strcasecmp(arg, "average") == 0 || strcasecmp(arg, "mean") == 0)
-	value = _accum[a_id].get_mean();
-      else if (strcasecmp(arg, "sd") == 0 || strcasecmp(arg, "sdev") == 0)
-	value = _accum[a_id].get_sdev();
-      else if (strcasecmp(arg, "min") == 0 || strcasecmp(arg, "minimum") == 0)
-	value = _accum[a_id].get_min();
-      else if (strcasecmp(arg, "max") == 0 || strcasecmp(arg, "maximum") == 0)
-	value = _accum[a_id].get_max();
-      else
+      if (!get_field_value(name, arg, type, value))
 	return;
 
       std::string str;
@@ -320,6 +335,97 @@ activity_accum::print_expansion(const char *name, const char *arg,
 	    fwrite(str.c_str(), 1, str.size(), stdout);
 	  else
 	    fprintf(stdout, "%*s", field_width, str.c_str());
+	}
+    }
+}
+
+void
+activity_accum::print_row(output_table &out, const char *format,
+			  const char *key) const
+{
+  while (*format != 0)
+    {
+      if (const char *ptr = strchr(format, '%'))
+	{
+	  ptr++;
+
+	  bool left_relative = false;
+	  bool bar_value = false;
+
+	  if (ptr[0] == '@')
+	    bar_value = true, left_relative = true, ptr++;
+
+	  if (ptr[0] == '-')
+	    left_relative = !left_relative, ptr++;
+
+	  int field_width = 0;
+	  while (isdigit(*ptr))
+	    field_width = field_width * 10 + (*ptr++ - '0');
+
+	  if (left_relative)
+	    {
+	      field_width = std::max(field_width, 1);
+	      field_width = -field_width;
+	    }
+
+	  switch (*ptr++)
+	    {
+	    case '{': {
+	      const char *end = strchr(ptr, '}');
+	      char token[128];
+	      if (end && end - ptr < sizeof(token)-1)
+		{
+		  memcpy(token, ptr, end - ptr);
+		  token[end - ptr] = 0;
+
+		  char *arg = strchr(token, ':');
+		  if (arg)
+		    *arg++ = 0;
+
+		  if (strcasecmp(token, "count") == 0)
+		    {
+		      if (!bar_value)
+			{
+			  out.output_value(field_width, type_number,
+					   _count, unit_unknown);
+			}
+		      else
+			{
+			  out.output_bar_value(field_width, _count);
+			}
+		    }
+		  else if (strcasecmp(token, "key") == 0)
+		    {
+		      out.output_string(field_width, key);
+		    }
+		  else
+		    {
+		      field_data_type type;
+		      double value;
+
+		      if (!get_field_value(token, arg, type, value))
+			return;
+
+		      if (!bar_value)
+			{
+			  out.output_value(field_width, type,
+					   value, unit_unknown);
+			}
+		      else
+			{
+			  out.output_bar_value(field_width, value);
+			}
+		    }
+		}
+	      ptr = end ? end + 1 : ptr + strlen(ptr);
+	      break; }
+	    }
+	  format = ptr;
+	}
+      else
+	{
+	  fputs(format, stdout);
+	  break;
 	}
     }
 }
