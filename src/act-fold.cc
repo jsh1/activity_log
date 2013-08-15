@@ -457,6 +457,10 @@ act_fold(arguments &args)
 	  format = opt_arg;
 	  break;
 
+	case opt_table:
+	  table_format = opt_arg;
+	  break;
+
 	case arguments::opt_error:
 	  fprintf(stderr, "Error: invalid argument: %s\n\n", opt_arg);
 	  print_usage(args);
