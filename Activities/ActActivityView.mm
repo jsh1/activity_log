@@ -1,3 +1,4 @@
+// -*- c-style: gnu -*-
 
 #import "ActActivityView.h"
 

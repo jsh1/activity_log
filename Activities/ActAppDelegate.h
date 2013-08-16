@@ -1,12 +1,16 @@
+// -*- c-style: gnu -*-
 
 #import <AppKit/AppKit.h>
 
-#import "act-database.h"
+@class ActWindowController;
 
 @interface ActAppDelegate : NSObject <NSApplicationDelegate>
+{
+  ActWindowController *_windowController;
+}
 
-@property (assign) IBOutlet NSWindow *window;
+@property(readonly) ActWindowController *windowController;
 
-@property(readonly) act::database *database;
+- (IBAction)showWindow:(id)sender;
 
 @end

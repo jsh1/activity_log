@@ -1,24 +1,32 @@
+// -*- c-style: gnu -*-
 
 #import "ActAppDelegate.h"
 
-@implementation ActAppDelegate
+#import "ActWindowController.h"
 
-static act::database *_database;
+@implementation ActAppDelegate
 
 - (void)dealloc
 {
-    delete _database;
-    [super dealloc];
+  [super dealloc];
 }
 
 - (void)applicationDidFinishLaunching:(NSNotification *)note
 {
-    _database = new act::database();
+  [self showWindow:self];
 }
 
-- (act::database *)database
+- (IBAction)showWindow:(id)sender
 {
-    return _database;
+  [[self windowController] showWindow:sender];
+}
+
+- (NSWindowController *)windowController
+{
+  if (_windowController == nil)
+    _windowController = [[ActWindowController alloc] init];
+
+  return _windowController;
 }
 
 @end

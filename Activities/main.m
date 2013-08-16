@@ -1,7 +1,9 @@
+// -*- c-style: gnu -*-
 
-#import <Cocoa/Cocoa.h>
+#import <AppKit/AppKit.h>
 
-int main(int argc, char *argv[])
+int
+main(int argc, const char **argv)
 {
-    return NSApplicationMain(argc, (const char **)argv);
+    return NSApplicationMain(argc, argv);
 }

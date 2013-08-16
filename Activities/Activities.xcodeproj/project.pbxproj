@@ -32,6 +32,8 @@
 		571DB9FB17BE67CD0001514C /* act-util.cc in Sources */ = {isa = PBXBuildFile; fileRef = 571DB9DD17BE67CD0001514C /* act-util.cc */; };
 		571DB9FF17BE689D0001514C /* libact.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 571DB9BD17BE67850001514C /* libact.a */; };
 		571DBA0317BE6B6C0001514C /* libxml2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 571DB9FD17BE68090001514C /* libxml2.dylib */; };
+		57921A5717BEAEF0001AD35D /* ActWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 57921A5517BEAEF0001AD35D /* ActWindow.xib */; };
+		57921A5A17BEAF48001AD35D /* ActWindowController.mm in Sources */ = {isa = PBXBuildFile; fileRef = 57921A5917BEAF48001AD35D /* ActWindowController.mm */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -92,6 +94,9 @@
 		571DB9DD17BE67CD0001514C /* act-util.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "act-util.cc"; path = "../src/act-util.cc"; sourceTree = "<group>"; };
 		571DB9DE17BE67CD0001514C /* act-util.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "act-util.h"; path = "../src/act-util.h"; sourceTree = "<group>"; };
 		571DB9FD17BE68090001514C /* libxml2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libxml2.dylib; path = usr/lib/libxml2.dylib; sourceTree = SDKROOT; };
+		57921A5617BEAEF0001AD35D /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/ActWindow.xib; sourceTree = "<group>"; };
+		57921A5817BEAF48001AD35D /* ActWindowController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActWindowController.h; sourceTree = "<group>"; };
+		57921A5917BEAF48001AD35D /* ActWindowController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ActWindowController.mm; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -152,6 +157,8 @@
 			children = (
 				571DB9A417BE615C0001514C /* ActAppDelegate.h */,
 				571DB9A517BE615C0001514C /* ActAppDelegate.mm */,
+				57921A5817BEAF48001AD35D /* ActWindowController.h */,
+				57921A5917BEAF48001AD35D /* ActWindowController.mm */,
 				571DB9B117BE66A60001514C /* ActActivityListView.h */,
 				571DB9B217BE66A60001514C /* ActActivityListView.mm */,
 				571DB9B317BE66A60001514C /* ActActivityView.h */,
@@ -176,6 +183,7 @@
 			isa = PBXGroup;
 			children = (
 				571DB9A717BE615C0001514C /* MainMenu.xib */,
+				57921A5517BEAEF0001AD35D /* ActWindow.xib */,
 			);
 			name = Resources;
 			sourceTree = "<group>";
@@ -301,6 +309,7 @@
 				571DB99D17BE615C0001514C /* InfoPlist.strings in Resources */,
 				571DB9A317BE615C0001514C /* Credits.rtf in Resources */,
 				571DB9A917BE615C0001514C /* MainMenu.xib in Resources */,
+				57921A5717BEAEF0001AD35D /* ActWindow.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -315,6 +324,7 @@
 				571DB9A617BE615C0001514C /* ActAppDelegate.mm in Sources */,
 				571DB9B517BE66A60001514C /* ActActivityListView.mm in Sources */,
 				571DB9B617BE66A60001514C /* ActActivityView.mm in Sources */,
+				57921A5A17BEAF48001AD35D /* ActWindowController.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -372,6 +382,14 @@
 				571DB9A817BE615C0001514C /* en */,
 			);
 			name = MainMenu.xib;
+			sourceTree = "<group>";
+		};
+		57921A5517BEAEF0001AD35D /* ActWindow.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				57921A5617BEAEF0001AD35D /* en */,
+			);
+			name = ActWindow.xib;
 			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */
@@ -496,6 +514,7 @@
 				571DB9AE17BE615C0001514C /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		571DB9BE17BE67850001514C /* Build configuration list for PBXNativeTarget "libact" */ = {
 			isa = XCConfigurationList;
@@ -504,6 +523,7 @@
 				571DB9C017BE67850001514C /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
