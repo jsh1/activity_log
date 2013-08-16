@@ -1,0 +1,511 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		571DB99D17BE615C0001514C /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 571DB99B17BE615C0001514C /* InfoPlist.strings */; };
+		571DB99F17BE615C0001514C /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 571DB99E17BE615C0001514C /* main.m */; };
+		571DB9A317BE615C0001514C /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = 571DB9A117BE615C0001514C /* Credits.rtf */; };
+		571DB9A617BE615C0001514C /* ActAppDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = 571DB9A517BE615C0001514C /* ActAppDelegate.mm */; };
+		571DB9A917BE615C0001514C /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 571DB9A717BE615C0001514C /* MainMenu.xib */; };
+		571DB9AF17BE63AC0001514C /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 571DB99517BE615C0001514C /* AppKit.framework */; };
+		571DB9B017BE63AF0001514C /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 571DB99717BE615C0001514C /* Foundation.framework */; };
+		571DB9B517BE66A60001514C /* ActActivityListView.mm in Sources */ = {isa = PBXBuildFile; fileRef = 571DB9B217BE66A60001514C /* ActActivityListView.mm */; };
+		571DB9B617BE66A60001514C /* ActActivityView.mm in Sources */ = {isa = PBXBuildFile; fileRef = 571DB9B417BE66A60001514C /* ActActivityView.mm */; };
+		571DB9DF17BE67CD0001514C /* act-activity-accum.cc in Sources */ = {isa = PBXBuildFile; fileRef = 571DB9C117BE67CD0001514C /* act-activity-accum.cc */; };
+		571DB9E117BE67CD0001514C /* act-activity-storage.cc in Sources */ = {isa = PBXBuildFile; fileRef = 571DB9C317BE67CD0001514C /* act-activity-storage.cc */; };
+		571DB9E317BE67CD0001514C /* act-activity.cc in Sources */ = {isa = PBXBuildFile; fileRef = 571DB9C517BE67CD0001514C /* act-activity.cc */; };
+		571DB9E517BE67CD0001514C /* act-arguments.cc in Sources */ = {isa = PBXBuildFile; fileRef = 571DB9C717BE67CD0001514C /* act-arguments.cc */; };
+		571DB9E817BE67CD0001514C /* act-config.cc in Sources */ = {isa = PBXBuildFile; fileRef = 571DB9CA17BE67CD0001514C /* act-config.cc */; };
+		571DB9EA17BE67CD0001514C /* act-database.cc in Sources */ = {isa = PBXBuildFile; fileRef = 571DB9CC17BE67CD0001514C /* act-database.cc */; };
+		571DB9EC17BE67CD0001514C /* act-format.cc in Sources */ = {isa = PBXBuildFile; fileRef = 571DB9CE17BE67CD0001514C /* act-format.cc */; };
+		571DB9EE17BE67CD0001514C /* act-gps-activity.cc in Sources */ = {isa = PBXBuildFile; fileRef = 571DB9D017BE67CD0001514C /* act-gps-activity.cc */; };
+		571DB9F017BE67CD0001514C /* act-gps-fit-parser.cc in Sources */ = {isa = PBXBuildFile; fileRef = 571DB9D217BE67CD0001514C /* act-gps-fit-parser.cc */; };
+		571DB9F217BE67CD0001514C /* act-gps-parser.cc in Sources */ = {isa = PBXBuildFile; fileRef = 571DB9D417BE67CD0001514C /* act-gps-parser.cc */; };
+		571DB9F417BE67CD0001514C /* act-gps-tcx-parser.cc in Sources */ = {isa = PBXBuildFile; fileRef = 571DB9D617BE67CD0001514C /* act-gps-tcx-parser.cc */; };
+		571DB9F617BE67CD0001514C /* act-output-table.cc in Sources */ = {isa = PBXBuildFile; fileRef = 571DB9D817BE67CD0001514C /* act-output-table.cc */; };
+		571DB9F917BE67CD0001514C /* act-types.cc in Sources */ = {isa = PBXBuildFile; fileRef = 571DB9DB17BE67CD0001514C /* act-types.cc */; };
+		571DB9FB17BE67CD0001514C /* act-util.cc in Sources */ = {isa = PBXBuildFile; fileRef = 571DB9DD17BE67CD0001514C /* act-util.cc */; };
+		571DB9FF17BE689D0001514C /* libact.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 571DB9BD17BE67850001514C /* libact.a */; };
+		571DBA0317BE6B6C0001514C /* libxml2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 571DB9FD17BE68090001514C /* libxml2.dylib */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		571DBA0017BE68A60001514C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 571DB98717BE615C0001514C /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 571DB9BC17BE67850001514C;
+			remoteInfo = libact;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		571DB98F17BE615C0001514C /* Activities.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Activities.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		571DB99517BE615C0001514C /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
+		571DB99717BE615C0001514C /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		571DB99A17BE615C0001514C /* Activities-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Activities-Info.plist"; sourceTree = "<group>"; };
+		571DB99C17BE615C0001514C /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		571DB99E17BE615C0001514C /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		571DB9A017BE615C0001514C /* Activities-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Activities-Prefix.pch"; sourceTree = "<group>"; };
+		571DB9A217BE615C0001514C /* en */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; name = en; path = en.lproj/Credits.rtf; sourceTree = "<group>"; };
+		571DB9A417BE615C0001514C /* ActAppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ActAppDelegate.h; sourceTree = "<group>"; };
+		571DB9A517BE615C0001514C /* ActAppDelegate.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = ActAppDelegate.mm; sourceTree = "<group>"; };
+		571DB9A817BE615C0001514C /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/MainMenu.xib; sourceTree = "<group>"; };
+		571DB9B117BE66A60001514C /* ActActivityListView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActActivityListView.h; sourceTree = "<group>"; };
+		571DB9B217BE66A60001514C /* ActActivityListView.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ActActivityListView.mm; sourceTree = "<group>"; };
+		571DB9B317BE66A60001514C /* ActActivityView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActActivityView.h; sourceTree = "<group>"; };
+		571DB9B417BE66A60001514C /* ActActivityView.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ActActivityView.mm; sourceTree = "<group>"; };
+		571DB9BD17BE67850001514C /* libact.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libact.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		571DB9C117BE67CD0001514C /* act-activity-accum.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "act-activity-accum.cc"; path = "../src/act-activity-accum.cc"; sourceTree = "<group>"; };
+		571DB9C217BE67CD0001514C /* act-activity-accum.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "act-activity-accum.h"; path = "../src/act-activity-accum.h"; sourceTree = "<group>"; };
+		571DB9C317BE67CD0001514C /* act-activity-storage.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "act-activity-storage.cc"; path = "../src/act-activity-storage.cc"; sourceTree = "<group>"; };
+		571DB9C417BE67CD0001514C /* act-activity-storage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "act-activity-storage.h"; path = "../src/act-activity-storage.h"; sourceTree = "<group>"; };
+		571DB9C517BE67CD0001514C /* act-activity.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "act-activity.cc"; path = "../src/act-activity.cc"; sourceTree = "<group>"; };
+		571DB9C617BE67CD0001514C /* act-activity.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "act-activity.h"; path = "../src/act-activity.h"; sourceTree = "<group>"; };
+		571DB9C717BE67CD0001514C /* act-arguments.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "act-arguments.cc"; path = "../src/act-arguments.cc"; sourceTree = "<group>"; };
+		571DB9C817BE67CD0001514C /* act-arguments.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "act-arguments.h"; path = "../src/act-arguments.h"; sourceTree = "<group>"; };
+		571DB9C917BE67CD0001514C /* act-base.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "act-base.h"; path = "../src/act-base.h"; sourceTree = "<group>"; };
+		571DB9CA17BE67CD0001514C /* act-config.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "act-config.cc"; path = "../src/act-config.cc"; sourceTree = "<group>"; };
+		571DB9CB17BE67CD0001514C /* act-config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "act-config.h"; path = "../src/act-config.h"; sourceTree = "<group>"; };
+		571DB9CC17BE67CD0001514C /* act-database.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "act-database.cc"; path = "../src/act-database.cc"; sourceTree = "<group>"; };
+		571DB9CD17BE67CD0001514C /* act-database.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "act-database.h"; path = "../src/act-database.h"; sourceTree = "<group>"; };
+		571DB9CE17BE67CD0001514C /* act-format.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "act-format.cc"; path = "../src/act-format.cc"; sourceTree = "<group>"; };
+		571DB9CF17BE67CD0001514C /* act-format.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "act-format.h"; path = "../src/act-format.h"; sourceTree = "<group>"; };
+		571DB9D017BE67CD0001514C /* act-gps-activity.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "act-gps-activity.cc"; path = "../src/act-gps-activity.cc"; sourceTree = "<group>"; };
+		571DB9D117BE67CD0001514C /* act-gps-activity.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "act-gps-activity.h"; path = "../src/act-gps-activity.h"; sourceTree = "<group>"; };
+		571DB9D217BE67CD0001514C /* act-gps-fit-parser.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "act-gps-fit-parser.cc"; path = "../src/act-gps-fit-parser.cc"; sourceTree = "<group>"; };
+		571DB9D317BE67CD0001514C /* act-gps-fit-parser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "act-gps-fit-parser.h"; path = "../src/act-gps-fit-parser.h"; sourceTree = "<group>"; };
+		571DB9D417BE67CD0001514C /* act-gps-parser.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "act-gps-parser.cc"; path = "../src/act-gps-parser.cc"; sourceTree = "<group>"; };
+		571DB9D517BE67CD0001514C /* act-gps-parser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "act-gps-parser.h"; path = "../src/act-gps-parser.h"; sourceTree = "<group>"; };
+		571DB9D617BE67CD0001514C /* act-gps-tcx-parser.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "act-gps-tcx-parser.cc"; path = "../src/act-gps-tcx-parser.cc"; sourceTree = "<group>"; };
+		571DB9D717BE67CD0001514C /* act-gps-tcx-parser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "act-gps-tcx-parser.h"; path = "../src/act-gps-tcx-parser.h"; sourceTree = "<group>"; };
+		571DB9D817BE67CD0001514C /* act-output-table.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "act-output-table.cc"; path = "../src/act-output-table.cc"; sourceTree = "<group>"; };
+		571DB9D917BE67CD0001514C /* act-output-table.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "act-output-table.h"; path = "../src/act-output-table.h"; sourceTree = "<group>"; };
+		571DB9DA17BE67CD0001514C /* act-swap-bytes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "act-swap-bytes.h"; path = "../src/act-swap-bytes.h"; sourceTree = "<group>"; };
+		571DB9DB17BE67CD0001514C /* act-types.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "act-types.cc"; path = "../src/act-types.cc"; sourceTree = "<group>"; };
+		571DB9DC17BE67CD0001514C /* act-types.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "act-types.h"; path = "../src/act-types.h"; sourceTree = "<group>"; };
+		571DB9DD17BE67CD0001514C /* act-util.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "act-util.cc"; path = "../src/act-util.cc"; sourceTree = "<group>"; };
+		571DB9DE17BE67CD0001514C /* act-util.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "act-util.h"; path = "../src/act-util.h"; sourceTree = "<group>"; };
+		571DB9FD17BE68090001514C /* libxml2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libxml2.dylib; path = usr/lib/libxml2.dylib; sourceTree = SDKROOT; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		571DB98C17BE615C0001514C /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				571DB9FF17BE689D0001514C /* libact.a in Frameworks */,
+				571DB9AF17BE63AC0001514C /* AppKit.framework in Frameworks */,
+				571DB9B017BE63AF0001514C /* Foundation.framework in Frameworks */,
+				571DBA0317BE6B6C0001514C /* libxml2.dylib in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		571DBA0217BE68E60001514C /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		571DB98617BE615C0001514C = {
+			isa = PBXGroup;
+			children = (
+				571DB99817BE615C0001514C /* Source */,
+				571DB9B817BE671A0001514C /* Library */,
+				571DB9B717BE66CC0001514C /* Resources */,
+				571DB99917BE615C0001514C /* Supporting Files */,
+				571DB99117BE615C0001514C /* Frameworks */,
+				571DB99017BE615C0001514C /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		571DB99017BE615C0001514C /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				571DB98F17BE615C0001514C /* Activities.app */,
+				571DB9BD17BE67850001514C /* libact.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		571DB99117BE615C0001514C /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				571DB99517BE615C0001514C /* AppKit.framework */,
+				571DB99717BE615C0001514C /* Foundation.framework */,
+				571DB9FD17BE68090001514C /* libxml2.dylib */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		571DB99817BE615C0001514C /* Source */ = {
+			isa = PBXGroup;
+			children = (
+				571DB9A417BE615C0001514C /* ActAppDelegate.h */,
+				571DB9A517BE615C0001514C /* ActAppDelegate.mm */,
+				571DB9B117BE66A60001514C /* ActActivityListView.h */,
+				571DB9B217BE66A60001514C /* ActActivityListView.mm */,
+				571DB9B317BE66A60001514C /* ActActivityView.h */,
+				571DB9B417BE66A60001514C /* ActActivityView.mm */,
+			);
+			name = Source;
+			sourceTree = SOURCE_ROOT;
+		};
+		571DB99917BE615C0001514C /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				571DB99A17BE615C0001514C /* Activities-Info.plist */,
+				571DB99B17BE615C0001514C /* InfoPlist.strings */,
+				571DB99E17BE615C0001514C /* main.m */,
+				571DB9A017BE615C0001514C /* Activities-Prefix.pch */,
+				571DB9A117BE615C0001514C /* Credits.rtf */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		571DB9B717BE66CC0001514C /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				571DB9A717BE615C0001514C /* MainMenu.xib */,
+			);
+			name = Resources;
+			sourceTree = "<group>";
+		};
+		571DB9B817BE671A0001514C /* Library */ = {
+			isa = PBXGroup;
+			children = (
+				571DB9C117BE67CD0001514C /* act-activity-accum.cc */,
+				571DB9C217BE67CD0001514C /* act-activity-accum.h */,
+				571DB9C317BE67CD0001514C /* act-activity-storage.cc */,
+				571DB9C417BE67CD0001514C /* act-activity-storage.h */,
+				571DB9C517BE67CD0001514C /* act-activity.cc */,
+				571DB9C617BE67CD0001514C /* act-activity.h */,
+				571DB9C717BE67CD0001514C /* act-arguments.cc */,
+				571DB9C817BE67CD0001514C /* act-arguments.h */,
+				571DB9C917BE67CD0001514C /* act-base.h */,
+				571DB9CA17BE67CD0001514C /* act-config.cc */,
+				571DB9CB17BE67CD0001514C /* act-config.h */,
+				571DB9CC17BE67CD0001514C /* act-database.cc */,
+				571DB9CD17BE67CD0001514C /* act-database.h */,
+				571DB9CE17BE67CD0001514C /* act-format.cc */,
+				571DB9CF17BE67CD0001514C /* act-format.h */,
+				571DB9D017BE67CD0001514C /* act-gps-activity.cc */,
+				571DB9D117BE67CD0001514C /* act-gps-activity.h */,
+				571DB9D217BE67CD0001514C /* act-gps-fit-parser.cc */,
+				571DB9D317BE67CD0001514C /* act-gps-fit-parser.h */,
+				571DB9D417BE67CD0001514C /* act-gps-parser.cc */,
+				571DB9D517BE67CD0001514C /* act-gps-parser.h */,
+				571DB9D617BE67CD0001514C /* act-gps-tcx-parser.cc */,
+				571DB9D717BE67CD0001514C /* act-gps-tcx-parser.h */,
+				571DB9D817BE67CD0001514C /* act-output-table.cc */,
+				571DB9D917BE67CD0001514C /* act-output-table.h */,
+				571DB9DA17BE67CD0001514C /* act-swap-bytes.h */,
+				571DB9DB17BE67CD0001514C /* act-types.cc */,
+				571DB9DC17BE67CD0001514C /* act-types.h */,
+				571DB9DD17BE67CD0001514C /* act-util.cc */,
+				571DB9DE17BE67CD0001514C /* act-util.h */,
+			);
+			name = Library;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		571DB9BB17BE67850001514C /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
+/* Begin PBXNativeTarget section */
+		571DB98E17BE615C0001514C /* Activities */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 571DB9AC17BE615C0001514C /* Build configuration list for PBXNativeTarget "Activities" */;
+			buildPhases = (
+				571DB98B17BE615C0001514C /* Sources */,
+				571DB98C17BE615C0001514C /* Frameworks */,
+				571DB98D17BE615C0001514C /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				571DBA0117BE68A60001514C /* PBXTargetDependency */,
+			);
+			name = Activities;
+			productName = Activities;
+			productReference = 571DB98F17BE615C0001514C /* Activities.app */;
+			productType = "com.apple.product-type.application";
+		};
+		571DB9BC17BE67850001514C /* libact */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 571DB9BE17BE67850001514C /* Build configuration list for PBXNativeTarget "libact" */;
+			buildPhases = (
+				571DB9B917BE67850001514C /* Sources */,
+				571DBA0217BE68E60001514C /* Frameworks */,
+				571DB9BB17BE67850001514C /* Headers */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = libact;
+			productName = libact;
+			productReference = 571DB9BD17BE67850001514C /* libact.a */;
+			productType = "com.apple.product-type.library.static";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		571DB98717BE615C0001514C /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				CLASSPREFIX = Act;
+				LastUpgradeCheck = 0460;
+				ORGANIZATIONNAME = Unfactored;
+			};
+			buildConfigurationList = 571DB98A17BE615C0001514C /* Build configuration list for PBXProject "Activities" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 571DB98617BE615C0001514C;
+			productRefGroup = 571DB99017BE615C0001514C /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				571DB98E17BE615C0001514C /* Activities */,
+				571DB9BC17BE67850001514C /* libact */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		571DB98D17BE615C0001514C /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				571DB99D17BE615C0001514C /* InfoPlist.strings in Resources */,
+				571DB9A317BE615C0001514C /* Credits.rtf in Resources */,
+				571DB9A917BE615C0001514C /* MainMenu.xib in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		571DB98B17BE615C0001514C /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				571DB99F17BE615C0001514C /* main.m in Sources */,
+				571DB9A617BE615C0001514C /* ActAppDelegate.mm in Sources */,
+				571DB9B517BE66A60001514C /* ActActivityListView.mm in Sources */,
+				571DB9B617BE66A60001514C /* ActActivityView.mm in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		571DB9B917BE67850001514C /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				571DB9DF17BE67CD0001514C /* act-activity-accum.cc in Sources */,
+				571DB9E117BE67CD0001514C /* act-activity-storage.cc in Sources */,
+				571DB9E317BE67CD0001514C /* act-activity.cc in Sources */,
+				571DB9E517BE67CD0001514C /* act-arguments.cc in Sources */,
+				571DB9E817BE67CD0001514C /* act-config.cc in Sources */,
+				571DB9EA17BE67CD0001514C /* act-database.cc in Sources */,
+				571DB9EC17BE67CD0001514C /* act-format.cc in Sources */,
+				571DB9EE17BE67CD0001514C /* act-gps-activity.cc in Sources */,
+				571DB9F017BE67CD0001514C /* act-gps-fit-parser.cc in Sources */,
+				571DB9F217BE67CD0001514C /* act-gps-parser.cc in Sources */,
+				571DB9F417BE67CD0001514C /* act-gps-tcx-parser.cc in Sources */,
+				571DB9F617BE67CD0001514C /* act-output-table.cc in Sources */,
+				571DB9F917BE67CD0001514C /* act-types.cc in Sources */,
+				571DB9FB17BE67CD0001514C /* act-util.cc in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		571DBA0117BE68A60001514C /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 571DB9BC17BE67850001514C /* libact */;
+			targetProxy = 571DBA0017BE68A60001514C /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		571DB99B17BE615C0001514C /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				571DB99C17BE615C0001514C /* en */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+		571DB9A117BE615C0001514C /* Credits.rtf */ = {
+			isa = PBXVariantGroup;
+			children = (
+				571DB9A217BE615C0001514C /* en */,
+			);
+			name = Credits.rtf;
+			sourceTree = "<group>";
+		};
+		571DB9A717BE615C0001514C /* MainMenu.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				571DB9A817BE615C0001514C /* en */,
+			);
+			name = MainMenu.xib;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		571DB9AA17BE615C0001514C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = c99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_CPP_EXCEPTIONS = NO;
+				GCC_ENABLE_CPP_RTTI = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_TREAT_WARNINGS_AS_ERRORS = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = /usr/include/libxml2;
+				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+				WARNING_CFLAGS = "-Wall";
+			};
+			name = Debug;
+		};
+		571DB9AB17BE615C0001514C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_C_LANGUAGE_STANDARD = c99;
+				GCC_ENABLE_CPP_EXCEPTIONS = NO;
+				GCC_ENABLE_CPP_RTTI = NO;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = /usr/include/libxml2;
+				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				SDKROOT = macosx;
+				WARNING_CFLAGS = "-Wall";
+			};
+			name = Release;
+		};
+		571DB9AD17BE615C0001514C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "Activities-Prefix.pch";
+				HEADER_SEARCH_PATHS = (
+					/usr/include/libxml2,
+					../src,
+				);
+				INFOPLIST_FILE = "Activities-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Debug;
+		};
+		571DB9AE17BE615C0001514C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "Activities-Prefix.pch";
+				HEADER_SEARCH_PATHS = (
+					/usr/include/libxml2,
+					../src,
+				);
+				INFOPLIST_FILE = "Activities-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Release;
+		};
+		571DB9BF17BE67850001514C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				EXECUTABLE_PREFIX = lib;
+				PRODUCT_NAME = act;
+				SKIP_INSTALL = YES;
+			};
+			name = Debug;
+		};
+		571DB9C017BE67850001514C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				EXECUTABLE_PREFIX = lib;
+				PRODUCT_NAME = act;
+				SKIP_INSTALL = YES;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		571DB98A17BE615C0001514C /* Build configuration list for PBXProject "Activities" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				571DB9AA17BE615C0001514C /* Debug */,
+				571DB9AB17BE615C0001514C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		571DB9AC17BE615C0001514C /* Build configuration list for PBXNativeTarget "Activities" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				571DB9AD17BE615C0001514C /* Debug */,
+				571DB9AE17BE615C0001514C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
+		571DB9BE17BE67850001514C /* Build configuration list for PBXNativeTarget "libact" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				571DB9BF17BE67850001514C /* Debug */,
+				571DB9C017BE67850001514C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 571DB98717BE615C0001514C /* Project object */;
+}
