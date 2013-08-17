@@ -479,7 +479,7 @@ act_fold(arguments &args)
       query.set_date_ranges(dates);
     }
   else
-    query.add_date_range(date_range(0, time(nullptr)));
+    query.add_date_range(date_range::infinity());
 
   database db;
 

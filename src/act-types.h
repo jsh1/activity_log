@@ -3,6 +3,8 @@
 #ifndef ACT_TYPES_H
 #define ACT_TYPES_H
 
+#include "act-base.h"
+
 #include <string>
 #include <time.h>
 
@@ -100,6 +102,8 @@ struct date_range
 
   date_range(time_t s, time_t l);
 
+  static date_range infinity();
+
   bool contains(time_t t) const;
 };
 
@@ -126,6 +130,12 @@ date_range::date_range(time_t s, time_t l)
 : start(s),
   length(l)
 {
+}
+
+inline date_range
+date_range::infinity()
+{
+  return date_range(0, LONG_MAX);
 }
 
 inline bool

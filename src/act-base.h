@@ -7,6 +7,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdlib.h>
+#include <limits.h>
 
 #ifndef __BIG_ENDIAN
 # define __BIG_ENDIAN 0x1234
