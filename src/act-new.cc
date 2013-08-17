@@ -193,7 +193,7 @@ act_new(arguments &args)
 
   bool edit = false;
 
-  std::shared_ptr<activity_storage> storage (new activity_storage);
+  activity_storage_ref storage (new activity_storage);
 
   while (1)
     {

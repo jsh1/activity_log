@@ -34,11 +34,11 @@ database::read_activities_callback(const char *path, void *ctx)
 {
   database *db = static_cast<database *>(ctx);
 
-  std::shared_ptr<activity_storage> storage (new activity_storage);
+  activity_storage_ref storage = std::make_shared<activity_storage> ();
   storage->read_file(path);
 
   const std::string *date = storage->field_ptr("Date");
-  if (!date)
+  if (date == nullptr)
     return;
 
   db->_items.resize(db->_items.size() + 1);
@@ -52,7 +52,7 @@ database::read_activities_callback(const char *path, void *ctx)
 }
 
 void
-database::execute_query(const query &q, std::vector<item_ref> &result)
+database::execute_query(const query &q, std::vector<item *> &result)
 {
   result.clear();
 
@@ -97,7 +97,7 @@ database::execute_query(const query &q, std::vector<item_ref> &result)
     }
 }
 
-database::not_term::not_term(const std::shared_ptr<const query_term> &t)
+database::not_term::not_term(const const_query_term_ref &t)
 : term(t)
 {
 }
@@ -112,15 +112,15 @@ database::and_term::and_term()
 {
 }
 
-database::and_term::and_term(const std::shared_ptr<const query_term> &l,
-			     const std::shared_ptr<const query_term> &r)
+database::and_term::and_term(const const_query_term_ref &l,
+			     const const_query_term_ref &r)
 {
   terms.push_back(l);
   terms.push_back(r);
 }
 
 void
-database::and_term::add_term(const std::shared_ptr<const query_term> &t)
+database::and_term::add_term(const const_query_term_ref &t)
 {
   terms.push_back(t);
 }
@@ -139,15 +139,15 @@ database::or_term::or_term()
 {
 }
 
-database::or_term::or_term(const std::shared_ptr<const query_term> &l,
-			   const std::shared_ptr<const query_term> &r)
+database::or_term::or_term(const const_query_term_ref &l,
+			   const const_query_term_ref &r)
 {
   terms.push_back(l);
   terms.push_back(r);
 }
 
 void
-database::or_term::add_term(const std::shared_ptr<const query_term> &t)
+database::or_term::add_term(const const_query_term_ref &t)
 {
   terms.push_back(t);
 }

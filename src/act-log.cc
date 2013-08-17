@@ -70,15 +70,13 @@ act_log(arguments &args, const char *format)
 	{
 	case opt_grep: {
 	  std::string re(opt_arg);
-	  std::shared_ptr<database::query_term>
-	    term (new database::grep_term(re));
+	  database::query_term_ref term (new database::grep_term(re));
 	  query_and->add_term(term);
 	  break; }
 
 	case opt_defines: {
 	  std::string field(opt_arg);
-	  std::shared_ptr<database::query_term>
-	    term (new database::defines_term(field));
+	  database::query_term_ref term (new database::defines_term(field));
 	  query_and->add_term(term);
 	  break; }
 
@@ -88,7 +86,7 @@ act_log(arguments &args, const char *format)
 	    {
 	      std::string field(opt_arg, arg - opt_arg);
 	      std::string re(arg + 1);
-	      std::shared_ptr<database::query_term>
+	      database::query_term_ref
 		term (new database::matches_term(field, re));
 	      query_and->add_term(term);
 	    }
@@ -105,7 +103,7 @@ act_log(arguments &args, const char *format)
 	    {
 	      std::string field(opt_arg, arg - opt_arg);
 	      std::string key(arg + 1);
-	      std::shared_ptr<database::query_term>
+	      database::query_term_ref
 		term (new database::contains_term(field, key));
 	      query_and->add_term(term);
 	    }
@@ -148,7 +146,7 @@ act_log(arguments &args, const char *format)
 	      double rhs;
 	      if (parse_value(tem, type, &rhs, nullptr))
 		{
-		  std::shared_ptr<database::query_term>
+		  database::query_term_ref
 		    term (new database::compare_term(field, op, rhs));
 		  query_and->add_term(term);
 		}
@@ -239,7 +237,7 @@ act_log(arguments &args, const char *format)
 
   database db;
 
-  std::vector<database::item_ref> items;
+  std::vector<database::item *> items;
   db.execute_query(query, items);
 
   for (const auto &it : items)

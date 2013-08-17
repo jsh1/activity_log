@@ -10,7 +10,7 @@
 
 namespace act {
 
-activity::activity(std::shared_ptr<activity_storage> storage)
+activity::activity(activity_storage_ref storage)
 : _storage(storage),
   _invalid_groups(group_all)
 {
@@ -529,7 +529,7 @@ activity::print_expansion(FILE *fh, const char *name,
     {
       const char *body = this->body().c_str();
 
-      if (!arg || strcasecmp(arg, "all") == 0)
+      if (arg == nullptr || strcasecmp(arg, "all") == 0)
 	{
 	  print_indented_string(body, this->body().size(), fh);
 	}
@@ -537,7 +537,7 @@ activity::print_expansion(FILE *fh, const char *name,
 	{
 	  const char *end = strchr(body, '\n');
 	  size_t len;
-	  if (!end)
+	  if (end == nullptr)
 	    len = strlen(body);
 	  else
 	    len = end - body;
@@ -547,7 +547,7 @@ activity::print_expansion(FILE *fh, const char *name,
 	{
 	  const char *end = strstr(body, "\n\n");
 	  size_t len;
-	  if (!end)
+	  if (end == nullptr)
 	    len = strlen(body);
 	  else
 	    len = end - body;
@@ -662,7 +662,7 @@ activity::print_field(FILE *fh, const char *field, const char *arg) const
 const gps::activity *
 activity::gps_data() const
 {
-  if (!_gps_data)
+  if (_gps_data == nullptr)
     {
       if (const std::string *str = field_ptr("gps-file"))
 	{

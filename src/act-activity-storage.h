@@ -5,6 +5,7 @@
 
 #include "act-base.h"
 
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -48,6 +49,9 @@ public:
   const_iterator begin() const;
   const_iterator end() const;
 };
+
+typedef std::shared_ptr<activity_storage> activity_storage_ref;
+typedef std::shared_ptr<const activity_storage> const_activity_storage_ref;
 
 // implementation details
 

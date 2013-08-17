@@ -23,19 +23,17 @@ public:
 
       std::string _path;
       time_t _date;
-      std::shared_ptr<activity_storage> _storage;
+      activity_storage_ref _storage;
 
     public:
       const std::string &path() const {return _path;}
 
       time_t date() const {return _date;}
 
-      std::shared_ptr<activity_storage> storage() {return _storage;}
-      std::shared_ptr<const activity_storage> storage() const {
+      activity_storage_ref storage() {return _storage;}
+      const_activity_storage_ref storage() const {
 	return std::const_pointer_cast<const activity_storage> (_storage);}
     };
-
-  typedef item *item_ref;
 
   class query_term
     {
@@ -44,40 +42,41 @@ public:
       virtual bool operator() (const activity &a) const = 0;
     };
 
+  typedef std::shared_ptr<query_term> query_term_ref;
+  typedef std::shared_ptr<const query_term> const_query_term_ref;
+
   class not_term : public query_term
     {
-      std::shared_ptr<const query_term> term;
+      const_query_term_ref term;
 
     public:
-      explicit not_term(const std::shared_ptr<const query_term> &t);
+      explicit not_term(const const_query_term_ref &t);
 
       virtual bool operator() (const activity &a) const;
     };
 
   class and_term : public query_term
     {
-      std::vector<std::shared_ptr<const query_term>> terms;
+      std::vector<const_query_term_ref> terms;
 
     public:
       and_term();
-      and_term(const std::shared_ptr<const query_term> &l,
-	       const std::shared_ptr<const query_term> &r);
+      and_term(const const_query_term_ref &l, const const_query_term_ref &r);
 
-      void add_term(const std::shared_ptr<const query_term> &t);
+      void add_term(const const_query_term_ref &t);
 
       virtual bool operator() (const activity &a) const;
     };
 
   class or_term : public query_term
     {
-      std::vector<std::shared_ptr<const query_term>> terms;
+      std::vector<const_query_term_ref> terms;
 
     public:
       or_term();
-      or_term(const std::shared_ptr<const query_term> &l,
-	      const std::shared_ptr<const query_term> &r);
+      or_term(const const_query_term_ref &l, const const_query_term_ref &r);
 
-      void add_term(const std::shared_ptr<const query_term> &t);
+      void add_term(const const_query_term_ref &t);
 
       virtual bool operator() (const activity &a) const;
     };
@@ -159,7 +158,7 @@ public:
       size_t _max_count;
       size_t _skip_count;
 
-      std::shared_ptr<const query_term> _term;
+      const_query_term_ref _term;
 
     public:
       query() : _max_count(SIZE_T_MAX), _skip_count(0) {}
@@ -174,11 +173,11 @@ public:
       size_t skip_count() const {return _skip_count;}
       void set_skip_count(size_t n) {_skip_count = n;}
 
-      void set_term(const std::shared_ptr<const query_term> &t) {_term = t;}
-      const std::shared_ptr<const query_term> &term() const {return _term;}
+      void set_term(const const_query_term_ref &t) {_term = t;}
+      const const_query_term_ref &term() const {return _term;}
     };
 
-  void execute_query(const query &q, std::vector<item_ref> &result);
+  void execute_query(const query &q, std::vector<item *> &result);
 
 private:
   std::vector<item> _items;

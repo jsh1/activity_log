@@ -13,7 +13,7 @@ bool
 activity_storage::read_file(const char *path)
 {
   FILE *fh = fopen(path, "r");
-  if (!fh)
+  if (fh == nullptr)
     return false;
 
   _header.clear();
@@ -34,7 +34,7 @@ activity_storage::read_file(const char *path)
       if (_header.size() == 0 || !isspace_l(buf[0], nullptr))
 	{
 	  char *ptr = strchr(buf, ':');
-	  if (!ptr)
+	  if (ptr == nullptr)
 	    continue;
 
 	  *ptr++ = 0;
@@ -66,7 +66,7 @@ bool
 activity_storage::write_file(const char *path) const
 {
   FILE *fh = fopen(path, "w");
-  if (!fh)
+  if (fh == nullptr)
     return false;
 
   for (const auto &it : _header)

@@ -15,10 +15,10 @@ namespace act {
 class activity
 {
 public:
-  activity(std::shared_ptr<activity_storage> storage);
+  activity(activity_storage_ref storage);
 
-  std::shared_ptr<activity_storage> storage();
-  std::shared_ptr<const activity_storage> storage() const;
+  activity_storage_ref storage();
+  const_activity_storage_ref storage() const;
 
   void invalidate_cached_values();
 
@@ -77,7 +77,7 @@ public:
   const std::vector<std::string> &keywords() const;
 
 private:
-  std::shared_ptr<activity_storage> _storage;
+  activity_storage_ref _storage;
 
   mutable std::unique_ptr<gps::activity> _gps_data;
 
@@ -137,13 +137,13 @@ private:
 
 // implementation details
 
-inline std::shared_ptr<activity_storage>
+inline activity_storage_ref
 activity::storage()
 {
   return _storage;
 }
 
-inline std::shared_ptr<const activity_storage>
+inline const_activity_storage_ref
 activity::storage() const
 {
   return _storage;
