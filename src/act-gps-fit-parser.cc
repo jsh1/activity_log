@@ -97,8 +97,12 @@ fit_parser::read_bytes(void *buf, size_t size)
 	  _buf_base += _buf_size;
 	  _buf_size = fread(_buf, 1, sizeof(_buf), _file);
 	  _buf_idx = 0;
+
 	  if (_buf_size == 0)
-	    return false;
+	    {
+	      memset(buf, 0, size);
+	      return false;
+	    }
 	}
     }
 

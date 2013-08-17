@@ -50,7 +50,8 @@ activity_storage::read_file(const char *path)
       else
 	{
 	  trim_newline_characters(buf);
-	  last_value->append(buf);
+	  if (last_value != nullptr)
+	    last_value->append(buf);
 	}
     }
 

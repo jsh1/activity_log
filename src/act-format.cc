@@ -740,7 +740,7 @@ parse_date(const std::string &str, size_t &idx,
 	      /* Speculatively try to parse "MONTH D+". */
 
 	      size_t tidx = skip_whitespace_and_dashes(str, idx);
-	      tidx = next_token(str, tidx, token);
+	      next_token(str, tidx, token);
 
 	      if (token.size() != 0 && isdigit_l(token[0], nullptr))
 		{
@@ -748,7 +748,6 @@ parse_date(const std::string &str, size_t &idx,
 
 		  if (n > 0)
 		    {
-		      idx = tidx;
 		      tm->tm_mday = n;
 		      *range_ptr = SECONDS_PER_DAY;
 		      return true;
@@ -1119,7 +1118,7 @@ parse_date_interval(const std::string &str, date_interval *interval_ptr)
 	return false;
 
       idx = skip_whitespace_and_dashes(str, idx);
-      idx = next_token(str, idx, token);
+      next_token(str, idx, token);
 
       if (token.size() == 0)
 	return false;
@@ -1366,6 +1365,8 @@ parse_fraction(const std::string &str, double *frac_ptr)
 	  value = value / 100;
 	}
     }
+
+  *frac_ptr = value;
 
   return check_trailer(str, idx);
 }
