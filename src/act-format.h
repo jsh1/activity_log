@@ -16,6 +16,7 @@ namespace act {
 // string conversion functions
 
 void format_date_time(std::string &str, time_t date);
+void format_date_time(std::string &str, time_t date, const char *format);
 void format_time(std::string &str, double dur, bool include_frac,
   const char *suffix);
 void format_duration(std::string &str, double dur);

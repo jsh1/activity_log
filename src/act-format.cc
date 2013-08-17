@@ -32,12 +32,18 @@ namespace act {
 void
 format_date_time(std::string &str, time_t date)
 {
+  format_date_time(str, date, "%Y-%m-%d %H:%M:%S %z");
+}
+
+void
+format_date_time(std::string &str, time_t date, const char *format)
+{
   char buf[256];
 
   struct tm tm = {0};
   localtime_r(&date, &tm);
 
-  strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S %z", &tm);
+  strftime(buf, sizeof(buf), format, &tm);
 
   str.append(buf);
 }
@@ -46,34 +52,41 @@ void
 format_time(std::string &str, double dur,
 	    bool include_frac, const char *suffix)
 {
-  if (!include_frac)
-    dur = floor(dur + .5);
-
   char buf[256];
 
-  if (dur > 3600)
+  if (!isfinite(dur))
     {
-      snprintf_l(buf, sizeof(buf), nullptr, "%d:%02d:%02d",
-		 (int) floor(dur/3600), (int) fmod(floor(dur/60),60),
-		 (int) fmod(dur, 60));
-    }
-  else if (dur > 60)
-    {
-      snprintf_l(buf, sizeof(buf), nullptr, "%d:%02d",
-		 (int) floor(dur/60), (int) fmod(dur, 60));
+      strcpy(buf, "Inf");
     }
   else
     {
-      snprintf_l(buf, sizeof(buf), nullptr, "%d", (int) dur);
-    }
+      if (!include_frac)
+	dur = floor(dur + .5);
 
-  double frac = dur - floor(dur);
+      if (dur > 3600)
+	{
+	  snprintf_l(buf, sizeof(buf), nullptr, "%d:%02d:%02d",
+		     (int) floor(dur/3600), (int) fmod(floor(dur/60),60),
+		     (int) fmod(dur, 60));
+	}
+      else if (dur > 60)
+	{
+	  snprintf_l(buf, sizeof(buf), nullptr, "%d:%02d",
+		     (int) floor(dur/60), (int) fmod(dur, 60));
+	}
+      else
+	{
+	  snprintf_l(buf, sizeof(buf), nullptr, "%d", (int) dur);
+	}
 
-  if (frac > 1e-4)
-    {
-      size_t len = strlen(buf);
-      snprintf_l(buf + len, sizeof(buf) - len, nullptr,
-	       ".%02d", (int) floor(frac * 10 + .5));
+      double frac = dur - floor(dur);
+
+      if (frac > 1e-4)
+	{
+	  size_t len = strlen(buf);
+	  snprintf_l(buf + len, sizeof(buf) - len, nullptr,
+		     ".%02d", (int) floor(frac * 10 + .5));
+	}
     }
 
   if (suffix)
@@ -160,12 +173,18 @@ format_pace(std::string &str, double pace, unit_type unit)
     case unit_seconds_per_mile:
     default:
       suffix = " / mi";
-      dur = SECS_PER_MILE(pace);
+      if (pace != 0)
+	dur = SECS_PER_MILE(pace);
+      else
+	dur = HUGE_VAL;
       break;
 
     case unit_seconds_per_kilometre:
       suffix = " / km";
-      dur = SECS_PER_KM(pace);
+      if (pace != 0)
+	dur = SECS_PER_KM(pace);
+      else
+	dur = HUGE_VAL;
       break;
     }
 
