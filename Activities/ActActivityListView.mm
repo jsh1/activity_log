@@ -62,10 +62,35 @@
 
   act::activity a (storage);
 
-  std::string date_str;
-  act::format_date_time(date_str, a.date());
+  std::string str;
 
-  return [NSString stringWithUTF8String:date_str.c_str()];
+  NSString *ident = [col identifier];
+  const char *string_field = nullptr;
+
+  if ([ident isEqualToString:@"date"])
+    act::format_date_time(str, a.date(), "%F %-l%p");
+  else if ([ident isEqualToString:@"distance"] && a.distance() != 0)
+    act::format_distance(str, a.distance(), a.distance_unit());
+  else if ([ident isEqualToString:@"duration"] && a.duration() != 0)
+    act::format_duration(str, a.duration());
+  else if ([ident isEqualToString:@"pace"] && a.speed() != 0)
+    act::format_pace(str, a.speed(), a.speed_unit());
+  else if ([ident isEqualToString:@"speed"] && a.speed() != 0)
+    act::format_speed(str, a.speed(), a.speed_unit());
+  else if ([ident isEqualToString:@"activity"])
+    string_field = "activity";
+  else if ([ident isEqualToString:@"type"])
+    string_field = "type";
+  else if ([ident isEqualToString:@"course"])
+    string_field = "course";
+
+  if (string_field != nullptr)
+    {
+      if (const std::string *s = a.field_ptr(string_field))
+	return [NSString stringWithUTF8String:s->c_str()];
+    }
+
+  return [NSString stringWithUTF8String:str.c_str()];
 }
 
 // NSTableViewDelegate methods
