@@ -85,6 +85,10 @@ activity::read_cached_values(unsigned int groups) const
 
       if (_speed == 0 && _duration != 0 && _distance != 0)
 	_speed = _distance / _duration;
+      else if (_duration == 0 && _distance != 0 && _speed != 0)
+	_duration = _distance / _speed;
+      else if (_distance == 0 && _duration != 0 && _speed != 0)
+	_distance = _speed * _duration;
 
       if (_date == 0 || _duration == 0 || _distance == 0 || _speed == 0)
 	use_gps = true;
