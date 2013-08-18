@@ -8,7 +8,7 @@
 #include "act-output-table.h"
 #include "act-util.h"
 
-#include <cmath>
+#include <math.h>
 
 namespace act {
 

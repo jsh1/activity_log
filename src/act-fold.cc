@@ -9,8 +9,8 @@
 #include "act-output-table.h"
 #include "act-util.h"
 
-#include <cmath>
 #include <map>
+#include <math.h>
 #include <xlocale.h>
 
 using namespace act;

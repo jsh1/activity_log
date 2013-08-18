@@ -5,7 +5,7 @@
 #include "act-format.h"
 
 #include <algorithm>
-#include <cassert>
+#include <assert.h>
 
 namespace act {
 
