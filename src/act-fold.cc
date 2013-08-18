@@ -135,7 +135,7 @@ string_group::string_group(const char *f)
 void
 string_group::insert(const activity &a)
 {
-  if(const std::string *ptr = a.field_ptr(field))
+  if (const std::string *ptr = a.field_ptr(field))
     {
       map[*ptr].add(a);
     }
@@ -155,7 +155,7 @@ keyword_group::keyword_group(const char *f)
 void
 keyword_group::insert(const activity &a)
 {
-  if(const std::vector<std::string> *ptr = a.field_keywords_ptr(field))
+  if (const std::vector<std::string> *ptr = a.field_keywords_ptr(field))
     {
       for (const auto &it : *ptr)
 	map[it].add(a);
@@ -315,9 +315,8 @@ act_fold(arguments &args)
 	  query_and->add_term(term);
 	  break; }
 
-	case opt_matches: {
-	  const char *arg = strchr(opt_arg, ':');
-	  if (arg)
+	case opt_matches:
+	  if (const char *arg = strchr(opt_arg, ':'))
 	    {
 	      std::string field(opt_arg, arg - opt_arg);
 	      std::string re(arg + 1);
@@ -330,11 +329,10 @@ act_fold(arguments &args)
 	      print_usage(args);
 	      return 1;
 	    }
-	  break; }
+	  break;
 
-	case opt_contains: {
-	  const char *arg = strchr(opt_arg, ':');
-	  if (arg)
+	case opt_contains:
+	  if (const char *arg = strchr(opt_arg, ':'))
 	    {
 	      std::string field(opt_arg, arg - opt_arg);
 	      std::string key(arg + 1);
@@ -347,7 +345,7 @@ act_fold(arguments &args)
 	      print_usage(args);
 	      return 1;
 	    }
-	  break; }
+	  break;
 
 	case opt_compare: {
 	  const char *arg = opt_arg;
