@@ -75,8 +75,34 @@
     act::format_duration(str, a.duration());
   else if ([ident isEqualToString:@"pace"] && a.speed() != 0)
     act::format_pace(str, a.speed(), a.speed_unit());
+  else if ([ident isEqualToString:@"max-pace"] && a.max_speed() != 0)
+    act::format_pace(str, a.max_speed(), a.max_speed_unit());
   else if ([ident isEqualToString:@"speed"] && a.speed() != 0)
     act::format_speed(str, a.speed(), a.speed_unit());
+  else if ([ident isEqualToString:@"max-speed"] && a.max_speed() != 0)
+    act::format_speed(str, a.max_speed(), a.max_speed_unit());
+  else if ([ident isEqualToString:@"effort"] && a.effort() != 0)
+    act::format_fraction(str, a.effort());
+  else if ([ident isEqualToString:@"quality"] && a.quality() != 0)
+    act::format_fraction(str, a.quality());
+  else if ([ident isEqualToString:@"average-hr"] && a.average_hr() != 0)
+    act::format_number(str, a.average_hr());
+  else if ([ident isEqualToString:@"max-hr"] && a.max_hr() != 0)
+    act::format_number(str, a.max_hr());
+  else if ([ident isEqualToString:@"resting-hr"] && a.resting_hr() != 0)
+    act::format_number(str, a.resting_hr());
+  else if ([ident isEqualToString:@"calories"] && a.calories() != 0)
+    act::format_number(str, a.calories());
+  else if ([ident isEqualToString:@"weight"] && a.weight() != 0)
+    act::format_weight(str, a.weight(), a.weight_unit());
+  else if ([ident isEqualToString:@"temperature"] && a.temperature() != 0)
+    act::format_temperature(str, a.temperature(), a.temperature_unit());
+  else if ([ident isEqualToString:@"dew-point"] && a.dew_point() != 0)
+    act::format_temperature(str, a.dew_point(), a.dew_point_unit());
+  else if ([ident isEqualToString:@"weather"])
+    act::format_keywords(str, a.weather());
+  else if ([ident isEqualToString:@"equipment"])
+    act::format_keywords(str, a.equipment());
   else if ([ident isEqualToString:@"activity"])
     string_field = "activity";
   else if ([ident isEqualToString:@"type"])
