@@ -9,6 +9,11 @@
 #include <stdlib.h>
 #include <limits.h>
 
+#if defined(__APPLE__) && __APPLE__
+# include <Availability.h>
+# include <TargetConditionals.h>
+#endif
+
 #ifndef __BIG_ENDIAN
 # define __BIG_ENDIAN 0x1234
 #endif
