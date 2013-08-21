@@ -4,9 +4,10 @@
 
 #import "ActActivityView.h"
 
-@implementation ActActivityBodyView
+#define LEFT_BORDER_WIDTH 64
+#define RIGHT_BORDER_WIDTH 32
 
-@synthesize activityView = _activityView;
+@implementation ActActivityBodyView
 
 - (id)initWithFrame:(NSRect)frame
 {
@@ -14,7 +15,8 @@
   if (self == nil)
     return nil;
 
-  _textView = [[NSTextView alloc] initWithFrame:frame];
+  _textView = [[NSTextView alloc] initWithFrame:NSZeroRect];
+  [_textView setFont:[NSFont systemFontOfSize:[NSFont smallSystemFontSize]]];
   [self addSubview:_textView];
   [_textView release];
   [_textView setDrawsBackground:NO];
@@ -39,7 +41,7 @@
 
 - (NSString *)bodyString
 {
-  if (const act::activity *a = [_activityView activity])
+  if (const act::activity *a = [[self activityView] activity])
     {
       const std::string &s = a->body();
 
@@ -88,6 +90,12 @@
 
 - (CGFloat)preferredHeightForWidth:(CGFloat)width
 {
+  // See https://developer.apple.com/library/mac/documentation/Cocoa/Conceptual/TextLayout/Tasks/StringHeight.html
+
+  width = width - (LEFT_BORDER_WIDTH + RIGHT_BORDER_WIDTH);
+  if (width < 0)
+    width = 0;
+
   [_layoutContainer setContainerSize:NSMakeSize(width, CGFLOAT_MAX)];
   [_layoutManager glyphRangeForTextContainer:_layoutContainer];
 
@@ -96,7 +104,12 @@
 
 - (void)layoutSubviews
 {
-  [_textView setFrame:[self bounds]];
+  NSRect bounds = [self bounds];
+  NSRect frame = NSMakeRect(LEFT_BORDER_WIDTH, 0, bounds.size.width
+			    - (LEFT_BORDER_WIDTH + RIGHT_BORDER_WIDTH),
+			    bounds.size.height);
+
+  [_textView setFrame:frame];
 }
 
 @end

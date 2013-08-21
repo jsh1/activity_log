@@ -34,6 +34,10 @@
 		571DBA0317BE6B6C0001514C /* libxml2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 571DB9FD17BE68090001514C /* libxml2.dylib */; };
 		57921A5717BEAEF0001AD35D /* ActWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 57921A5517BEAEF0001AD35D /* ActWindow.xib */; };
 		57921A5A17BEAF48001AD35D /* ActWindowController.mm in Sources */ = {isa = PBXBuildFile; fileRef = 57921A5917BEAF48001AD35D /* ActWindowController.mm */; };
+		579772E217C4F3E000AA2E9D /* ActActivitySubview.mm in Sources */ = {isa = PBXBuildFile; fileRef = 579772E117C4F3E000AA2E9D /* ActActivitySubview.mm */; };
+		579772E517C4F63900AA2E9D /* ActActivityHeaderView.mm in Sources */ = {isa = PBXBuildFile; fileRef = 579772E417C4F63900AA2E9D /* ActActivityHeaderView.mm */; };
+		579772E817C4FB0A00AA2E9D /* ActActivityHeaderFieldView.mm in Sources */ = {isa = PBXBuildFile; fileRef = 579772E717C4FB0A00AA2E9D /* ActActivityHeaderFieldView.mm */; };
+		579772EB17C5015600AA2E9D /* ActFoundationExtensions.mm in Sources */ = {isa = PBXBuildFile; fileRef = 579772EA17C5015600AA2E9D /* ActFoundationExtensions.mm */; };
 		57D99EB417C3F865003709BB /* ActActivityBodyView.mm in Sources */ = {isa = PBXBuildFile; fileRef = 57D99EB317C3F865003709BB /* ActActivityBodyView.mm */; };
 /* End PBXBuildFile section */
 
@@ -98,6 +102,14 @@
 		57921A5617BEAEF0001AD35D /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/ActWindow.xib; sourceTree = "<group>"; };
 		57921A5817BEAF48001AD35D /* ActWindowController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActWindowController.h; sourceTree = "<group>"; };
 		57921A5917BEAF48001AD35D /* ActWindowController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ActWindowController.mm; sourceTree = "<group>"; };
+		579772E017C4F3E000AA2E9D /* ActActivitySubview.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActActivitySubview.h; sourceTree = "<group>"; };
+		579772E117C4F3E000AA2E9D /* ActActivitySubview.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ActActivitySubview.mm; sourceTree = "<group>"; };
+		579772E317C4F63900AA2E9D /* ActActivityHeaderView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActActivityHeaderView.h; sourceTree = "<group>"; };
+		579772E417C4F63900AA2E9D /* ActActivityHeaderView.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ActActivityHeaderView.mm; sourceTree = "<group>"; };
+		579772E617C4FB0A00AA2E9D /* ActActivityHeaderFieldView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActActivityHeaderFieldView.h; sourceTree = "<group>"; };
+		579772E717C4FB0A00AA2E9D /* ActActivityHeaderFieldView.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ActActivityHeaderFieldView.mm; sourceTree = "<group>"; };
+		579772E917C5015600AA2E9D /* ActFoundationExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActFoundationExtensions.h; sourceTree = "<group>"; };
+		579772EA17C5015600AA2E9D /* ActFoundationExtensions.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ActFoundationExtensions.mm; sourceTree = "<group>"; };
 		57D99EB217C3F865003709BB /* ActActivityBodyView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActActivityBodyView.h; sourceTree = "<group>"; };
 		57D99EB317C3F865003709BB /* ActActivityBodyView.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ActActivityBodyView.mm; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -166,8 +178,16 @@
 				571DB9B217BE66A60001514C /* ActActivityListView.mm */,
 				571DB9B317BE66A60001514C /* ActActivityView.h */,
 				571DB9B417BE66A60001514C /* ActActivityView.mm */,
+				579772E017C4F3E000AA2E9D /* ActActivitySubview.h */,
+				579772E117C4F3E000AA2E9D /* ActActivitySubview.mm */,
 				57D99EB217C3F865003709BB /* ActActivityBodyView.h */,
 				57D99EB317C3F865003709BB /* ActActivityBodyView.mm */,
+				579772E317C4F63900AA2E9D /* ActActivityHeaderView.h */,
+				579772E417C4F63900AA2E9D /* ActActivityHeaderView.mm */,
+				579772E617C4FB0A00AA2E9D /* ActActivityHeaderFieldView.h */,
+				579772E717C4FB0A00AA2E9D /* ActActivityHeaderFieldView.mm */,
+				579772E917C5015600AA2E9D /* ActFoundationExtensions.h */,
+				579772EA17C5015600AA2E9D /* ActFoundationExtensions.mm */,
 			);
 			name = Source;
 			sourceTree = SOURCE_ROOT;
@@ -331,6 +351,10 @@
 				571DB9B617BE66A60001514C /* ActActivityView.mm in Sources */,
 				57921A5A17BEAF48001AD35D /* ActWindowController.mm in Sources */,
 				57D99EB417C3F865003709BB /* ActActivityBodyView.mm in Sources */,
+				579772E217C4F3E000AA2E9D /* ActActivitySubview.mm in Sources */,
+				579772E517C4F63900AA2E9D /* ActActivityHeaderView.mm in Sources */,
+				579772E817C4FB0A00AA2E9D /* ActActivityHeaderFieldView.mm in Sources */,
+				579772EB17C5015600AA2E9D /* ActFoundationExtensions.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

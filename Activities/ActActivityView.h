@@ -8,7 +8,6 @@
 
 @interface ActActivityView : NSView
 {
-@private
   IBOutlet ActWindowController *_controller;
 
   act::activity_storage_ref _activity_storage;
@@ -17,20 +16,6 @@
 
 @property(nonatomic) act::activity_storage_ref activityStorage;
 @property(nonatomic, readonly) act::activity *activity;
-
-- (void)activityDidChange;
-
-- (CGFloat)preferredHeightForWidth:(CGFloat)width;
-
-- (void)layoutSubviews;
-
-@end
-
-// Ad hoc protocol for activity subview classes
-
-@interface NSView (ActActivitySubview)
-
-@property(nonatomic, assign) ActActivityView *activityView;
 
 - (void)activityDidChange;
 

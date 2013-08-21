@@ -8,7 +8,6 @@
 
 @interface ActWindowController : NSWindowController <NSSplitViewDelegate>
 {
-@private
   IBOutlet ActActivityView *_activityView;
   IBOutlet ActActivityListView *_activityListView;
   IBOutlet NSSplitView *_verticalSplitView;

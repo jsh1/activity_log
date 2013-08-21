@@ -3,6 +3,8 @@
 #import "ActActivityView.h"
 
 #import "ActActivityBodyView.h"
+#import "ActActivityHeaderView.h"
+#import "ActActivitySubView.h"
 
 @interface ActActivityView ()
 - (void)updateHeight;
@@ -41,13 +43,14 @@
   if (subview_classes == nil)
     {
       subview_classes = [[NSArray alloc] initWithObjects:
+			 [ActActivityHeaderView class],
 			 [ActActivityBodyView class],
 			 nil];
     }
 
   for (Class cls in subview_classes)
     {
-      NSView *view = [[cls alloc] initWithFrame:NSZeroRect];
+      ActActivitySubview *view = [[cls alloc] initWithFrame:NSZeroRect];
       [view setActivityView:self];
       [self addSubview:view];
       [view release];
@@ -59,9 +62,9 @@
   if ([[self subviews] count] == 0)
     [self createSubviews];
 
-  for (NSView *view in [self subviews])
+  for (ActActivitySubview *subview in [self subviews])
     {
-      [view activityDidChange];
+      [subview activityDidChange];
     }
 
   [self updateHeight];
@@ -85,9 +88,9 @@
 {
   CGFloat height = 0;
 
-  for (NSView *view in [self subviews])
+  for (ActActivitySubview *subview in [self subviews])
     {
-      height += [view preferredHeightForWidth:width];
+      height += [subview preferredHeightForWidth:width];
     }
 
   return height;
@@ -98,11 +101,11 @@
   NSRect bounds = [self bounds];
   NSRect frame = bounds;
 
-  for (NSView *view in [self subviews])
+  for (ActActivitySubview *subview in [self subviews])
     {
-      frame.size.height = [view preferredHeightForWidth:frame.size.width];
-      [view setFrame:frame];
-      [view layoutSubviews];
+      frame.size.height = [subview preferredHeightForWidth:frame.size.width];
+      [subview setFrame:frame];
+      [subview layoutSubviews];
       frame.origin.y += frame.size.height;
     }
 }
@@ -120,32 +123,6 @@
 - (BOOL)isFlipped
 {
   return YES;
-}
-
-@end
-
-@implementation NSView (ActActivitySubview)
-
-- (ActActivityView *)activityView
-{
-  return nil;
-}
-
-- (void)setActivityView:(ActActivityView *)view
-{
-}
-
-- (void)activityDidChange
-{
-}
-
-- (CGFloat)preferredHeightForWidth:(CGFloat)width
-{
-  return [self bounds].size.height;
-}
-
-- (void)layoutSubviews
-{
 }
 
 @end
