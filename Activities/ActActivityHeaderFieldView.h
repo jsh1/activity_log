@@ -2,10 +2,12 @@
 
 #import "ActActivitySubview.h"
 
+@class ActActivityHeaderFieldTextView;
+
 @interface ActActivityHeaderFieldView : ActActivitySubview
 {
-  IBOutlet NSTextField *_labelView;
-  IBOutlet NSTextView *_textView;
+  NSTextField *_labelView;
+  ActActivityHeaderFieldTextView *_textView;
 
   NSString *_fieldName;
 }

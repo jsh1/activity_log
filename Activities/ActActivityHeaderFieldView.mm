@@ -6,10 +6,13 @@
 
 #import "act-format.h"
 
-#define LABEL_WIDTH 100
+#define LABEL_WIDTH 80
 #define LABEL_HEIGHT 14
 
 #define CONTROL_HEIGHT LABEL_HEIGHT
+
+@interface ActActivityHeaderFieldTextView : NSTextView
+@end
 
 @implementation ActActivityHeaderFieldView
 
@@ -32,7 +35,7 @@
   [self addSubview:_labelView];
   [_labelView release];
 
-  _textView = [[NSTextView alloc] initWithFrame:
+  _textView = [[ActActivityHeaderFieldTextView alloc] initWithFrame:
 	       NSMakeRect(LABEL_WIDTH, 0, frame.size.width
 			  - LABEL_WIDTH, CONTROL_HEIGHT)];
   [_textView setFont:[NSFont systemFontOfSize:[NSFont smallSystemFontSize]]];
@@ -132,6 +135,33 @@
   frame.origin.x += frame.size.width;
   frame.size.width = bounds.size.width - frame.size.width;
   [_textView setFrame:frame];
+}
+
+@end
+
+@implementation ActActivityHeaderFieldTextView
+
+- (void)keyDown:(NSEvent *)e
+{
+  unsigned int keyCode = [e keyCode];
+
+  if (keyCode == 125 /* Down */ || keyCode == 126 /* Up */
+      || keyCode == 36 /* RET */ || keyCode == 48 /* TAB */)
+    {
+      if ([[self window] firstResponder] == self)
+	{
+	  if (keyCode == 125
+	      || (keyCode != 126
+		  && !([e modifierFlags] & NSShiftKeyMask)))
+	    [[self window] selectNextKeyView:self];
+	  else
+	    [[self window] selectPreviousKeyView:self];
+	}
+    }
+  else
+    {
+      [super keyDown:e];
+    }
 }
 
 @end

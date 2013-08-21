@@ -44,7 +44,7 @@
 				<int key="NSWindowStyleMask">15</int>
 				<int key="NSWindowBacking">2</int>
 				<string key="NSWindowRect">{{62, 151}, {905, 665}}</string>
-				<int key="NSWTFlags">1948778496</int>
+				<int key="NSWTFlags">1948780544</int>
 				<string key="NSWindowTitle">Activities</string>
 				<string key="NSWindowClass">NSWindow</string>
 				<nil key="NSViewClass"/>
@@ -160,7 +160,7 @@
 																							<int key="NSColorSpace">6</int>
 																							<string key="NSCatalogName">System</string>
 																							<string key="NSColorName">controlBackgroundColor</string>
-																							<object class="NSColor" key="NSColor" id="204303208">
+																							<object class="NSColor" key="NSColor">
 																								<int key="NSColorSpace">3</int>
 																								<bytes key="NSWhite">MC42NjY2NjY2NjY3AA</bytes>
 																							</object>
@@ -470,12 +470,7 @@
 																	<reference key="NSNextKeyView" ref="1010773551"/>
 																	<string key="NSReuseIdentifierKey">_NS:11</string>
 																	<reference key="NSDocView" ref="1010773551"/>
-																	<object class="NSColor" key="NSBGColor">
-																		<int key="NSColorSpace">6</int>
-																		<string key="NSCatalogName">System</string>
-																		<string key="NSColorName">controlColor</string>
-																		<reference key="NSColor" ref="204303208"/>
-																	</object>
+																	<reference key="NSBGColor" ref="859800846"/>
 																	<int key="NScvFlags">4</int>
 																</object>
 																<object class="NSScroller" id="324615777">

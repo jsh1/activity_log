@@ -4,7 +4,7 @@
 
 #import "ActActivityView.h"
 
-#define LEFT_BORDER_WIDTH 64
+#define LEFT_BORDER_WIDTH 32
 #define RIGHT_BORDER_WIDTH 32
 
 @implementation ActActivityBodyView
