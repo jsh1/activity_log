@@ -65,7 +65,7 @@ private:
   state previous_state() {return _state[_state.size()-2];}
 
   activity::lap &current_lap() {return destination().laps().back();}
-  activity::point &current_point() {return current_lap().track().back();}
+  activity::point &current_point() {return current_lap().track.back();}
 
   static void sax_start_element(void *ctx, const xmlChar *name,
     const xmlChar *pfx, const xmlChar *uri, int n_ns, const xmlChar **ns,

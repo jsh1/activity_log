@@ -453,7 +453,7 @@ fit_parser::read_record_message(const message_type &def, uint32_t timestamp)
 {
   activity::point p;
 
-  p.set_time(make_time(timestamp));
+  p.time = make_time(timestamp);
 
   for (std::vector<message_field>::const_iterator it = def.fields.begin();
        !had_error() && it != def.fields.end(); it++)
@@ -461,27 +461,27 @@ fit_parser::read_record_message(const message_type &def, uint32_t timestamp)
       switch (it->field_type)
 	{
 	case 0:				/* position_lat */
-	  p.set_latitude(make_lat_long(read_field(def, *it)));
+	  p.latitude = make_lat_long(read_field(def, *it));
 	  break;
 
 	case 1:				/* position_long */
-	  p.set_longitude(make_lat_long(read_field(def, *it)));
+	  p.longitude = make_lat_long(read_field(def, *it));
 	  break;
 
 	case 2:				/* altitude */
-	  p.set_altitude(make_altitude(read_field(def, *it)));
+	  p.altitude = make_altitude(read_field(def, *it));
 	  break;
 
 	case 5:				/* distance */
-	  p.set_distance(make_distance(read_field(def, *it)));
+	  p.distance = make_distance(read_field(def, *it));
 	  break;
 
 	case 6:				/* speed */
-	  p.set_speed(make_speed(read_field(def, *it)));
+	  p.speed = make_speed(read_field(def, *it));
 	  break;
 
 	case 3:				/* heart_rate */
-	  p.set_heart_rate(read_field(def, *it));
+	  p.heart_rate = read_field(def, *it);
 	  break;
 
 	default:
@@ -504,35 +504,35 @@ fit_parser::read_lap_message(const message_type &def, uint32_t timestamp)
       switch (it->field_type)
 	{
 	case 2:				/* start_time */
-	  lap.set_time(make_time(read_field(def, *it)));
+	  lap.time = make_time(read_field(def, *it));
 	  break;
 
 	case 8:				/* total_timer_time */
-	  lap.set_duration(make_duration(read_field(def, *it)));
+	  lap.duration = make_duration(read_field(def, *it));
 	  break;
 
 	case 9:				/* distance */
-	  lap.set_distance(make_distance(read_field(def, *it)));
+	  lap.distance = make_distance(read_field(def, *it));
 	  break;
 
 	case 13:			/* avg_speed */
-	  lap.set_avg_speed(make_speed(read_field(def, *it)));
+	  lap.avg_speed = make_speed(read_field(def, *it));
 	  break;
 
 	case 14:			/* max_speed */
-	  lap.set_max_speed(make_speed(read_field(def, *it)));
+	  lap.max_speed = make_speed(read_field(def, *it));
 	  break;
 
 	case 11:			/* total_calories */
-	  lap.set_calories(read_field(def, *it));
+	  lap.calories = read_field(def, *it);
 	  break;
 
 	case 15:			/* avg_heart_rate */
-	  lap.set_avg_heart_rate(read_field(def, *it));
+	  lap.avg_heart_rate = read_field(def, *it);
 	  break;
 
 	case 16:			/* max_heart_rate */
-	  lap.set_max_heart_rate(read_field(def, *it));
+	  lap.max_heart_rate = read_field(def, *it);
 	  break;
 
 	default:
@@ -541,7 +541,7 @@ fit_parser::read_lap_message(const message_type &def, uint32_t timestamp)
     }
 
   using std::swap;
-  swap(lap.track(), _records);
+  swap(lap.track, _records);
   _records.resize(0);
 }
 

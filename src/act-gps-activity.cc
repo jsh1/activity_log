@@ -67,17 +67,17 @@ activity::update_summary()
   if (laps().size() < 1)
     return;
 
-  _time = laps()[0].time();
+  _time = laps()[0].time;
 
   for (std::vector<activity::lap>::const_iterator it = laps().begin();
        it != laps().end(); it++)
     {
-      _duration += it->duration();
-      _distance += it->distance();
-      _max_speed = fmax(_max_speed, it->max_speed());
-      _calories += it->calories();
-      _avg_heart_rate += it->avg_heart_rate() * it->duration();
-      _max_heart_rate = fmax(_max_heart_rate, it->max_heart_rate());
+      _duration += it->duration;
+      _distance += it->distance;
+      _max_speed = fmax(_max_speed, it->max_speed);
+      _calories += it->calories;
+      _avg_heart_rate += it->avg_heart_rate * it->duration;
+      _max_heart_rate = fmax(_max_heart_rate, it->max_heart_rate);
     }
 
   _avg_speed = _distance / _duration;
@@ -144,34 +144,34 @@ activity::print_laps(FILE *fh) const
   for (const auto &it : laps())
     {
       std::string dur;
-      format_time(dur, it.duration(), true, "");
+      format_time(dur, it.duration, true, "");
 
       std::string pace, max_pace;
-      format_time(pace, 1/(it.avg_speed() * miles_per_meter), false, "");
-      format_time(max_pace, 1/(it.max_speed() * miles_per_meter), false, "");
+      format_time(pace, 1/(it.avg_speed * miles_per_meter), false, "");
+      format_time(max_pace, 1/(it.max_speed * miles_per_meter), false, "");
 
       std::string avg_hr, max_hr;
       if (has_hr)
 	{
-	  format_number(avg_hr, it.avg_heart_rate());
-	  format_number(max_hr, it.max_heart_rate());
+	  format_number(avg_hr, it.avg_heart_rate);
+	  format_number(max_hr, it.max_heart_rate);
 	}
 
       std::string cal;
-      if (it.calories() != 0)
-	format_number(cal, it.calories());
+      if (it.calories != 0)
+	format_number(cal, it.calories);
 
       if (has_hr)
 	{
 	  fprintf(fh, "    %-3d  %8s  %6.2f  %5s %5s  %3s %3s  %4s\n",
-		  lap_idx + 1, dur.c_str(), it.distance() * miles_per_meter,
+		  lap_idx + 1, dur.c_str(), it.distance * miles_per_meter,
 		  pace.c_str(), max_pace.c_str(), avg_hr.c_str(),
 		  max_hr.c_str(), cal.c_str());
 	}
       else
 	{
 	  fprintf(fh, "    %-3d  %8s  %6.2f  %5s %5s  %4s\n",
-		  lap_idx + 1, dur.c_str(), it.distance() * miles_per_meter,
+		  lap_idx + 1, dur.c_str(), it.distance * miles_per_meter,
 		  pace.c_str(), max_pace.c_str(), cal.c_str());
 	}
 
@@ -180,6 +180,51 @@ activity::print_laps(FILE *fh) const
 
   if (lap_idx > 0)
     fputc('\n', fh);
+}
+
+void
+activity::get_range(double point:: *field, double &ret_min, double &ret_max,
+		    double &ret_mean, double &ret_sdev) const
+{
+  double min = 0, max = 0, total = 0, total_sq = 0, samples = 0;
+
+  for (size_t li = 0; li < laps().size(); li++)
+    {
+      const lap &l = laps()[li];
+
+      for (size_t ti = 0; ti < l.track.size(); ti++)
+	{
+	  const point &p = l.track[ti];
+	  double value = p.*field;
+
+	  if (p.distance == 0 || !(value > 0))
+	    continue;
+
+	  if (samples == 0)
+	    min = max = value;
+	  else
+	    {
+	      min = std::min(min, value);
+	      max = std::max(max, value);
+	    }
+
+	  total += value;
+	  total_sq += value * value;
+	  samples++;
+	}
+    }
+
+  ret_min = min;
+  ret_max = max;
+
+  if (samples > 0)
+    {
+      double recip = 1 / samples;
+      ret_mean = total * recip;
+      ret_sdev = sqrt(total_sq * recip - ret_mean * ret_mean);
+    }
+  else
+    ret_mean = 0, ret_sdev = 0;
 }
 
 } // namespace gps

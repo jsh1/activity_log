@@ -165,7 +165,7 @@ tcx_parser::sax_start_element(void *ctx, const xmlChar *name,
 	      p->destination().laps().push_back(activity::lap());
 	      std::string s;
 	      if (find_attr(s, n_attr, attr, "StartTime"))
-		p->current_lap().set_time(parse_time(s));
+		p->current_lap().time = parse_time(s);
 	    }
 	  break;
 	case LAP:
@@ -190,7 +190,7 @@ tcx_parser::sax_start_element(void *ctx, const xmlChar *name,
 	  if (strcmp((const char *)name, "Trackpoint") == 0)
 	    {
 	      new_state = TRACKPOINT;
-	      p->current_lap().track().push_back(activity::point());
+	      p->current_lap().track.push_back(activity::point());
 	    }
 	  break;
 	case TRACKPOINT:
@@ -300,50 +300,50 @@ tcx_parser::sax_end_element(void *ctx, const xmlChar *name,
 	  p->destination().set_activity_id(*p->_characters);
 	  break;
 	case LAP_TOTAL_TIME:
-	  p->current_lap().set_duration(parse_double(*p->_characters));
+	  p->current_lap().duration = parse_double(*p->_characters);
 	  break;
 	case LAP_DISTANCE:
-	  p->current_lap().set_distance(parse_double(*p->_characters));
+	  p->current_lap().distance = parse_double(*p->_characters);
 	  break;
 	case LAP_AVG_SPEED:
-	  p->current_lap().set_avg_speed(parse_double(*p->_characters));
+	  p->current_lap().avg_speed = parse_double(*p->_characters);
 	  break;
 	case LAP_MAX_SPEED:
-	  p->current_lap().set_max_speed(parse_double(*p->_characters));
+	  p->current_lap().max_speed = parse_double(*p->_characters);
 	  break;
 	case LAP_CALORIES:
-	  p->current_lap().set_calories(parse_double(*p->_characters));
+	  p->current_lap().calories = parse_double(*p->_characters);
 	  break;
 	case TP_TIME:
-	  p->current_point().set_time(parse_time(*p->_characters));
+	  p->current_point().time = parse_time(*p->_characters);
 	  break;
 	case TP_LAT:
-	  p->current_point().set_latitude(parse_double(*p->_characters));
+	  p->current_point().latitude = parse_double(*p->_characters);
 	  break;
 	case TP_LONG:
-	  p->current_point().set_longitude(parse_double(*p->_characters));
+	  p->current_point().longitude = parse_double(*p->_characters);
 	  break;
 	case TP_ALTITUDE:
-	  p->current_point().set_altitude(parse_double(*p->_characters));
+	  p->current_point().altitude = parse_double(*p->_characters);
 	  break;
 	case TP_DISTANCE:
-	  p->current_point().set_distance(parse_double(*p->_characters));
+	  p->current_point().distance = parse_double(*p->_characters);
 	  break;
 	case TP_SPEED:
-	  p->current_point().set_speed(parse_double(*p->_characters));
+	  p->current_point().speed = parse_double(*p->_characters);
 	  break;
 	case VALUE: {
 	  double x = parse_double(*p->_characters);
 	  switch (p->previous_state())
 	    {
 	    case LAP_AVG_HEART_RATE:
-	      p->current_lap().set_avg_heart_rate(x);
+	      p->current_lap().avg_heart_rate = x;
 	      break;
 	    case LAP_MAX_HEART_RATE:
-	      p->current_lap().set_max_heart_rate(x);
+	      p->current_lap().max_heart_rate = x;
 	      break;
 	    case TP_HEART_RATE:
-	      p->current_point().set_heart_rate(x);
+	      p->current_point().heart_rate = x;
 	      break;
 	    default:
 	      break;
