@@ -7,8 +7,8 @@
 
 #define FIELD_HEIGHT 12
 #define FIELD_TOP_BORDER 4
-#define FIELD_BOTTOM_BORDER 8
-#define FIELD_Y_SPACING 4
+#define FIELD_BOTTOM_BORDER 12
+#define FIELD_Y_SPACING 2
 
 @implementation ActActivityHeaderView
 
