@@ -5,7 +5,7 @@
 #import "ActActivityBodyView.h"
 
 @interface ActActivityView ()
-- (void)updateSize;
+- (void)updateHeight;
 @end
 
 @implementation ActActivityView
@@ -64,10 +64,10 @@
       [view activityDidChange];
     }
 
-  [self updateSize];
+  [self updateHeight];
 }
 
-- (void)updateSize
+- (void)updateHeight
 {
   NSRect rect = [self frame];
   CGFloat height = [self preferredHeightForWidth:rect.size.width];
@@ -105,6 +105,16 @@
       [view layoutSubviews];
       frame.origin.y += frame.size.height;
     }
+}
+
+- (void)resizeSubviewsWithOldSize:(NSSize)oldSize
+{
+  [super resizeSubviewsWithOldSize:oldSize];
+
+  NSSize newSize = [self bounds].size;
+
+  if (newSize.width != oldSize.width)
+    [self updateHeight];
 }
 
 - (BOOL)isFlipped

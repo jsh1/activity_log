@@ -7,8 +7,11 @@
 @interface ActActivityBodyView : NSView
 {
 @private
-  IBOutlet NSText *_textView;
+  IBOutlet NSTextView *_textView;
   IBOutlet ActActivityView *_activityView;
+
+  NSLayoutManager *_layoutManager;
+  NSTextContainer *_layoutContainer;
 }
 
 @property(nonatomic, assign) ActActivityView *activityView;
