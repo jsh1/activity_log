@@ -24,6 +24,9 @@ class config
 
   int _start_of_week;
 
+  int _resting_hr;
+  int _max_hr;
+
   bool _silent;
   bool _verbose;
 
@@ -43,6 +46,9 @@ public:
   // delta from sunday, i.e. -1 = saturday, +1 = monday.
 
   int start_of_week() const;
+
+  int resting_hr() const;
+  int max_hr() const;
 
   bool silent() const;
   bool verbose() const;
@@ -103,6 +109,18 @@ inline int
 config::start_of_week() const
 {
   return _start_of_week;
+}
+
+inline int
+config::resting_hr() const
+{
+  return _resting_hr;
+}
+
+inline int
+config::max_hr() const
+{
+  return _max_hr;
 }
 
 inline bool

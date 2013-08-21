@@ -13,6 +13,8 @@ config::config()
   _default_temperature_unit(unit_celsius),
   _default_weight_unit(unit_kilogrammes),
   _start_of_week(1),
+  _resting_hr(40),
+  _max_hr(178),
   _silent(false),
   _verbose(false)
 {
@@ -49,6 +51,12 @@ config::config()
 
   if (const char *opt = getenv("ACT_START_OF_WEEK"))
     _start_of_week = atoi(opt);
+
+  if (const char *opt = getenv("ACT_RESTING_HR"))
+    _resting_hr = atoi(opt);
+
+  if (const char *opt = getenv("ACT_MAX_HR"))
+    _max_hr = atoi(opt);
 
   if (const char *opt = getenv("ACT_SILENT"))
     _silent = atoi(opt) != 0;
