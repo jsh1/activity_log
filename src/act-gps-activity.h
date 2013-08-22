@@ -71,6 +71,11 @@ private:
 
   std::vector<lap> _laps;
 
+  bool _has_location;
+  bool _has_speed;
+  bool _has_heart_rate;
+  bool _has_altitude;
+
 public:
   activity();
 
@@ -123,6 +128,18 @@ public:
 
   std::vector<lap> &laps() {return _laps;}
   const std::vector<lap> &laps() const {return _laps;}
+
+  void set_has_location(bool x) {_has_location = x;}
+  bool has_location() const {return _has_location;}
+
+  void set_has_speed(bool x) {_has_speed = x;}
+  bool has_speed() const {return _has_speed;}
+
+  void set_has_heart_rate(bool x) {_has_heart_rate = x;}
+  bool has_heart_rate() const {return _has_heart_rate;}
+
+  void set_has_altitude(bool x) {_has_altitude = x;}
+  bool has_altitude() const {return _has_altitude;}
 };
 
 } // namespace gps

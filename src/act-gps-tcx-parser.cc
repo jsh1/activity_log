@@ -319,18 +319,22 @@ tcx_parser::sax_end_element(void *ctx, const xmlChar *name,
 	  break;
 	case TP_LAT:
 	  p->current_point().latitude = parse_double(*p->_characters);
+	  p->destination().set_has_location(true);
 	  break;
 	case TP_LONG:
 	  p->current_point().longitude = parse_double(*p->_characters);
+	  p->destination().set_has_location(true);
 	  break;
 	case TP_ALTITUDE:
 	  p->current_point().altitude = parse_double(*p->_characters);
+	  p->destination().set_has_altitude(true);
 	  break;
 	case TP_DISTANCE:
 	  p->current_point().distance = parse_double(*p->_characters);
 	  break;
 	case TP_SPEED:
 	  p->current_point().speed = parse_double(*p->_characters);
+	  p->destination().set_has_speed(true);
 	  break;
 	case VALUE: {
 	  double x = parse_double(*p->_characters);
@@ -344,6 +348,7 @@ tcx_parser::sax_end_element(void *ctx, const xmlChar *name,
 	      break;
 	    case TP_HEART_RATE:
 	      p->current_point().heart_rate = x;
+	      p->destination().set_has_heart_rate(true);
 	      break;
 	    default:
 	      break;

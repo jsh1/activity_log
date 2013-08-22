@@ -462,14 +462,20 @@ fit_parser::read_record_message(const message_type &def, uint32_t timestamp)
 	{
 	case 0:				/* position_lat */
 	  p.latitude = make_lat_long(read_field(def, *it));
+	  if (p.latitude != 0)
+	    destination().set_has_location(true);
 	  break;
 
 	case 1:				/* position_long */
 	  p.longitude = make_lat_long(read_field(def, *it));
+	  if (p.longitude != 0)
+	    destination().set_has_location(true);
 	  break;
 
 	case 2:				/* altitude */
 	  p.altitude = make_altitude(read_field(def, *it));
+	  if (p.altitude != 0)
+	    destination().set_has_altitude(true);
 	  break;
 
 	case 5:				/* distance */
@@ -478,10 +484,14 @@ fit_parser::read_record_message(const message_type &def, uint32_t timestamp)
 
 	case 6:				/* speed */
 	  p.speed = make_speed(read_field(def, *it));
+	  if (p.speed != 0)
+	    destination().set_has_speed(true);
 	  break;
 
 	case 3:				/* heart_rate */
 	  p.heart_rate = read_field(def, *it);
+	  if (p.heart_rate != 0)
+	    destination().set_has_heart_rate(true);
 	  break;
 
 	default:

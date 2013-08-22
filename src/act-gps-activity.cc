@@ -21,7 +21,11 @@ activity::activity()
   _max_speed(0),
   _calories(0),
   _avg_heart_rate(0),
-  _max_heart_rate(0)
+  _max_heart_rate(0),
+  _has_location(false),
+  _has_speed(false),
+  _has_heart_rate(false),
+  _has_altitude(false)
 {
 }
 
