@@ -40,6 +40,7 @@ libact.a_objects =		\
 	act-database.o		\
 	act-format.o		\
 	act-gps-activity.o	\
+	act-gps-chart.o		\
 	act-gps-parser.o	\
 	act-gps-fit-parser.o	\
 	act-gps-tcx-parser.o	\

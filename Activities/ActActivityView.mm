@@ -3,6 +3,7 @@
 #import "ActActivityView.h"
 
 #import "ActActivityBodyView.h"
+#import "ActActivityChartView.h"
 #import "ActActivityHeaderView.h"
 #import "ActActivitySubView.h"
 
@@ -45,6 +46,9 @@
       subview_classes = [[NSArray alloc] initWithObjects:
 			 [ActActivityHeaderView class],
 			 [ActActivityBodyView class],
+			 [ActActivityPaceChartView class],
+			 [ActActivityHeartRateChartView class],
+			 [ActActivityAltitudeChartView class],
 			 nil];
     }
 

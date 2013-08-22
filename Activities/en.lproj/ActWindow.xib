@@ -461,6 +461,7 @@
 																			<string key="NSFrameSize">{732, 325}</string>
 																			<reference key="NSSuperview" ref="34853895"/>
 																			<reference key="NSWindow"/>
+																			<reference key="NSNextKeyView"/>
 																			<string key="NSReuseIdentifierKey">_NS:13</string>
 																		</object>
 																	</array>
@@ -530,6 +531,7 @@
 											<reference key="NSNextKeyView" ref="260055674"/>
 											<string key="NSReuseIdentifierKey">_NS:9</string>
 											<int key="NSDividerStyle">3</int>
+											<string key="NSAutosaveName">ActVerticalSplitView</string>
 										</object>
 									</array>
 									<string key="NSFrame">{{173, 0}, {732, 665}}</string>
@@ -547,6 +549,7 @@
 							<string key="NSReuseIdentifierKey">_NS:9</string>
 							<bool key="NSIsVertical">YES</bool>
 							<int key="NSDividerStyle">3</int>
+							<string key="NSAutosaveName">ActHorizontalSplitView</string>
 						</object>
 					</array>
 					<string key="NSFrameSize">{905, 665}</string>
@@ -556,6 +559,7 @@
 				</object>
 				<string key="NSScreenRect">{{0, 0}, {1440, 878}}</string>
 				<string key="NSMaxSize">{10000000000000, 10000000000000}</string>
+				<string key="NSFrameAutosaveName">ActWindow</string>
 				<bool key="NSWindowIsRestorable">YES</bool>
 			</object>
 		</array>

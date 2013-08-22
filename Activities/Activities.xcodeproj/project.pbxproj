@@ -32,6 +32,8 @@
 		571DB9FB17BE67CD0001514C /* act-util.cc in Sources */ = {isa = PBXBuildFile; fileRef = 571DB9DD17BE67CD0001514C /* act-util.cc */; };
 		571DB9FF17BE689D0001514C /* libact.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 571DB9BD17BE67850001514C /* libact.a */; };
 		571DBA0317BE6B6C0001514C /* libxml2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 571DB9FD17BE68090001514C /* libxml2.dylib */; };
+		5730789317C56820002C5B28 /* act-gps-chart.cc in Sources */ = {isa = PBXBuildFile; fileRef = 5730789117C56820002C5B28 /* act-gps-chart.cc */; };
+		5730789617C56E54002C5B28 /* ActActivityChartView.mm in Sources */ = {isa = PBXBuildFile; fileRef = 5730789517C56E54002C5B28 /* ActActivityChartView.mm */; };
 		57921A5717BEAEF0001AD35D /* ActWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 57921A5517BEAEF0001AD35D /* ActWindow.xib */; };
 		57921A5A17BEAF48001AD35D /* ActWindowController.mm in Sources */ = {isa = PBXBuildFile; fileRef = 57921A5917BEAF48001AD35D /* ActWindowController.mm */; };
 		579772E217C4F3E000AA2E9D /* ActActivitySubview.mm in Sources */ = {isa = PBXBuildFile; fileRef = 579772E117C4F3E000AA2E9D /* ActActivitySubview.mm */; };
@@ -99,6 +101,10 @@
 		571DB9DD17BE67CD0001514C /* act-util.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "act-util.cc"; path = "../src/act-util.cc"; sourceTree = "<group>"; };
 		571DB9DE17BE67CD0001514C /* act-util.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "act-util.h"; path = "../src/act-util.h"; sourceTree = "<group>"; };
 		571DB9FD17BE68090001514C /* libxml2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libxml2.dylib; path = usr/lib/libxml2.dylib; sourceTree = SDKROOT; };
+		5730789117C56820002C5B28 /* act-gps-chart.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "act-gps-chart.cc"; path = "../src/act-gps-chart.cc"; sourceTree = "<group>"; };
+		5730789217C56820002C5B28 /* act-gps-chart.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "act-gps-chart.h"; path = "../src/act-gps-chart.h"; sourceTree = "<group>"; };
+		5730789417C56E54002C5B28 /* ActActivityChartView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActActivityChartView.h; sourceTree = "<group>"; };
+		5730789517C56E54002C5B28 /* ActActivityChartView.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ActActivityChartView.mm; sourceTree = "<group>"; };
 		57921A5617BEAEF0001AD35D /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/ActWindow.xib; sourceTree = "<group>"; };
 		57921A5817BEAF48001AD35D /* ActWindowController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActWindowController.h; sourceTree = "<group>"; };
 		57921A5917BEAF48001AD35D /* ActWindowController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ActWindowController.mm; sourceTree = "<group>"; };
@@ -182,6 +188,8 @@
 				579772E117C4F3E000AA2E9D /* ActActivitySubview.mm */,
 				57D99EB217C3F865003709BB /* ActActivityBodyView.h */,
 				57D99EB317C3F865003709BB /* ActActivityBodyView.mm */,
+				5730789417C56E54002C5B28 /* ActActivityChartView.h */,
+				5730789517C56E54002C5B28 /* ActActivityChartView.mm */,
 				579772E317C4F63900AA2E9D /* ActActivityHeaderView.h */,
 				579772E417C4F63900AA2E9D /* ActActivityHeaderView.mm */,
 				579772E617C4FB0A00AA2E9D /* ActActivityHeaderFieldView.h */,
@@ -233,6 +241,8 @@
 				571DB9CF17BE67CD0001514C /* act-format.h */,
 				571DB9D017BE67CD0001514C /* act-gps-activity.cc */,
 				571DB9D117BE67CD0001514C /* act-gps-activity.h */,
+				5730789117C56820002C5B28 /* act-gps-chart.cc */,
+				5730789217C56820002C5B28 /* act-gps-chart.h */,
 				571DB9D217BE67CD0001514C /* act-gps-fit-parser.cc */,
 				571DB9D317BE67CD0001514C /* act-gps-fit-parser.h */,
 				571DB9D417BE67CD0001514C /* act-gps-parser.cc */,
@@ -355,6 +365,8 @@
 				579772E517C4F63900AA2E9D /* ActActivityHeaderView.mm in Sources */,
 				579772E817C4FB0A00AA2E9D /* ActActivityHeaderFieldView.mm in Sources */,
 				579772EB17C5015600AA2E9D /* ActFoundationExtensions.mm in Sources */,
+				5730789317C56820002C5B28 /* act-gps-chart.cc in Sources */,
+				5730789617C56E54002C5B28 /* ActActivityChartView.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
