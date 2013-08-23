@@ -69,6 +69,7 @@ private:
   std::vector<line> _lines;
   CGRect _chart_rect;
 
+  void draw_background(CGContextRef ctx);
   void draw_line(CGContextRef ctx, const line &l);
   void draw_lap_markers(CGContextRef ctx);
 

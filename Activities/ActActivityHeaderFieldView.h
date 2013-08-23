@@ -6,7 +6,7 @@
 
 @interface ActActivityHeaderFieldView : ActActivitySubview
 {
-  NSTextField *_labelView;
+  NSTextView *_labelView;
   ActActivityHeaderFieldTextView *_textView;
 
   NSString *_fieldName;

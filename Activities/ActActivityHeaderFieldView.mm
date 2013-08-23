@@ -22,23 +22,17 @@
   if (self == nil)
     return nil;
 
-  _labelView = [[NSTextField alloc] initWithFrame:
+  _labelView = [[NSTextView alloc] initWithFrame:
 		NSMakeRect(0, 0, LABEL_WIDTH, LABEL_HEIGHT)];
-  [_labelView setDrawsBackground:NO];
-  [_labelView setBordered:NO];
-  [_labelView setBezeled:NO];
   [_labelView setEditable:NO];
+  [_labelView setDrawsBackground:NO];
   [_labelView setAlignment:NSRightTextAlignment];
-  [[_labelView cell] setControlSize:NSSmallControlSize];
-  [[_labelView cell] setFont:
-   [NSFont systemFontOfSize:[NSFont smallSystemFontSize]]];
   [self addSubview:_labelView];
   [_labelView release];
 
   _textView = [[ActActivityHeaderFieldTextView alloc] initWithFrame:
 	       NSMakeRect(LABEL_WIDTH, 0, frame.size.width
 			  - LABEL_WIDTH, CONTROL_HEIGHT)];
-  [_textView setFont:[NSFont systemFontOfSize:[NSFont smallSystemFontSize]]];
   [self addSubview:_textView];
   [_textView release];
   [_textView setDrawsBackground:NO];
@@ -65,7 +59,8 @@
       [_fieldName release];
       _fieldName = [name copy];
 
-      [_labelView setStringValue:[_fieldName stringByAppendingString:@": "]];
+      [_labelView setFont:[[self activityView] font]];
+      [_labelView setString:[_fieldName stringByAppendingString:@": "]];
     }
 }
 
@@ -116,6 +111,7 @@
 
 - (void)activityDidChange
 {
+  [_textView setFont:[[self activityView] font]];
   [_textView setString:[self fieldString]];
 }
 

@@ -11,6 +11,10 @@
 - (void)updateHeight;
 @end
 
+#define SUBVIEW_Y_SPACING 14
+
+#define FONT_NAME "Bitstream Vera Sans Roman"
+
 @implementation ActActivityView
 
 - (act::activity_storage_ref)activityStorage
@@ -90,28 +94,65 @@
 
 - (CGFloat)preferredHeightForWidth:(CGFloat)width
 {
-  CGFloat height = 0;
+  CGFloat y = 0;
 
   for (ActActivitySubview *subview in [self subviews])
     {
-      height += [subview preferredHeightForWidth:width];
+      NSEdgeInsets insets = [subview edgeInsets];
+
+      CGFloat sub_width = width - (insets.left + insets.right);
+      CGFloat sub_height = [subview preferredHeightForWidth:sub_width];
+
+      if (sub_width > 0 && sub_height > 0)
+	y = y + insets.top + sub_height + insets.bottom + SUBVIEW_Y_SPACING;
     }
 
-  return height;
+  return y;
 }
 
 - (void)layoutSubviews
 {
   NSRect bounds = [self bounds];
-  NSRect frame = bounds;
+  CGFloat x = bounds.origin.x;
+  CGFloat y = bounds.origin.y;
+  CGFloat width = bounds.size.width;
 
   for (ActActivitySubview *subview in [self subviews])
     {
-      frame.size.height = [subview preferredHeightForWidth:frame.size.width];
-      [subview setFrame:frame];
-      [subview layoutSubviews];
-      frame.origin.y += frame.size.height;
+      NSEdgeInsets insets = [subview edgeInsets];
+
+      CGFloat sub_width = width - (insets.left + insets.right);
+      CGFloat sub_height = [subview preferredHeightForWidth:sub_width];
+
+      if (sub_width > 0 && sub_height > 0)
+	{
+	  NSRect frame = NSMakeRect(x + insets.left, y + insets.top,
+				    sub_width, sub_height);
+
+	  [subview setHidden:NO];
+	  [subview setFrame:frame];
+	  [subview layoutSubviews];
+
+	  y = y + insets.top + sub_height + insets.bottom + SUBVIEW_Y_SPACING;
+	}
+      else
+	[subview setHidden:YES];
     }
+}
+
+- (NSFont *)font
+{
+  static NSFont *font;
+
+  if (font == nil)
+    {
+      CGFloat fontSize = [NSFont smallSystemFontSize];
+      font = [NSFont fontWithName:@FONT_NAME size:fontSize];
+      if (font == nil)
+	font = [NSFont systemFontOfSize:fontSize];
+    }
+
+  return font;
 }
 
 - (void)resizeSubviewsWithOldSize:(NSSize)oldSize

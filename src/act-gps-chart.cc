@@ -11,7 +11,7 @@
 
 #define MINUTES_PER_MILE(x) ((1. /  (x)) * (1. / (MILES_PER_METER * 60.)))
 
-#define MAX_TICKS 8
+#define MAX_TICKS 6
 #define MIN_TICKS 3
 
 namespace act {
@@ -165,10 +165,24 @@ chart::set_chart_rect(const CGRect &r)
 void
 chart::draw(CGContextRef ctx)
 {
+  draw_background(ctx);
+
   for (size_t i = 0; i < _lines.size(); i++)
     draw_line(ctx, _lines[i]);
 
   draw_lap_markers(ctx);
+}
+
+void
+chart::draw_background(CGContextRef ctx)
+{
+  CGContextSaveGState(ctx);
+  CGContextSetLineWidth(ctx, 1);
+  CGContextSetRGBFillColor(ctx, 0, 0, 0, 0.05);
+  CGContextFillRect(ctx, _chart_rect);
+  CGContextSetRGBStrokeColor(ctx, 0, 0, 0, 0.2);
+  CGContextStrokeRect(ctx, CGRectInset(_chart_rect, .5, .5));
+  CGContextRestoreGState(ctx);
 }
 
 void
@@ -234,60 +248,11 @@ chart::draw_line(CGContextRef ctx, const line &l)
   CGContextScaleCTM(ctx, 1, -1);
   CGContextTranslateCTM(ctx, -_chart_rect.origin.x, -_chart_rect.origin.y);
 
-  // Fill gradient under the line
-
-  const CGFloat *fill_grad = 0;
-
-  switch (l.color)
-    {
-      static const CGFloat red_grad[8] = {1, 0, 0.1, 0.4,
-					  1, 0, 0.1, 0.1};
-      static const CGFloat green_grad[8] = {0, 1, 0.25, 0.4,
-					    0, 1, 0.25, 0.1};
-      static const CGFloat blue_grad[8] = {0, 0.5, 1, 0.4,
-					   0, 0.5, 1, 0.1};
-      static const CGFloat orange_grad[8] = {1, 0.5, 0, 0.4,
-					     1, 0.5, 0, 0.1};
-
-    case RED:
-      fill_grad = red_grad;
-      break;
-    case GREEN:
-      fill_grad = green_grad;
-      break;
-    case BLUE:
-      fill_grad = blue_grad;
-      break;
-    case ORANGE:
-      fill_grad = orange_grad;
-      break;
-    }
-
-  if (fill_grad)
-    {
-      CGColorSpaceRef space = CGColorSpaceCreateDeviceRGB();
-      CGGradientRef grad = CGGradientCreateWithColorComponents(space,
-							fill_grad, 0, 2);
-      CGColorSpaceRelease(space);
-      CGContextSaveGState(ctx);
-      CGContextAddPath(ctx, fill_path);
-      CGContextClip(ctx);
-      CGPoint p0 = CGPointMake(0, l.max_value * ym + y0);
-      CGPoint p1 = CGPointMake(0, l.min_value * ym + y0);
-      CGContextDrawLinearGradient(ctx, grad, p0, p1,
-				  kCGGradientDrawsBeforeStartLocation
-				  | kCGGradientDrawsAfterEndLocation);
-      CGContextRestoreGState(ctx);
-      CGGradientRelease(grad);
-    }
-
   // Draw 'tick' lines at sensible points around the value's range.
 
   CGContextSaveGState(ctx);
-  CGContextAddPath(ctx, fill_path);
-  CGContextClip(ctx);
   CGContextSetLineWidth(ctx, 1);
-  CGContextSetRGBStrokeColor(ctx, 1, 1, 1, .7);
+  CGContextSetRGBStrokeColor(ctx, 0, 0, 0, 0.1);
 
   double min_tick, max_tick, tick_delta;
   l.tick_values(min_tick, max_tick, tick_delta);
@@ -305,6 +270,31 @@ chart::draw_line(CGContextRef ctx, const line &l)
 
   CGContextRestoreGState(ctx);
 
+  // Fill gradient under the line
+
+  CGContextSaveGState(ctx);
+
+  switch (l.color)
+    {
+    case RED:
+      CGContextSetRGBFillColor(ctx, 1, .5, .5, .4);
+      break;
+    case GREEN:
+      CGContextSetRGBFillColor(ctx, .75, 1, .75, .4);
+      break;
+    case BLUE:
+      CGContextSetRGBFillColor(ctx, .5, .75, 1, .4);
+      break;
+    case ORANGE:
+      CGContextSetRGBFillColor(ctx, 1, .5, 0, .4);
+      break;
+    }
+
+  CGContextAddPath(ctx, fill_path);
+  CGContextFillPath(ctx);
+
+  CGContextRestoreGState(ctx);
+
   // Draw data line
 
   switch (l.color)
@@ -316,7 +306,7 @@ chart::draw_line(CGContextRef ctx, const line &l)
       CGContextSetRGBStrokeColor(ctx, 0, 0.8, 0.2, 1);
       break;
     case BLUE:
-      CGContextSetRGBStrokeColor(ctx, 0, 0.8, 1, 1);
+      CGContextSetRGBStrokeColor(ctx, 0, 0.2, 1, 1);
       break;
     case ORANGE:
       CGContextSetRGBStrokeColor(ctx, 1, 0.5, 0, 1);
@@ -357,7 +347,7 @@ chart::draw_lap_markers(CGContextRef ctx)
 
   CGContextSaveGState(ctx);
   CGContextSetLineWidth(ctx, 1);
-  CGContextSetRGBStrokeColor(ctx, 1, 1, 1, 0.2);
+  CGContextSetRGBStrokeColor(ctx, 0, 0, 0, 0.1);
   CGContextStrokeLineSegments(ctx, &lines[0], lines.size());
   CGContextRestoreGState(ctx);
 }

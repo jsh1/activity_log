@@ -23,4 +23,6 @@
 
 - (void)layoutSubviews;
 
+- (NSFont *)font;
+
 @end

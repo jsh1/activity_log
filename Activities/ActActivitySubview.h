@@ -15,6 +15,10 @@
 
 - (void)activityDidChange;
 
+// Standard implementation returns all zeros
+
+- (NSEdgeInsets)edgeInsets;
+
 // Standard implementation returns zero
 
 - (CGFloat)preferredHeightForWidth:(CGFloat)width;

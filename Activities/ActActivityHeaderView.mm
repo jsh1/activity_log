@@ -7,8 +7,8 @@
 
 #define FIELD_HEIGHT 12
 #define FIELD_TOP_BORDER 4
-#define FIELD_BOTTOM_BORDER 12
-#define FIELD_Y_SPACING 2
+#define FIELD_BOTTOM_BORDER 4
+#define FIELD_Y_SPACING 3
 
 @implementation ActActivityHeaderView
 
@@ -29,9 +29,6 @@ static NSArray *_displayedFields;
   self = [super initWithFrame:frame];
   if (self == nil)
     return nil;
-
-  for (NSString *name in _displayedFields)
-    [self addFieldView:name];
 
   return self;
 }
@@ -58,6 +55,12 @@ static NSArray *_displayedFields;
 
 - (void)activityDidChange
 {
+  if ([[self subviews] count] == 0)
+    {
+      for (NSString *name in _displayedFields)
+	[self addFieldView:name];
+    }
+
   for (ActActivityHeaderFieldView *field in [self subviews])
     [field activityDidChange];
 }

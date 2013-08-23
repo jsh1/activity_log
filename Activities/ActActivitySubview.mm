@@ -12,6 +12,11 @@
 {
 }
 
+- (NSEdgeInsets)edgeInsets
+{
+  return NSEdgeInsetsMake(0, 0, 0, 0);
+}
+
 - (CGFloat)preferredHeightForWidth:(CGFloat)width
 {
   return [self bounds].size.height;

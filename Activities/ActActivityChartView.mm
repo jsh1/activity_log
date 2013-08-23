@@ -5,8 +5,10 @@
 #import "ActActivityView.h"
 
 #define CHART_HEIGHT 130
-#define CHART_X_BORDER 40
-#define CHART_Y_BORDER 10
+#define TOP_BORDER 0
+#define BOTTOM_BORDER 0
+#define LEFT_BORDER 32
+#define RIGHT_BORDER 32
 
 @implementation ActActivityChartView
 
@@ -33,8 +35,6 @@
   if (_chart)
     {
       CGRect bounds = NSRectToCGRect([self bounds]);
-
-      bounds = CGRectInset(bounds, CHART_X_BORDER, CHART_Y_BORDER);
 
       if (!CGRectEqualToRect(bounds, _chart->chart_rect()))
 	{
@@ -76,12 +76,18 @@
 	    {
 	      _chart->add_line(&act::gps::activity::point::speed,
 			       true, act::gps::chart::SPEED_MS_PACE,
-			       act::gps::chart::ORANGE, 0, 1);
+			       act::gps::chart::BLUE, 0, 1);
 	    }
 
 	  [self updateChartRect];
 	}
     }
+}
+
+- (NSEdgeInsets)edgeInsets
+{
+  return NSEdgeInsetsMake(TOP_BORDER, LEFT_BORDER,
+			  BOTTOM_BORDER, RIGHT_BORDER);
 }
 
 - (CGFloat)preferredHeightForWidth:(CGFloat)width
@@ -101,7 +107,7 @@
 	}
     }
 
-  return empty ? 0 : CHART_HEIGHT + CHART_Y_BORDER * 2;
+  return empty ? 0 : CHART_HEIGHT;
 }
 
 - (void)layoutSubviews
