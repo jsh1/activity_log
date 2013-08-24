@@ -118,6 +118,9 @@ format_distance(std::string &str, double dist, unit_type unit)
 {
   const char *format = nullptr;
 
+  if (unit == unit_unknown)
+    unit = shared_config().default_distance_unit();
+
   switch (unit)
     {
     case unit_centimetres:
@@ -168,6 +171,9 @@ format_pace(std::string &str, double pace, unit_type unit)
   double dur = 0;
   const char *suffix = nullptr;
 
+  if (unit == unit_unknown)
+    unit = shared_config().default_pace_unit();
+
   switch (unit)
     {
     case unit_seconds_per_mile:
@@ -196,6 +202,9 @@ format_speed(std::string &str, double speed, unit_type unit)
 {
   double dist = 0;
   const char *format = nullptr;
+
+  if (unit == unit_unknown)
+    unit = shared_config().default_speed_unit();
 
   switch (unit)
     {
@@ -227,6 +236,9 @@ format_temperature(std::string &str, double temp, unit_type unit)
 {
   const char *format = nullptr;
 
+  if (unit == unit_unknown)
+    unit = shared_config().default_temperature_unit();
+
   switch (unit)
     {
     case unit_celsius:
@@ -251,6 +263,9 @@ void
 format_weight(std::string &str, double weight, unit_type unit)
 {
   const char *format = nullptr;
+
+  if (unit == unit_unknown)
+    unit = shared_config().default_weight_unit();
 
   switch (unit)
     {
@@ -298,26 +313,18 @@ format_value(std::string &str, field_data_type type,
       break;
 
     case type_distance:
-      if (unit == unit_unknown)
-	unit = shared_config().default_distance_unit();
       format_distance(str, value, unit);
       break;
 
     case type_pace:
-      if (unit == unit_unknown)
-	unit = shared_config().default_pace_unit();
       format_pace(str, value, unit);
       break;
 
     case type_speed:
-      if (unit == unit_unknown)
-	unit = shared_config().default_speed_unit();
       format_speed(str, value, unit);
       break;
 
     case type_temperature:
-      if (unit == unit_unknown)
-	unit = shared_config().default_temperature_unit();
       format_temperature(str, value, unit);
       break;
 
@@ -326,8 +333,6 @@ format_value(std::string &str, field_data_type type,
       break;
 
     case type_weight:
-      if (unit == unit_unknown)
-	unit = shared_config().default_weight_unit();
       format_weight(str, value, unit);
       break;
 
