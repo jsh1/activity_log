@@ -45,8 +45,12 @@ private:
       line_color color;
       double min_ratio, max_ratio;
 
+      // in "standard unit" source space
       double min_value, max_value;
       double scaled_min_value, scaled_max_value;
+
+      // in "target unit" source space
+      double tick_min, tick_max, tick_delta;
 
       line();
       line(double activity::point:: *field_, bool smoothed_,
@@ -58,8 +62,7 @@ private:
       double convert_from_si(double x) const;
       double convert_to_si(double x) const;
 
-      void tick_values(double &min_tick, double &max_tick,
-	double &delta) const;
+      void format_tick(std::string &s, double tick, double value) const;
     };
 
   friend struct chart::line;

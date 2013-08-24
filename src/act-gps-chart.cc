@@ -3,52 +3,21 @@
 #include "act-gps-chart.h"
 
 #include "act-config.h"
+#include "act-format.h"
 
 #include <math.h>
 
 #define MILES_PER_METER 0.000621371192
 #define FEET_PER_METER 3.2808399
 
-#define MINUTES_PER_MILE(x) ((1. /  (x)) * (1. / (MILES_PER_METER * 60.)))
+#define SECS_PER_MILE(x) ((1. /  (x)) * (1. / MILES_PER_METER))
+#define MILES_PER_SEC(x) (1. / ((x) * MILES_PER_METER))
 
-#define MAX_TICKS 6
-#define MIN_TICKS 3
+#define MAX_TICKS 4
+#define MIN_TICKS 2
 
 namespace act {
 namespace gps {
-
-void
-chart::line::update_values(const chart &c)
-{
-  const activity &a = c._activity;
-
-  double mean, sdev;
-  a.get_range(field, min_value, max_value, mean, sdev);
-
-  if (field == &activity::point::speed)
-    {
-      min_value = mean - 2.5 * sdev;
-      max_value = mean + 2.5 * sdev;
-    }
-  else if (field == &activity::point::altitude)
-    {
-      if (max_value - min_value < 50)
-	max_value = min_value + 50;
-    }
-
-  double range = max_value - min_value;
-  scaled_min_value = min_value + range * min_ratio;
-  scaled_max_value = min_value + range * max_ratio;
-
-  if (field == &activity::point::altitude)
-    {
-      // Try to avoid making mountains out of molehills...
-
-      double range = c._max_dist - c._min_dist;
-      if (scaled_max_value - scaled_min_value < range * .01)
-	scaled_max_value = scaled_min_value + range * .01;
-    }
-}
 
 double
 chart::line::convert_from_si(double x) const
@@ -61,7 +30,7 @@ chart::line::convert_from_si(double x) const
       const config &cfg = shared_config();
       return (x - cfg.resting_hr()) / (cfg.max_hr() - cfg.resting_hr()) * 100.; }
     case SPEED_MS_PACE:
-      return x > 0 ? 1. / (x * MILES_PER_METER * 60.) : 0;
+      return x > 0 ? SECS_PER_MILE(x) : 0;
     case DISTANCE_M_MI:
       return x * MILES_PER_METER;
     case DISTANCE_M_FT:
@@ -82,7 +51,7 @@ chart::line::convert_to_si(double x) const
       const config &cfg = shared_config();
       return x * (1./100) * (cfg.max_hr() - cfg.resting_hr()) + cfg.resting_hr(); }
     case SPEED_MS_PACE:
-      return x > 0 ? (1. / x) * (1. / (MILES_PER_METER * 60.)) : 0;
+      return x > 0 ? MILES_PER_SEC(x) : 0;
     case DISTANCE_M_MI:
       return x * (1. / MILES_PER_METER);
     case DISTANCE_M_FT:
@@ -93,38 +62,89 @@ chart::line::convert_to_si(double x) const
 }
 
 void
-chart::line::tick_values(double &min_tick, double &max_tick,
-			 double &delta) const
+chart::line::update_values(const chart &c)
 {
-  min_tick = convert_from_si(min_value);
-  max_tick = convert_from_si(max_value);
-  if (max_tick < min_tick)
-    std::swap(min_tick, max_tick);
+  const activity &a = c._activity;
 
-  double tick_unit;
+  double mean, sdev;
+  a.get_range(field, min_value, max_value, mean, sdev);
+
+  double border = (max_value - min_value) * .05;
+  min_value -= border;
+  max_value += border;
+
+  if (field == &activity::point::speed)
+    {
+      min_value = mean - 2.5 * sdev;
+      max_value = mean + 2.5 * sdev;
+    }
+  else if (field == &activity::point::altitude)
+    {
+      if (max_value - min_value < 100)
+	max_value = min_value + 100;
+    }
+
+  double range = max_value - min_value;
+  scaled_min_value = min_value + range * min_ratio;
+  scaled_max_value = min_value + range * max_ratio;
+
+  tick_min = convert_from_si(min_value);
+  tick_max = convert_from_si(max_value);
+
+  if (tick_max < tick_min)
+    std::swap(tick_min, tick_max);
+
   switch (conversion)
     {
     case HEARTRATE_BPM_HRR:
-      tick_unit = 10;
+      tick_delta = 5;
       break;
     case SPEED_MS_PACE:
-      tick_unit = 0.5;
+      tick_delta = 30;
       break;
     case DISTANCE_M_FT:
-      tick_unit = 100;
+      tick_delta = 100;
       break;
     default:
-      tick_unit = 1;
+      tick_delta = 1;
     }
 
-  while ((max_tick - min_tick) / tick_unit > MAX_TICKS)
-    tick_unit = tick_unit * 2;
-  while ((max_tick - min_tick) / tick_unit < MIN_TICKS)
-    tick_unit = tick_unit * .5;
+  while ((tick_max - tick_min) / tick_delta > MAX_TICKS)
+    tick_delta = tick_delta * 2;
+  while ((tick_max - tick_min) / tick_delta < MIN_TICKS)
+    tick_delta = tick_delta * .5;
 
-  min_tick = floor(min_tick / tick_unit) * tick_unit;
-  max_tick = ceil(max_tick / tick_unit) * tick_unit;
-  delta = tick_unit;
+  tick_min = floor(tick_min / tick_delta) * tick_delta;
+  tick_max = ceil(tick_max / tick_delta) * tick_delta;
+}
+
+void
+chart::line::format_tick(std::string &s, double tick, double value) const
+{
+  if (field == &activity::point::altitude)
+    {
+      format_distance(s, value, conversion == DISTANCE_M_FT
+		      ? unit_feet : unit_metres);
+    }
+  else if (field == &activity::point::speed)
+    {
+      if (conversion == SPEED_MS_PACE)
+	format_pace(s, value, unit_seconds_per_mile);
+      else
+	format_speed(s, value, unit_miles_per_hour);
+    }
+  else if (field == &activity::point::heart_rate)
+    {
+      format_number(s, tick);
+      if (conversion == HEARTRATE_BPM_HRR)
+	s.append(" %HRR");
+      else if (conversion == IDENTITY)
+	s.append(" bpm");
+    }
+  else
+    {
+      format_number(s, tick);
+    }
 }
 
 chart::chart(const activity &a)
@@ -248,28 +268,6 @@ chart::draw_line(CGContextRef ctx, const line &l)
   CGContextScaleCTM(ctx, 1, -1);
   CGContextTranslateCTM(ctx, -_chart_rect.origin.x, -_chart_rect.origin.y);
 
-  // Draw 'tick' lines at sensible points around the value's range.
-
-  CGContextSaveGState(ctx);
-  CGContextSetLineWidth(ctx, 1);
-  CGContextSetRGBStrokeColor(ctx, 0, 0, 0, 0.1);
-
-  double min_tick, max_tick, tick_delta;
-  l.tick_values(min_tick, max_tick, tick_delta);
-
-  for (double tick = min_tick; tick < max_tick; tick += tick_delta)
-    {
-      CGFloat y = l.convert_to_si(tick);
-      y = y * ym + y0;
-      y = floor(y) + 0.5;
-      CGPoint lines[2];
-      lines[0] = CGPointMake(_chart_rect.origin.x, y);
-      lines[1] = CGPointMake(_chart_rect.origin.x + _chart_rect.size.width, y);
-      CGContextStrokeLineSegments(ctx, lines, 2);
-    }
-
-  CGContextRestoreGState(ctx);
-
   // Fill gradient under the line
 
   CGContextSaveGState(ctx);
@@ -297,6 +295,8 @@ chart::draw_line(CGContextRef ctx, const line &l)
 
   // Draw data line
 
+  CGContextSaveGState(ctx);
+
   switch (l.color)
     {
     case RED:
@@ -316,6 +316,40 @@ chart::draw_line(CGContextRef ctx, const line &l)
   CGContextAddPath(ctx, path);
   CGContextSetLineWidth(ctx, 1.5);
   CGContextStrokePath(ctx);
+
+  CGContextRestoreGState(ctx);
+
+  // Draw 'tick' lines at sensible points around the value's range.
+
+  CGContextSaveGState(ctx);
+
+  CGContextSetLineWidth(ctx, 1);
+  CGContextSetRGBStrokeColor(ctx, 0, 0, 0, 0.1);
+
+  CGContextSelectFont(ctx, "Helvetica-Bold", 9, kCGEncodingMacRoman);
+  CGContextSetTextMatrix(ctx, CGAffineTransformIdentity);
+  CGContextSetTextDrawingMode(ctx, kCGTextFill);
+  CGContextSetRGBFillColor(ctx, 0, 0, 0, 1);
+
+  for (double tick = l.tick_min; tick < l.tick_max; tick += l.tick_delta)
+    {
+      double value = l.convert_to_si(tick);
+      CGFloat y = value;
+      y = y * ym + y0;
+      y = floor(y) + 0.5;
+      CGPoint lines[2];
+      lines[0] = CGPointMake(_chart_rect.origin.x, y);
+      lines[1] = CGPointMake(_chart_rect.origin.x + _chart_rect.size.width, y);
+      CGContextStrokeLineSegments(ctx, lines, 2);
+
+      std::string s;
+      l.format_tick(s, tick, value);
+
+      CGContextShowTextAtPoint(ctx, _chart_rect.origin.x + 2,
+			       y + 2, s.c_str(), s.size());
+    }
+
+  CGContextRestoreGState(ctx);
 
   CGContextRestoreGState(ctx);
 
