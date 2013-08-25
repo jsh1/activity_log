@@ -2,7 +2,7 @@
 
 #import "ActActivitySubview.h"
 
-@interface ActActivityBodyView : ActActivitySubview
+@interface ActActivityBodyView : ActActivitySubview <NSTextViewDelegate>
 {
   IBOutlet NSTextView *_textView;
 

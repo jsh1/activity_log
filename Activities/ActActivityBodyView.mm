@@ -22,9 +22,10 @@
     return nil;
 
   _textView = [[NSTextView alloc] initWithFrame:NSZeroRect];
+  [_textView setDrawsBackground:NO];
+  [_textView setDelegate:self];
   [self addSubview:_textView];
   [_textView release];
-  [_textView setDrawsBackground:NO];
 
   _layoutContainer = [[NSTextContainer alloc]
 		      initWithContainerSize:NSZeroSize];
@@ -38,6 +39,8 @@
 
 - (void)dealloc
 {
+  [_textView setDelegate:nil];
+
   [_layoutManager release];
   [_layoutContainer release];
 
@@ -120,6 +123,21 @@
   frame.size.width = std::min(frame.size.width, (CGFloat) MAX_WIDTH);
 
   [_textView setFrame:frame];
+}
+
+// NSTextViewDelegate methods
+
+- (void)textDidChange:(NSNotification *)note
+{
+  if ([note object] == _textView)
+    {
+      // FIXME: this might be too slow?
+
+      NSRect bounds = [self bounds];
+      CGFloat width = std::min(bounds.size.width, (CGFloat) MAX_WIDTH);
+      if ([self preferredHeightForWidth:width] != bounds.size.height)
+	[[self activityView] updateHeight];
+    }
 }
 
 @end

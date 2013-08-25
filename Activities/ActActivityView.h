@@ -19,6 +19,8 @@
 
 - (void)activityDidChange;
 
+- (void)updateHeight;
+
 - (CGFloat)preferredHeightForWidth:(CGFloat)width;
 
 - (void)layoutSubviews;

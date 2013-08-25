@@ -7,10 +7,6 @@
 #import "ActActivityHeaderView.h"
 #import "ActActivitySubView.h"
 
-@interface ActActivityView ()
-- (void)updateHeight;
-@end
-
 #define SUBVIEW_Y_SPACING 14
 
 #define FONT_NAME "Bitstream Vera Sans Roman"
