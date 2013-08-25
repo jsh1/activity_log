@@ -151,7 +151,8 @@ chart::chart(const activity &a, x_axis_type xa)
 : _activity(a),
   _x_axis(xa),
   _x_axis_field(_x_axis == x_axis_type::DISTANCE
-		? &activity::point::distance : &activity::point::time)
+		? &activity::point::distance : &activity::point::time),
+  _chart_rect(CGRectNull)
 {
   double mean, sdev;
   a.get_range(_x_axis_field, _min_x_value, _max_x_value, mean, sdev);
@@ -182,7 +183,6 @@ void
 chart::set_chart_rect(const CGRect &r)
 {
   _chart_rect = r;
-  update_values();
 }
 
 void

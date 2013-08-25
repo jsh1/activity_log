@@ -30,20 +30,6 @@
   return self;
 }
 
-- (void)updateChartRect
-{
-  if (_chart)
-    {
-      CGRect bounds = NSRectToCGRect([self bounds]);
-
-      if (!CGRectEqualToRect(bounds, _chart->chart_rect()))
-	{
-	  _chart->set_chart_rect(NSRectToCGRect(bounds));
-	  [self setNeedsDisplay:YES];
-	}
-    }
-}
-
 - (void)activityDidChange
 {
   if (_chart)
@@ -83,7 +69,10 @@
 			       ::BLUE, 0, 1);
 	    }
 
-	  [self updateChartRect];
+	  _chart->set_chart_rect(NSRectToCGRect([self bounds]));
+	  _chart->update_values();
+
+	  [self setNeedsDisplay:YES];
 	}
     }
 }
@@ -116,7 +105,16 @@
 
 - (void)layoutSubviews
 {
-  [self updateChartRect];
+  if (_chart)
+    {
+      CGRect bounds = NSRectToCGRect([self bounds]);
+
+      if (!CGRectEqualToRect(bounds, _chart->chart_rect()))
+	{
+	  _chart->set_chart_rect(bounds);
+	  [self setNeedsDisplay:YES];
+	}
+    }
 }
 
 - (void)drawRect:(NSRect)r
