@@ -236,14 +236,14 @@ database::compare_term::operator()(const activity &a) const
   field_id id = lookup_field_id(field.c_str());
 
   field_data_type type = lookup_field_data_type(id);
-  if (type == type_string)
-    type = type_number;
+  if (type == field_data_type::string)
+    type = field_data_type::number;
 
   /* Use activity to read known fields, e.g. this ensures we fill in
      missing fields from any GPS file. */
 
   double lhs;
-  if (id != field_custom)
+  if (id != field_id::custom)
     {
       lhs = a.field_value(id);
       if (lhs == 0)
@@ -260,22 +260,22 @@ database::compare_term::operator()(const activity &a) const
      the values are converted to speed (1/pace). */
 
   double rhs = this->rhs;
-  if (type == type_pace)
+  if (type == field_data_type::pace)
     lhs = 1/lhs, rhs = 1/rhs;
 
   switch (op)
     {
-    case op_equal:
+    case compare_op::equal:
       return lhs == rhs;
-    case op_not_equal:
+    case compare_op::not_equal:
       return lhs != rhs;
-    case op_greater:
+    case compare_op::greater:
       return lhs > rhs;
-    case op_greater_or_equal:
+    case compare_op::greater_or_equal:
       return lhs >= rhs;
-    case op_less:
+    case compare_op::less:
       return lhs < rhs;
-    case op_less_or_equal:
+    case compare_op::less_or_equal:
       return lhs <= rhs;
     }
 

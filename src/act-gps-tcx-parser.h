@@ -12,7 +12,7 @@ namespace gps {
 
 class tcx_parser : public parser
 {
-  enum state
+  enum class state
     {
       ROOT,
       TRAINING_CENTER_DATABASE,

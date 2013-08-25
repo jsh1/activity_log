@@ -56,27 +56,31 @@
     {
       if (const act::gps::activity *gps_a = a->gps_data())
 	{
-	  _chart.reset(new act::gps::chart(*gps_a));
+	  _chart.reset(new act::gps::chart(*gps_a,
+			act::gps::chart::x_axis_type::DISTANCE));
 
 	  if (_chartType == CHART_ALTITUDE && gps_a->has_altitude())
 	    {
-	      _chart->add_line(&act::gps::activity::point::altitude,
-			       false, act::gps::chart::DISTANCE_M_FT,
-			       act::gps::chart::GREEN, 0, 1);
+	      _chart->add_line(&act::gps::activity::point::altitude, false,
+			       act::gps::chart::value_conversion
+			       ::DISTANCE_M_FT, act::gps::chart::line_color
+			       ::GREEN, 0, 1);
 	    }
 
 	  if (_chartType == CHART_HEART_RATE && gps_a->has_heart_rate())
 	    {
-	      _chart->add_line(&act::gps::activity::point::heart_rate,
-			       true, act::gps::chart::IDENTITY,
-			       act::gps::chart::RED, 0, 1);
+	      _chart->add_line(&act::gps::activity::point::heart_rate, true,
+			       act::gps::chart::value_conversion
+			       ::IDENTITY, act::gps::chart::line_color::RED,
+			       0, 1);
 	    }
 
 	  if (_chartType == CHART_PACE && gps_a->has_speed())
 	    {
-	      _chart->add_line(&act::gps::activity::point::speed,
-			       true, act::gps::chart::SPEED_MS_PACE,
-			       act::gps::chart::BLUE, 0, 1);
+	      _chart->add_line(&act::gps::activity::point::speed, true,
+			       act::gps::chart::value_conversion
+			       ::SPEED_MS_PACE, act::gps::chart::line_color
+			       ::BLUE, 0, 1);
 	    }
 
 	  [self updateChartRect];

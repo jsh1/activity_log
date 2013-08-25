@@ -7,11 +7,11 @@
 namespace act {
 
 config::config()
-: _default_distance_unit(unit_miles),
-  _default_pace_unit(unit_seconds_per_mile),
-  _default_speed_unit(unit_miles_per_hour),
-  _default_temperature_unit(unit_celsius),
-  _default_weight_unit(unit_kilogrammes),
+: _default_distance_unit(unit_type::miles),
+  _default_pace_unit(unit_type::seconds_per_mile),
+  _default_speed_unit(unit_type::miles_per_hour),
+  _default_temperature_unit(unit_type::celsius),
+  _default_weight_unit(unit_type::kilogrammes),
   _start_of_week(1),
   _resting_hr(40),
   _max_hr(178),

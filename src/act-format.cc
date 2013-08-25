@@ -118,41 +118,41 @@ format_distance(std::string &str, double dist, unit_type unit)
 {
   const char *format = nullptr;
 
-  if (unit == unit_unknown)
+  if (unit == unit_type::unknown)
     unit = shared_config().default_distance_unit();
 
   switch (unit)
     {
-    case unit_centimetres:
+    case unit_type::centimetres:
       format = "%.0f cm";
       dist = dist * 1e2;
       break;
 
-    case unit_metres:
+    case unit_type::metres:
       format = "%.1f m";
       break;
 
-    case unit_kilometres:
+    case unit_type::kilometres:
       format = "%.2f km";
       dist = dist * 1e-3;
       break;
 
-    case unit_inches:
+    case unit_type::inches:
       format = "%.0f in";
       dist = dist * INCHES_PER_METER;
       break;
 
-    case unit_feet:
+    case unit_type::feet:
       format = "%.0f feet";
       dist = dist * FEET_PER_METER;
       break;
 
-    case unit_yards:
+    case unit_type::yards:
       format = "%.1f yd";
       dist = dist * YARDS_PER_METER;
       break;
 
-    case unit_miles:
+    case unit_type::miles:
     default:
       format = "%.2f mi";
       dist = dist * MILES_PER_METER;
@@ -171,12 +171,12 @@ format_pace(std::string &str, double pace, unit_type unit)
   double dur = 0;
   const char *suffix = nullptr;
 
-  if (unit == unit_unknown)
+  if (unit == unit_type::unknown)
     unit = shared_config().default_pace_unit();
 
   switch (unit)
     {
-    case unit_seconds_per_mile:
+    case unit_type::seconds_per_mile:
     default:
       suffix = " / mi";
       if (pace != 0)
@@ -185,7 +185,7 @@ format_pace(std::string &str, double pace, unit_type unit)
 	dur = HUGE_VAL;
       break;
 
-    case unit_seconds_per_kilometre:
+    case unit_type::seconds_per_kilometre:
       suffix = " / km";
       if (pace != 0)
 	dur = SECS_PER_KM(pace);
@@ -203,22 +203,22 @@ format_speed(std::string &str, double speed, unit_type unit)
   double dist = 0;
   const char *format = nullptr;
 
-  if (unit == unit_unknown)
+  if (unit == unit_type::unknown)
     unit = shared_config().default_speed_unit();
 
   switch (unit)
     {
-    case unit_metres_per_second:
+    case unit_type::metres_per_second:
       format = "%.1f m/s";
       dist = speed;
       break;
 
-    case unit_kilometres_per_hour:
+    case unit_type::kilometres_per_hour:
       format = "%.2f km/h";
       dist = speed * (3600/1e3);
       break;
 
-    case unit_miles_per_hour:
+    case unit_type::miles_per_hour:
     default:
       format = "%.2f mph";
       dist = speed * (3600/METERS_PER_MILE);
@@ -236,17 +236,17 @@ format_temperature(std::string &str, double temp, unit_type unit)
 {
   const char *format = nullptr;
 
-  if (unit == unit_unknown)
+  if (unit == unit_type::unknown)
     unit = shared_config().default_temperature_unit();
 
   switch (unit)
     {
-    case unit_celsius:
+    case unit_type::celsius:
     default:
       format = "%.f C";
       break;
 
-    case unit_fahrenheit:
+    case unit_type::fahrenheit:
       format = "%.f F";
       temp = temp * 9/5 + 32;
       break;
@@ -264,17 +264,17 @@ format_weight(std::string &str, double weight, unit_type unit)
 {
   const char *format = nullptr;
 
-  if (unit == unit_unknown)
+  if (unit == unit_type::unknown)
     unit = shared_config().default_weight_unit();
 
   switch (unit)
     {
-    case unit_kilogrammes:
+    case unit_type::kilogrammes:
     default:
       format = "%.f kg";
       break;
 
-    case unit_pounds:
+    case unit_type::pounds:
       format = "%.f lb";
       weight = weight * POUNDS_PER_KILO;
       break;
@@ -303,44 +303,44 @@ format_value(std::string &str, field_data_type type,
 {
   switch (type)
     {
-    case type_number:
-    case type_string:
+    case field_data_type::number:
+    case field_data_type::string:
       format_number(str, value);
       break;
 
-    case type_duration:
+    case field_data_type::duration:
       format_duration(str, value);
       break;
 
-    case type_distance:
+    case field_data_type::distance:
       format_distance(str, value, unit);
       break;
 
-    case type_pace:
+    case field_data_type::pace:
       format_pace(str, value, unit);
       break;
 
-    case type_speed:
+    case field_data_type::speed:
       format_speed(str, value, unit);
       break;
 
-    case type_temperature:
+    case field_data_type::temperature:
       format_temperature(str, value, unit);
       break;
 
-    case type_fraction:
+    case field_data_type::fraction:
       format_fraction(str, value);
       break;
 
-    case type_weight:
+    case field_data_type::weight:
       format_weight(str, value, unit);
       break;
 
-    case type_date:
+    case field_data_type::date:
       format_date_time(str, (time_t) value);
       break;
 
-    case type_keywords:
+    case field_data_type::keywords:
       abort();
     }
 }
@@ -1131,7 +1131,7 @@ parse_date_interval(const std::string &str, date_interval *interval_ptr)
   if (token.size() == 0)
     return false;
 
-  date_interval::unit_type unit = date_interval::days;
+  date_interval::unit_type unit = date_interval::unit_type::days;
   int count = 1;
 
   if (isdigit_l(token[0], nullptr))
@@ -1151,13 +1151,13 @@ parse_date_interval(const std::string &str, date_interval *interval_ptr)
   const char *tstr = token.c_str();
 
   if (matches_word_list(tstr, "day\0days\0daily\0"))
-    unit = date_interval::days;
+    unit = date_interval::unit_type::days;
   else if (matches_word_list(tstr, "week\0weeks\0weekly\0"))
-    unit = date_interval::weeks;
+    unit = date_interval::unit_type::weeks;
   else if (matches_word_list(tstr, "month\0months\0monthly\0"))
-    unit = date_interval::months;
+    unit = date_interval::unit_type::months;
   else if (matches_word_list(tstr, "year\0years\0yearly\0"))
-    unit = date_interval::years;
+    unit = date_interval::unit_type::years;
   else
     return false;
 
@@ -1203,14 +1203,14 @@ parse_distance(const std::string &str, double *dist_ptr, unit_type *unit_ptr)
   static const parsable_unit distance_units[] =
     {
       {"cm\0centimetres\0centimetre\0centimeters\0centimeter\0",
-       unit_centimetres, .01},
-      {"m\0metres\0metre\0meters\0meter\0", unit_metres, 1},
+       unit_type::centimetres, .01},
+      {"m\0metres\0metre\0meters\0meter\0", unit_type::metres, 1},
       {"km\0kilometres\0kilometre\0kilometers\0kilometer\0",
-       unit_kilometres, 1000},
-      {"in\0inches\0inch\0", unit_inches, 1/INCHES_PER_METER},
-      {"ft\0feet\0foot\0", unit_feet, 1/FEET_PER_METER},
-      {"yd\0yards\0yard\0", unit_yards, 1/YARDS_PER_METER},
-      {"mi\0mile\0miles\0", unit_miles, 1/MILES_PER_METER},
+       unit_type::kilometres, 1000},
+      {"in\0inches\0inch\0", unit_type::inches, 1/INCHES_PER_METER},
+      {"ft\0feet\0foot\0", unit_type::feet, 1/FEET_PER_METER},
+      {"yd\0yards\0yard\0", unit_type::yards, 1/YARDS_PER_METER},
+      {"mi\0mile\0miles\0", unit_type::miles, 1/MILES_PER_METER},
       {0}
     };
 
@@ -1237,7 +1237,7 @@ parse_pace(const std::string &str, double *pace_ptr, unit_type *unit_ptr)
     return false;
 
   value = 1/value;
-  unit_type unit = unit_seconds_per_mile;
+  unit_type unit = unit_type::seconds_per_mile;
 
   idx = skip_whitespace(str, idx);
 
@@ -1247,8 +1247,8 @@ parse_pace(const std::string &str, double *pace_ptr, unit_type *unit_ptr)
 
       static const parsable_unit pace_units[] =
 	{
-	  {"mi\0mile\0", unit_seconds_per_mile, 1/MILES_PER_METER},
-	  {"km\0kilometre\0kilometer\0", unit_seconds_per_kilometre, 1000},
+	  {"mi\0mile\0", unit_type::seconds_per_mile, 1/MILES_PER_METER},
+	  {"km\0kilometre\0kilometer\0", unit_type::seconds_per_kilometre, 1000},
 	  {0}
 	};
 
@@ -1281,9 +1281,9 @@ parse_speed(const std::string &str, double *speed_ptr, unit_type *unit_ptr)
 
   static const parsable_unit speed_units[] =
     {
-      {"m/s\0mps\0", unit_metres_per_second, 1},
-      {"km/h\0kmh\0", unit_kilometres_per_hour, 1000/3600.},
-      {"mph\0", unit_miles_per_hour, METERS_PER_MILE/3600.},
+      {"m/s\0mps\0", unit_type::metres_per_second, 1},
+      {"km/h\0kmh\0", unit_type::kilometres_per_hour, 1000/3600.},
+      {"mph\0", unit_type::miles_per_hour, METERS_PER_MILE/3600.},
       {0}
     };
 
@@ -1313,8 +1313,8 @@ parse_temperature(const std::string &str, double *temp_ptr,
 
   static const parsable_unit temp_units[] =
     {
-      {"c\0celsius\0centigrade\0", unit_celsius, 1},
-      {"f\0fahrenheit\0", unit_fahrenheit, 5/9., -160*9.},
+      {"c\0celsius\0centigrade\0", unit_type::celsius, 1},
+      {"f\0fahrenheit\0", unit_type::fahrenheit, 5/9., -160*9.},
       {0}
     };
 
@@ -1344,8 +1344,8 @@ parse_weight(const std::string &str, double *weight_ptr, unit_type *unit_ptr)
   static const parsable_unit weight_units[] =
     {
       {"kg\0kilos\0kilogram\0kilograms\0kilogramme\0kilogrammes\0",
-       unit_kilogrammes, 1},
-      {"lb\0lbs\0pound\0pounds\0", unit_pounds, 1/POUNDS_PER_KILO},
+       unit_type::kilogrammes, 1},
+      {"lb\0lbs\0pound\0pounds\0", unit_type::pounds, 1/POUNDS_PER_KILO},
       {0}
     };
 
@@ -1425,36 +1425,36 @@ parse_value(const std::string &str, field_data_type type,
 	    double *value_ptr, unit_type *unit_ptr)
 {
   if (unit_ptr)
-    *unit_ptr = unit_unknown;
+    *unit_ptr = unit_type::unknown;
 
   switch (type)
     {
-    case type_number:
-    case type_string:
+    case field_data_type::number:
+    case field_data_type::string:
       return parse_number(str, value_ptr);
 
-    case type_duration:
+    case field_data_type::duration:
       return parse_duration(str, value_ptr);
 
-    case type_distance:
+    case field_data_type::distance:
       return parse_distance(str, value_ptr, unit_ptr);
 
-    case type_pace:
+    case field_data_type::pace:
       return parse_pace(str, value_ptr, unit_ptr);
 
-    case type_speed:
+    case field_data_type::speed:
       return parse_speed(str, value_ptr, unit_ptr);
 
-    case type_temperature:
+    case field_data_type::temperature:
       return parse_temperature(str, value_ptr, unit_ptr);
 
-    case type_fraction:
+    case field_data_type::fraction:
       return parse_fraction(str, value_ptr);
 
-    case type_weight:
+    case field_data_type::weight:
       return parse_weight(str, value_ptr, unit_ptr);
 
-    case type_date: {
+    case field_data_type::date: {
       time_t time = 0;
       if (parse_date_time(str, &time, nullptr))
 	{
@@ -1463,7 +1463,7 @@ parse_value(const std::string &str, field_data_type type,
 	}
       return false; }
 
-    case type_keywords:
+    case field_data_type::keywords:
       return false;
     }
 

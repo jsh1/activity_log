@@ -13,7 +13,7 @@ namespace act {
 namespace gps {
 
 activity::activity()
-: _sport(sport_unknown),
+: _sport(sport_type::unknown),
   _time(0),
   _duration(0),
   _distance(0),
@@ -101,15 +101,15 @@ activity::print_summary(FILE *fh) const
   fprintf(fh, "Duration: %s\n", tem.c_str());
   tem.clear();
 
-  format_distance(tem, distance(), unit_miles);
+  format_distance(tem, distance(), unit_type::miles);
   fprintf(fh, "Distance: %s\n", tem.c_str());
   tem.clear();
 
-  format_pace(tem, avg_speed(), unit_seconds_per_mile);
+  format_pace(tem, avg_speed(), unit_type::seconds_per_mile);
   fprintf(fh, "Pace: %s\n", tem.c_str());
   tem.clear();
 
-  format_pace(tem, max_speed(), unit_seconds_per_mile);
+  format_pace(tem, max_speed(), unit_type::seconds_per_mile);
   fprintf(fh, "Max-Pace: %s\n", tem.c_str());
   tem.clear();
 

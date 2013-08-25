@@ -76,12 +76,12 @@
 
       switch (field_type)
 	{
-	case act::type_string:
+	case act::field_data_type::string:
 	  if (const std::string *s = a->field_ptr(field))
 	    return [NSString stringWithUTF8String:s->c_str()];
 	  break;
 
-	case act::type_keywords:
+	case act::field_data_type::keywords:
 	  if (const std::vector<std::string>
 	      *keys = a->field_keywords_ptr(field_id))
 	    {

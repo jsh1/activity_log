@@ -11,11 +11,11 @@ namespace act {
 
 class output_table
 {
-  enum cell_type
+  enum class cell_type
     {
-      cell_empty,
-      cell_string,
-      cell_bar_value,
+      EMPTY,
+      STRING,
+      BAR_VALUE,
     };
 
   struct table_cell

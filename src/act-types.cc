@@ -17,86 +17,86 @@ lookup_field_id(const char *str)
     {
     case 'a':
       if (strcasecmp(str, "activity") == 0)
-	return field_activity;
+	return field_id::activity;
       else if (strcasecmp(str, "average_hr") == 0)
-	return field_average_hr;
+	return field_id::average_hr;
       break;
 
     case 'c':
       if (strcasecmp(str, "calories") == 0)
-	return field_calories;
+	return field_id::calories;
       else if (strcasecmp(str, "course") == 0)
-	return field_course;
+	return field_id::course;
       break;
 
     case 'd':
       if (strcasecmp(str, "date") == 0)
-	return field_date;
+	return field_id::date;
       else if (strcasecmp(str, "dew-point") == 0)
-	return field_dew_point;
+	return field_id::dew_point;
       else if (strcasecmp(str, "distance") == 0)
-	return field_distance;
+	return field_id::distance;
       else if (strcasecmp(str, "duration") == 0)
-	return field_duration;
+	return field_id::duration;
       break;
 
     case 'e':
       if (strcasecmp(str, "effort") == 0)
-	return field_effort;
+	return field_id::effort;
       else if (strcasecmp(str, "equipment") == 0)
-	return field_equipment;
+	return field_id::equipment;
       break;
 
     case 'g':
       if (strcasecmp(str, "gps-file") == 0)
-	return field_gps_file;
+	return field_id::gps_file;
       break;
 
     case 'k':
       if (strcasecmp(str, "keywords") == 0)
-	return field_keywords;
+	return field_id::keywords;
       break;
 
     case 'm':
       if (strcasecmp(str, "max-hr") == 0)
-	return field_max_hr;
+	return field_id::max_hr;
       else if (strcasecmp(str, "max-pace") == 0)
-	return field_max_pace;
+	return field_id::max_pace;
       else if (strcasecmp(str, "max-speed") == 0)
-	return field_max_speed;
+	return field_id::max_speed;
       break;
 
     case 'p':
       if (strcasecmp(str, "pace") == 0)
-	return field_pace;
+	return field_id::pace;
       break;
 
     case 'q':
       if (strcasecmp(str, "quality") == 0)
-	return field_quality;
+	return field_id::quality;
       break;
 
     case 'r':
       if (strcasecmp(str, "resting-hr") == 0)
-	return field_resting_hr;
+	return field_id::resting_hr;
       break;
 
     case 't':
       if (strcasecmp(str, "temperature") == 0)
-	return field_temperature;
+	return field_id::temperature;
       else if (strcasecmp(str, "type") == 0)
-	return field_type;
+	return field_id::type;
       break;
 
     case 'w':
       if (strcasecmp(str, "weather") == 0)
-	return field_weather;
+	return field_id::weather;
       else if (strcasecmp(str, "weight") == 0)
-	return field_weight;
+	return field_id::weight;
       break;
     }
 
-  return field_custom;
+  return field_id::custom;
 }
 
 const char *
@@ -104,53 +104,53 @@ canonical_field_name(field_id id)
 {
   switch (id)
     {
-    case field_activity:
+    case field_id::activity:
       return "Activity";
-    case field_average_hr:
+    case field_id::average_hr:
       return "Average-HR";
-    case field_calories:
+    case field_id::calories:
       return "Calories";
-    case field_course:
+    case field_id::course:
       return "Course";
-    case field_custom:
+    case field_id::custom:
       return 0;
-    case field_date:
+    case field_id::date:
       return "Date";
-    case field_dew_point:
+    case field_id::dew_point:
       return "Dew-Point";
-    case field_distance:
+    case field_id::distance:
       return "Distance";
-    case field_duration:
+    case field_id::duration:
       return "Duration";
-    case field_effort:
+    case field_id::effort:
       return "Effort";
-    case field_equipment:
+    case field_id::equipment:
       return "Equipment";
-    case field_gps_file:
+    case field_id::gps_file:
       return "GPS-File";
-    case field_keywords:
+    case field_id::keywords:
       return "Keywords";
-    case field_max_hr:
+    case field_id::max_hr:
       return "Max-HR";
-    case field_max_pace:
+    case field_id::max_pace:
       return "Max-Pace";
-    case field_max_speed:
+    case field_id::max_speed:
       return "Max-Speed";
-    case field_pace:
+    case field_id::pace:
       return "Pace";
-    case field_quality:
+    case field_id::quality:
       return "Quality";
-    case field_resting_hr:
+    case field_id::resting_hr:
       return "Resting-HR";
-    case field_speed:
+    case field_id::speed:
       return "Speed";
-    case field_temperature:
+    case field_id::temperature:
       return "Temperature";
-    case field_type:
+    case field_id::type:
       return "Type";
-    case field_weather:
+    case field_id::weather:
       return "Weather";
-    case field_weight:
+    case field_id::weight:
       return "Weight";
     }
 }
@@ -160,41 +160,41 @@ lookup_field_data_type(const field_id id)
 {
   switch (id)
     {
-    case field_activity:
-    case field_course:
-    case field_gps_file:
-    case field_type:
-    case field_custom:
-      return type_string;
-    case field_average_hr:
-    case field_calories:
-    case field_max_hr:
-    case field_resting_hr:
-      return type_number;
-    case field_date:
-      return type_date;
-    case field_distance:
-      return type_distance;
-    case field_duration:
-      return type_duration;
-    case field_effort:
-    case field_quality:
-      return type_fraction;
-    case field_equipment:
-    case field_keywords:
-    case field_weather:
-      return type_keywords;
-    case field_max_pace:
-    case field_pace:
-      return type_pace;
-    case field_max_speed:
-    case field_speed:
-      return type_speed;
-    case field_dew_point:
-    case field_temperature:
-      return type_temperature;
-    case field_weight:
-      return type_weight;
+    case field_id::activity:
+    case field_id::course:
+    case field_id::gps_file:
+    case field_id::type:
+    case field_id::custom:
+      return field_data_type::string;
+    case field_id::average_hr:
+    case field_id::calories:
+    case field_id::max_hr:
+    case field_id::resting_hr:
+      return field_data_type::number;
+    case field_id::date:
+      return field_data_type::date;
+    case field_id::distance:
+      return field_data_type::distance;
+    case field_id::duration:
+      return field_data_type::duration;
+    case field_id::effort:
+    case field_id::quality:
+      return field_data_type::fraction;
+    case field_id::equipment:
+    case field_id::keywords:
+    case field_id::weather:
+      return field_data_type::keywords;
+    case field_id::max_pace:
+    case field_id::pace:
+      return field_data_type::pace;
+    case field_id::max_speed:
+    case field_id::speed:
+      return field_data_type::speed;
+    case field_id::dew_point:
+    case field_id::temperature:
+      return field_data_type::temperature;
+    case field_id::weight:
+      return field_data_type::weight;
     }
 }
 
@@ -203,10 +203,10 @@ canonicalize_field_string(field_data_type type, std::string &str)
 {
   switch (type)
     {
-    case type_string:
+    case field_data_type::string:
       return true;
 
-    case type_number: {
+    case field_data_type::number: {
       double value;
       if (parse_number(str, &value))
 	{
@@ -216,7 +216,7 @@ canonicalize_field_string(field_data_type type, std::string &str)
 	}
       break; }
 
-    case type_date: {
+    case field_data_type::date: {
       time_t date;
       if (parse_date_time(str, &date, nullptr))
 	{
@@ -226,7 +226,7 @@ canonicalize_field_string(field_data_type type, std::string &str)
 	}
       break; }
 
-    case type_duration: {
+    case field_data_type::duration: {
       double dur;
       if (parse_duration(str, &dur))
 	{
@@ -236,7 +236,7 @@ canonicalize_field_string(field_data_type type, std::string &str)
 	}
       break; }
 
-    case type_distance: {
+    case field_data_type::distance: {
       double dist;
       unit_type unit;
       if (parse_distance(str, &dist, &unit))
@@ -247,7 +247,7 @@ canonicalize_field_string(field_data_type type, std::string &str)
 	}
       break; }
 
-    case type_pace: {
+    case field_data_type::pace: {
       double pace;
       unit_type unit;
       if (parse_pace(str, &pace, &unit))
@@ -258,7 +258,7 @@ canonicalize_field_string(field_data_type type, std::string &str)
 	}
       break; }
 
-    case type_speed: {
+    case field_data_type::speed: {
       double speed;
       unit_type unit;
       if (parse_speed(str, &speed, &unit))
@@ -269,7 +269,7 @@ canonicalize_field_string(field_data_type type, std::string &str)
 	}
       break; }
 
-    case type_temperature: {
+    case field_data_type::temperature: {
       double temp;
       unit_type unit;
       if (parse_temperature(str, &temp, &unit))
@@ -280,7 +280,7 @@ canonicalize_field_string(field_data_type type, std::string &str)
 	}
       break; }
 
-    case type_weight: {
+    case field_data_type::weight: {
       double temp;
       unit_type unit;
       if (parse_weight(str, &temp, &unit))
@@ -291,7 +291,7 @@ canonicalize_field_string(field_data_type type, std::string &str)
 	}
       break; }
 
-    case type_fraction: {
+    case field_data_type::fraction: {
       double value;
       if (parse_fraction(str, &value))
 	{
@@ -301,7 +301,7 @@ canonicalize_field_string(field_data_type type, std::string &str)
 	}
       break; }
 
-    case type_keywords: {
+    case field_data_type::keywords: {
       std::vector<std::string> keys;
       if (parse_keywords(str, &keys))
 	{
@@ -356,20 +356,20 @@ date_interval::date_index(time_t date) const
 
   switch (unit)
     {
-    case days:
+    case unit_type::days:
       return days_since_1970(tm) / count;
 
-    case weeks: {
+    case unit_type::weeks: {
       // 1970-01-01 was a thursday.
       static int week_offset = 4 - shared_config().start_of_week();
       x = (days_since_1970(tm) + week_offset) / 7;
       break; }
 
-    case months:
+    case unit_type::months:
       x = (tm.tm_year - 70) * 12 + tm.tm_mon;
       break;
 
-    case years:
+    case unit_type::years:
       x = tm.tm_year - 70;
       break;
     }
@@ -384,17 +384,17 @@ date_interval::append_date(std::string &str, int x) const
 
   switch (unit)
     {
-    case days:
+    case unit_type::days:
       append_days_date(str, x);
       break;
 
-    case weeks: {
+    case unit_type::weeks: {
       static int week_offset = 4 - shared_config().start_of_week();
       int days = x * 7 - week_offset;
       append_days_date(str, days);
       break; }
 
-    case months: {
+    case unit_type::months: {
       int month = x % 12;
       int year = 1970 + x / 12;
       char buf[128];
@@ -405,7 +405,7 @@ date_interval::append_date(std::string &str, int x) const
       str.append(buf);
       break; }
 
-    case years: {
+    case unit_type::years: {
       char buf[64];
       snprintf_l(buf, sizeof(buf), nullptr, "%d", 1970 + x);
       str.append(buf);

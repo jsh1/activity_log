@@ -31,11 +31,11 @@ activity::read_cached_values(unsigned int groups) const
       _date = 0;
       _duration = 0;
       _distance = 0;
-      _distance_unit = unit_miles;
+      _distance_unit = unit_type::miles;
       _speed = 0;
-      _speed_unit = unit_seconds_per_mile;
+      _speed_unit = unit_type::seconds_per_mile;
       _max_speed = 0;
-      _max_speed_unit = unit_seconds_per_mile;
+      _max_speed_unit = unit_type::seconds_per_mile;
     }
 
   if (groups & group_physiological)
@@ -45,7 +45,7 @@ activity::read_cached_values(unsigned int groups) const
       _max_hr = 0;
       _calories = 0;
       _weight = 0;
-      _weight_unit = unit_kilogrammes;
+      _weight_unit = unit_type::kilogrammes;
     }
 
   if (groups & group_other)
@@ -53,9 +53,9 @@ activity::read_cached_values(unsigned int groups) const
       _effort = 0;
       _quality = 0;
       _temperature = 0;
-      _temperature_unit = unit_celsius;
+      _temperature_unit = unit_type::celsius;
       _dew_point = 0;
-      _dew_point_unit = unit_celsius;
+      _dew_point_unit = unit_type::celsius;
     }
 
   // Pull values out of the file
@@ -150,8 +150,8 @@ activity::read_cached_values(unsigned int groups) const
 	      if (_speed == 0)
 		{
 		  _speed = data->avg_speed();
-		  if (data->sport() == gps::activity::sport_cycling)
-		    _speed_unit = unit_miles_per_hour;
+		  if (data->sport() == gps::activity::sport_type::cycling)
+		    _speed_unit = unit_type::miles_per_hour;
 		}
 	      if (_max_speed == 0)
 		{
@@ -178,35 +178,35 @@ activity::field_value(field_id id) const
 {
   switch (id)
     {
-    case field_date:
+    case field_id::date:
       return date();
-    case field_duration:
+    case field_id::duration:
       return duration();
-    case field_distance:
+    case field_id::distance:
       return distance();
-    case field_speed:
-    case field_pace:
+    case field_id::speed:
+    case field_id::pace:
       return speed();
-    case field_max_speed:
-    case field_max_pace:
+    case field_id::max_speed:
+    case field_id::max_pace:
       return max_speed();
-    case field_effort:
+    case field_id::effort:
       return effort();
-    case field_quality:
+    case field_id::quality:
       return quality();
-    case field_resting_hr:
+    case field_id::resting_hr:
       return resting_hr();
-    case field_average_hr:
+    case field_id::average_hr:
       return average_hr();
-    case field_max_hr:
+    case field_id::max_hr:
       return max_hr();
-    case field_calories:
+    case field_id::calories:
       return calories();
-    case field_weight:
+    case field_id::weight:
       return weight();
-    case field_temperature:
+    case field_id::temperature:
       return temperature();
-    case field_dew_point:
+    case field_id::dew_point:
       return dew_point();
     default:
       return 0;
@@ -218,11 +218,11 @@ activity::field_keywords_ptr(field_id id) const
 {
   switch (id)
     {
-    case field_equipment:
+    case field_id::equipment:
       return &equipment();
-    case field_weather:
+    case field_id::weather:
       return &weather();
-    case field_keywords:
+    case field_id::keywords:
       return &keywords();
     default:
       return nullptr;
@@ -234,24 +234,24 @@ activity::field_unit(field_id id) const
 {
   switch (id)
     {
-    case field_date:
-      return unit_seconds;
-    case field_distance:
+    case field_id::date:
+      return unit_type::seconds;
+    case field_id::distance:
       return distance_unit();
-    case field_speed:
-    case field_pace:
+    case field_id::speed:
+    case field_id::pace:
       return speed_unit();
-    case field_max_speed:
-    case field_max_pace:
+    case field_id::max_speed:
+    case field_id::max_pace:
       return max_speed_unit();
-    case field_weight:
+    case field_id::weight:
       return weight_unit();
-    case field_temperature:
+    case field_id::temperature:
       return temperature_unit();
-    case field_dew_point:
+    case field_id::dew_point:
       return dew_point_unit();
     default:
-      return unit_unknown;
+      return unit_type::unknown;
     }
 }
 
@@ -588,31 +588,31 @@ activity::print_expansion(FILE *fh, const char *name,
 
       switch (type)
 	{
-	case type_string:
+	case field_data_type::string:
 	  str = field_ptr(std::string(name));
 	  break;
 
-	case type_date:
+	case field_data_type::date:
 	  abort();
 
 	  /* FIXME: add a way to specify custom unit conversions,
 	     precision specifiers, etc. */
 
-	case type_duration:
-	case type_number:
-	case type_distance:
-	case type_pace:
-	case type_speed:
-	case type_temperature:
-	case type_fraction:
-	case type_weight: {
+	case field_data_type::duration:
+	case field_data_type::number:
+	case field_data_type::distance:
+	case field_data_type::pace:
+	case field_data_type::speed:
+	case field_data_type::temperature:
+	case field_data_type::fraction:
+	case field_data_type::weight: {
 	  double value = field_value(id);
 	  unit_type unit = field_unit(id);
 	  format_value(tem, type, value, unit);
 	  str = &tem;
 	  break; }
 
-	case type_keywords:
+	case field_data_type::keywords:
 	  if (const std::vector<std::string>
 	      *keys = field_keywords_ptr(id))
 	    {

@@ -16,7 +16,7 @@ namespace gps {
 tcx_parser::tcx_parser(activity &dest)
 : parser(dest),
   _ctx(nullptr),
-  _state(1, ROOT),
+  _state(1, state::ROOT),
   _characters(nullptr)
 {
   memset(&_sax_vtable, 0, sizeof(_sax_vtable));
@@ -124,100 +124,100 @@ tcx_parser::sax_start_element(void *ctx, const xmlChar *name,
 {
   tcx_parser *p = static_cast<tcx_parser *>(ctx);
 
-  state new_state = UNKNOWN;
+  state new_state = state::UNKNOWN;
 
   if (uri && strcmp((const char *)uri, TRAINING_CENTER_NS) == 0)
     {
       switch (p->current_state())
 	{
-	case ROOT:
+	case state::ROOT:
 	  if (strcmp((const char *)name, "TrainingCenterDatabase") == 0)
-	    new_state = TRAINING_CENTER_DATABASE;
+	    new_state = state::TRAINING_CENTER_DATABASE;
 	  break;
-	case TRAINING_CENTER_DATABASE:
+	case state::TRAINING_CENTER_DATABASE:
 	  if (strcmp((const char *)name, "Activities") == 0)
-	    new_state = ACTIVITIES;
+	    new_state = state::ACTIVITIES;
 	  break;
-	case ACTIVITIES:
+	case state::ACTIVITIES:
 	  if (strcmp((const char *)name, "Activity") == 0)
 	    {
-	      new_state = ACTIVITY;
+	      new_state = state::ACTIVITY;
 	      std::string s;
 	      if (find_attr(s, n_attr, attr, "Sport"))
 		{
-		  activity::sport_type sport = activity::sport_unknown;
+		  activity::sport_type sport = activity::sport_type::unknown;
 		  if (s == "Running")
-		    sport = activity::sport_running;
+		    sport = activity::sport_type::running;
 		  else if (s == "Cycling")
-		    sport = activity::sport_cycling;
+		    sport = activity::sport_type::cycling;
 		  else if (s == "Swimming")
-		    sport = activity::sport_swimming;
+		    sport = activity::sport_type::swimming;
 		  p->destination().set_sport(sport);
 		}
 	    }
 	  break;
-	case ACTIVITY:
+	case state::ACTIVITY:
 	  if (strcmp((const char *)name, "Id") == 0)
-	    new_state = ACTIVITY_ID;
+	    new_state = state::ACTIVITY_ID;
 	  else if (strcmp((const char *)name, "Lap") == 0)
 	    {
-	      new_state = LAP;
+	      new_state = state::LAP;
 	      p->destination().laps().push_back(activity::lap());
 	      std::string s;
 	      if (find_attr(s, n_attr, attr, "StartTime"))
 		p->current_lap().time = parse_time(s);
 	    }
 	  break;
-	case LAP:
+	case state::LAP:
 	  if (strcmp((const char *)name, "TotalTimeSeconds") == 0)
-	    new_state = LAP_TOTAL_TIME;
+	    new_state = state::LAP_TOTAL_TIME;
 	  else if (strcmp((const char *)name, "DistanceMeters") == 0)
-	    new_state = LAP_DISTANCE;
+	    new_state = state::LAP_DISTANCE;
 	  else if (strcmp((const char *)name, "MaximumSpeed") == 0)
-	    new_state = LAP_MAX_SPEED;
+	    new_state = state::LAP_MAX_SPEED;
 	  else if (strcmp((const char *)name, "Calories") == 0)
-	    new_state = LAP_CALORIES;
+	    new_state = state::LAP_CALORIES;
 	  else if (strcmp((const char *)name, "AverageHeartRateBpm") == 0)
-	    new_state = LAP_AVG_HEART_RATE;
+	    new_state = state::LAP_AVG_HEART_RATE;
 	  else if (strcmp((const char *)name, "MaximumHeartRateBpm") == 0)
-	    new_state = LAP_MAX_HEART_RATE;
+	    new_state = state::LAP_MAX_HEART_RATE;
 	  else if (strcmp((const char *)name, "Track") == 0)
-	    new_state = TRACK;
+	    new_state = state::TRACK;
 	  else if (strcmp((const char *)name, "Extensions") == 0)
-	    new_state = LAP_EXTENSIONS;
+	    new_state = state::LAP_EXTENSIONS;
 	  break;
-	case TRACK:
+	case state::TRACK:
 	  if (strcmp((const char *)name, "Trackpoint") == 0)
 	    {
-	      new_state = TRACKPOINT;
+	      new_state = state::TRACKPOINT;
 	      p->current_lap().track.push_back(activity::point());
 	    }
 	  break;
-	case TRACKPOINT:
+	case state::TRACKPOINT:
 	  if (strcmp((const char *)name, "Time") == 0)
-	    new_state = TP_TIME;
+	    new_state = state::TP_TIME;
 	  else if (strcmp((const char *)name, "Position") == 0)
-	    new_state = TP_POSITION;
+	    new_state = state::TP_POSITION;
 	  else if (strcmp((const char *)name, "AltitudeMeters") == 0)
-	    new_state = TP_ALTITUDE;
+	    new_state = state::TP_ALTITUDE;
 	  else if (strcmp((const char *)name, "DistanceMeters") == 0)
-	    new_state = TP_DISTANCE;
+	    new_state = state::TP_DISTANCE;
 	  else if (strcmp((const char *)name, "HeartRateBpm") == 0)
-	    new_state = TP_HEART_RATE;
+	    new_state = state::TP_HEART_RATE;
 	  else if (strcmp((const char *)name, "Extensions") == 0)
-	    new_state = TP_EXTENSIONS;
+	    new_state = state::TP_EXTENSIONS;
 	  break;
-	case TP_POSITION:
+	case state::TP_POSITION:
 	  if (strcmp((const char *)name, "LatitudeDegrees") == 0)
-	    new_state = TP_LAT;
+	    new_state = state::TP_LAT;
 	  else if (strcmp((const char *)name, "LongitudeDegrees") == 0)
-	    new_state = TP_LONG;
+	    new_state = state::TP_LONG;
 	  break;
-	case LAP_AVG_HEART_RATE:
-	case LAP_MAX_HEART_RATE:
-	case TP_HEART_RATE:
+	case state::LAP_AVG_HEART_RATE:
+	case state::LAP_MAX_HEART_RATE:
+	case state::TP_HEART_RATE:
 	  if (strcmp((const char *)name, "Value") == 0)
-	    new_state = VALUE;
+	    new_state = state::VALUE;
 	  break;
 	default:
 	  break;
@@ -227,21 +227,21 @@ tcx_parser::sax_start_element(void *ctx, const xmlChar *name,
     {
       switch (p->current_state())
 	{
-	case LAP_EXTENSIONS:
+	case state::LAP_EXTENSIONS:
 	  if (strcmp((const char *)name, "LX") == 0)
-	    new_state = LAP_LX;
+	    new_state = state::LAP_LX;
 	  break;
-	case LAP_LX:
+	case state::LAP_LX:
 	  if (strcmp((const char *)name, "AvgSpeed") == 0)
-	    new_state = LAP_AVG_SPEED;
+	    new_state = state::LAP_AVG_SPEED;
 	  break;
-	case TP_EXTENSIONS:
+	case state::TP_EXTENSIONS:
 	  if (strcmp((const char *)name, "TPX") == 0)
-	    new_state = TP_TPX;
+	    new_state = state::TP_TPX;
 	  break;
-	case TP_TPX:
+	case state::TP_TPX:
 	  if (strcmp((const char *)name, "Speed") == 0)
-	    new_state = TP_SPEED;
+	    new_state = state::TP_SPEED;
 	  break;
 	default:
 	  break;
@@ -261,19 +261,19 @@ tcx_parser::sax_characters(void *ctx, const xmlChar *ptr, int size)
 
   switch (p->current_state())
     {
-    case ACTIVITY_ID:
-    case LAP_TOTAL_TIME:
-    case LAP_DISTANCE:
-    case LAP_AVG_SPEED:
-    case LAP_MAX_SPEED:
-    case LAP_CALORIES:
-    case TP_TIME:
-    case TP_LAT:
-    case TP_LONG:
-    case TP_ALTITUDE:
-    case TP_DISTANCE:
-    case TP_SPEED:
-    case VALUE:
+    case state::ACTIVITY_ID:
+    case state::LAP_TOTAL_TIME:
+    case state::LAP_DISTANCE:
+    case state::LAP_AVG_SPEED:
+    case state::LAP_MAX_SPEED:
+    case state::LAP_CALORIES:
+    case state::TP_TIME:
+    case state::TP_LAT:
+    case state::TP_LONG:
+    case state::TP_ALTITUDE:
+    case state::TP_DISTANCE:
+    case state::TP_SPEED:
+    case state::VALUE:
       if (!p->_characters)
 	p->_characters = new std::string((const char *)ptr, size);
       else
@@ -295,58 +295,58 @@ tcx_parser::sax_end_element(void *ctx, const xmlChar *name,
     {
       switch (p->current_state())
 	{
-	case ACTIVITY_ID:
+	case state::ACTIVITY_ID:
 	  /* FIXME: trim whitespace. */
 	  p->destination().set_activity_id(*p->_characters);
 	  break;
-	case LAP_TOTAL_TIME:
+	case state::LAP_TOTAL_TIME:
 	  p->current_lap().duration = parse_double(*p->_characters);
 	  break;
-	case LAP_DISTANCE:
+	case state::LAP_DISTANCE:
 	  p->current_lap().distance = parse_double(*p->_characters);
 	  break;
-	case LAP_AVG_SPEED:
+	case state::LAP_AVG_SPEED:
 	  p->current_lap().avg_speed = parse_double(*p->_characters);
 	  break;
-	case LAP_MAX_SPEED:
+	case state::LAP_MAX_SPEED:
 	  p->current_lap().max_speed = parse_double(*p->_characters);
 	  break;
-	case LAP_CALORIES:
+	case state::LAP_CALORIES:
 	  p->current_lap().calories = parse_double(*p->_characters);
 	  break;
-	case TP_TIME:
+	case state::TP_TIME:
 	  p->current_point().time = parse_time(*p->_characters);
 	  break;
-	case TP_LAT:
+	case state::TP_LAT:
 	  p->current_point().latitude = parse_double(*p->_characters);
 	  p->destination().set_has_location(true);
 	  break;
-	case TP_LONG:
+	case state::TP_LONG:
 	  p->current_point().longitude = parse_double(*p->_characters);
 	  p->destination().set_has_location(true);
 	  break;
-	case TP_ALTITUDE:
+	case state::TP_ALTITUDE:
 	  p->current_point().altitude = parse_double(*p->_characters);
 	  p->destination().set_has_altitude(true);
 	  break;
-	case TP_DISTANCE:
+	case state::TP_DISTANCE:
 	  p->current_point().distance = parse_double(*p->_characters);
 	  break;
-	case TP_SPEED:
+	case state::TP_SPEED:
 	  p->current_point().speed = parse_double(*p->_characters);
 	  p->destination().set_has_speed(true);
 	  break;
-	case VALUE: {
+	case state::VALUE: {
 	  double x = parse_double(*p->_characters);
 	  switch (p->previous_state())
 	    {
-	    case LAP_AVG_HEART_RATE:
+	    case state::LAP_AVG_HEART_RATE:
 	      p->current_lap().avg_heart_rate = x;
 	      break;
-	    case LAP_MAX_HEART_RATE:
+	    case state::LAP_MAX_HEART_RATE:
 	      p->current_lap().max_heart_rate = x;
 	      break;
-	    case TP_HEART_RATE:
+	    case state::TP_HEART_RATE:
 	      p->current_point().heart_rate = x;
 	      p->destination().set_has_heart_rate(true);
 	      break;

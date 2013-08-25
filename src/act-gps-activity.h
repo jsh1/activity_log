@@ -14,12 +14,12 @@ namespace gps {
 class activity
 {
 public:
-  enum sport_type
+  enum class sport_type
     {
-      sport_unknown,
-      sport_running,
-      sport_cycling,
-      sport_swimming,
+      unknown,
+      running,
+      cycling,
+      swimming,
     };
 
   struct point

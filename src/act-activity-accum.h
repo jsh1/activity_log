@@ -32,24 +32,24 @@ class activity_accum
       double get_max() const;
     };
 
-  enum accum_id
+  enum class accum_id
     {
-      accum_distance,
-      accum_duration,
-      accum_speed,
-      accum_max_speed,
-      accum_average_hr,
-      accum_max_hr,
-      accum_resting_hr,
-      accum_calories,
-      accum_weight,
-      accum_effort,
-      accum_quality,
-      accum_temperature,
-      accum_dew_point
+      distance,
+      duration,
+      speed,
+      max_speed,
+      average_hr,
+      max_hr,
+      resting_hr,
+      calories,
+      weight,
+      effort,
+      quality,
+      temperature,
+      dew_point
     };
 
-  enum {accum_count = accum_dew_point+1};
+  enum {accum_count = static_cast<int>(accum_id::dew_point)+1};
 
   value_accum _accum[accum_count];
 

@@ -19,7 +19,13 @@ namespace gps {
 class chart
 {
 public:
-  enum value_conversion
+  enum class x_axis_type
+    {
+      DISTANCE,
+      DURATION,
+    };
+
+  enum class value_conversion
     {
       IDENTITY,
       HEARTRATE_BPM_HRR,
@@ -28,7 +34,7 @@ public:
       DISTANCE_M_FT,
     };
 
-  enum line_color
+  enum class line_color
     {
       RED,
       GREEN,
@@ -53,9 +59,9 @@ private:
       double tick_min, tick_max, tick_delta;
 
       line();
-      line(double activity::point:: *field_, bool smoothed_,
-	value_conversion conversion_, line_color color_, double min_ratio_,
-	double max_ratio_);
+      line(double activity::point:: *field, bool smoothed,
+	value_conversion conversion, line_color color, double min_ratio,
+	double max_ratio);
 
       void update_values(const chart &c);
 
@@ -68,7 +74,9 @@ private:
   friend struct chart::line;
 
   const activity &_activity;
-  double _min_dist, _max_dist;
+  x_axis_type _x_axis;
+  double activity::point:: *_x_axis_field;
+  double _min_x_value, _max_x_value;
   std::vector<line> _lines;
   CGRect _chart_rect;
 
@@ -77,11 +85,12 @@ private:
   void draw_lap_markers(CGContextRef ctx);
 
 public:
-  chart(const activity &a);
+  chart(const activity &a, x_axis_type x_axis);
 
   void add_line(double activity::point:: *field, bool smoothed,
     value_conversion conv, line_color color, double min_ratio,
     double max_ratio);
+
   void remove_all_lines();
 
   void update_values();

@@ -24,16 +24,16 @@ chart::line::convert_from_si(double x) const
 {
   switch (conversion)
     {
-    case IDENTITY:
+    case value_conversion::IDENTITY:
       return x;
-    case HEARTRATE_BPM_HRR: {
+    case value_conversion::HEARTRATE_BPM_HRR: {
       const config &cfg = shared_config();
       return (x - cfg.resting_hr()) / (cfg.max_hr() - cfg.resting_hr()) * 100.; }
-    case SPEED_MS_PACE:
+    case value_conversion::SPEED_MS_PACE:
       return x > 0 ? SECS_PER_MILE(x) : 0;
-    case DISTANCE_M_MI:
+    case value_conversion::DISTANCE_M_MI:
       return x * MILES_PER_METER;
-    case DISTANCE_M_FT:
+    case value_conversion::DISTANCE_M_FT:
       return x * FEET_PER_METER;
     default:
       return x;
@@ -45,16 +45,16 @@ chart::line::convert_to_si(double x) const
 {
   switch (conversion)
     {
-    case IDENTITY:
+    case value_conversion::IDENTITY:
       return x;
-    case HEARTRATE_BPM_HRR: {
+    case value_conversion::HEARTRATE_BPM_HRR: {
       const config &cfg = shared_config();
       return x * (1./100) * (cfg.max_hr() - cfg.resting_hr()) + cfg.resting_hr(); }
-    case SPEED_MS_PACE:
+    case value_conversion::SPEED_MS_PACE:
       return x > 0 ? MILES_PER_SEC(x) : 0;
-    case DISTANCE_M_MI:
+    case value_conversion::DISTANCE_M_MI:
       return x * (1. / MILES_PER_METER);
-    case DISTANCE_M_FT:
+    case value_conversion::DISTANCE_M_FT:
       return x * (1. / FEET_PER_METER);
     default:
       return x;
@@ -96,13 +96,13 @@ chart::line::update_values(const chart &c)
 
   switch (conversion)
     {
-    case HEARTRATE_BPM_HRR:
+    case value_conversion::HEARTRATE_BPM_HRR:
       tick_delta = 5;
       break;
-    case SPEED_MS_PACE:
+    case value_conversion::SPEED_MS_PACE:
       tick_delta = 30;
       break;
-    case DISTANCE_M_FT:
+    case value_conversion::DISTANCE_M_FT:
       tick_delta = 100;
       break;
     default:
@@ -123,22 +123,22 @@ chart::line::format_tick(std::string &s, double tick, double value) const
 {
   if (field == &activity::point::altitude)
     {
-      format_distance(s, value, conversion == DISTANCE_M_FT
-		      ? unit_feet : unit_metres);
+      format_distance(s, value, conversion == value_conversion::DISTANCE_M_FT
+		      ? unit_type::feet : unit_type::metres);
     }
   else if (field == &activity::point::speed)
     {
-      if (conversion == SPEED_MS_PACE)
-	format_pace(s, value, unit_seconds_per_mile);
+      if (conversion == value_conversion::SPEED_MS_PACE)
+	format_pace(s, value, unit_type::seconds_per_mile);
       else
-	format_speed(s, value, unit_miles_per_hour);
+	format_speed(s, value, unit_type::miles_per_hour);
     }
   else if (field == &activity::point::heart_rate)
     {
       format_number(s, tick);
-      if (conversion == HEARTRATE_BPM_HRR)
+      if (conversion == value_conversion::HEARTRATE_BPM_HRR)
 	s.append(" %HRR");
-      else if (conversion == IDENTITY)
+      else
 	s.append(" bpm");
     }
   else
@@ -147,11 +147,14 @@ chart::line::format_tick(std::string &s, double tick, double value) const
     }
 }
 
-chart::chart(const activity &a)
-: _activity(a)
+chart::chart(const activity &a, x_axis_type xa)
+: _activity(a),
+  _x_axis(xa),
+  _x_axis_field(_x_axis == x_axis_type::DISTANCE
+		? &activity::point::distance : &activity::point::time)
 {
   double mean, sdev;
-  a.get_range(&activity::point::distance, _min_dist, _max_dist, mean, sdev);
+  a.get_range(_x_axis_field, _min_x_value, _max_x_value, mean, sdev);
 }
 
 void
@@ -212,9 +215,9 @@ chart::draw_line(CGContextRef ctx, const line &l)
         = x * v_scale * chart_w - min_v * v_scale * chart_w + chart_x
 	v_scale = 1 / (max_v - min_v). */
 
-  CGFloat x_scale = 1. / (_max_dist - _min_dist);
+  CGFloat x_scale = 1. / (_max_x_value - _min_x_value);
   CGFloat x0 = (_chart_rect.origin.x
-		- _min_dist * x_scale * _chart_rect.size.width);
+		- _min_x_value * x_scale * _chart_rect.size.width);
   CGFloat xm = x_scale * _chart_rect.size.width;
 
   CGFloat y_scale = 1. / (l.scaled_max_value - l.scaled_min_value);
@@ -228,6 +231,10 @@ chart::draw_line(CGContextRef ctx, const line &l)
   CGFloat first_x = 0, first_y = 0;
   CGFloat last_x = 0, last_y = 0;
 
+  // basic smoothing to avoid rendering multiple data points per pixel
+
+  double skipped_total = 0, skipped_count = 0;
+  
   for (size_t li = 0; li < _activity.laps().size(); li++)
     {
       const activity::lap &lap = _activity.laps()[li];
@@ -236,20 +243,30 @@ chart::draw_line(CGContextRef ctx, const line &l)
       for (size_t ti = 0; ti < lap.track.size(); ti++)
 	{
 	  const activity::point &p = track[ti];
-	  double dist = p.distance;
+	  double dist = p.*_x_axis_field;
 	  double value = p.*(l.field);
 	  if (dist == 0 || value == 0)
 	    continue;
 	  CGFloat x = dist * xm + x0;
-	  CGFloat y = value * ym + y0;
-	  if (first_pt)
+	  if (first_pt || x - last_x >= 1)
 	    {
-	      CGPathMoveToPoint(path, 0, x, y);
-	      first_x = x, first_y = y, first_pt = false;
+	      if (skipped_count > 0)
+		{
+		  value = (value + skipped_total) / (skipped_count + 1);
+		  skipped_total = skipped_count = 0;
+		}
+	      CGFloat y = value * ym + y0;
+	      if (first_pt)
+		{
+		  CGPathMoveToPoint(path, 0, x, y);
+		  first_x = x, first_y = y, first_pt = false;
+		}
+	      else
+		CGPathAddLineToPoint(path, 0, x, y);
+	      last_x = x, last_y = y;
 	    }
 	  else
-	    CGPathAddLineToPoint(path, 0, x, y);
-	  last_x = x, last_y = y;
+	    skipped_total += value, skipped_count += 1;
 	}
     }
 
@@ -274,16 +291,16 @@ chart::draw_line(CGContextRef ctx, const line &l)
 
   switch (l.color)
     {
-    case RED:
+    case line_color::RED:
       CGContextSetRGBFillColor(ctx, 1, .5, .5, .4);
       break;
-    case GREEN:
+    case line_color::GREEN:
       CGContextSetRGBFillColor(ctx, .75, 1, .75, .4);
       break;
-    case BLUE:
+    case line_color::BLUE:
       CGContextSetRGBFillColor(ctx, .5, .75, 1, .4);
       break;
-    case ORANGE:
+    case line_color::ORANGE:
       CGContextSetRGBFillColor(ctx, 1, .5, 0, .4);
       break;
     }
@@ -299,16 +316,16 @@ chart::draw_line(CGContextRef ctx, const line &l)
 
   switch (l.color)
     {
-    case RED:
+    case line_color::RED:
       CGContextSetRGBStrokeColor(ctx, 1, 0, 0.3, 1);
       break;
-    case GREEN:
+    case line_color::GREEN:
       CGContextSetRGBStrokeColor(ctx, 0, 0.8, 0.2, 1);
       break;
-    case BLUE:
+    case line_color::BLUE:
       CGContextSetRGBStrokeColor(ctx, 0, 0.2, 1, 1);
       break;
-    case ORANGE:
+    case line_color::ORANGE:
       CGContextSetRGBStrokeColor(ctx, 1, 0.5, 0, 1);
       break;
     }
@@ -363,12 +380,13 @@ chart::draw_lap_markers(CGContextRef ctx)
   std::vector<CGPoint> lines;
   lines.reserve(2 * _activity.laps().size());
 
-  CGFloat x_scale = 1. / (_max_dist - _min_dist);
+  CGFloat x_scale = 1. / (_max_x_value - _min_x_value);
   CGFloat x0 = (_chart_rect.origin.x
-		- _min_dist * x_scale * _chart_rect.size.width);
+		- _min_x_value * x_scale * _chart_rect.size.width);
   CGFloat xm = x_scale * _chart_rect.size.width;
 
-  CGFloat total_dist = 0;
+  CGFloat total_dist = _x_axis == x_axis_type::DISTANCE ? 0 : _activity.time();
+
   for (size_t i = 0; i < _activity.laps().size(); i++)
     {
       CGFloat x = total_dist * xm + x0;
@@ -376,7 +394,10 @@ chart::draw_lap_markers(CGContextRef ctx)
       lines.push_back(CGPointMake(x, _chart_rect.origin.y));
       lines.push_back(CGPointMake(x, _chart_rect.origin.y
 				  + _chart_rect.size.height));
-      total_dist += _activity.laps()[i].distance;
+      if (_x_axis == x_axis_type::DISTANCE)
+	total_dist += _activity.laps()[i].distance;
+      else
+	total_dist = _activity.laps()[i].time + _activity.laps()[i].duration;
     }
 
   CGContextSaveGState(ctx);

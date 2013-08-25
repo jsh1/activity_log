@@ -122,17 +122,35 @@ act_log(arguments &args, const char *format)
 	      std::string field(opt_arg, arg - opt_arg);
 	      database::compare_term::compare_op op;
 	      if (arg[0] == '=')
-		op = database::compare_term::op_equal, arg += 1;
+		{
+		  op = database::compare_term::compare_op::equal;
+		  arg += 1;
+		}
 	      else if (arg[0] == '!' && arg[1] == '=')
-		op = database::compare_term::op_not_equal, arg += 2;
+		{
+		  op = database::compare_term::compare_op::not_equal;
+		  arg += 2;
+		}
 	      else if (arg[0] == '<' && arg[1] == '=')
-		op = database::compare_term::op_less_or_equal, arg += 2;
+		{
+		  op = database::compare_term::compare_op::less_or_equal;
+		  arg += 2;
+		}
 	      else if (arg[0] == '<')
-		op = database::compare_term::op_less, arg += 1;
+		{
+		  op = database::compare_term::compare_op::less;
+		  arg += 1;
+		}
 	      else if (arg[0] == '>' && arg[1] == '=')
-		op = database::compare_term::op_greater_or_equal, arg += 2;
+		{
+		  op = database::compare_term::compare_op::greater_or_equal;
+		  arg += 2;
+		}
 	      else if (arg[0] == '>')
-		op = database::compare_term::op_greater, arg += 1;
+		{
+		  op = database::compare_term::compare_op::greater;
+		  arg += 1;
+		}
 	      else
 		{
 		  print_usage(args);
@@ -140,8 +158,8 @@ act_log(arguments &args, const char *format)
 		}
 	      field_id id = lookup_field_id(field.c_str());
 	      field_data_type type = lookup_field_data_type(id);
-	      if (type == type_string)
-		type = type_number;
+	      if (type == field_data_type::string)
+		type = field_data_type::number;
 	      std::string tem(arg);
 	      double rhs;
 	      if (parse_value(tem, type, &rhs, nullptr))

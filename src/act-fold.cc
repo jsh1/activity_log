@@ -181,7 +181,7 @@ value_group::insert(const activity &a)
 {
   double value = 0;
 
-  if (field_id != field_custom)
+  if (field_id != field_id::custom)
     value = a.field_value(field_id);
   else if (const std::string *ptr = a.field_ptr(field))
     parse_number(*ptr, &value);
@@ -203,9 +203,9 @@ value_group::format_key(std::string &buf, int key) const
   field_data_type type = lookup_field_data_type(field_id);
 
   buf.push_back('[');
-  format_value(buf, type, min, unit_unknown);
+  format_value(buf, type, min, unit_type::unknown);
   buf.append(", ");
-  format_value(buf, type, max, unit_unknown);
+  format_value(buf, type, max, unit_type::unknown);
   buf.push_back(')');
 }
 
@@ -289,7 +289,7 @@ act_fold(arguments &args)
   std::string group_field;
   bool group_keywords = false;
   double group_size = 0;
-  date_interval interval(date_interval::days, 0);
+  date_interval interval(date_interval::unit_type::days, 0);
 
   const char *format = nullptr;
   const char *table_format = nullptr;
@@ -355,17 +355,35 @@ act_fold(arguments &args)
 	      std::string field(opt_arg, arg - opt_arg);
 	      database::compare_term::compare_op op;
 	      if (arg[0] == '=')
-		op = database::compare_term::op_equal, arg += 1;
+		{
+		  op = database::compare_term::compare_op::equal;
+		  arg += 1;
+		}
 	      else if (arg[0] == '!' && arg[1] == '=')
-		op = database::compare_term::op_not_equal, arg += 2;
+		{
+		  op = database::compare_term::compare_op::not_equal;
+		  arg += 2;
+		}
 	      else if (arg[0] == '<' && arg[1] == '=')
-		op = database::compare_term::op_less_or_equal, arg += 2;
+		{
+		  op = database::compare_term::compare_op::less_or_equal;
+		  arg += 2;
+		}
 	      else if (arg[0] == '<')
-		op = database::compare_term::op_less, arg += 1;
+		{
+		  op = database::compare_term::compare_op::less;
+		  arg += 1;
+		}
 	      else if (arg[0] == '>' && arg[1] == '=')
-		op = database::compare_term::op_greater_or_equal, arg += 2;
+		{
+		  op = database::compare_term::compare_op::greater_or_equal;
+		  arg += 2;
+		}
 	      else if (arg[0] == '>')
-		op = database::compare_term::op_greater, arg += 1;
+		{
+		  op = database::compare_term::compare_op::greater;
+		  arg += 1;
+		}
 	      else
 		{
 		  print_usage(args);
@@ -373,8 +391,8 @@ act_fold(arguments &args)
 		}
 	      field_id id = lookup_field_id(field.c_str());
 	      field_data_type type = lookup_field_data_type(id);
-	      if (type == type_string)
-		type = type_number;
+	      if (type == field_data_type::string)
+		type = field_data_type::number;
 	      std::string tem(arg);
 	      double rhs;
 	      if (parse_value(tem, type, &rhs, nullptr))

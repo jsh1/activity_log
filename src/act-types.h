@@ -10,48 +10,48 @@
 
 namespace act {
 
-enum field_id
+enum class field_id
 {
   // ordered by canonical output order
-  field_date,
-  field_gps_file,
-  field_activity,
-  field_type,
-  field_course,
-  field_duration,
-  field_distance,
-  field_pace,
-  field_max_pace,
-  field_speed,
-  field_max_speed,
-  field_effort,
-  field_quality,
-  field_resting_hr,
-  field_average_hr,
-  field_max_hr,
-  field_calories,
-  field_equipment,
-  field_temperature,
-  field_dew_point,
-  field_weather,
-  field_weight,
-  field_keywords,
-  field_custom,
+  date,
+  gps_file,
+  activity,
+  type,
+  course,
+  duration,
+  distance,
+  pace,
+  max_pace,
+  speed,
+  max_speed,
+  effort,
+  quality,
+  resting_hr,
+  average_hr,
+  max_hr,
+  calories,
+  equipment,
+  temperature,
+  dew_point,
+  weather,
+  weight,
+  keywords,
+  custom,
 };
 
-enum field_data_type
+enum class field_data_type
 {
-  type_string,
-  type_number,
-  type_date,
-  type_duration,
-  type_distance,
-  type_pace,
-  type_speed,
-  type_temperature,
-  type_fraction,
-  type_weight,
-  type_keywords,
+  string,
+  number,
+  date,
+  duration,
+  distance,
+  pace,
+  speed,
+  temperature,
+  fraction,
+  weight,
+  keywords,
 };
 
 field_id lookup_field_id(const char *field_name);
@@ -61,38 +61,38 @@ field_data_type lookup_field_data_type(field_id id);
 
 bool canonicalize_field_string(field_data_type type, std::string &value);
 
-enum unit_type
+enum class unit_type
 {
-  unit_unknown,
+  unknown,
 
   // time units
-  unit_seconds,
+  seconds,
 
   // distance units
-  unit_centimetres,
-  unit_metres,
-  unit_kilometres,
-  unit_inches,
-  unit_feet,
-  unit_yards,
-  unit_miles,
+  centimetres,
+  metres,
+  kilometres,
+  inches,
+  feet,
+  yards,
+  miles,
 
   // pace units
-  unit_seconds_per_mile,
-  unit_seconds_per_kilometre,
+  seconds_per_mile,
+  seconds_per_kilometre,
 
   // speed units
-  unit_metres_per_second,
-  unit_kilometres_per_hour,
-  unit_miles_per_hour,
+  metres_per_second,
+  kilometres_per_hour,
+  miles_per_hour,
 
   // temperature units
-  unit_celsius,
-  unit_fahrenheit,
+  celsius,
+  fahrenheit,
 
   // mass units
-  unit_kilogrammes,
-  unit_pounds,
+  kilogrammes,
+  pounds,
 };
 
 struct date_range
@@ -109,7 +109,7 @@ struct date_range
 
 struct date_interval
 {
-  enum unit_type
+  enum class unit_type
     {
       days, weeks, months, years
     };

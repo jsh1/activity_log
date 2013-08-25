@@ -76,43 +76,43 @@ activity_accum::add(const activity &a)
   _count++;
 
   if (a.distance() != 0)
-    _accum[accum_distance].add(a.distance());
+    _accum[static_cast<int>(accum_id::distance)].add(a.distance());
 
   if (a.duration() != 0)
-    _accum[accum_duration].add(a.duration());
+    _accum[static_cast<int>(accum_id::duration)].add(a.duration());
 
   if (a.speed() != 0)
-    _accum[accum_speed].add(a.speed());
+    _accum[static_cast<int>(accum_id::speed)].add(a.speed());
 
   if (a.max_speed() != 0)
-    _accum[accum_max_speed].add(a.max_speed());
+    _accum[static_cast<int>(accum_id::max_speed)].add(a.max_speed());
 
   if (a.average_hr() != 0)
-    _accum[accum_average_hr].add(a.average_hr());
+    _accum[static_cast<int>(accum_id::average_hr)].add(a.average_hr());
 
   if (a.max_hr() != 0)
-    _accum[accum_max_hr].add(a.max_hr());
+    _accum[static_cast<int>(accum_id::max_hr)].add(a.max_hr());
 
   if (a.resting_hr() != 0)
-    _accum[accum_resting_hr].add(a.resting_hr());
+    _accum[static_cast<int>(accum_id::resting_hr)].add(a.resting_hr());
 
   if (a.calories() != 0)
-    _accum[accum_calories].add(a.calories());
+    _accum[static_cast<int>(accum_id::calories)].add(a.calories());
 
   if (a.weight() != 0)
-    _accum[accum_weight].add(a.weight());
+    _accum[static_cast<int>(accum_id::weight)].add(a.weight());
 
   if (a.effort() != 0)
-    _accum[accum_effort].add(a.effort());
+    _accum[static_cast<int>(accum_id::effort)].add(a.effort());
 
   if (a.quality() != 0)
-    _accum[accum_quality].add(a.quality());
+    _accum[static_cast<int>(accum_id::quality)].add(a.quality());
 
   if (a.temperature() != 0)
-    _accum[accum_temperature].add(a.temperature());
+    _accum[static_cast<int>(accum_id::temperature)].add(a.temperature());
 
   if (a.dew_point() != 0)
-    _accum[accum_dew_point].add(a.dew_point());
+    _accum[static_cast<int>(accum_id::dew_point)].add(a.dew_point());
 }
 
 void
@@ -197,70 +197,70 @@ activity_accum::get_field_value(const char *name, const char *arg,
   accum_id a_id;
   switch (f_id)
     {
-    case field_distance:
-      a_id = accum_distance;
+    case field_id::distance:
+      a_id = accum_id::distance;
       if (!arg)
 	arg = "total";
       break;
-    case field_duration:
-      a_id = accum_duration;
+    case field_id::duration:
+      a_id = accum_id::duration;
       if (!arg)
 	arg = "total";
       break;
-    case field_speed:
-    case field_pace:
-      a_id = accum_speed;
+    case field_id::speed:
+    case field_id::pace:
+      a_id = accum_id::speed;
       if (!arg)
 	arg = "average";
       break;
-    case field_max_speed:
-    case field_max_pace:
-      a_id = accum_max_speed;
+    case field_id::max_speed:
+    case field_id::max_pace:
+      a_id = accum_id::max_speed;
       if (!arg)
 	arg = "max";
       break;
-    case field_average_hr:
-      a_id = accum_average_hr;
+    case field_id::average_hr:
+      a_id = accum_id::average_hr;
       if (!arg)
 	arg = "average";
       break;
-    case field_max_hr:
-      a_id = accum_max_hr;
+    case field_id::max_hr:
+      a_id = accum_id::max_hr;
       if (!arg)
 	arg = "max";
       break;
-    case field_resting_hr:
-      a_id = accum_resting_hr;
+    case field_id::resting_hr:
+      a_id = accum_id::resting_hr;
       if (!arg)
 	arg = "min";
       break;
-    case field_calories:
-      a_id = accum_calories;
+    case field_id::calories:
+      a_id = accum_id::calories;
       if (!arg)
 	arg = "total";
       break;
-    case field_weight:
-      a_id = accum_weight;
+    case field_id::weight:
+      a_id = accum_id::weight;
       if (!arg)
 	arg = "average";
       break;
-    case field_effort:
-      a_id = accum_effort;
+    case field_id::effort:
+      a_id = accum_id::effort;
       if (!arg)
 	arg = "average";
       break;
-    case field_quality:
-      a_id = accum_quality;
+    case field_id::quality:
+      a_id = accum_id::quality;
       if (!arg)
 	arg = "average";
       break;
-    case field_temperature:
-      a_id = accum_temperature;
+    case field_id::temperature:
+      a_id = accum_id::temperature;
       if (!arg)
 	arg = "average";
       break;
-    case field_dew_point:
-      a_id = accum_dew_point;
+    case field_id::dew_point:
+      a_id = accum_id::dew_point;
       if (!arg)
 	arg = "average";
       break;
@@ -270,15 +270,15 @@ activity_accum::get_field_value(const char *name, const char *arg,
 
   value = 0;
   if (strcasecmp(arg, "total") == 0 || strcasecmp(arg, "sum") == 0)
-    value = _accum[a_id].get_total();
+    value = _accum[static_cast<int>(a_id)].get_total();
   else if (strcasecmp(arg, "average") == 0 || strcasecmp(arg, "mean") == 0)
-    value = _accum[a_id].get_mean();
+    value = _accum[static_cast<int>(a_id)].get_mean();
   else if (strcasecmp(arg, "sd") == 0 || strcasecmp(arg, "sdev") == 0)
-    value = _accum[a_id].get_sdev();
+    value = _accum[static_cast<int>(a_id)].get_sdev();
   else if (strcasecmp(arg, "min") == 0 || strcasecmp(arg, "minimum") == 0)
-    value = _accum[a_id].get_min();
+    value = _accum[static_cast<int>(a_id)].get_min();
   else if (strcasecmp(arg, "max") == 0 || strcasecmp(arg, "maximum") == 0)
-    value = _accum[a_id].get_max();
+    value = _accum[static_cast<int>(a_id)].get_max();
   else
     return false;
 
@@ -309,23 +309,23 @@ activity_accum::print_expansion(const char *name, const char *arg,
 
       switch (type)
 	{
-	case type_string:
-	case type_date:
-	case type_keywords:
+	case field_data_type::string:
+	case field_data_type::date:
+	case field_data_type::keywords:
 	  return;
 
 	  /* FIXME: add a way to specify custom unit conversions,
 	     precision specifiers, etc. */
 
-	case type_duration:
-	case type_number:
-	case type_distance:
-	case type_pace:
-	case type_speed:
-	case type_temperature:
-	case type_fraction:
-	case type_weight:
-	  format_value(str, type, value, unit_unknown);
+	case field_data_type::duration:
+	case field_data_type::number:
+	case field_data_type::distance:
+	case field_data_type::pace:
+	case field_data_type::speed:
+	case field_data_type::temperature:
+	case field_data_type::fraction:
+	case field_data_type::weight:
+	  format_value(str, type, value, unit_type::unknown);
 	  break;
 	}
 
@@ -386,8 +386,8 @@ activity_accum::print_row(output_table &out, const char *format,
 		    {
 		      if (!bar_value)
 			{
-			  out.output_value(field_width, type_number,
-					   _count, unit_unknown);
+			  out.output_value(field_width, field_data_type::number,
+					   _count, unit_type::unknown);
 			}
 		      else
 			{
@@ -409,7 +409,7 @@ activity_accum::print_row(output_table &out, const char *format,
 		      if (!bar_value)
 			{
 			  out.output_value(field_width, type,
-					   value, unit_unknown);
+					   value, unit_type::unknown);
 			}
 		      else
 			{

@@ -49,53 +49,53 @@ option_field_id(option_id opt)
   switch (opt)
     {
     case opt_date:
-      return field_date;
+      return field_id::date;
     case opt_activity:
-      return field_activity;
+      return field_id::activity;
     case opt_type:
-      return field_type;
+      return field_id::type;
     case opt_course:
-      return field_course;
+      return field_id::course;
     case opt_keyword:
-      return field_keywords;
+      return field_id::keywords;
     case opt_equipment:
-      return field_equipment;
+      return field_id::equipment;
     case opt_distance:
-      return field_distance;
+      return field_id::distance;
     case opt_duration:
-      return field_duration;
+      return field_id::duration;
     case opt_pace:
-      return field_pace;
+      return field_id::pace;
     case opt_speed:
-      return field_speed;
+      return field_id::speed;
     case opt_max_pace:
-      return field_max_pace;
+      return field_id::max_pace;
     case opt_max_speed:
-      return field_max_speed;
+      return field_id::max_speed;
     case opt_resting_hr:
-      return field_resting_hr;
+      return field_id::resting_hr;
     case opt_average_hr:
-      return field_average_hr;
+      return field_id::average_hr;
     case opt_max_hr:
-      return field_max_hr;
+      return field_id::max_hr;
     case opt_calories:
-      return field_calories;
+      return field_id::calories;
     case opt_weight:
-      return field_weight;
+      return field_id::weight;
     case opt_temperature:
-      return field_temperature;
+      return field_id::temperature;
     case opt_dew_point:
-      return field_dew_point;
+      return field_id::dew_point;
     case opt_weather:
-      return field_weather;
+      return field_id::weather;
     case opt_quality:
-      return field_quality;
+      return field_id::quality;
     case opt_effort:
-      return field_effort;
+      return field_id::effort;
     case opt_gps_file:
-      return field_gps_file;
+      return field_id::gps_file;
     case opt_field:
-      return field_custom;
+      return field_id::custom;
     case opt_edit:
     case opt_import_all:
       abort();
@@ -158,16 +158,16 @@ copy_gps_fields(activity_storage &a, const gps::activity &gps_data)
   if (a.field_ptr("Date") == nullptr)
     format_date_time(a["Date"], (time_t) gps_data.time());
 
-  if (gps_data.sport() != gps::activity::sport_unknown
+  if (gps_data.sport() != gps::activity::sport_type::unknown
       && a.field_ptr("Activity") == nullptr)
     {
       gps::activity::sport_type sport = gps_data.sport();
       std::string type;
-      if (sport == gps::activity::sport_running)
+      if (sport == gps::activity::sport_type::running)
 	type = "run";
-      else if (sport == gps::activity::sport_cycling)
+      else if (sport == gps::activity::sport_type::cycling)
 	type = "bike";
-      if (sport == gps::activity::sport_swimming)
+      if (sport == gps::activity::sport_type::swimming)
 	type = "swim";
       if (type.size() != 0)
 	a["Activity"] = type;
@@ -179,7 +179,7 @@ copy_gps_fields(activity_storage &a, const gps::activity &gps_data)
 
   if (gps_data.distance() > 0
       && a.field_ptr("Distance") == nullptr)
-    format_distance(a["Distance"], gps_data.distance(), unit_miles);
+    format_distance(a["Distance"], gps_data.distance(), unit_type::miles);
 
   // Let other fields be read as needed.
 }

@@ -10,7 +10,7 @@
 namespace act {
 
 output_table::table_cell::table_cell()
-: type(cell_empty),
+: type(cell_type::EMPTY),
   field_width(0),
   value(0)
 {
@@ -44,7 +44,7 @@ output_table::print()
     {
       table_column &col = _columns[i];
 
-      if (col.cells[0].type == cell_string)
+      if (col.cells[0].type == cell_type::STRING)
 	{
 	  int max_width = 0;
 	  for (size_t j = 0; j < total_rows; j++)
@@ -53,7 +53,7 @@ output_table::print()
 	  widths[i] = max_width;
 	  total_width += max_width + 1;
 	}
-      else if (col.cells[0].type == cell_bar_value)
+      else if (col.cells[0].type == cell_type::BAR_VALUE)
 	{
 	  double max_value = 0;
 	  for (size_t j = 0; j < total_rows; j++)
@@ -80,7 +80,7 @@ output_table::print()
 	{
 	  table_column &col = _columns[i];
 
-	  if (col.cells[0].type == cell_bar_value)
+	  if (col.cells[0].type == cell_type::BAR_VALUE)
 	    {
 	      widths[i] = bar_width;
 	      total_width += bar_width + 1;
@@ -102,9 +102,9 @@ output_table::print()
 	  char *ptr = buf;
 
 	  int cell_width = 0;
-	  if (cell.type == cell_string)
+	  if (cell.type == cell_type::STRING)
 	    cell_width = cell.string.size();
-	  else if (cell.type == cell_bar_value)
+	  else if (cell.type == cell_type::BAR_VALUE)
 	    cell_width = (int) ((cell.value / values[i]) * width + .5);
 
 	  int gap_width = std::max(width - cell_width, 0);
@@ -112,9 +112,9 @@ output_table::print()
 	  if (!left_relative)
 	    memset(ptr, ' ', gap_width), ptr += gap_width;
 
-	  if (cell.type == cell_string)
+	  if (cell.type == cell_type::STRING)
 	    memcpy(ptr, cell.string.c_str(), cell_width);
-	  else if (cell.type == cell_bar_value)
+	  else if (cell.type == cell_type::BAR_VALUE)
 	    memset(ptr, '#', cell_width);
 	  ptr += cell_width;
 
@@ -146,7 +146,7 @@ void
 output_table::output_string(int field_width, const std::string &str)
 {
   table_cell &cell = add_cell();
-  cell.type = cell_string;
+  cell.type = cell_type::STRING;
   cell.string = str;
   cell.field_width = field_width;
 }
@@ -155,7 +155,7 @@ void
 output_table::output_string(int field_width, const char *ptr)
 {
   table_cell &cell = add_cell();
-  cell.type = cell_string;
+  cell.type = cell_type::STRING;
   cell.string = ptr;
   cell.field_width = field_width;
 }
@@ -165,7 +165,7 @@ output_table::output_value(int field_width, field_data_type type,
 			   double value, unit_type unit)
 {
   table_cell &cell = add_cell();
-  cell.type = cell_string;
+  cell.type = cell_type::STRING;
   format_value(cell.string, type, value, unit);
   cell.field_width = field_width;
 }
@@ -174,7 +174,7 @@ void
 output_table::output_bar_value(int field_width, double value)
 {
   table_cell &cell = add_cell();
-  cell.type = cell_bar_value;
+  cell.type = cell_type::BAR_VALUE;
   cell.value = value;
   cell.field_width = field_width;
 }

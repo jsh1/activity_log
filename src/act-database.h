@@ -118,14 +118,14 @@ public:
   class compare_term : public query_term
     {
     public:
-      enum compare_op
+      enum class compare_op
 	{
-	  op_equal,
-	  op_not_equal,
-	  op_greater,
-	  op_greater_or_equal,
-	  op_less,
-	  op_less_or_equal
+	  equal,
+	  not_equal,
+	  greater,
+	  greater_or_equal,
+	  less,
+	  less_or_equal
 	};
 
     private:

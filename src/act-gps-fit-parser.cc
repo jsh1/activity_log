@@ -406,13 +406,13 @@ make_sport(int32_t value)
   switch (value)
     {
     case 1:
-      return activity::sport_running;
+      return activity::sport_type::running;
     case 2:
-      return activity::sport_cycling;
+      return activity::sport_type::cycling;
     case 5:
-      return activity::sport_swimming;
+      return activity::sport_type::swimming;
     default:
-      return activity::sport_unknown;
+      return activity::sport_type::unknown;
     }
 }
 
