@@ -320,7 +320,7 @@ chart::draw_line(CGContextRef ctx, const line &l)
       CGContextSetRGBStrokeColor(ctx, 1, 0, 0.3, 1);
       break;
     case line_color::GREEN:
-      CGContextSetRGBStrokeColor(ctx, 0, 0.8, 0.2, 1);
+      CGContextSetRGBStrokeColor(ctx, 0, 0.6, 0.2, 1);
       break;
     case line_color::BLUE:
       CGContextSetRGBStrokeColor(ctx, 0, 0.2, 1, 1);
