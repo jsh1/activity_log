@@ -5,6 +5,7 @@
 #import "ActActivityBodyView.h"
 #import "ActActivityChartView.h"
 #import "ActActivityHeaderView.h"
+#import "ActActivityLapView.h"
 #import "ActActivitySubView.h"
 
 #define SUBVIEW_Y_SPACING 14
@@ -46,6 +47,7 @@
       subview_classes = [[NSArray alloc] initWithObjects:
 			 [ActActivityHeaderView class],
 			 [ActActivityBodyView class],
+			 [ActActivityLapView class],
 			 [ActActivityPaceChartView class],
 			 [ActActivityHeartRateChartView class],
 			 [ActActivityAltitudeChartView class],
