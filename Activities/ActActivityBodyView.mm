@@ -79,7 +79,7 @@
 	      [tem release];
 	    }
 
-	  return str;
+	  return [str autorelease];
 	}
     }
 
