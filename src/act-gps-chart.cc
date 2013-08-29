@@ -152,7 +152,8 @@ chart::chart(const activity &a, x_axis_type xa)
   _x_axis(xa),
   _x_axis_field(_x_axis == x_axis_type::DISTANCE
 		? &activity::point::distance : &activity::point::time),
-  _chart_rect(CGRectNull)
+  _chart_rect(CGRectNull),
+  _selected_lap(-1)
 {
   double mean, sdev;
   a.get_range(_x_axis_field, _min_x_value, _max_x_value, mean, sdev);
@@ -183,6 +184,12 @@ void
 chart::set_chart_rect(const CGRect &r)
 {
   _chart_rect = r;
+}
+
+void
+chart::set_selected_lap(int idx)
+{
+  _selected_lap = idx;
 }
 
 void
@@ -378,7 +385,7 @@ void
 chart::draw_lap_markers(CGContextRef ctx)
 {
   std::vector<CGPoint> lines;
-  lines.reserve(2 * _activity.laps().size());
+  lines.reserve(2 * (_activity.laps().size() + 1));
 
   CGFloat x_scale = 1. / (_max_x_value - _min_x_value);
   CGFloat x0 = (_chart_rect.origin.x
@@ -387,13 +394,18 @@ chart::draw_lap_markers(CGContextRef ctx)
 
   CGFloat total_dist = _x_axis == x_axis_type::DISTANCE ? 0 : _activity.time();
 
-  for (size_t i = 0; i < _activity.laps().size(); i++)
+  for (size_t i = 0; true; i++)
     {
       CGFloat x = total_dist * xm + x0;
       x = floor(x) + 0.5;
+
       lines.push_back(CGPointMake(x, _chart_rect.origin.y));
       lines.push_back(CGPointMake(x, _chart_rect.origin.y
 				  + _chart_rect.size.height));
+
+      if (!(i < _activity.laps().size()))
+	break;
+
       if (_x_axis == x_axis_type::DISTANCE)
 	total_dist += _activity.laps()[i].distance;
       else
@@ -401,9 +413,22 @@ chart::draw_lap_markers(CGContextRef ctx)
     }
 
   CGContextSaveGState(ctx);
+
   CGContextSetLineWidth(ctx, 1);
   CGContextSetRGBStrokeColor(ctx, 0, 0, 0, 0.1);
-  CGContextStrokeLineSegments(ctx, &lines[0], lines.size());
+  CGContextStrokeLineSegments(ctx, &lines[2], lines.size() - 4);
+
+  if (_selected_lap >= 0 && _selected_lap < _activity.laps().size())
+    {
+      CGContextSetGrayFillColor(ctx, .5, .3);
+      CGContextSetBlendMode(ctx, kCGBlendModePlusDarker);
+
+      const CGPoint &p0 = lines[_selected_lap*2];
+      const CGPoint &p1 = lines[_selected_lap*2+3];
+      CGRect r = CGRectMake(p0.x, p0.y, p1.x - p0.x, p1.y - p0.y);
+      CGContextFillRect(ctx, r);
+    }
+
   CGContextRestoreGState(ctx);
 }
 

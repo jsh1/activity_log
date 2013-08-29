@@ -38,6 +38,21 @@
   return _activity.get();
 }
 
+- (NSInteger)selectedLapIndex
+{
+  return _selectedLapIndex;
+}
+
+- (void)setSelectedLapIndex:(NSInteger)idx
+{
+  if (_selectedLapIndex != idx)
+    {
+      _selectedLapIndex = idx;
+
+      [self selectedLapDidChange];
+    }
+}
+
 - (void)createSubviews
 {
   static NSArray *subview_classes;
@@ -54,6 +69,8 @@
 			 nil];
     }
 
+  _selectedLapIndex = -1;
+
   for (Class cls in subview_classes)
     {
       ActActivitySubview *view = [[cls alloc] initWithFrame:NSZeroRect];
@@ -65,8 +82,12 @@
 
 - (void)activityDidChange
 {
-  if ([[self subviews] count] == 0)
+  BOOL hasSubviews = [[self subviews] count] != 0;
+
+  if (_activity_storage != nullptr && !hasSubviews)
     [self createSubviews];
+  else if (_activity_storage == nullptr && hasSubviews)
+    [self setSubviews:[NSArray array]];
 
   for (ActActivitySubview *subview in [self subviews])
     {
@@ -74,6 +95,14 @@
     }
 
   [self updateHeight];
+}
+
+- (void)selectedLapDidChange
+{
+  for (ActActivitySubview *subview in [self subviews])
+    {
+      [subview selectedLapDidChange];
+    }
 }
 
 - (void)updateHeight

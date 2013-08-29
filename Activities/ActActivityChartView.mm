@@ -70,10 +70,20 @@
 	    }
 
 	  _chart->set_chart_rect(NSRectToCGRect([self bounds]));
+	  _chart->set_selected_lap([[self activityView] selectedLapIndex]);
 	  _chart->update_values();
 
 	  [self setNeedsDisplay:YES];
 	}
+    }
+}
+
+- (void)selectedLapDidChange
+{
+  if (_chart)
+    {
+      _chart->set_selected_lap([[self activityView] selectedLapIndex]);
+      [self setNeedsDisplay:YES];
     }
 }
 

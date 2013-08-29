@@ -127,6 +127,8 @@
 
   if (row >= 0 && row < _activities.size())
     [_controller setSelectedActivity:_activities[row]];
+  else
+    [_controller setSelectedActivity:nullptr];
 }
 
 @end

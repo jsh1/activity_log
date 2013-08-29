@@ -79,6 +79,7 @@ private:
   double _min_x_value, _max_x_value;
   std::vector<line> _lines;
   CGRect _chart_rect;
+  int _selected_lap;
 
   void draw_background(CGContextRef ctx);
   void draw_line(CGContextRef ctx, const line &l);
@@ -90,6 +91,9 @@ public:
   void add_line(double activity::point:: *field, bool smoothed,
     value_conversion conv, line_color color, double min_ratio,
     double max_ratio);
+
+  void set_selected_lap(int idx);
+  int selected_lap() const;
 
   void remove_all_lines();
 
@@ -125,6 +129,12 @@ inline const CGRect &
 chart::chart_rect() const
 {
   return _chart_rect;
+}
+
+inline int
+chart::selected_lap() const
+{
+  return _selected_lap;
 }
 
 } // namespace gps

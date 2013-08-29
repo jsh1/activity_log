@@ -14,19 +14,19 @@
 #define HEADER_HEIGHT 20
 #define ROW_HEIGHT 20
 #define SEPARATOR_HEIGHT 2
+#define COLUMN_WIDTH 80
 
 @implementation ActActivityLapView
 
 static void
-addTableColumn (NSTableView *tv, NSFont *font, NSString *ident,NSString *title)
+addTableColumn (NSTableView *tv, NSFont *font,
+		NSString *ident, NSString *title)
 {
   NSTableColumn *tc = [[NSTableColumn alloc] initWithIdentifier:ident];
   [tc setEditable:NO];
+  [[tc headerCell] setStringValue:title];
+  [[tc headerCell] setFont:font];
   [[tc dataCell] setFont:font];
-  NSTableHeaderCell *hc = [[NSTableHeaderCell alloc] initTextCell:title];
-  [hc setFont:font];
-  [tc setHeaderCell:hc];
-  [hc release];
   [tv addTableColumn:tc];
   [tc release];
 }
@@ -41,6 +41,7 @@ addTableColumn (NSTableView *tv, NSFont *font, NSString *ident,NSString *title)
 
   _tableView = [[NSTableView alloc] initWithFrame:NSZeroRect];
   [_tableView setDataSource:self];
+  [_tableView setDelegate:self];
   [_tableView setUsesAlternatingRowBackgroundColors:YES];
   [_tableView setRowHeight:ROW_HEIGHT];
 
@@ -61,6 +62,17 @@ addTableColumn (NSTableView *tv, NSFont *font, NSString *ident,NSString *title)
 {
   if (_tableView == nil && [self numberOfRowsInTableView:nil] != 0)
     [self createTableView];
+
+  bool has_hr = false;
+
+  if (const act::activity *a = [[self activityView] activity])
+    {
+      if (const act::gps::activity *gps_data = a->gps_data())
+	has_hr = gps_data->has_heart_rate();
+    }
+
+  [[_tableView tableColumnWithIdentifier:@"average-hr"] setHidden:!has_hr];
+  [[_tableView tableColumnWithIdentifier:@"max-hr"] setHidden:!has_hr];
 
   [_tableView reloadData];
 }
@@ -92,11 +104,14 @@ addTableColumn (NSTableView *tv, NSFont *font, NSString *ident,NSString *title)
   if (_tableView == nil)
     [self createTableView];
 
+  for (NSTableColumn *col in [_tableView tableColumns])
+    [col setWidth:COLUMN_WIDTH];
+
   NSRect r = [self bounds];
 
   r.size.height = (ROW_HEIGHT + SEPARATOR_HEIGHT) * rows;
   [_tableView setFrame:r];
-  [_tableView sizeToFit];
+  [_tableView sizeLastColumnToFit];
 
   r = [_tableView frame];
   r.origin.y += r.size.height;
@@ -165,6 +180,13 @@ addTableColumn (NSTableView *tv, NSFont *font, NSString *ident,NSString *title)
     return [NSString stringWithUTF8String:str.c_str()];
   else
     return nil;
+}
+
+// NSTableViewDelegate methods
+
+- (void)tableViewSelectionDidChange:(NSNotification *)note
+{
+  [[self activityView] setSelectedLapIndex:[_tableView selectedRow]];
 }
 
 @end

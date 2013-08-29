@@ -11,9 +11,10 @@
 
 @property(nonatomic, assign) ActActivityView *activityView;
 
-// Standard implementation does nothing
+// Standard implementations do nothing
 
 - (void)activityDidChange;
+- (void)selectedLapDidChange;
 
 // Standard implementation returns all zeros
 

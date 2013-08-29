@@ -12,12 +12,17 @@
 
   act::activity_storage_ref _activity_storage;
   std::unique_ptr<act::activity> _activity;
+
+  NSInteger _selectedLapIndex;
 }
 
 @property(nonatomic) act::activity_storage_ref activityStorage;
 @property(nonatomic, readonly) act::activity *activity;
 
+@property(nonatomic) NSInteger selectedLapIndex;
+
 - (void)activityDidChange;
+- (void)selectedLapDidChange;
 
 - (void)updateHeight;
 

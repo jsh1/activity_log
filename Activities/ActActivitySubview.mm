@@ -12,6 +12,10 @@
 {
 }
 
+- (void)selectedLapDidChange
+{
+}
+
 - (NSEdgeInsets)edgeInsets
 {
   return NSEdgeInsetsMake(0, 0, 0, 0);
