@@ -18,7 +18,7 @@ lookup_field_id(const char *str)
     case 'a':
       if (strcasecmp(str, "activity") == 0)
 	return field_id::activity;
-      else if (strcasecmp(str, "average_hr") == 0)
+      else if (strcasecmp(str, "average-hr") == 0)
 	return field_id::average_hr;
       break;
 
