@@ -160,7 +160,7 @@ activity::read_cached_values(unsigned int groups) const
 		}
 	    }
 
-	  if (groups & group_other)
+	  if (groups & group_physiological)
 	    {
 	      if (_average_hr == 0)
 		_average_hr = data->avg_heart_rate();
