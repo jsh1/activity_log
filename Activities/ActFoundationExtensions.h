@@ -9,3 +9,10 @@
 - (void)copyStdString:(std::string &)s;
   
 @end
+
+@interface NSArray (ActFoundationExtensions)
+
+- (NSInteger)indexOfStringNoCase:(NSString *)str;
+- (BOOL)containsStringNoCase:(NSString *)str;
+
+@end

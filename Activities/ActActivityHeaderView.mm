@@ -5,6 +5,8 @@
 #import "ActActivityView.h"
 #import "ActActivityHeaderFieldView.h"
 
+#import "ActFoundationExtensions.h"
+
 #define FIELD_HEIGHT 12
 #define FIELD_TOP_BORDER 4
 #define FIELD_BOTTOM_BORDER 4
@@ -12,25 +14,75 @@
 
 @implementation ActActivityHeaderView
 
-static NSArray *_displayedFields;
-
-+ (void)initialize
-{
-  if (self == [ActActivityHeaderView class])
-    {
-      _displayedFields = [[NSArray alloc] initWithObjects:@"Date",
-			  @"Activity", @"Type", @"Course", @"Distance",
-			  @"Duration", @"Pace", @"Equipment", nil];
-    }
-}
-
 - (id)initWithFrame:(NSRect)frame
 {
   self = [super initWithFrame:frame];
   if (self == nil)
     return nil;
 
+  _displayedFields = [[NSMutableArray alloc] init];
+
   return self;
+}
+
+- (void)dealloc
+{
+  [_displayedFields release];
+
+  [super dealloc];
+}
+
+- (NSArray *)displayedFields
+{
+  return [[_displayedFields copy] autorelease];
+}
+
+- (void)setDisplayedFields:(NSArray *)array
+{
+  if (_displayedFields != array)
+    {
+      [_displayedFields removeAllObjects];
+
+      if (array != nil)
+	[_displayedFields addObjectsFromArray:array];
+
+      [self setSubviews:[NSArray array]];
+
+      if ([self activityView] != nil)
+	[self activityDidChange];
+    }
+}
+
+- (BOOL)displaysField:(NSString *)name
+{
+  return [_displayedFields indexOfStringNoCase:name] != NSNotFound;
+}
+
+- (void)addDisplayedField:(NSString *)name
+{
+  NSInteger idx = [_displayedFields indexOfStringNoCase:name];
+
+  if (idx == NSNotFound)
+    {
+      [_displayedFields addObject:name];
+
+      if ([self activityView] != nil)
+	[self addFieldView:name];
+    }
+}
+
+- (void)removeDisplayedField:(NSString *)name
+{
+  NSInteger idx = [_displayedFields indexOfStringNoCase:name];
+
+  if (idx != NSNotFound)
+    {
+      [_displayedFields removeObjectAtIndex:idx];
+
+      NSArray *subviews = [self subviews];
+      if ([subviews count] >= idx)
+	[[subviews objectAtIndex:idx] removeFromSuperview];
+    }
 }
 
 - (void)addFieldView:(NSString *)name

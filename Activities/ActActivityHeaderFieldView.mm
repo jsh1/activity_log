@@ -6,7 +6,7 @@
 
 #import "act-format.h"
 
-#define LABEL_WIDTH 80
+#define LABEL_WIDTH 100
 #define LABEL_HEIGHT 14
 
 #define CONTROL_HEIGHT LABEL_HEIGHT
@@ -22,9 +22,8 @@
   if (self == nil)
     return nil;
 
-  _labelView = [[NSTextView alloc] initWithFrame:
+  _labelView = [[ActActivityHeaderFieldTextView alloc] initWithFrame:
 		NSMakeRect(0, 0, LABEL_WIDTH, LABEL_HEIGHT)];
-  [_labelView setEditable:NO];
   [_labelView setDrawsBackground:NO];
   [_labelView setAlignment:NSRightTextAlignment];
   [self addSubview:_labelView];
@@ -60,7 +59,7 @@
       _fieldName = [name copy];
 
       [_labelView setFont:[[self activityView] font]];
-      [_labelView setString:[_fieldName stringByAppendingString:@": "]];
+      [_labelView setString:_fieldName];
     }
 }
 

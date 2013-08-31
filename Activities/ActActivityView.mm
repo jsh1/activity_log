@@ -8,11 +8,23 @@
 #import "ActActivityLapView.h"
 #import "ActActivitySubView.h"
 
+#import "ActFoundationExtensions.h"
+
 #define SUBVIEW_Y_SPACING 14
 
 #define FONT_NAME "Bitstream Vera Sans Roman"
 
 @implementation ActActivityView
+
+static NSArray *_ignoredFields;
+
++ (void)initialize
+{
+  if (self == [ActActivityView class])
+    {
+      _ignoredFields = [[NSArray alloc] initWithObjects:@"GPS-File", nil];
+    }
+}
 
 - (act::activity_storage_ref)activityStorage
 {
@@ -91,6 +103,47 @@
 
   for (ActActivitySubview *subview in [self subviews])
     {
+      if ([subview isKindOfClass:[ActActivityHeaderView class]])
+	{
+	  ActActivityHeaderView *header = (id) subview;
+
+	  [header setDisplayedFields:
+	   [NSArray arrayWithObjects:@"Date", @"Activity", @"Type",
+	    @"Course", @"Distance", @"Duration", @"Pace", nil]];
+
+	  if (const act::activity *a = [self activity])
+	    {
+	      if (a->resting_hr() != 0)
+		[header addDisplayedField:@"Resting-HR"];
+	      if (a->average_hr() != 0)
+		[header addDisplayedField:@"Average-HR"];
+	      if (a->max_hr() != 0)
+		[header addDisplayedField:@"Max-HR"];
+	      if (a->calories() != 0)
+		[header addDisplayedField:@"Calories"];
+
+	      if (a->temperature() != 0)
+		[header addDisplayedField:@"Temperature"];
+	      if (a->dew_point() != 0)
+		[header addDisplayedField:@"Dew-Point"];
+	      if (a->field_ptr("weather") != nullptr)
+		[header addDisplayedField:@"Weather"];
+
+	      if (a->field_ptr("equipment") != nullptr)
+		[header addDisplayedField:@"Equipment"];
+
+	      for (const auto &it : *_activity_storage)
+		{
+		  NSString *str = [[NSString alloc]
+				   initWithUTF8String:it.first.c_str()];
+		  if (![header displaysField:str]
+		      && ![_ignoredFields containsStringNoCase:str])
+		    [header addDisplayedField:str];
+		  [str release];
+		}
+	    }
+	}
+
       [subview activityDidChange];
     }
 
