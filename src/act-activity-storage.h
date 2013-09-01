@@ -38,6 +38,9 @@ public:
   const std::string *field_ptr(const char *name) const;
   const std::string *field_ptr(const std::string &name) const;
 
+  bool set_field_name(const std::string &old_name, const std::string
+    &new_name);
+
   typedef field_map::iterator iterator;
   typedef field_map::const_iterator const_iterator;
   typedef field_map::value_type value_type;

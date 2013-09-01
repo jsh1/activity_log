@@ -125,4 +125,17 @@ activity_storage::field_ptr(const char *name) const
   return idx >= 0 ? &_header[idx].second : nullptr;
 }
 
+bool
+activity_storage::set_field_name(const std::string &old_name,
+				 const std::string &new_name)
+{
+  int idx = field_index(old_name.c_str());
+
+  if (idx < 0)
+    return false;
+
+  _header[idx].first = new_name;
+  return true;
+}
+
 } // namespace act
