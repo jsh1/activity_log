@@ -36,6 +36,11 @@
   [_activityListView setSelectedActivity:a];
 }
 
+- (void)reloadSelectedActivity
+{
+  [_activityListView reloadSelectedActivity];
+}
+
 - (void)windowDidLoad
 {
   [[NSNotificationCenter defaultCenter]

@@ -7,6 +7,7 @@
 #import "ActActivityHeaderView.h"
 #import "ActActivityLapView.h"
 #import "ActActivitySubView.h"
+#import "ActWindowController.h"
 
 #import "ActFoundationExtensions.h"
 
@@ -148,6 +149,14 @@ static NSArray *_ignoredFields;
     }
 
   [self updateHeight];
+}
+
+- (void)activityDidChangeField:(NSString *)name
+{
+  [_controller reloadSelectedActivity];
+
+  for (ActActivitySubview *subview in [self subviews])
+    [subview activityDidChangeField:name];
 }
 
 - (void)selectedLapDidChange

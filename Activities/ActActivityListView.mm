@@ -46,6 +46,17 @@
     }
 }
 
+- (void)reloadSelectedActivity
+{
+  NSInteger row = [_tableView selectedRow];
+  if (row < 0)
+    return;
+
+  [_tableView reloadDataForRowIndexes:[NSIndexSet indexSetWithIndex:row]
+   columnIndexes:[NSIndexSet indexSetWithIndexesInRange:
+		  NSMakeRange(0, [_tableView numberOfColumns])]];
+}
+
 // NSTableViewDataSource methods
 
 - (NSInteger)numberOfRowsInTableView:(NSTableView *)tv

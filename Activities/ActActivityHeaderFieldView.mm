@@ -2,6 +2,7 @@
 
 #import "ActActivityHeaderFieldView.h"
 
+#import "ActActivityHeaderView.h"
 #import "ActActivityView.h"
 
 #import "act-format.h"
@@ -24,6 +25,7 @@
 
   _labelView = [[ActActivityHeaderFieldTextView alloc] initWithFrame:
 		NSMakeRect(0, 0, LABEL_WIDTH, LABEL_HEIGHT)];
+  [_labelView setDelegate:self];
   [_labelView setDrawsBackground:NO];
   [_labelView setAlignment:NSRightTextAlignment];
   [self addSubview:_labelView];
@@ -32,15 +34,19 @@
   _textView = [[ActActivityHeaderFieldTextView alloc] initWithFrame:
 	       NSMakeRect(LABEL_WIDTH, 0, frame.size.width
 			  - LABEL_WIDTH, CONTROL_HEIGHT)];
+  [_textView setDelegate:self];
+  [_textView setDrawsBackground:NO];
   [self addSubview:_textView];
   [_textView release];
-  [_textView setDrawsBackground:NO];
 
   return self;
 }
 
 - (void)dealloc
 {
+  [_labelView setDelegate:nil];
+  [_textView setDelegate:nil];
+
   [_fieldName release];
 
   [super dealloc];
@@ -113,13 +119,15 @@
   return @"";
 }
 
-- (void)setFieldString:(NSString *)str
-{
-  // FIXME: implement this
-}
-
 - (void)activityDidChange
 {
+  [_textView setString:[self fieldString]];
+}
+
+- (void)activityDidChangeField:(NSString *)name
+{
+  // reload everything in case of dependent fields (pace, etc)
+
   [_textView setString:[self fieldString]];
 }
 
@@ -141,6 +149,51 @@
   [_textView setFrame:frame];
 }
 
+// NSTextViewDelegate methods
+
+- (void)textDidEndEditing:(NSNotification *)note
+{
+  if (act::activity *a = [[self activityView] activity])
+    {
+      NSTextView *view = [note object];
+      NSString *value = [view string];
+      std::string str([value UTF8String]);
+      std::string field_name([_fieldName UTF8String]);
+
+      // FIXME: undo support
+
+      if (view == _labelView)
+	{
+	  if (str != field_name)
+	    {
+	      a->storage()->set_field_name(field_name, str);
+	      a->invalidate_cached_values();
+	      NSString *oldName = _fieldName;
+	      _fieldName = [value copy];
+	      [[self activityView] activityDidChangeField:oldName];
+	      [[self activityView] activityDidChangeField:_fieldName];
+	      [oldName release];
+	    }
+	}
+      else if (view == _textView)
+	{
+	  if (![value isEqual:[self fieldString]])
+	    {
+	      auto id = act::lookup_field_id(field_name.c_str());
+	      auto type = act::lookup_field_data_type(id);
+
+	      std::string value(str);
+	      act::canonicalize_field_string(type, value);
+
+	      (*a->storage())[field_name] = value;
+	      a->invalidate_cached_values();
+
+	      [[self activityView] activityDidChangeField:_fieldName];
+	    }
+	}
+    }
+}
+
 @end
 
 @implementation ActActivityHeaderFieldTextView
@@ -154,12 +207,45 @@
     {
       if ([[self window] firstResponder] == self)
 	{
-	  if (keyCode == 125
-	      || (keyCode != 126
-		  && !([e modifierFlags] & NSShiftKeyMask)))
-	    [[self window] selectNextKeyView:self];
+	  if (keyCode == 48 /* TAB */)
+	    {
+	      if (!([e modifierFlags] & NSShiftKeyMask))
+		[[self window] selectNextKeyView:self];
+	      else
+		[[self window] selectPreviousKeyView:self];
+	    }
 	  else
-	    [[self window] selectPreviousKeyView:self];
+	    {
+	      BOOL backwards = keyCode == 126;
+
+	      ActActivityHeaderFieldView *field = (id) [self superview];
+	      ActActivityHeaderView *header = (id) [field superview];
+
+	      NSInteger item_idx
+	        = [[field subviews] indexOfObjectIdenticalTo:self];
+	      NSInteger field_idx
+	        = [[header subviews] indexOfObjectIdenticalTo:field];
+
+	      if (!backwards)
+		{
+		  if (field_idx + 1 < [[header subviews] count])
+		    field_idx += 1;
+		  else
+		    field_idx = 0;
+		}
+	      else
+		{
+		  if (field_idx - 1 >= 0)
+		    field_idx -= 1;
+		  else
+		    field_idx = [[header subviews] count] - 1;
+		}
+
+	      field = [[header subviews] objectAtIndex:field_idx];
+	      NSView *item = [[field subviews] objectAtIndex:item_idx];
+
+	      [[self window] makeFirstResponder:item];
+	    }
 	}
     }
   else

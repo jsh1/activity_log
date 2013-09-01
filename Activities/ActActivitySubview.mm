@@ -12,6 +12,10 @@
 {
 }
 
+- (void)activityDidChangeField:(NSString *)name
+{
+}
+
 - (void)selectedLapDidChange
 {
 }

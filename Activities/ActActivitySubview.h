@@ -14,6 +14,7 @@
 // Standard implementations do nothing
 
 - (void)activityDidChange;
+- (void)activityDidChangeField:(NSString *)name;
 - (void)selectedLapDidChange;
 
 // Standard implementation returns all zeros

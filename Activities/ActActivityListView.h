@@ -22,4 +22,6 @@
 
 @property act::activity_storage_ref selectedActivity;
 
+- (void)reloadSelectedActivity;
+
 @end

@@ -22,6 +22,7 @@
 @property(nonatomic) NSInteger selectedLapIndex;
 
 - (void)activityDidChange;
+- (void)activityDidChangeField:(NSString *)name;
 - (void)selectedLapDidChange;
 
 - (void)updateHeight;

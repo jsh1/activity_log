@@ -127,6 +127,12 @@
     [field activityDidChange];
 }
 
+- (void)activityDidChangeField:(NSString *)name
+{
+  for (ActActivityHeaderFieldView *field in [self subviews])
+    [field activityDidChangeField:name];
+}
+
 - (CGFloat)preferredHeightForWidth:(CGFloat)width
 {
   NSArray *fields = [self subviews];

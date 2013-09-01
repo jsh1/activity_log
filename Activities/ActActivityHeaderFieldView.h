@@ -4,7 +4,7 @@
 
 @class ActActivityHeaderFieldTextView;
 
-@interface ActActivityHeaderFieldView : ActActivitySubview
+@interface ActActivityHeaderFieldView : ActActivitySubview <NSTextViewDelegate>
 {
   NSTextView *_labelView;
   ActActivityHeaderFieldTextView *_textView;
