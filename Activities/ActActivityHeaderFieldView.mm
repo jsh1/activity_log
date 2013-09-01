@@ -46,6 +46,17 @@
   [super dealloc];
 }
 
+- (void)setActivityView:(ActActivityView *)view
+{
+  [super setActivityView:view];
+
+  if (NSFont *font = [view font])
+    {
+      [_labelView setFont:font];
+      [_textView setFont:font];
+    }
+}
+
 - (NSString *)fieldName
 {
   return _fieldName;
@@ -58,7 +69,6 @@
       [_fieldName release];
       _fieldName = [name copy];
 
-      [_labelView setFont:[[self activityView] font]];
       [_labelView setString:_fieldName];
     }
 }
@@ -110,7 +120,6 @@
 
 - (void)activityDidChange
 {
-  [_textView setFont:[[self activityView] font]];
   [_textView setString:[self fieldString]];
 }
 

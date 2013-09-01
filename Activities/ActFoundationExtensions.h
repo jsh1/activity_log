@@ -7,6 +7,8 @@
 @interface NSString (ActFoundationExtensions)
 
 - (void)copyStdString:(std::string &)s;
+
+- (BOOL)isEqualToStringNoCase:(NSString *)str;
   
 @end
 

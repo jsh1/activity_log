@@ -3,9 +3,6 @@
 #import "ActActivitySubview.h"
 
 @interface ActActivityHeaderView : ActActivitySubview
-{
-  NSMutableArray *_displayedFields;
-}
 
 @property(nonatomic, copy) NSArray *displayedFields;
 

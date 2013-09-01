@@ -9,6 +9,11 @@
   s.append([self UTF8String]);
 }
 
+- (BOOL)isEqualToStringNoCase:(NSString *)str
+{
+  return [self compare:str options:NSCaseInsensitiveSearch] == NSOrderedSame;
+}
+
 @end
 
 @implementation NSArray (ActFoundationExtensions)
@@ -19,7 +24,7 @@
 
   for (NSString *str2 in self)
     {
-      if ([str1 compare:str2 options:NSCaseInsensitiveSearch] == NSOrderedSame)
+      if ([str1 isEqualToStringNoCase:str2])
 	return idx;
       idx++;
     }

@@ -20,81 +20,97 @@
   if (self == nil)
     return nil;
 
-  _displayedFields = [[NSMutableArray alloc] init];
-
   return self;
-}
-
-- (void)dealloc
-{
-  [_displayedFields release];
-
-  [super dealloc];
 }
 
 - (NSArray *)displayedFields
 {
-  return [[_displayedFields copy] autorelease];
+  NSMutableArray *array = [[NSMutableArray alloc] init];
+
+  for (ActActivityHeaderFieldView *subview in [self subviews])
+    [array addObject:[subview fieldName]];
+
+  return [array autorelease];
 }
 
 - (void)setDisplayedFields:(NSArray *)array
 {
-  if (_displayedFields != array)
+  NSMutableArray *old_subviews = [[self subviews] mutableCopy];
+  NSMutableArray *new_subviews = [[NSMutableArray alloc] init];
+
+  for (NSString *field in array)
     {
-      [_displayedFields removeAllObjects];
+      ActActivityHeaderFieldView *new_subview = nil;
 
-      if (array != nil)
-	[_displayedFields addObjectsFromArray:array];
+      NSInteger old_idx = 0;
+      for (ActActivityHeaderFieldView *old_subview in old_subviews)
+	{
+	  if ([[old_subview fieldName] isEqualToStringNoCase:field])
+	    {
+	      new_subview = old_subview;
+	      [old_subviews removeObjectAtIndex:old_idx];
+	      break;
+	    }
+	  old_idx++;
+	}
 
-      [self setSubviews:[NSArray array]];
+      if (new_subview == nil)
+	{
+	  new_subview = [[[ActActivityHeaderFieldView alloc]
+			  initWithFrame:NSZeroRect] autorelease];
 
-      if ([self activityView] != nil)
-	[self activityDidChange];
+	  [new_subview setFieldName:field];
+	  if (ActActivityView *view = [self activityView])
+	    [new_subview setActivityView:view];
+	}
+
+      [new_subviews addObject:new_subview];
     }
+
+  [self setSubviews:new_subviews];
+
+  [new_subviews release];
+  [old_subviews release];
 }
 
 - (BOOL)displaysField:(NSString *)name
 {
-  return [_displayedFields indexOfStringNoCase:name] != NSNotFound;
+  for (ActActivityHeaderFieldView *subview in [self subviews])
+    {
+      if ([[subview fieldName] isEqualToStringNoCase:name])
+	return YES;
+    }
+
+  return NO;
 }
 
 - (void)addDisplayedField:(NSString *)name
 {
-  NSInteger idx = [_displayedFields indexOfStringNoCase:name];
+  if ([self displaysField:name])
+    return;
 
-  if (idx == NSNotFound)
-    {
-      [_displayedFields addObject:name];
+  ActActivityHeaderFieldView *field
+    = [[ActActivityHeaderFieldView alloc] initWithFrame:NSZeroRect];
 
-      if ([self activityView] != nil)
-	[self addFieldView:name];
-    }
+  [field setFieldName:name];
+
+  if (ActActivityView *view = [self activityView])
+    [field setActivityView:view];
+
+  [self addSubview:field];
+  [field release];
 }
 
 - (void)removeDisplayedField:(NSString *)name
 {
-  NSInteger idx = [_displayedFields indexOfStringNoCase:name];
-
-  if (idx != NSNotFound)
+  for (ActActivityHeaderFieldView *subview in [self subviews])
     {
-      [_displayedFields removeObjectAtIndex:idx];
-
-      NSArray *subviews = [self subviews];
-      if ([subviews count] >= idx)
-	[[subviews objectAtIndex:idx] removeFromSuperview];
+      if ([[subview fieldName] isEqualToStringNoCase:name])
+	{
+	  [subview removeFromSuperview];
+	  return;
+	}
     }
-}
-
-- (void)addFieldView:(NSString *)name
-{
-  ActActivityHeaderFieldView *field
-    = [[ActActivityHeaderFieldView alloc] initWithFrame:NSZeroRect];
-
-  [field setActivityView:[self activityView]];
-  [field setFieldName:name];
-  [self addSubview:field];
-
-  [field release];
 }
 
 - (void)setActivityView:(ActActivityView *)view
@@ -107,12 +123,6 @@
 
 - (void)activityDidChange
 {
-  if ([[self subviews] count] == 0)
-    {
-      for (NSString *name in _displayedFields)
-	[self addFieldView:name];
-    }
-
   for (ActActivityHeaderFieldView *field in [self subviews])
     [field activityDidChange];
 }
