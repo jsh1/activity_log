@@ -56,6 +56,9 @@ activity::read_cached_values(unsigned int groups) const
       _temperature_unit = unit_type::celsius;
       _dew_point = 0;
       _dew_point_unit = unit_type::celsius;
+      _equipment.clear();
+      _weather.clear();
+      _keywords.clear();
     }
 
   // Pull values out of the file
