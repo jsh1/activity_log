@@ -15,6 +15,7 @@
 
 - (void)activityDidChange;
 - (void)activityDidChangeField:(NSString *)name;
+- (void)activityDidChangeBody;
 - (void)selectedLapDidChange;
 
 // Standard implementation returns all zeros

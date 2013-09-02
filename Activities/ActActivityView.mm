@@ -159,6 +159,12 @@ static NSArray *_ignoredFields;
     [subview activityDidChangeField:name];
 }
 
+- (void)activityDidChangeBody
+{
+  for (ActActivitySubview *subview in [self subviews])
+    [subview activityDidChangeBody];
+}
+
 - (void)selectedLapDidChange
 {
   for (ActActivitySubview *subview in [self subviews])

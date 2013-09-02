@@ -16,6 +16,10 @@
 {
 }
 
+- (void)activityDidChangeBody
+{
+}
+
 - (void)selectedLapDidChange
 {
 }

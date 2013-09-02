@@ -13,6 +13,8 @@
 
 #define MAX_WIDTH 540
 
+#define WRAP_COLUMN 72
+
 @implementation ActActivityBodyView
 
 - (id)initWithFrame:(NSRect)frame
@@ -88,7 +90,52 @@
 
 - (void)setBodyString:(NSString *)str
 {
-  // FIXME: implement this
+  static const char whitespace[] = " \t\n\f\r";
+
+  const char *ptr = [str UTF8String];
+
+  std::string wrapped;
+  size_t column = 0;
+
+  while (*ptr != 0)
+    {
+      ptr = ptr + strspn(ptr, whitespace);
+      const char *word = ptr + strcspn(ptr, whitespace);
+
+      if (word > ptr)
+	{
+	  if (column >= WRAP_COLUMN)
+	    {
+	      wrapped.push_back('\n');
+	      column = 0;
+	    }
+	  else
+	    {
+	      wrapped.push_back(' ');
+	      column++;
+	    }
+
+	  wrapped.append(ptr, word - ptr);
+	  column += word - ptr;
+	  ptr = word;
+	}
+    }
+
+  if (column > 0)
+    wrapped.push_back('\n');
+
+  if (act::activity *a = [[self activityView] activity])
+    {
+      std::string &body = a->storage()->body();
+
+      if (wrapped != body)
+	{
+	  // FIXME: undo management
+
+	  std::swap(body, wrapped);
+	  [[self activityView] activityDidChangeBody];
+	}
+    }
 }
 
 - (void)activityDidChange
@@ -137,6 +184,14 @@
       CGFloat width = std::min(bounds.size.width, (CGFloat) MAX_WIDTH);
       if ([self preferredHeightForWidth:width] != bounds.size.height)
 	[[self activityView] updateHeight];
+    }
+}
+
+- (void)textDidEndEditing:(NSNotification *)note
+{
+  if ([note object] == _textView)
+    {
+      [self setBodyString:[_textView string]];
     }
 }
 
