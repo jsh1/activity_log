@@ -16,6 +16,9 @@
 #define MAX_TICKS 4
 #define MIN_TICKS 2
 
+#define LABEL_FONT "Lucida Grande"
+#define LABEL_SIZE 9
+
 namespace act {
 namespace gps {
 
@@ -350,7 +353,7 @@ chart::draw_line(CGContextRef ctx, const line &l)
   CGContextSetLineWidth(ctx, 1);
   CGContextSetRGBStrokeColor(ctx, 0, 0, 0, 0.1);
 
-  CGContextSelectFont(ctx, "Helvetica-Bold", 9, kCGEncodingMacRoman);
+  CGContextSelectFont(ctx, LABEL_FONT, LABEL_SIZE, kCGEncodingMacRoman);
   CGContextSetTextMatrix(ctx, CGAffineTransformIdentity);
   CGContextSetTextDrawingMode(ctx, kCGTextFill);
   CGContextSetRGBFillColor(ctx, 0, 0, 0, 1);

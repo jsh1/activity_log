@@ -13,7 +13,7 @@
 
 #define SUBVIEW_Y_SPACING 14
 
-#define FONT_NAME "Bitstream Vera Sans Roman"
+#undef FONT_NAME
 
 @implementation ActActivityView
 
@@ -242,7 +242,9 @@ static NSArray *_ignoredFields;
   if (font == nil)
     {
       CGFloat fontSize = [NSFont smallSystemFontSize];
+#ifdef FONT_NAME
       font = [NSFont fontWithName:@FONT_NAME size:fontSize];
+#endif
       if (font == nil)
 	font = [NSFont systemFontOfSize:fontSize];
     }
