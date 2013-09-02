@@ -1314,7 +1314,7 @@ parse_temperature(const std::string &str, double *temp_ptr,
   static const parsable_unit temp_units[] =
     {
       {"c\0celsius\0centigrade\0", unit_type::celsius, 1},
-      {"f\0fahrenheit\0", unit_type::fahrenheit, 5/9., -160*9.},
+      {"f\0fahrenheit\0", unit_type::fahrenheit, 5/9., -160/9.},
       {0}
     };
 
