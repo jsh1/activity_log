@@ -44,6 +44,8 @@ public:
   bool set_field_name(const std::string &old_name, const std::string
     &new_name);
 
+  bool field_read_only_p(const char *name) const;
+
   typedef field_map::iterator iterator;
   typedef field_map::const_iterator const_iterator;
   typedef field_map::value_type value_type;

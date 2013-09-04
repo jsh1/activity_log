@@ -149,4 +149,42 @@ activity_storage::set_field_name(const std::string &old_name,
   return true;
 }
 
+bool
+activity_storage::field_read_only_p(const char *name) const
+{
+  field_id id = lookup_field_id(name);
+
+  if (act::field_read_only_p(id))
+    return true;
+
+  switch (id)
+    {
+    case field_id::pace:
+    case field_id::speed:
+      if (field_ptr("duration") != nullptr
+	  && field_ptr("distance") != nullptr)
+	return true;
+      break;
+
+    case field_id::distance:
+      if (field_ptr("duration") != nullptr
+	  && (field_ptr("speed") != nullptr
+	      || field_ptr("pace") != nullptr))
+	return true;
+      break;
+
+    case field_id::duration:
+      if (field_ptr("distance") != nullptr
+	  && (field_ptr("speed") != nullptr
+	      || field_ptr("pace") != nullptr))
+	return true;
+      break;
+
+    default:
+      break;
+    }
+
+  return false;
+}
+
 } // namespace act
