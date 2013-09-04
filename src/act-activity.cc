@@ -6,6 +6,7 @@
 #include "act-format.h"
 #include "act-util.h"
 
+#include <math.h>
 #include <xlocale.h>
 
 namespace act {
@@ -86,14 +87,10 @@ activity::read_cached_values(unsigned int groups) const
       else if (const std::string *s = field_ptr("max-speed"))
 	parse_speed(*s, &_max_speed, &_max_speed_unit);
 
-      if (_speed == 0 && _duration != 0 && _distance != 0)
-	_speed = _distance / _duration;
-      else if (_duration == 0 && _distance != 0 && _speed != 0)
-	_duration = _distance / _speed;
-      else if (_distance == 0 && _duration != 0 && _speed != 0)
-	_distance = _speed * _duration;
+      if (_date == 0)
+	use_gps = true;
 
-      if (_date == 0 || _duration == 0 || _distance == 0 || _speed == 0)
+      if (_duration != 0 + _distance != 0 + _speed != 0 < 2)
 	use_gps = true;
     }
 
@@ -211,6 +208,8 @@ activity::field_value(field_id id) const
       return temperature();
     case field_id::dew_point:
       return dew_point();
+    case field_id::vdot:
+      return vdot();
     default:
       return 0;
     }
@@ -269,14 +268,26 @@ double
 activity::duration() const
 {
   validate_cached_values(group_timing);
-  return _duration;
+
+  if (_duration != 0)
+    return _duration;
+  else if (_distance != 0 && _speed != 0)
+    return _distance / _speed;
+  else
+    return 0;
 }
 
 double
 activity::distance() const
 {
   validate_cached_values(group_timing);
-  return _distance;
+
+  if (_distance != 0)
+    return _distance;
+  else if (_duration != 0 && _speed != 0)
+    return _speed * _duration;
+  else
+    return 0;
 }
 
 unit_type
@@ -290,7 +301,13 @@ double
 activity::speed() const
 {
   validate_cached_values(group_timing);
-  return _speed;
+
+  if (_speed != 0)
+    return _speed;
+  else if (_duration != 0 && _distance != 0)
+    return _distance / _duration;
+  else
+    return 0;
 }
 
 unit_type
@@ -417,6 +434,22 @@ activity::keywords() const
 {
   validate_cached_values(group_other);
   return _keywords;
+}
+
+double
+activity::vdot() const
+{
+  double time = duration() / 60;
+  double velocity = speed() * 60;
+
+  if (time > 0 && velocity > 0)
+    {
+      double percent_max = 0.8 + 0.1894393 * exp(-0.012778 * time) + 0.2989558 * exp(-0.1932605 * time);
+      double vo2 = -4.60 + 0.182258 * velocity + 0.000104 * velocity*velocity;
+      return vo2 / percent_max;
+    }
+  else
+    return 0;
 }
 
 bool

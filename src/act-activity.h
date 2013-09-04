@@ -76,6 +76,8 @@ public:
 
   const std::vector<std::string> &keywords() const;
 
+  double vdot() const;
+
 private:
   activity_storage_ref _storage;
 

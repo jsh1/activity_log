@@ -88,6 +88,11 @@ lookup_field_id(const char *str)
 	return field_id::type;
       break;
 
+    case 'v':
+      if (strcasecmp(str, "vdot") == 0)
+	return field_id::vdot;
+      break;
+
     case 'w':
       if (strcasecmp(str, "weather") == 0)
 	return field_id::weather;
@@ -148,10 +153,25 @@ canonical_field_name(field_id id)
       return "Temperature";
     case field_id::type:
       return "Type";
+    case field_id::vdot:
+      return "VDOT";
     case field_id::weather:
       return "Weather";
     case field_id::weight:
       return "Weight";
+    }
+}
+
+bool
+field_read_only_p(field_id id)
+{
+  switch (id)
+    {
+    case field_id::vdot:
+      return true;
+
+    default:
+      return false;
     }
 }
 
@@ -170,6 +190,7 @@ lookup_field_data_type(const field_id id)
     case field_id::calories:
     case field_id::max_hr:
     case field_id::resting_hr:
+    case field_id::vdot:
       return field_data_type::number;
     case field_id::date:
       return field_data_type::date;

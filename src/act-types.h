@@ -36,6 +36,7 @@ enum class field_id
   weather,
   weight,
   keywords,
+  vdot,					// read-only
   custom,
 };
 
@@ -56,6 +57,8 @@ enum class field_data_type
 
 field_id lookup_field_id(const char *field_name);
 const char *canonical_field_name(field_id id);
+
+bool field_read_only_p(field_id id);
 
 field_data_type lookup_field_data_type(field_id id);
 
