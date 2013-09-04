@@ -114,6 +114,12 @@ static NSArray *_ignoredFields;
 
 	  if (const act::activity *a = [self activity])
 	    {
+	      if (const std::string *s = a->field_ptr("activity"))
+		{
+		  if (strcasecmp(s->c_str(), "run") == 0)
+		    [header addDisplayedField:@"VDOT"];
+		}
+		    
 	      if (a->resting_hr() != 0)
 		[header addDisplayedField:@"Resting-HR"];
 	      if (a->average_hr() != 0)

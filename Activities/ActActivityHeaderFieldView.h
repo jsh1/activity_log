@@ -15,6 +15,6 @@
 
 @property(nonatomic, copy) NSString *fieldName;
 @property(nonatomic, copy) NSString *fieldString;
-@property(nonatomic, readonly) BOOL fieldReadOnly;
+@property(nonatomic, readonly, getter=isFieldReadOnly) BOOL fieldReadOnly;
   
 @end

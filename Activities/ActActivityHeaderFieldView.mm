@@ -79,9 +79,12 @@
   [_labelView setString:_fieldName];
 
   const char *field = [_fieldName UTF8String];
-  act::field_id field_id = act::lookup_field_id(field);
 
-  _fieldReadOnly = act::field_read_only_p(field_id);
+  if (const act::activity *a = [[self activityView] activity])
+    _fieldReadOnly = a->storage()->field_read_only_p(field);
+  else
+    _fieldReadOnly = field_read_only_p(act::lookup_field_id(field));
+
   [_textView setEditable:!_fieldReadOnly];
 }
 
@@ -138,6 +141,7 @@
 
 - (void)activityDidChange
 {
+  [self _updateFieldName];
   [_textView setString:[self fieldString]];
 }
 
@@ -145,6 +149,7 @@
 {
   // reload everything in case of dependent fields (pace, etc)
 
+  [self _updateFieldName];
   [_textView setString:[self fieldString]];
 }
 
@@ -201,12 +206,21 @@
 	  if (![value isEqual:[self fieldString]])
 	    {
 	      auto id = act::lookup_field_id(field_name.c_str());
-	      auto type = act::lookup_field_data_type(id);
 
-	      std::string value(str);
-	      act::canonicalize_field_string(type, value);
+	      // FIXME: trim whitespace?
 
-	      (*a->storage())[field_name] = value;
+	      if ([value length] != 0)
+		{
+		  auto type = act::lookup_field_data_type(id);
+
+		  std::string value(str);
+		  act::canonicalize_field_string(type, value);
+
+		  (*a->storage())[field_name] = value;
+		}
+	      else
+		a->storage()->delete_field(field_name);
+
 	      a->invalidate_cached_values();
 
 	      [[self activityView] activityDidChangeField:_fieldName];
@@ -245,7 +259,11 @@
 {
   if (_drawsBorder)
     {
-      [[NSColor keyboardFocusIndicatorColor] setStroke];
+      if ([self isEditable])
+	[[NSColor keyboardFocusIndicatorColor] setStroke];
+      else
+	[[NSColor secondarySelectedControlColor] setStroke];
+
       [NSBezierPath strokeRect:NSInsetRect([self bounds], .5, .5)];
     }
 

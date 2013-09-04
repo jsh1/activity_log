@@ -59,9 +59,10 @@
 	  new_subview = [[[ActActivityHeaderFieldView alloc]
 			  initWithFrame:NSZeroRect] autorelease];
 
-	  [new_subview setFieldName:field];
 	  if (ActActivityView *view = [self activityView])
 	    [new_subview setActivityView:view];
+
+	  [new_subview setFieldName:field];
 	}
 
       [new_subviews addObject:new_subview];
