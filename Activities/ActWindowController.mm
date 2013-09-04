@@ -7,6 +7,8 @@
 
 @implementation ActWindowController
 
+@synthesize undoManager = _undoManager;
+
 - (NSString *)windowNibName
 {
   return @"ActWindow";
@@ -14,7 +16,20 @@
 
 - (id)init
 {
-  return [super initWithWindow:nil];
+  self = [super initWithWindow:nil];
+  if (self == nil)
+    return nil;
+
+  _undoManager = [[NSUndoManager alloc] init];
+
+  return self;
+}
+
+- (void)dealloc
+{
+  [_undoManager release];
+
+  [super dealloc];
 }
 
 - (act::database *)database
@@ -68,6 +83,11 @@
   [[NSNotificationCenter defaultCenter] removeObserver:self];
 
   [NSApp terminate:self];
+}
+
+- (NSUndoManager *)windowWillReturnUndoManager:(NSWindow *)window
+{
+  return _undoManager;
 }
 
 @end

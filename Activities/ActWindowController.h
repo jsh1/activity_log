@@ -13,12 +13,16 @@
   IBOutlet NSSplitView *_verticalSplitView;
   IBOutlet NSSplitView *_horizontalSplitView;
 
+  NSUndoManager *_undoManager;
+
   std::unique_ptr<act::database> _database;
 }
 
-@property(readonly) act::database *database;
+@property(nonatomic, readonly) act::database *database;
 
-@property act::activity_storage_ref selectedActivity;
+@property(nonatomic) act::activity_storage_ref selectedActivity;
+
+@property(nonatomic, readonly) NSUndoManager *undoManager;
 
 - (void)reloadSelectedActivity;
 
