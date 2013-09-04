@@ -302,7 +302,11 @@ activity::speed() const
 {
   validate_cached_values(group_timing);
 
-  if (_speed != 0)
+  // Even if speed was explicitly specified, ignore it if duration and
+  // distance are also known. Only use speed value in calculations if
+  // one of the other two values is missing.
+
+  if (_speed != 0 && (_duration == 0 || _distance == 0))
     return _speed;
   else if (_duration != 0 && _distance != 0)
     return _distance / _duration;
@@ -444,7 +448,8 @@ activity::vdot() const
 
   if (time > 0 && velocity > 0)
     {
-      double percent_max = 0.8 + 0.1894393 * exp(-0.012778 * time) + 0.2989558 * exp(-0.1932605 * time);
+      double percent_max = (0.8 + 0.1894393 * exp(-0.012778 * time)
+			    + 0.2989558 * exp(-0.1932605 * time));
       double vo2 = -4.60 + 0.182258 * velocity + 0.000104 * velocity*velocity;
       return vo2 / percent_max;
     }
