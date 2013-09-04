@@ -7,15 +7,21 @@
 
 #import "act-format.h"
 
+#define LABEL_INSET 32
 #define LABEL_WIDTH 100
 #define LABEL_HEIGHT 14
 
 #define CONTROL_HEIGHT LABEL_HEIGHT
 
 @interface ActActivityHeaderFieldTextView : NSTextView
+{
+  BOOL _drawsBorder;
+}
 @end
 
 @implementation ActActivityHeaderFieldView
+
+@synthesize fieldReadOnly = _fieldReadOnly;
 
 - (id)initWithFrame:(NSRect)frame
 {
@@ -68,6 +74,17 @@
   return _fieldName;
 }
 
+- (void)_updateFieldName
+{
+  [_labelView setString:_fieldName];
+
+  const char *field = [_fieldName UTF8String];
+  act::field_id field_id = act::lookup_field_id(field);
+
+  _fieldReadOnly = act::field_read_only_p(field_id);
+  [_textView setEditable:!_fieldReadOnly];
+}
+
 - (void)setFieldName:(NSString *)name
 {
   if (_fieldName != name)
@@ -75,7 +92,7 @@
       [_fieldName release];
       _fieldName = [name copy];
 
-      [_labelView setString:_fieldName];
+      [self _updateFieldName];
     }
 }
 
@@ -145,7 +162,7 @@
   [_labelView setFrame:frame];
 
   frame.origin.x += frame.size.width;
-  frame.size.width = bounds.size.width - frame.size.width;
+  frame.size.width = bounds.size.width - frame.size.width - LABEL_INSET;
   [_textView setFrame:frame];
 }
 
@@ -168,10 +185,14 @@
 	    {
 	      a->storage()->set_field_name(field_name, str);
 	      a->invalidate_cached_values();
+
 	      NSString *oldName = _fieldName;
 	      _fieldName = [value copy];
+	      [self _updateFieldName];
+
 	      [[self activityView] activityDidChangeField:oldName];
 	      [[self activityView] activityDidChangeField:_fieldName];
+
 	      [oldName release];
 	    }
 	}
@@ -197,6 +218,39 @@
 @end
 
 @implementation ActActivityHeaderFieldTextView
+
+- (BOOL)becomeFirstResponder
+{
+  if (![super becomeFirstResponder])
+    return NO;
+
+  _drawsBorder = YES;
+  [self setNeedsDisplay:YES];
+
+  return YES;
+}
+
+- (BOOL)resignFirstResponder
+{
+  if (![super resignFirstResponder])
+    return NO;
+
+  _drawsBorder = NO;
+  [self setNeedsDisplay:YES];
+
+  return YES;
+}
+
+- (void)drawRect:(NSRect)r
+{
+  if (_drawsBorder)
+    {
+      [[NSColor keyboardFocusIndicatorColor] setStroke];
+      [NSBezierPath strokeRect:NSInsetRect([self bounds], .5, .5)];
+    }
+
+  [super drawRect:r];
+}
 
 - (void)keyDown:(NSEvent *)e
 {
