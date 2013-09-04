@@ -126,6 +126,17 @@ activity_storage::field_ptr(const char *name) const
 }
 
 bool
+activity_storage::delete_field(const char *name)
+{
+  int idx = field_index(name);
+  if (idx < 0)
+    return false;
+
+  _header.erase(_header.begin() + idx);
+  return true;
+}
+
+bool
 activity_storage::set_field_name(const std::string &old_name,
 				 const std::string &new_name)
 {

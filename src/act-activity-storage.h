@@ -38,6 +38,9 @@ public:
   const std::string *field_ptr(const char *name) const;
   const std::string *field_ptr(const std::string &name) const;
 
+  bool delete_field(const char *name);
+  bool delete_field(const std::string &name);
+
   bool set_field_name(const std::string &old_name, const std::string
     &new_name);
 
@@ -80,6 +83,12 @@ inline const std::string *
 activity_storage::field_ptr(const std::string &name) const
 {
   return field_ptr(name.c_str());
+}
+
+inline bool
+activity_storage::delete_field(const std::string &name)
+{
+  return delete_field(name.c_str());
 }
 
 inline activity_storage::iterator
