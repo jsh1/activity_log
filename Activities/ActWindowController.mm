@@ -56,6 +56,33 @@
   [_activityListView reloadSelectedActivity];
 }
 
+- (void)setNeedsSynchronize:(BOOL)flag
+{
+  if (flag && !_needsSynchronize)
+    {
+      _needsSynchronize = YES;
+
+      dispatch_time_t t = dispatch_time(DISPATCH_TIME_NOW, 2LL * NSEC_PER_SEC);
+      dispatch_after(t, dispatch_get_main_queue(), ^{
+	if (_needsSynchronize)
+	  [self synchronize];
+      });
+    }
+}
+
+- (BOOL)needsSynchronize
+{
+  return _needsSynchronize;
+}
+
+- (void)synchronize
+{
+  _needsSynchronize = NO;
+
+  if (_database)
+    _database->synchronize();
+}
+
 - (void)windowDidLoad
 {
   [[NSNotificationCenter defaultCenter]

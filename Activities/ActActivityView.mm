@@ -159,6 +159,7 @@ static NSArray *_ignoredFields;
 
 - (void)activityDidChangeField:(NSString *)name
 {
+  [_controller setNeedsSynchronize:YES];
   [_controller reloadSelectedActivity];
 
   for (ActActivitySubview *subview in [self subviews])
@@ -167,6 +168,8 @@ static NSArray *_ignoredFields;
 
 - (void)activityDidChangeBody
 {
+  [_controller setNeedsSynchronize:YES];
+
   for (ActActivitySubview *subview in [self subviews])
     [subview activityDidChangeBody];
 }

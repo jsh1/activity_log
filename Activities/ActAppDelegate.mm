@@ -16,6 +16,11 @@
   [self showWindow:self];
 }
 
+- (void)applicationWillTerminate:(NSNotification *)note
+{
+  [_windowController synchronize];
+}
+
 - (IBAction)showWindow:(id)sender
 {
   [[self windowController] showWindow:sender];

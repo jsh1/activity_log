@@ -189,6 +189,7 @@
 	  if (str != field_name)
 	    {
 	      a->storage()->set_field_name(field_name, str);
+	      a->storage()->increment_seed();
 	      a->invalidate_cached_values();
 
 	      NSString *oldName = _fieldName;
@@ -221,6 +222,7 @@
 	      else
 		a->storage()->delete_field(field_name);
 
+	      a->storage()->increment_seed();
 	      a->invalidate_cached_values();
 
 	      [[self activityView] activityDidChangeField:_fieldName];

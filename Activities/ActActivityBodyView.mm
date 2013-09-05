@@ -133,6 +133,7 @@
 	  // FIXME: undo management
 
 	  std::swap(body, wrapped);
+	  a->storage()->increment_seed();
 	  [[self activityView] activityDidChangeBody];
 	}
     }

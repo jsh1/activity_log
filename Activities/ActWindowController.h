@@ -16,6 +16,7 @@
   NSUndoManager *_undoManager;
 
   std::unique_ptr<act::database> _database;
+  BOOL _needsSynchronize;
 }
 
 @property(nonatomic, readonly) act::database *database;
@@ -25,5 +26,9 @@
 @property(nonatomic, readonly) NSUndoManager *undoManager;
 
 - (void)reloadSelectedActivity;
+
+@property(nonatomic) BOOL needsSynchronize;
+
+- (void)synchronize;
 
 @end
