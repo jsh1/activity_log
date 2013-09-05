@@ -93,13 +93,13 @@
   static const char whitespace[] = " \t\n\f\r";
 
   const char *ptr = [str UTF8String];
+  ptr = ptr + strspn(ptr, whitespace);
 
   std::string wrapped;
   size_t column = 0;
 
   while (*ptr != 0)
     {
-      ptr = ptr + strspn(ptr, whitespace);
       const char *word = ptr + strcspn(ptr, whitespace);
 
       if (word > ptr)
@@ -109,16 +109,27 @@
 	      wrapped.push_back('\n');
 	      column = 0;
 	    }
-	  else
+	  else if (column > 0)
 	    {
 	      wrapped.push_back(' ');
 	      column++;
 	    }
 
 	  wrapped.append(ptr, word - ptr);
-	  column += word - ptr;
+
+	  if (word[0] == '\n' && word[1] == '\n')
+	    {
+	      wrapped.push_back('\n');
+	      column = WRAP_COLUMN;
+	    }
+	  else
+	    column += word - ptr;
+
 	  ptr = word;
 	}
+
+      if (ptr[0] != 0)
+	ptr++;
     }
 
   if (column > 0)
