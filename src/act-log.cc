@@ -261,11 +261,11 @@ act_log(arguments &args, const char *format)
   for (const auto &it : items)
     {
       if (print_path)
-	printf("%s\n", it->path().c_str());
+	printf("%s\n", it->storage()->path());
 
       if (print_raw_contents)
 	{
-	  cat_file(it->path().c_str());
+	  cat_file(it->storage()->path());
 	  fputc('\n', stdout);
 	}
 

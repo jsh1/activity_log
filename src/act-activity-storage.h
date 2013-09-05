@@ -18,14 +18,29 @@ class activity_storage
 
   typedef std::vector<std::pair<std::string, std::string>> field_map;
 
+  uint32_t _seed;
+
+  std::string _path;
+  mutable uint32_t _path_seed;
+
   field_map _header;
   std::string _body;
 
   int field_index(const char *name) const;
 
 public:
+  activity_storage();
+
+  void set_path(const char *path);
+  const char *path() const;
+
+  uint32_t seed() const;
+  void increment_seed();
+
   bool read_file(const char *path);
   bool write_file(const char *path) const;
+
+  void synchronize_file() const;
 
   void canonicalize_field_order();
 
@@ -62,6 +77,24 @@ typedef std::shared_ptr<activity_storage> activity_storage_ref;
 typedef std::shared_ptr<const activity_storage> const_activity_storage_ref;
 
 // implementation details
+
+inline const char *
+activity_storage::path() const
+{
+  return _path.c_str();
+}
+
+inline uint32_t
+activity_storage::seed() const
+{
+  return _seed;
+}
+
+inline void
+activity_storage::increment_seed()
+{
+  _seed++;
+}
 
 inline const std::string &
 activity_storage::body() const

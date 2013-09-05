@@ -35,7 +35,11 @@ database::read_activities_callback(const char *path, void *ctx)
   database *db = static_cast<database *>(ctx);
 
   activity_storage_ref storage = std::make_shared<activity_storage> ();
-  storage->read_file(path);
+
+  if (!storage->read_file(path))
+    return;
+
+  storage->set_path(path);
 
   const std::string *date = storage->field_ptr("Date");
   if (date == nullptr)
@@ -44,7 +48,6 @@ database::read_activities_callback(const char *path, void *ctx)
   db->_items.resize(db->_items.size() + 1);
   item &it = db->_items.back();
 
-  it._path = path;
   parse_date_time(*date, &it._date, nullptr);
 
   using std::swap;
@@ -95,6 +98,13 @@ database::execute_query(const query &q, std::vector<item *> &result)
       if (--to_add == 0)
 	break;
     }
+}
+
+void
+database::synchronize() const
+{
+  for (auto &it : _items)
+    it.storage()->synchronize_file();
 }
 
 database::not_term::not_term(const const_query_term_ref &t)

@@ -21,13 +21,10 @@ public:
     {
       friend class database;
 
-      std::string _path;
       time_t _date;
       activity_storage_ref _storage;
 
     public:
-      const std::string &path() const {return _path;}
-
       time_t date() const {return _date;}
 
       activity_storage_ref storage() {return _storage;}
@@ -178,6 +175,8 @@ public:
     };
 
   void execute_query(const query &q, std::vector<item *> &result);
+
+  void synchronize() const;
 
 private:
   std::vector<item> _items;

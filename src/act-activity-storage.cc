@@ -9,6 +9,19 @@
 
 namespace act {
 
+activity_storage::activity_storage()
+: _seed(0),
+  _path_seed(0)
+{
+}
+
+void
+activity_storage::set_path(const char *path)
+{
+  _path = path;
+  _path_seed = _seed;
+}
+
 bool
 activity_storage::read_file(const char *path)
 {
@@ -78,6 +91,18 @@ activity_storage::write_file(const char *path) const
 
   fclose(fh);
   return true;
+}
+
+void
+activity_storage::synchronize_file() const
+{
+  if (_path.size() == 0 || _path_seed == _seed)
+    return;
+
+  if (!write_file(_path.c_str()))
+    return;
+
+  _path_seed = _seed;
 }
 
 void
