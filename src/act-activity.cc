@@ -53,6 +53,7 @@ activity::read_cached_values(unsigned int groups) const
     {
       _effort = 0;
       _quality = 0;
+      _points = 0;
       _temperature = 0;
       _temperature_unit = unit_type::celsius;
       _dew_point = 0;
@@ -118,6 +119,8 @@ activity::read_cached_values(unsigned int groups) const
 	parse_fraction(*s, &_effort);
       if (const std::string *s = field_ptr("quality"))
 	parse_fraction(*s, &_quality);
+      if (const std::string *s = field_ptr("points"))
+	parse_number(*s, &_points);
 
       if (const std::string *s = field_ptr("temperature"))
 	parse_temperature(*s, &_temperature, &_temperature_unit);
@@ -210,6 +213,8 @@ activity::field_value(field_id id) const
       return dew_point();
     case field_id::vdot:
       return vdot();
+    case field_id::points:
+      return points();
     default:
       return 0;
     }
@@ -350,6 +355,13 @@ activity::quality() const
 }
 
 double
+activity::points() const
+{
+  validate_cached_values(group_other);
+  return _points;
+}
+
+double
 activity::resting_hr() const
 {
   validate_cached_values(group_physiological);
@@ -451,7 +463,8 @@ activity::vdot() const
       double percent_max = (0.8 + 0.1894393 * exp(-0.012778 * time)
 			    + 0.2989558 * exp(-0.1932605 * time));
       double vo2 = -4.60 + 0.182258 * velocity + 0.000104 * velocity*velocity;
-      return vo2 / percent_max;
+      double vdot = vo2 / percent_max;
+      return round(vdot*10) * .1;
     }
   else
     return 0;

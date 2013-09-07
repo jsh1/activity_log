@@ -27,6 +27,8 @@ class config
   int _resting_hr;
   int _max_hr;
 
+  double _vdot;
+
   bool _silent;
   bool _verbose;
 
@@ -49,6 +51,8 @@ public:
 
   int resting_hr() const;
   int max_hr() const;
+
+  double vdot() const;
 
   bool silent() const;
   bool verbose() const;
@@ -121,6 +125,12 @@ inline int
 config::max_hr() const
 {
   return _max_hr;
+}
+
+inline double
+config::vdot() const
+{
+  return _vdot;
 }
 
 inline bool

@@ -37,6 +37,7 @@ enum class field_id
   weight,
   keywords,
   vdot,					// read-only
+  points,
   custom,
 };
 

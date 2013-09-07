@@ -108,6 +108,9 @@ activity_accum::add(const activity &a)
   if (a.quality() != 0)
     _accum[static_cast<int>(accum_id::quality)].add(a.quality());
 
+  if (a.points() != 0)
+    _accum[static_cast<int>(accum_id::points)].add(a.points());
+
   if (a.temperature() != 0)
     _accum[static_cast<int>(accum_id::temperature)].add(a.temperature());
 
@@ -253,6 +256,11 @@ activity_accum::get_field_value(const char *name, const char *arg,
       a_id = accum_id::quality;
       if (!arg)
 	arg = "average";
+      break;
+    case field_id::points:
+      a_id = accum_id::points;
+      if (!arg)
+	arg = "total";
       break;
     case field_id::temperature:
       a_id = accum_id::temperature;

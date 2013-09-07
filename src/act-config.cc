@@ -15,6 +15,7 @@ config::config()
   _start_of_week(1),
   _resting_hr(40),
   _max_hr(178),
+  _vdot(50),				// 20:00 5K
   _silent(false),
   _verbose(false)
 {
@@ -57,6 +58,9 @@ config::config()
 
   if (const char *opt = getenv("ACT_MAX_HR"))
     _max_hr = atoi(opt);
+
+  if (const char *opt = getenv("ACT_VDOT"))
+    _vdot = atof(opt);
 
   if (const char *opt = getenv("ACT_SILENT"))
     _silent = atoi(opt) != 0;

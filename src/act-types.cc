@@ -69,6 +69,8 @@ lookup_field_id(const char *str)
     case 'p':
       if (strcasecmp(str, "pace") == 0)
 	return field_id::pace;
+      else if (strcasecmp(str, "points") == 0)
+	return field_id::points;
       break;
 
     case 'q':
@@ -143,6 +145,8 @@ canonical_field_name(field_id id)
       return "Max-Speed";
     case field_id::pace:
       return "Pace";
+    case field_id::points:
+      return "Points";
     case field_id::quality:
       return "Quality";
     case field_id::resting_hr:
@@ -191,6 +195,7 @@ lookup_field_data_type(const field_id id)
     case field_id::max_hr:
     case field_id::resting_hr:
     case field_id::vdot:
+    case field_id::points:
       return field_data_type::number;
     case field_id::date:
       return field_data_type::date;

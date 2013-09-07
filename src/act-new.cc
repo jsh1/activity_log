@@ -5,7 +5,10 @@
 #include "act-config.h"
 #include "act-format.h"
 #include "act-gps-activity.h"
+#include "act-intensity-points.h"
 #include "act-util.h"
+
+#include <math.h>
 
 using namespace act;
 
@@ -37,6 +40,7 @@ enum option_id
   opt_weather,
   opt_quality,
   opt_effort,
+  opt_points,
   opt_gps_file,
   opt_field,
   // import options
@@ -92,6 +96,8 @@ option_field_id(option_id opt)
       return field_id::quality;
     case opt_effort:
       return field_id::effort;
+    case opt_points:
+      return field_id::points;
     case opt_gps_file:
       return field_id::gps_file;
     case opt_field:
@@ -127,6 +133,7 @@ const arguments::option new_options[] =
   {opt_weather, "weather", 0, "WEATHER"},
   {opt_quality, "quality", 0, "QUALITY-RATIO"},
   {opt_effort, "effort", 0, "EFFORT-RATIO"},
+  {opt_points, "points", 0, "POINTS"},
   {opt_gps_file, "gps-file", 0, "GPS-FILE"},
   {opt_field, "field", 'f', "NAME:VALUE", "Define custom field."},
   {arguments::opt_eof}
@@ -180,6 +187,20 @@ copy_gps_fields(activity_storage &a, const gps::activity &gps_data)
   if (gps_data.distance() > 0
       && a.field_ptr("Distance") == nullptr)
     format_distance(a["Distance"], gps_data.distance(), unit_type::miles);
+
+  if (gps_data.has_speed()
+      && a.field_ptr("Points") == nullptr)
+    {
+      // compute Daniels' intensity points
+
+      double points = calculate_points(gps_data);
+
+      if (points != 0)
+	{
+	  points = round(points * 10) * .1;
+	  format_number(a["Points"], points);
+	}
+    }
 
   // Let other fields be read as needed.
 }
@@ -268,6 +289,18 @@ act_new(arguments &args)
     {
       copy_gps_fields(*storage, *gps_data);
       a.invalidate_cached_values();
+    }
+
+  if (storage->field_ptr("Points") == nullptr)
+    {
+      double points = calculate_points(a.speed(), a.distance());
+
+      if (points != 0)
+	{
+	  points = round(points * 10) * .1;
+	  format_number((*storage)["Points"], points);
+	  a.invalidate_cached_values();
+	}
     }
 
   std::string filename;

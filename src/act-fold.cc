@@ -31,6 +31,7 @@ enum option_id
   opt_equipment,
   opt_format,
   opt_table,
+  opt_table_field,
 };
 
 const arguments::option options[] =
@@ -48,6 +49,7 @@ const arguments::option options[] =
   {opt_equipment, "equipment", 0, nullptr, "Group by equipment."},
   {opt_format, "format", 'f', "FORMAT", "Format string."},
   {opt_table, "table", 't', "FORMAT", "Table format string."},
+  {opt_table_field, "table-field", 'T', "KEY", "Field for table output."},
   {arguments::opt_eof},
 };
 
@@ -474,6 +476,12 @@ act_fold(arguments &args)
 	case opt_table:
 	  table_format = opt_arg;
 	  break;
+
+	case opt_table_field: {
+	  char *fmt = nullptr;
+	  asprintf(&fmt, "%%-{key} %%{%s} %%@{%s}", opt_arg, opt_arg);
+	  table_format = fmt;
+	  break; }
 
 	case arguments::opt_error:
 	  fprintf(stderr, "Error: invalid argument: %s\n\n", opt_arg);

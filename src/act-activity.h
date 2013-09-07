@@ -54,6 +54,7 @@ public:
 
   double effort() const;
   double quality() const;
+  double points() const;
 
   double resting_hr() const;
   double average_hr() const;
@@ -114,10 +115,11 @@ private:
   mutable double _weight;
   mutable unit_type _weight_unit;
 
-  // rest is group_other
+  // group_other
 
   mutable double _effort;
   mutable double _quality;
+  mutable double _points;
   mutable double _temperature;
   mutable double _dew_point;
   mutable unit_type _temperature_unit;

@@ -45,6 +45,7 @@ class activity_accum
       weight,
       effort,
       quality,
+      points,
       temperature,
       dew_point
     };
