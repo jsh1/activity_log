@@ -120,6 +120,13 @@ static NSArray *_ignoredFields;
 		    [header addDisplayedField:@"VDOT"];
 		}
 		    
+	      if (a->effort() != 0)
+		[header addDisplayedField:@"Effort"];
+	      if (a->quality() != 0)
+		[header addDisplayedField:@"Quality"];
+	      if (a->points() != 0)
+		[header addDisplayedField:@"Points"];
+
 	      if (a->resting_hr() != 0)
 		[header addDisplayedField:@"Resting-HR"];
 	      if (a->average_hr() != 0)

@@ -34,6 +34,8 @@
 		571DBA0317BE6B6C0001514C /* libxml2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 571DB9FD17BE68090001514C /* libxml2.dylib */; };
 		5730789317C56820002C5B28 /* act-gps-chart.cc in Sources */ = {isa = PBXBuildFile; fileRef = 5730789117C56820002C5B28 /* act-gps-chart.cc */; };
 		5730789617C56E54002C5B28 /* ActActivityChartView.mm in Sources */ = {isa = PBXBuildFile; fileRef = 5730789517C56E54002C5B28 /* ActActivityChartView.mm */; };
+		57638D5017DB72EA00BE93AC /* act-intensity-points.cc in Sources */ = {isa = PBXBuildFile; fileRef = 57638D4E17DB72EA00BE93AC /* act-intensity-points.cc */; };
+		57638D5117DB72EA00BE93AC /* act-intensity-points.h in Headers */ = {isa = PBXBuildFile; fileRef = 57638D4F17DB72EA00BE93AC /* act-intensity-points.h */; };
 		57921A5717BEAEF0001AD35D /* ActWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 57921A5517BEAEF0001AD35D /* ActWindow.xib */; };
 		57921A5A17BEAF48001AD35D /* ActWindowController.mm in Sources */ = {isa = PBXBuildFile; fileRef = 57921A5917BEAF48001AD35D /* ActWindowController.mm */; };
 		579772E217C4F3E000AA2E9D /* ActActivitySubview.mm in Sources */ = {isa = PBXBuildFile; fileRef = 579772E117C4F3E000AA2E9D /* ActActivitySubview.mm */; };
@@ -106,6 +108,8 @@
 		5730789217C56820002C5B28 /* act-gps-chart.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "act-gps-chart.h"; path = "../src/act-gps-chart.h"; sourceTree = "<group>"; };
 		5730789417C56E54002C5B28 /* ActActivityChartView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActActivityChartView.h; sourceTree = "<group>"; };
 		5730789517C56E54002C5B28 /* ActActivityChartView.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ActActivityChartView.mm; sourceTree = "<group>"; };
+		57638D4E17DB72EA00BE93AC /* act-intensity-points.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "act-intensity-points.cc"; path = "../src/act-intensity-points.cc"; sourceTree = "<group>"; };
+		57638D4F17DB72EA00BE93AC /* act-intensity-points.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "act-intensity-points.h"; path = "../src/act-intensity-points.h"; sourceTree = "<group>"; };
 		57921A5617BEAEF0001AD35D /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/ActWindow.xib; sourceTree = "<group>"; };
 		57921A5817BEAF48001AD35D /* ActWindowController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActWindowController.h; sourceTree = "<group>"; };
 		57921A5917BEAF48001AD35D /* ActWindowController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ActWindowController.mm; sourceTree = "<group>"; };
@@ -254,6 +258,8 @@
 				571DB9D517BE67CD0001514C /* act-gps-parser.h */,
 				571DB9D617BE67CD0001514C /* act-gps-tcx-parser.cc */,
 				571DB9D717BE67CD0001514C /* act-gps-tcx-parser.h */,
+				57638D4E17DB72EA00BE93AC /* act-intensity-points.cc */,
+				57638D4F17DB72EA00BE93AC /* act-intensity-points.h */,
 				571DB9D817BE67CD0001514C /* act-output-table.cc */,
 				571DB9D917BE67CD0001514C /* act-output-table.h */,
 				571DB9DA17BE67CD0001514C /* act-swap-bytes.h */,
@@ -272,6 +278,7 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				57638D5117DB72EA00BE93AC /* act-intensity-points.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -394,6 +401,7 @@
 				571DB9F617BE67CD0001514C /* act-output-table.cc in Sources */,
 				571DB9F917BE67CD0001514C /* act-types.cc in Sources */,
 				571DB9FB17BE67CD0001514C /* act-util.cc in Sources */,
+				57638D5017DB72EA00BE93AC /* act-intensity-points.cc in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

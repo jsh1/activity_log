@@ -96,6 +96,8 @@
     act::format_fraction(str, a.effort());
   else if ([ident isEqualToString:@"quality"] && a.quality() != 0)
     act::format_fraction(str, a.quality());
+  else if ([ident isEqualToString:@"points"] && a.points() != 0)
+    act::format_number(str, a.points());
   else if ([ident isEqualToString:@"average-hr"] && a.average_hr() != 0)
     act::format_number(str, a.average_hr());
   else if ([ident isEqualToString:@"max-hr"] && a.max_hr() != 0)
