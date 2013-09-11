@@ -6,6 +6,7 @@
 #import "ActActivityChartView.h"
 #import "ActActivityHeaderView.h"
 #import "ActActivityLapView.h"
+#import "ActActivityMapView.h"
 #import "ActActivitySubView.h"
 #import "ActWindowController.h"
 
@@ -79,6 +80,7 @@ static NSArray *_ignoredFields;
 			 [ActActivityPaceChartView class],
 			 [ActActivityHeartRateChartView class],
 			 [ActActivityAltitudeChartView class],
+			 [ActActivityMapView class],
 			 nil];
     }
 

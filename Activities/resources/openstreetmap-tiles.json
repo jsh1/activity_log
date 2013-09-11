@@ -1,0 +1,12 @@
+{
+    "attribution": "<p><a href='http://www.openstreetmap.org' target='_blank'>© OpenStreetMap contributors.</a></p>",
+    "bounds": [-180,-85,180,85],
+    "center": [0,0,3],
+    "maxzoom": 19,
+    "minzoom": 0,
+    "name": "OSM mapnik",
+    "scheme": "tms",
+    "tilejson":"2.0.0",
+    "tiles": ["http://a.tile.openstreetmap.org/{z}/{x}/{y}.png",
+	      "http://b.tile.openstreetmap.org/{z}/{x}/{y}.png"]
+}

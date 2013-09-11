@@ -1,0 +1,14 @@
+{
+    "attribution": "<p><a href='http://www.openstreetmap.org/' target='_blank'>© OpenStreetMap contributors.</a> <a href='http://www.mapquest.com/' target='_blank'>Tiles Courtesy of MapQuest.</a></p>",
+    "bounds": [-180,-85,180,85],
+    "center": [0,0,3],
+    "maxzoom": 19,
+    "minzoom": 0,
+    "name": "Mapquest OSM",
+    "scheme": "tms",
+    "tilejson":"2.0.0",
+    "tiles": ["http://otile1.mqcdn.com/tiles/1.0.0/map/{z}/{x}/{y}.jpg",
+	      "http://otile2.mqcdn.com/tiles/1.0.0/map/{z}/{x}/{y}.jpg",
+	      "http://otile3.mqcdn.com/tiles/1.0.0/map/{z}/{x}/{y}.jpg",
+	      "http://otile4.mqcdn.com/tiles/1.0.0/map/{z}/{x}/{y}.jpg"]
+}

@@ -12,7 +12,7 @@
 #define RIGHT_BORDER 32
 
 #define HEADER_HEIGHT 20
-#define ROW_HEIGHT 20
+#define ROW_HEIGHT 18
 #define SEPARATOR_HEIGHT 2
 #define COLUMN_WIDTH 80
 

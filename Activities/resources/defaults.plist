@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- FIXME: these are all currently ignored -->
+
+	<key>ActDefaultDistanceUnit</key>
+	<string>miles</string>
+	<key>ActDefaultPaceUnit</key>
+	<string>seconds_per_mile</string>
+	<key>ActDefaultSpeedUnit</key>
+	<string>miles_per_hour</string>
+	<key>ActDefaultTemperatureUnit</key>
+	<string>celsius</string>
+	<key>ActDefaultWeightUnit</key>
+	<string>kg</string>
+	<key>ActStartOfWeek</key>
+	<integer>1</integer>
+	<key>ActRestingHR</key>
+	<integer>40</integer>
+	<key>ActMaxHR</key>
+	<integer>178</integer>
+	<key>VDOT</key>
+	<real>50</real>
+
+	<key>ActMapSources</key>
+	<array>
+		<string>openstreetmap-tiles</string>
+		<string>opencyclemap-tiles</string>
+		<string>hikebikemap-tiles</string>
+		<string>mapquest-map-tiles</string>
+		<string>mapquest-sat-tiles</string>
+	</array>
+</dict>
+</plist>

@@ -8,11 +8,27 @@
 
 - (void)dealloc
 {
+  [_windowController release];
+
   [super dealloc];
 }
 
 - (void)applicationDidFinishLaunching:(NSNotification *)note
 {
+  if (NSString *path = [[NSBundle mainBundle]
+			pathForResource:@"defaults" ofType:@"plist"])
+    {
+      if (NSData *data = [NSData dataWithContentsOfFile:path])
+	{
+	  if (NSDictionary *dict
+	      = [NSPropertyListSerialization propertyListWithData:data
+		 options:NSPropertyListImmutable format:nil error:nil])
+	    {
+	      [[NSUserDefaults standardUserDefaults] registerDefaults:dict];
+	    }
+	}
+    }
+
   [self showWindow:self];
 }
 
