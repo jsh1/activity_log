@@ -11,8 +11,8 @@
   int _mapZoom;
   CLLocationCoordinate2D _mapCenter;
 
-  NSMutableDictionary *_loadedImages;	/* NSURL -> CGImageRef */
-  NSMutableDictionary *_activeImages;	/* NSURL -> ActMapURLConnection */
+  uint32_t _seed;
+  NSMutableDictionary *_images;		/* NSURL -> ActMapImage */
 }
 
 @property(nonatomic, retain) ActMapSource *mapSource;

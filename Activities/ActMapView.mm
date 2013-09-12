@@ -8,14 +8,22 @@
 
 #define DEBUG_URLS 0
 
-@interface ActMapURLConnection : NSURLConnection
+@interface ActMapImage : NSObject
 {
+@public
+  uint32_t _seed;
+  CGImageRef _image;
   NSMutableData *_data;
+  NSURLConnection *_connection;
+  BOOL _failed;
 }
-- (void)resetData;
-- (void)appendData:(NSData *)data;
-- (CGImageRef)copyCGImage;
+
+- (void)drawInRect:(CGRect)r;
+
+- (void)invalidate;
+
 @end
+
 
 @implementation ActMapView
 
@@ -29,25 +37,21 @@
   _mapCenter.latitude = -50.71666;
   _mapZoom = 12;
 
-  _loadedImages = [[NSMutableDictionary alloc] init];
-  _activeImages = [[NSMutableDictionary alloc] init];
+  _images = [[NSMutableDictionary alloc] init];
 
   return self;
 }
 
 - (void)invalidate
 {
-  for (NSURL *url in _activeImages)
+  for (NSURL *url in _images)
     {
-      ActMapURLConnection *conn = [_activeImages objectForKey:url];
-      [conn cancel];
+      ActMapImage *im = [_images objectForKey:url];
+      [im invalidate];
     }
 
-  [_activeImages release];
-  _activeImages = nil;
-
-  [_loadedImages release];
-  _loadedImages = nil;
+  [_images release];
+  _images = nil;
 }
 
 - (void)dealloc
@@ -128,6 +132,8 @@ convertPointToLocation(CGPoint p)
   if (src == nil)
     return;
 
+  _seed++;
+
   int zoom_min = [src minZoom];
   int zoom_max = [src maxZoom];
 
@@ -156,9 +162,6 @@ convertPointToLocation(CGPoint p)
   int tx1 = ceil(origin.x + bounds.size.width / tw);
   int ty1 = ceil(origin.y + bounds.size.height / th);
 
-  CGContextRef ctx
-    = (CGContextRef) [[NSGraphicsContext currentContext] graphicsPort];
-
   for (int ty = ty0; ty < ty1; ty++)
     {
       if (ty < 0 || ty >= n_tiles)
@@ -175,48 +178,62 @@ convertPointToLocation(CGPoint p)
 	  if (url == nil)
 	    continue;
 
-	  if (CGImageRef im = [self copyImageForURL:url])
-	    {
-	      CGContextDrawImage(ctx, CGRectMake(px, py, tw, th), im);
-	      CGImageRelease(im);
-	    }
+	  if (ActMapImage *im = [self imageForURL:url])
+	    [im drawInRect:CGRectMake(px, py, tw, th)];
 	}
     }
+
+  // cancel connections no longer needed and release unused images.
+
+  NSMutableArray *removed = nil;
+
+  for (NSURL *url in _images)
+    {
+      ActMapImage *im = [_images objectForKey:url];
+
+      if (im->_seed != _seed)
+	{
+	  [im invalidate];
+	  if (removed == nil)
+	    removed = [[NSMutableArray alloc] init];
+	  [removed addObject:url];
+	}
+    }
+  for (NSURL *url in removed)
+    [_images removeObjectForKey:url];
+
+  [removed release];
 }
 
-- (CGImageRef)copyImageForURL:(NSURL *)url
+- (ActMapImage *)imageForURL:(NSURL *)url
 {
-  if (id obj = [_loadedImages objectForKey:url])
-    {
-      if (CFGetTypeID(obj) == CGImageGetTypeID())
-	return CGImageRetain((CGImageRef)obj);
-      else
-	return NULL;
-    }
+  ActMapImage *im = [_images objectForKey:url];
 
+  if (im == nil)
+    {
 #if DEBUG_URLS
-  NSLog(@"image request %@", url);
+      NSLog(@"image request %@", url);
 #endif
 
-  ActMapURLConnection *conn = [_activeImages objectForKey:url];
+      im = [[ActMapImage alloc] init];
 
-  if (conn == nil)
-    {
-      NSURLRequest *request = [[NSURLRequest alloc] initWithURL:url];
-
-      conn = [[ActMapURLConnection alloc]
-	      initWithRequest:request delegate:self startImmediately:YES];
-
-      if (conn != nil)
-	{
-	  [_activeImages setObject:conn forKey:url];
-	  [conn release];
-	}
+      [_images setObject:im forKey:url];
+      [im release];
     }
 
-  [_loadedImages setObject:[NSNull null] forKey:url];
+  if (im->_image == NULL && im->_connection == nil && !im->_failed)
+    {
+      if (im->_data == nil)
+	im->_data = [[NSMutableData alloc] init];
 
-  return NULL;
+      NSURLRequest *request = [[NSURLRequest alloc] initWithURL:url];
+      im->_connection = [[NSURLConnection alloc]
+			 initWithRequest:request delegate:self];
+      [request release];
+    }
+
+  im->_seed = _seed;
+  return im;
 }
 
 // NSURLConnectionDataDelegate methods
@@ -224,79 +241,88 @@ convertPointToLocation(CGPoint p)
 - (void)connection:(NSURLConnection *)conn
     didReceiveResponse:(NSURLResponse *)response
 {
-  [(ActMapURLConnection *)conn resetData];
+  NSURL *url = [[conn originalRequest] URL];
+  ActMapImage *im = [_images objectForKey:url];
+
+  [im->_data setLength:0];
 }
 
 - (void)connection:(NSURLConnection *)conn didFailWithError:(NSError *)error
 {
   NSURL *url = [[conn originalRequest] URL];
+  ActMapImage *im = [_images objectForKey:url];
 
-  [_activeImages removeObjectForKey:url];
+  im->_failed = YES;
+  [im invalidate];
 }
 
 - (void)connection:(NSURLConnection *)conn didReceiveData:(NSData *)data
 {
-  [(ActMapURLConnection *)conn appendData:data];
+  NSURL *url = [[conn originalRequest] URL];
+  ActMapImage *im = [_images objectForKey:url];
+
+  [im->_data appendData:data];
 }
 
 - (void)connectionDidFinishLoading:(NSURLConnection *)conn
 {
   NSURL *url = [[conn originalRequest] URL];
+  ActMapImage *im = [_images objectForKey:url];
 
-  [_activeImages removeObjectForKey:url];
-
-  if (CGImageRef im = [(ActMapURLConnection *)conn copyCGImage])
+  if (CGImageSourceRef src
+      = CGImageSourceCreateWithData((CFDataRef)im->_data, NULL))
     {
-      [_loadedImages setObject:(id)im forKey:url];
-      CGImageRelease(im);
-      [self setNeedsDisplay:YES];		// FIXME: shoddy
+      if (CGImageRef image = CGImageSourceCreateImageAtIndex(src, 0, NULL))
+	{
+	  im->_image = image;
+	  [self setNeedsDisplay:YES];			// FIXME: shoddy
+	}
+
+      CFRelease(src);
     }
+
+  [im->_connection release];
+  im->_connection = nil;
+
+  [im->_data release];
+  im->_data = nil;
+
+  im->_failed = NO;
 }
 
 @end
 
-@implementation ActMapURLConnection
+@implementation ActMapImage
 
-- (id)initWithRequest:(NSURLRequest *)req delegate:(id)obj
-    startImmediately:(BOOL)flag
+- (void)invalidate
 {
-  self = [super initWithRequest:req delegate:obj startImmediately:flag];
-  if (self == nil)
-    return nil;
+  CGImageRelease(_image);
+  _image = NULL;
 
-  _data = [[NSMutableData alloc] init];
+  [_data release];
+  _data = nil;
 
-  return self;
+  [_connection cancel];
+  [_connection release];
+  _connection = nil;
 }
 
 - (void)dealloc
 {
-  [_data release];
+  [self invalidate];
 
   [super dealloc];
 }
 
-- (void)resetData
+- (void)drawInRect:(CGRect)r
 {
-  [_data setLength:0];
-}
-
-- (void)appendData:(NSData *)data
-{
-  [_data appendData:data];
-}
-
-- (CGImageRef)copyCGImage
-{
-  if (CGImageSourceRef src
-      = CGImageSourceCreateWithData((CFDataRef)_data, NULL))
+  if (_image != NULL)
     {
-      CGImageRef im = CGImageSourceCreateImageAtIndex(src, 0, NULL);
-      CFRelease(src);
-      return im;
+      CGContextRef ctx
+	= (CGContextRef) [[NSGraphicsContext currentContext] graphicsPort];
+  
+      CGContextDrawImage(ctx, r, _image);
     }
-  else
-    return NULL;
 }
 
 @end
