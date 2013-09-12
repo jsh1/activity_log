@@ -142,7 +142,7 @@
 	}
     }
 
-  return empty ? 0 : width * (CGFloat).75;
+  return empty ? 0 : ceil(width * (CGFloat).75);
 }
 
 - (void)layoutSubviews

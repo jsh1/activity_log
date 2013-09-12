@@ -171,7 +171,7 @@
   [_layoutContainer setContainerSize:NSMakeSize(width, CGFLOAT_MAX)];
   [_layoutManager glyphRangeForTextContainer:_layoutContainer];
 
-  return [_layoutManager usedRectForTextContainer:_layoutContainer].size.height;
+  return ceil([_layoutManager usedRectForTextContainer:_layoutContainer].size.height);
 }
 
 - (void)layoutSubviews
