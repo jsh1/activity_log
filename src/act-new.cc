@@ -293,7 +293,7 @@ act_new(arguments &args)
 
   if (storage->field_ptr("Points") == nullptr)
     {
-      double points = calculate_points(a.speed(), a.distance());
+      double points = calculate_points(a.speed(), a.duration());
 
       if (points != 0)
 	{
