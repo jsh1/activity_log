@@ -5,7 +5,7 @@
     "maxzoom": 19,
     "minzoom": 0,
     "name": "Hike & Bike",
-    "scheme": "tms",
+    "scheme": "xyz",
     "tilejson":"2.0.0",
     "tiles": ["http://toolserver.org/tiles/hikebike/{z}/{x}/{y}.png"]
 }

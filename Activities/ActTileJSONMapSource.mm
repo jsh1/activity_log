@@ -87,7 +87,7 @@
     return nil;
 
   int ty = tile.y;
-  if ([[self scheme] isEqualToString:@"tms"])
+  if ([[self scheme] isEqualToString:@"xyz"])
     ty = (1 << tile.z) - ty - 1;
 
   NSString *str = [array objectAtIndex:0];

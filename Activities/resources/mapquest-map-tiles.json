@@ -5,7 +5,7 @@
     "maxzoom": 19,
     "minzoom": 0,
     "name": "Mapquest OSM",
-    "scheme": "tms",
+    "scheme": "xyz",
     "tilejson":"2.0.0",
     "tiles": ["http://otile1.mqcdn.com/tiles/1.0.0/map/{z}/{x}/{y}.jpg",
 	      "http://otile2.mqcdn.com/tiles/1.0.0/map/{z}/{x}/{y}.jpg",
