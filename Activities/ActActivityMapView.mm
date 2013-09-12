@@ -18,42 +18,57 @@
 
 @implementation ActActivityMapView
 
++ (NSArray *)_mapSourcesForKey:(NSString *)key
+{
+  NSArray *strings = [[NSUserDefaults standardUserDefaults] arrayForKey:key];
+  if (strings == nil)
+    return nil;
+
+  NSMutableArray *tem = [[NSMutableArray alloc] init];
+
+  for (NSString *str in strings)
+    {
+      ActMapSource *src = nil;
+
+      if ([str rangeOfString:@"/"].length == 0)
+	src = [ActTileJSONMapSource mapSourceFromResource:str];
+      else
+	{
+	  NSURL *url = nil;
+	  if ([str rangeOfString:@":"].length == 0)
+	    url = [NSURL fileURLWithPath:str];
+	  else
+	    url = [NSURL URLWithString:str];
+	  if (url != nil)
+	    src = [ActTileJSONMapSource mapSourceFromURL:url];
+	}
+
+      if ([src name] != nil)
+	[tem addObject:src];
+    }
+
+  NSArray *ret = [NSArray arrayWithArray:tem];
+  [tem release];
+
+  return ret;
+}
+
 + (NSArray *)mapSources
 {
   static NSArray *array;
 
   if (array == nil)
     {
-      NSArray *strings = [[NSUserDefaults standardUserDefaults]
-			  arrayForKey:@"ActMapSources"];
-      if (strings != nil)
-	{
-	  NSMutableArray *tem = [[NSMutableArray alloc] init];
+      NSMutableArray *tem = [[NSMutableArray alloc] init];
 
-	  for (NSString *str in strings)
-	    {
-	      ActMapSource *src = nil;
+      if (NSArray *a = [self _mapSourcesForKey:@"ActUserMapSources"])
+	[tem addObjectsFromArray:a];
 
-	      if ([str rangeOfString:@"/"].length == 0)
-		src = [ActTileJSONMapSource mapSourceFromResource:str];
-	      else
-		{
-		  NSURL *url = nil;
-		  if ([str rangeOfString:@":"].length == 0)
-		    url = [NSURL fileURLWithPath:str];
-		  else
-		    url = [NSURL URLWithString:str];
-		  if (url != nil)
-		    src = [ActTileJSONMapSource mapSourceFromURL:url];
-		}
+      if (NSArray *a = [self _mapSourcesForKey:@"ActMapSources"])
+	[tem addObjectsFromArray:a];
 
-	      if ([src name] != nil)
-		[tem addObject:src];
-	    }
-
-	  array = [tem copy];
-	  [tem release];
-	}
+      array = [tem copy];
+      [tem release];
     }
 
   return array;
