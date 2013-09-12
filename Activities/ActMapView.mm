@@ -8,6 +8,9 @@
 
 #define DEBUG_URLS 0
 
+#define DRAG_THRESH 3
+#define DRAG_MASK (NSLeftMouseDraggedMask | NSLeftMouseUpMask)
+
 @interface ActMapImage : NSObject
 {
 @public
@@ -115,7 +118,6 @@ convertLocationToPoint(CLLocationCoordinate2D l)
   return p;
 }
 
-#if UNUSED_CODE
 static CLLocationCoordinate2D
 convertPointToLocation(CGPoint p)
 {
@@ -124,7 +126,6 @@ convertPointToLocation(CGPoint p)
   l.latitude = atan(sinh(M_PI * (1 - 2 * p.y))) * 180 / M_PI;
   return l;
 }
-#endif
 
 - (void)drawRect:(NSRect)r
 {
@@ -227,8 +228,11 @@ convertPointToLocation(CGPoint p)
 	im->_data = [[NSMutableData alloc] init];
 
       NSURLRequest *request = [[NSURLRequest alloc] initWithURL:url];
-      im->_connection = [[NSURLConnection alloc]
-			 initWithRequest:request delegate:self];
+      im->_connection = [[NSURLConnection alloc] initWithRequest:request
+			 delegate:self startImmediately:NO];
+      [im->_connection scheduleInRunLoop:[NSRunLoop mainRunLoop]
+       forMode:NSRunLoopCommonModes];
+      [im->_connection start];
       [request release];
     }
 
@@ -288,6 +292,56 @@ convertPointToLocation(CGPoint p)
   im->_data = nil;
 
   im->_failed = NO;
+}
+
+// Event handling
+
+- (void)mouseDown:(NSEvent *)e
+{
+  NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+
+  BOOL dragging = NO;
+
+  NSPoint p0 = [self convertPoint:[e locationInWindow] fromView:nil];
+  CGPoint c0 = convertLocationToPoint([self mapCenter]);
+
+  CGFloat mx = (1 << _mapZoom) * [_mapSource tileWidth];
+  CGFloat my = (1 << _mapZoom) * [_mapSource tileHeight];
+
+  c0.x *= mx;
+  c0.y *= my;
+
+  while (1)
+    {
+      e = [[self window] nextEventMatchingMask:DRAG_MASK];
+
+      if ([e type] != NSLeftMouseDragged)
+	break;
+
+      NSPoint p1 = [self convertPoint:[e locationInWindow] fromView:nil];
+
+      if (!dragging && (fabs(p1.x - p0.x) >= DRAG_THRESH
+			|| fabs(p1.y - p0.y) >= DRAG_THRESH))
+	{
+	  dragging = YES;
+	}
+
+      if (dragging)
+	{
+	  CGPoint c1;
+	  c1.x = (c0.x + (p0.x - p1.x)) / mx;
+	  c1.y = (c0.y + (p0.y - p1.y)) / my;
+
+	  [self setMapCenter:convertPointToLocation(c1)];
+
+	  [self displayIfNeeded];
+	}
+
+      [pool drain];
+      pool = [[NSAutoreleasePool alloc] init];
+    }
+
+  [pool drain];
 }
 
 @end
