@@ -19,11 +19,23 @@
 
 + (ActTileJSONMapSource *)mapSourceFromURL:(NSURL *)url
 {
-  NSData *data = [NSData dataWithContentsOfURL:url];
-  if (data == nil)
-    return nil;
+  if ([url isFileURL])
+    {
+      NSData *data = [NSData dataWithContentsOfURL:url];
+      if (data == nil)
+	return nil;
 
-  return [[[self alloc] initWithJSONData:data] autorelease];
+      return [[[self alloc] initWithJSONData:data] autorelease];
+    }
+  else
+    {
+      /* Load remote JSON data URLs asynchronously, avoids noticeably
+	 blocking on startup. */
+
+      ActTileJSONMapSource *src = [[self alloc] initWithJSONData:nil];
+      [src startLoadingURL:url];
+      return [src autorelease];
+    }
 }
 
 - (id)initWithJSONData:(NSData *)data
@@ -32,13 +44,16 @@
   if (self == nil)
     return nil;
 
-  _dict = [[NSJSONSerialization
-	    JSONObjectWithData:data options:0 error:nil] retain];
-
-  if (_dict == nil)
+  if (data != nil)
     {
-      [self release];
-      return nil;
+      _dict = [[NSJSONSerialization
+		JSONObjectWithData:data options:0 error:nil] retain];
+
+      if (_dict == nil)
+	{
+	  [self release];
+	  return nil;
+	}
     }
 
   return self;
@@ -48,12 +63,42 @@
 {
   [_dict release];
 
+  [_connection cancel];
+  [_connection release];
+  [_connectionData release];
+
   [super dealloc];
+}
+
+- (void)startLoadingURL:(NSURL *)url
+{
+  assert(_connection == nil);
+
+  NSURLRequest *request = [[NSURLRequest alloc] initWithURL:url];
+  _connection = [[NSURLConnection alloc] initWithRequest:request
+		 delegate:self startImmediately:NO];
+  [_connection scheduleInRunLoop:[NSRunLoop mainRunLoop]
+   forMode:NSRunLoopCommonModes];
+  [_connection start];
+  [request release];
+  _connectionData = [[NSMutableData alloc] init];
+}
+
+- (BOOL)isLoading
+{
+  return _connection != nil;
 }
 
 - (NSString *)name
 {
-  return [_dict objectForKey:@"name"];
+  if (NSString *name = [_dict objectForKey:@"name"])
+    return name;
+  else if (_connection != nil)
+    return @"(loading)";
+  else if (_dict == nil)
+    return @"(null)";
+  else
+    return @"unknown";
 }
 
 - (NSString *)scheme
@@ -99,6 +144,44 @@
          withString:[NSString stringWithFormat:@"%d", tile.z]];
 
   return [NSURL URLWithString:str];
+}
+
+// NSURLConnectionDataDelegate methods
+
+- (void)connection:(NSURLConnection *)conn
+    didReceiveResponse:(NSURLResponse *)response
+{
+  [_connectionData setLength:0];
+}
+
+- (void)connection:(NSURLConnection *)conn didFailWithError:(NSError *)error
+{
+  [_connection release];
+  _connection = nil;
+
+  [_connectionData release];
+  _connectionData = nil;
+}
+
+- (void)connection:(NSURLConnection *)conn didReceiveData:(NSData *)data
+{
+  [_connectionData appendData:data];
+}
+
+- (void)connectionDidFinishLoading:(NSURLConnection *)conn
+{
+  [_dict release];
+  _dict = [[NSJSONSerialization JSONObjectWithData:_connectionData
+	    options:0 error:nil] retain];
+
+  [_connection release];
+  _connection = nil;
+
+  [_connectionData release];
+  _connectionData = nil;
+
+  [[NSNotificationCenter defaultCenter]
+   postNotificationName:ActMapSourceDidFinishLoading object:self];
 }
 
 @end

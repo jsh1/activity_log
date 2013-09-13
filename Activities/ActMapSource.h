@@ -15,6 +15,8 @@ struct ActMapTileIndex
 
 @interface ActMapSource : NSObject
 
+@property(nonatomic, readonly, getter=isLoading) BOOL loading;
+
 @property(nonatomic, readonly) NSString *name;
 @property(nonatomic, readonly) NSString *scheme;
 @property(nonatomic, readonly) int minZoom;
@@ -25,6 +27,10 @@ struct ActMapTileIndex
 - (NSURL *)URLForTileIndex:(const ActMapTileIndex &)tile;
 
 @end
+
+// ActMapSource notifications
+
+extern NSString *const ActMapSourceDidFinishLoading;
 
 // implementation details
 

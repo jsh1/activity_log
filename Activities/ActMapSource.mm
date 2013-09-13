@@ -2,7 +2,14 @@
 
 #import "ActMapSource.h"
 
+NSString *const ActMapSourceDidFinishLoading = @"ActMapSourceDidFinishLoading";
+
 @implementation ActMapSource
+
+- (BOOL)isLoading
+{
+  return NO;
+}
 
 - (NSString *)name
 {

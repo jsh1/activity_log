@@ -111,15 +111,40 @@
       // FIXME: [auto]release 'obj'?
     }
 
+  BOOL loading = NO;
   for (ActMapSource *src in [[self class] mapSources])
     {
       [_mapSrcButton addItemWithTitle:[src name]];
+      if ([src isLoading])
+	loading = YES;
+    }
+
+  if (loading)
+    {
+      [[NSNotificationCenter defaultCenter] addObserver:self
+       selector:@selector(mapSourceDidFinishLoading:)
+       name:ActMapSourceDidFinishLoading object:nil];
     }
 
   [self setMapSourceAtIndex:0];
   [_zoomSlider setIntValue:[_mapView mapZoom]];
 
   return self;
+}
+
+- (void)mapSourceDidFinishLoading:(NSNotification *)note
+{
+  [_mapSrcButton removeAllItems];
+
+  for (ActMapSource *src in [[self class] mapSources])
+    [_mapSrcButton addItemWithTitle:[src name]];
+}
+
+- (void)dealloc
+{
+  [[NSNotificationCenter defaultCenter] removeObserver:self];
+
+  [super dealloc];
 }
 
 - (void)activityDidChange
