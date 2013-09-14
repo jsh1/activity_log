@@ -231,5 +231,84 @@ activity::get_range(double point:: *field, double &ret_min, double &ret_max,
     ret_mean = 0, ret_sdev = 0;
 }
 
+void
+activity::lap::update_region()
+{
+  /* FIXME: none of this correctly handles regions spanning the wrap point. */
+
+  double min_lat = 0, min_long = 0, max_lat = 0, max_long = 0;
+  bool first = true;
+
+  for (size_t i = 0; i < track.size(); i++)
+    {
+      const point &p = track[i];
+
+      if (p.location.latitude == 0 && p.location.longitude == 0)
+	continue;
+
+      if (first)
+	{
+	  min_lat = max_lat = p.location.latitude;
+	  min_long = max_long = p.location.longitude;
+	  first = false;
+	}
+      else
+	{
+	  min_lat = std::min(min_lat, p.location.latitude);
+	  max_lat = std::max(max_lat, p.location.latitude);
+	  min_long = std::min(min_long, p.location.longitude);
+	  max_long = std::max(max_long, p.location.longitude);
+	}
+    }
+
+  location cen = location((min_lat + max_lat)*.5, (min_long + max_long)*.5);
+  location_size sz = location_size(max_lat - min_lat, max_long - min_long);
+  this->region = location_region(cen, sz);
+}
+
+void
+activity::update_region()
+{
+  double min_lat = 0, min_long = 0, max_lat = 0, max_long = 0;
+  bool first = true;
+
+  for (size_t i = 0; i < laps().size(); i++)
+    {
+      lap &l = laps()[i];
+
+      l.update_region();
+
+      if (l.region.size.latitude != 0 || l.region.size.longitude != 0)
+	{
+	  double lat0 = (l.region.center.latitude
+			 - l.region.size.latitude * .5);
+	  double long0 = (l.region.center.longitude
+			  - l.region.size.longitude * .5);
+	  double lat1 = lat0 + l.region.size.latitude;
+	  double long1 = long0 + l.region.size.longitude;
+
+	  if (first)
+	    {
+	      min_lat = lat0;
+	      max_lat = lat1;
+	      min_long = long0;
+	      max_long = long1;
+	      first = false;
+	    }
+	  else
+	    {
+	      min_lat = std::min(min_lat, lat0);
+	      max_lat = std::max(max_lat, lat1);
+	      min_long = std::min(min_long, long0);
+	      max_long = std::max(max_long, long1);
+	    }
+	}
+    }
+
+  location cen = location((min_lat + max_lat)*.5, (min_long + max_long)*.5);
+  location_size sz = location_size(max_lat - min_lat, max_long - min_long);
+  _region = location_region(cen, sz);
+}
+
 } // namespace gps
 } // namespace act

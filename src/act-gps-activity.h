@@ -3,7 +3,7 @@
 #ifndef ACT_GPS_ACTIVITY_H
 #define ACT_GPS_ACTIVITY_H
 
-#include "act-base.h"
+#include "act-types.h"
 
 #include <string>
 #include <vector>
@@ -25,16 +25,14 @@ public:
   struct point
     {
       double time;
-      double latitude;
-      double longitude;
+      location location;
       double altitude;
       double distance;
       double speed;
       double heart_rate;
 
       point()
-      : time(0), latitude(0), longitude(0), altitude(0),
-        distance(0), speed(0), heart_rate(0) {}
+      : time(0), altitude(0), distance(0), speed(0), heart_rate(0) {}
     };
 
   struct lap
@@ -48,11 +46,14 @@ public:
       double avg_heart_rate;
       double max_heart_rate;
       std::vector<point> track;
+      location_region region;
 
       lap()
       : time(0), duration(0), distance(0), avg_speed(0),
         max_speed(0), calories(0), avg_heart_rate(0),
 	max_heart_rate(0) {}
+
+      void update_region();
     };
 
 private:
@@ -70,6 +71,8 @@ private:
   double _max_heart_rate;
 
   std::vector<lap> _laps;
+
+  location_region _region;
 
   bool _has_location;
   bool _has_speed;
@@ -129,6 +132,8 @@ public:
   std::vector<lap> &laps() {return _laps;}
   const std::vector<lap> &laps() const {return _laps;}
 
+  const location_region &region() const {return _region;}
+
   void set_has_location(bool x) {_has_location = x;}
   bool has_location() const {return _has_location;}
 
@@ -140,6 +145,8 @@ public:
 
   void set_has_altitude(bool x) {_has_altitude = x;}
   bool has_altitude() const {return _has_altitude;}
+
+  void update_region();
 };
 
 } // namespace gps

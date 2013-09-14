@@ -60,6 +60,9 @@ tcx_parser::parse_file(const char *path)
 
       fclose (fh);
     }
+
+  if (!had_error())
+    destination().update_region();
 }
 
 namespace {
@@ -318,11 +321,11 @@ tcx_parser::sax_end_element(void *ctx, const xmlChar *name,
 	  p->current_point().time = parse_time(*p->_characters);
 	  break;
 	case state::TP_LAT:
-	  p->current_point().latitude = parse_double(*p->_characters);
+	  p->current_point().location.latitude = parse_double(*p->_characters);
 	  p->destination().set_has_location(true);
 	  break;
 	case state::TP_LONG:
-	  p->current_point().longitude = parse_double(*p->_characters);
+	  p->current_point().location.longitude = parse_double(*p->_characters);
 	  p->destination().set_has_location(true);
 	  break;
 	case state::TP_ALTITUDE:

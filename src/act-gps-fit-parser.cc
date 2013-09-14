@@ -69,6 +69,9 @@ fit_parser::parse_file(const char *path)
     }
   else
     set_error();
+
+  if (!had_error())
+    destination().update_region();
 }
 
 /* pass null 'buf' pointer to seek forwards. */
@@ -461,14 +464,14 @@ fit_parser::read_record_message(const message_type &def, uint32_t timestamp)
       switch (it->field_type)
 	{
 	case 0:				/* position_lat */
-	  p.latitude = make_lat_long(read_field(def, *it));
-	  if (p.latitude != 0)
+	  p.location.latitude = make_lat_long(read_field(def, *it));
+	  if (p.location.latitude != 0)
 	    destination().set_has_location(true);
 	  break;
 
 	case 1:				/* position_long */
-	  p.longitude = make_lat_long(read_field(def, *it));
-	  if (p.longitude != 0)
+	  p.location.longitude = make_lat_long(read_field(def, *it));
+	  if (p.location.longitude != 0)
 	    destination().set_has_location(true);
 	  break;
 
