@@ -77,10 +77,10 @@ static NSArray *_ignoredFields;
 			 [ActActivityHeaderView class],
 			 [ActActivityBodyView class],
 			 [ActActivityLapView class],
+			 [ActActivityMapView class],
 			 [ActActivityPaceChartView class],
 			 [ActActivityHeartRateChartView class],
 			 [ActActivityAltitudeChartView class],
-			 [ActActivityMapView class],
 			 nil];
     }
 

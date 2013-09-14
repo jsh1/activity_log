@@ -10,7 +10,7 @@
 
 #import <algorithm>
 
-#define MAP_HEIGHT 300
+#define MAP_ASPECT (16./9.)
 #define TOP_BORDER 0
 #define BOTTOM_BORDER 0
 #define LEFT_BORDER 32
@@ -158,10 +158,19 @@
     return;
 
   [_mapView displayRegion:gps_a->region()];
+
+  // FIXME: need a notification/KVO for this?
+  [_zoomSlider setIntValue:[_mapView mapZoom]];
 }
 
 - (void)selectedLapDidChange
 {
+  const act::activity *a = [[self activityView] activity];
+
+  if (a != nullptr && a->gps_data() != nullptr)
+    {
+      [_mapView setNeedsDisplay:YES];
+    }
 }
 
 - (NSEdgeInsets)edgeInsets
@@ -183,7 +192,7 @@
 	}
     }
 
-  return empty ? 0 : ceil(width * (CGFloat).75);
+  return empty ? 0 : ceil(width * (1./MAP_ASPECT));
 }
 
 - (void)layoutSubviews
@@ -239,8 +248,6 @@
   CGContextSetRGBStrokeColor(ctx, 0, 0.2, 1, .75);
   CGContextSetLineWidth(ctx, 3);
 
-  CGContextBeginPath(ctx);
-
   double xa = bounds.size.width / (loc_ur.longitude - loc_ll.longitude);
   double xb = bounds.origin.x - loc_ll.longitude * xa;
 
@@ -248,9 +255,22 @@
   double yb = bounds.origin.y - loc_ll.latitude * ya;
 
   bool in_subpath = false;
+  CGPoint cp = CGPointZero;
+
+  int current_lap = 0;
+  int selected_lap = [[self activityView] selectedLapIndex];
 
   for (const auto &lap : gps_a->laps())
     {
+      if (current_lap == selected_lap)
+	{
+	  CGContextStrokePath(ctx);
+	  CGContextSaveGState(ctx);
+	  CGContextSetRGBStrokeColor(ctx, 1, 0, 0.3, 1);
+	  CGContextBeginPath(ctx);
+	  CGContextMoveToPoint(ctx, cp.x, cp.y);
+	}
+	
       for (const auto &p : lap.track)
 	{
 	  if (p.location.longitude == 0 && p.location.latitude == 0)
@@ -260,10 +280,27 @@
 	  CGFloat py = p.location.latitude * ya + yb;
 
 	  if (!in_subpath)
-	    CGContextMoveToPoint(ctx, px, py), in_subpath = true;
+	    {
+	      CGContextBeginPath(ctx);
+	      CGContextMoveToPoint(ctx, px, py);
+	      in_subpath = true;
+	    }
 	  else
-	    CGContextAddLineToPoint(ctx, px, py);
+	    {
+	      CGContextAddLineToPoint(ctx, px, py);
+	      cp = CGPointMake(px, py);
+	    }
 	}
+
+      if (current_lap == selected_lap)
+	{
+	  CGContextStrokePath(ctx);
+	  CGContextRestoreGState(ctx);
+	  CGContextBeginPath(ctx);
+	  CGContextMoveToPoint(ctx, cp.x, cp.y);
+	}
+
+      current_lap++;
     }
 
   CGContextStrokePath(ctx);
