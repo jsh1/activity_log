@@ -2,7 +2,7 @@
     "attribution": "<p><a href='http://www.openstreetmap.org/' target='_blank'>© OpenStreetMap contributors.</a> <a href='http://www.mapquest.com/' target='_blank'>Tiles Courtesy of MapQuest.</a></p>",
     "bounds": [-180,-85,180,85],
     "center": [0,0,3],
-    "maxzoom": 19,
+    "maxzoom": 18,
     "minzoom": 0,
     "name": "Mapquest OSM",
     "scheme": "xyz",
