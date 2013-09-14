@@ -27,8 +27,28 @@
 
 @end
 
+static CGPoint
+convertLocationToPoint(act::location l)
+{
+  CGPoint p;
+  p.x = (180 - l.longitude) / 360;
+  double lat_rad = l.latitude * (M_PI / 180);
+  p.y = (1 - (log(tan(lat_rad) + 1/cos(lat_rad)) / M_PI)) / 2;
+  return p;
+}
+
+static act::location
+convertPointToLocation(CGPoint p)
+{
+  act::location l;
+  l.longitude = 180 - p.x * 360;
+  l.latitude = atan(sinh(M_PI * (1 - 2 * p.y))) * 180 / M_PI;
+  return l;
+}
 
 @implementation ActMapView
+
+@synthesize mapDelegate = _mapDelegate;
 
 - (id)initWithFrame:(NSRect)frame
 {
@@ -37,7 +57,7 @@
     return nil;
 
   _mapCenter.longitude = -1.98333;
-  _mapCenter.latitude = -50.71666;
+  _mapCenter.latitude = 50.71666;
   _mapZoom = 12;
 
   _images = [[NSMutableDictionary alloc] init];
@@ -94,12 +114,12 @@
     }
 }
 
-- (CLLocationCoordinate2D)mapCenter
+- (act::location)mapCenter
 {
   return _mapCenter;
 }
 
-- (void)setMapCenter:(CLLocationCoordinate2D)l
+- (void)setMapCenter:(act::location)l
 {
   if (_mapCenter.latitude != l.latitude || _mapCenter.longitude != l.longitude)
     {
@@ -108,23 +128,35 @@
     }
 }
 
-static CGPoint
-convertLocationToPoint(CLLocationCoordinate2D l)
+- (void)displayRegion:(const act::location_region &)rgn
 {
-  CGPoint p;
-  p.x = (l.longitude + 180) / 360;
-  double lat_rad = l.latitude * (M_PI / 180);
-  p.y = (1 - (log(tan(lat_rad) + 1/cos(lat_rad)) / M_PI)) / 2;
-  return p;
-}
+  [self setMapCenter:rgn.center];
 
-static CLLocationCoordinate2D
-convertPointToLocation(CGPoint p)
-{
-  CLLocationCoordinate2D l;
-  l.longitude = p.x * 360 - 180;
-  l.latitude = atan(sinh(M_PI * (1 - 2 * p.y))) * 180 / M_PI;
-  return l;
+  ActMapSource *src = [self mapSource];
+  if (src == nil)
+    return;
+
+  act::location loc_ll(rgn.center.latitude - rgn.size.latitude * .5,
+		       rgn.center.longitude - rgn.size.longitude * .5);
+  act::location loc_ur(rgn.center.latitude + rgn.size.latitude * .5,
+		       rgn.center.longitude + rgn.size.longitude * .5);
+
+  CGPoint p_ll = convertLocationToPoint(loc_ll);
+  CGPoint p_ur = convertLocationToPoint(loc_ur);
+
+  double pw = fabs(p_ur.x - p_ll.x);
+  double ph = fabs(p_ur.y - p_ll.y);
+
+  NSRect bounds = [self bounds];
+  double tw = bounds.size.width / [src tileWidth];
+  double th = bounds.size.height / [src tileHeight];
+
+  double zw = log2(tw / pw);
+  double zh = log2(th / ph);
+
+  int zoom = floor(std::min(zw, zh));
+
+  [self setMapZoom:zoom];
 }
 
 - (void)drawRect:(NSRect)r
@@ -182,6 +214,23 @@ convertPointToLocation(CGPoint p)
 	  if (ActMapImage *im = [self imageForURL:url])
 	    [im drawInRect:CGRectMake(px, py, tw, th)];
 	}
+    }
+
+  if ([_mapDelegate respondsToSelector:
+       @selector(mapView:drawOverlayRect:mapBottomLeft:topRight:)])
+    {
+      CGPoint p_ll = CGPointMake(origin.x / n_tiles,
+				 origin.y / n_tiles);
+      CGPoint p_ur = CGPointMake((origin.x + bounds.size.width / tw)
+				 / n_tiles,
+				 (origin.y + bounds.size.height / th)
+				 / n_tiles);
+
+      act::location l_ll = convertPointToLocation(p_ll);
+      act::location l_ur = convertPointToLocation(p_ur);
+
+      [_mapDelegate mapView:self drawOverlayRect:r mapBottomLeft:l_ll
+       topRight:l_ur];
     }
 
   // cancel connections no longer needed and release unused images.

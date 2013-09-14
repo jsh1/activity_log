@@ -149,14 +149,15 @@
 
 - (void)activityDidChange
 {
-#if 0
-  if (const act::activity *a = [[self activityView] activity])
-    {
-      if (const act::gps::activity *gps_a = a->gps_data())
-	{
-	}
-    }
-#endif
+  const act::activity *a = [[self activityView] activity];
+  if (!a)
+    return;
+
+  const act::gps::activity *gps_a = a->gps_data();
+  if (!gps_a || !gps_a->has_location())
+    return;
+
+  [_mapView displayRegion:gps_a->region()];
 }
 
 - (void)selectedLapDidChange
@@ -214,6 +215,60 @@
       [_mapView setMapZoom:zoom];
       [_zoomSlider setIntValue:zoom];
     }
+}
+
+- (void)mapView:(ActMapView *)view drawOverlayRect:(NSRect)r
+    mapBottomLeft:(const act::location &)loc_ll
+    topRight:(const act::location &)loc_ur
+{
+  const act::activity *a = [[self activityView] activity];
+  if (!a)
+    return;
+
+  const act::gps::activity *gps_a = a->gps_data();
+  if (!gps_a || !gps_a->has_location())
+    return;
+
+  CGContextRef ctx =
+    (CGContextRef) [[NSGraphicsContext currentContext] graphicsPort];
+
+  NSRect bounds = [view bounds];
+
+  CGContextSaveGState(ctx);
+
+  CGContextSetRGBStrokeColor(ctx, 0, 0.2, 1, .75);
+  CGContextSetLineWidth(ctx, 3);
+
+  CGContextBeginPath(ctx);
+
+  double xa = bounds.size.width / (loc_ur.longitude - loc_ll.longitude);
+  double xb = bounds.origin.x - loc_ll.longitude * xa;
+
+  double ya = bounds.size.height / (loc_ur.latitude - loc_ll.latitude);
+  double yb = bounds.origin.y - loc_ll.latitude * ya;
+
+  bool in_subpath = false;
+
+  for (const auto &lap : gps_a->laps())
+    {
+      for (const auto &p : lap.track)
+	{
+	  if (p.location.longitude == 0 && p.location.latitude == 0)
+	    continue;
+
+	  CGFloat px = p.location.longitude * xa + xb;
+	  CGFloat py = p.location.latitude * ya + yb;
+
+	  if (!in_subpath)
+	    CGContextMoveToPoint(ctx, px, py), in_subpath = true;
+	  else
+	    CGContextAddLineToPoint(ctx, px, py);
+	}
+    }
+
+  CGContextStrokePath(ctx);
+
+  CGContextRestoreGState(ctx);
 }
 
 @end
