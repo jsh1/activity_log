@@ -350,13 +350,15 @@ format_keywords(std::string &str, const std::vector<std::string> &keys)
 {
   bool first = true;
 
-  for (auto it = keys.begin(); it != keys.end(); it++, first = false)
+  for (const auto &it : keys)
     {
       if (!first)
 	str.push_back(' ');
+      else
+	first = false;
 
       // FIXME: quoting?
-      str.append(*it);
+      str.append(it);
     }
 }
 

@@ -458,47 +458,49 @@ fit_parser::read_record_message(const message_type &def, uint32_t timestamp)
 
   p.time = make_time(timestamp);
 
-  for (std::vector<message_field>::const_iterator it = def.fields.begin();
-       !had_error() && it != def.fields.end(); it++)
+  for (const auto &it : def.fields)
     {
-      switch (it->field_type)
+      if (had_error())
+	break;
+
+      switch (it.field_type)
 	{
 	case 0:				/* position_lat */
-	  p.location.latitude = make_lat_long(read_field(def, *it));
+	  p.location.latitude = make_lat_long(read_field(def, it));
 	  if (p.location.latitude != 0)
 	    destination().set_has_location(true);
 	  break;
 
 	case 1:				/* position_long */
-	  p.location.longitude = make_lat_long(read_field(def, *it));
+	  p.location.longitude = make_lat_long(read_field(def, it));
 	  if (p.location.longitude != 0)
 	    destination().set_has_location(true);
 	  break;
 
 	case 2:				/* altitude */
-	  p.altitude = make_altitude(read_field(def, *it));
+	  p.altitude = make_altitude(read_field(def, it));
 	  if (p.altitude != 0)
 	    destination().set_has_altitude(true);
 	  break;
 
 	case 5:				/* distance */
-	  p.distance = make_distance(read_field(def, *it));
+	  p.distance = make_distance(read_field(def, it));
 	  break;
 
 	case 6:				/* speed */
-	  p.speed = make_speed(read_field(def, *it));
+	  p.speed = make_speed(read_field(def, it));
 	  if (p.speed != 0)
 	    destination().set_has_speed(true);
 	  break;
 
 	case 3:				/* heart_rate */
-	  p.heart_rate = read_field(def, *it);
+	  p.heart_rate = read_field(def, it);
 	  if (p.heart_rate != 0)
 	    destination().set_has_heart_rate(true);
 	  break;
 
 	default:
-	  skip_field(*it);
+	  skip_field(it);
 	}
     }
 
@@ -511,45 +513,47 @@ fit_parser::read_lap_message(const message_type &def, uint32_t timestamp)
   destination().laps().push_back(activity::lap());
   activity::lap &lap = destination().laps().back();
 
-  for (std::vector<message_field>::const_iterator it = def.fields.begin();
-       !had_error() && it != def.fields.end(); it++)
+  for (const auto &it : def.fields)
     {
-      switch (it->field_type)
+      if (had_error())
+	break;
+
+      switch (it.field_type)
 	{
 	case 2:				/* start_time */
-	  lap.time = make_time(read_field(def, *it));
+	  lap.time = make_time(read_field(def, it));
 	  break;
 
 	case 8:				/* total_timer_time */
-	  lap.duration = make_duration(read_field(def, *it));
+	  lap.duration = make_duration(read_field(def, it));
 	  break;
 
 	case 9:				/* distance */
-	  lap.distance = make_distance(read_field(def, *it));
+	  lap.distance = make_distance(read_field(def, it));
 	  break;
 
 	case 13:			/* avg_speed */
-	  lap.avg_speed = make_speed(read_field(def, *it));
+	  lap.avg_speed = make_speed(read_field(def, it));
 	  break;
 
 	case 14:			/* max_speed */
-	  lap.max_speed = make_speed(read_field(def, *it));
+	  lap.max_speed = make_speed(read_field(def, it));
 	  break;
 
 	case 11:			/* total_calories */
-	  lap.calories = read_field(def, *it);
+	  lap.calories = read_field(def, it);
 	  break;
 
 	case 15:			/* avg_heart_rate */
-	  lap.avg_heart_rate = read_field(def, *it);
+	  lap.avg_heart_rate = read_field(def, it);
 	  break;
 
 	case 16:			/* max_heart_rate */
-	  lap.max_heart_rate = read_field(def, *it);
+	  lap.max_heart_rate = read_field(def, it);
 	  break;
 
 	default:
-	  skip_field(*it);
+	  skip_field(it);
 	}
     }
 
@@ -563,49 +567,51 @@ fit_parser::read_session_message(const message_type &def, uint32_t timestamp)
 {
   activity &d = destination();
 
-  for (std::vector<message_field>::const_iterator it = def.fields.begin();
-       !had_error() && it != def.fields.end(); it++)
+  for (const auto &it : def.fields)
     {
-      switch (it->field_type)
+      if (had_error())
+	break;
+
+      switch (it.field_type)
 	{
 	case 2:				/* start_time */
-	  d.set_time(make_time(read_field(def, *it)));
+	  d.set_time(make_time(read_field(def, it)));
 	  break;
 
 	case 5:				/* sport */
-	  d.set_sport(make_sport(read_field(def, *it)));
+	  d.set_sport(make_sport(read_field(def, it)));
 	  break;
 
 	case 8:				/* total_timer_time */
-	  d.set_duration(make_duration(read_field(def, *it)));
+	  d.set_duration(make_duration(read_field(def, it)));
 	  break;
 
 	case 9:				/* total_distance */
-	  d.set_distance(make_distance(read_field(def, *it)));
+	  d.set_distance(make_distance(read_field(def, it)));
 	  break;
 
 	case 14:			/* avg_speed */
-	  d.set_avg_speed(make_speed(read_field(def, *it)));
+	  d.set_avg_speed(make_speed(read_field(def, it)));
 	  break;
 
 	case 15:			/* max_speed */
-	  d.set_max_speed(make_speed(read_field(def, *it)));
+	  d.set_max_speed(make_speed(read_field(def, it)));
 	  break;
 
 	case 11:			/* total_calories */
-	  d.set_calories(read_field(def, *it));
+	  d.set_calories(read_field(def, it));
 	  break;
 
 	case 16:			/* avg_heart_rate */
-	  d.set_avg_heart_rate(read_field(def, *it));
+	  d.set_avg_heart_rate(read_field(def, it));
 	  break;
 
 	case 17:			/* max_heart_rate */
-	  d.set_max_heart_rate(read_field(def, *it));
+	  d.set_max_heart_rate(read_field(def, it));
 	  break;
 
 	default:
-	  skip_field(*it);
+	  skip_field(it);
 	}
     }
 }
@@ -613,10 +619,9 @@ fit_parser::read_session_message(const message_type &def, uint32_t timestamp)
 void
 fit_parser::skip_message(const message_type &def)
 {
-  for (std::vector<message_field>::const_iterator it = def.fields.begin();
-       !had_error() && it != def.fields.end(); it++)
+  for (const auto &it : def.fields)
     {
-      skip_field(*it);
+      skip_field(it);
     }
 }
 
