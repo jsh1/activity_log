@@ -127,6 +127,33 @@ struct date_interval
   void append_date(std::string &str, int x) const;
 };
 
+struct location
+{
+  double latitude;
+  double longitude;
+
+  location();
+  location(double lat, double lng);
+};
+
+struct location_size
+{
+  double latitude;
+  double longitude;
+
+  location_size();
+  location_size(double lat, double lng);
+};
+
+struct location_region
+{
+  location center;
+  location_size size;
+
+  location_region();
+  location_region(const location &cen, const location_size &size);
+};
+
 // implementation
 
 inline
@@ -153,6 +180,47 @@ inline
 date_interval::date_interval(unit_type u, int n)
 : unit(u),
   count(n)
+{
+}
+
+inline
+location::location()
+: latitude(0),
+  longitude(0)
+{
+}
+
+inline
+location::location(double lat, double lng)
+: latitude(lat),
+  longitude(lng)
+{
+}
+
+inline
+location_size::location_size()
+: latitude(0),
+  longitude(0)
+{
+}
+
+inline
+location_size::location_size(double lat, double lng)
+: latitude(lat),
+  longitude(lng)
+{
+}
+
+inline
+location_region::location_region()
+{
+}
+
+inline
+location_region::location_region(const location &cen,
+				 const location_size &sz)
+: center(cen),
+  size(sz)
 {
 }
 
