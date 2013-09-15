@@ -147,7 +147,7 @@
   [super dealloc];
 }
 
-- (void)activityDidChange
+- (void)_updateDisplayedRegion
 {
   const act::activity *a = [[self activityView] activity];
   if (!a)
@@ -160,7 +160,13 @@
   [_mapView displayRegion:gps_a->region()];
 
   // FIXME: need a notification/KVO for this?
+
   [_zoomSlider setIntValue:[_mapView mapZoom]];
+}
+
+- (void)activityDidChange
+{
+  [self _updateDisplayedRegion];
 }
 
 - (void)selectedLapDidChange
@@ -168,9 +174,7 @@
   const act::activity *a = [[self activityView] activity];
 
   if (a != nullptr && a->gps_data() != nullptr)
-    {
-      [_mapView setNeedsDisplay:YES];
-    }
+    [_mapView setNeedsDisplay:YES];
 }
 
 - (NSEdgeInsets)edgeInsets
@@ -223,6 +227,10 @@
       zoom = std::max(zoom - 1, [[_mapView mapSource] minZoom]);
       [_mapView setMapZoom:zoom];
       [_zoomSlider setIntValue:zoom];
+    }
+  else if (sender == _centerButton)
+    {
+      [self _updateDisplayedRegion];
     }
 }
 

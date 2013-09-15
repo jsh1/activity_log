@@ -11,6 +11,7 @@
   IBOutlet NSSlider *_zoomSlider;
   IBOutlet NSButton *_zoomInButton;
   IBOutlet NSButton *_zoomOutButton;
+  IBOutlet NSButton *_centerButton;
 }
 
 - (IBAction)controlAction:(id)sender;
