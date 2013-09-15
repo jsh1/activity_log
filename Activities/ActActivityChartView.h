@@ -6,29 +6,13 @@
 
 #import <memory>
 
-enum ActActivityChartType
-{
-  CHART_NONE,
-  CHART_PACE,
-  CHART_HEART_RATE,
-  CHART_ALTITUDE,
-};
-
 @interface ActActivityChartView : ActActivitySubview
 {
-  ActActivityChartType _chartType;
+  IBOutlet NSSegmentedControl *_segmentedControl;
+
   std::unique_ptr<act::gps::chart> _chart;
 }
 
-@property ActActivityChartType chartType;
+- (IBAction)controlAction:(id)sender;
 
-@end
-
-@interface ActActivityPaceChartView : ActActivityChartView
-@end
-
-@interface ActActivityHeartRateChartView : ActActivityChartView
-@end
-
-@interface ActActivityAltitudeChartView : ActActivityChartView
 @end

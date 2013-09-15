@@ -8,6 +8,13 @@
 
 @synthesize activityView = _activityView;
 
++ (ActActivitySubview *)subviewForView:(ActActivityView *)view
+{
+  ActActivitySubview *subview = [[self alloc] initWithFrame:NSZeroRect];
+  [subview setActivityView:view];
+  return [subview autorelease];
+}
+
 - (void)activityDidChange
 {
 }

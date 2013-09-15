@@ -9,6 +9,8 @@
   IBOutlet ActActivityView *_activityView;
 }
 
++ (ActActivitySubview *)subviewForView:(ActActivityView *)view;
+
 @property(nonatomic, assign) ActActivityView *activityView;
 
 // Standard implementations do nothing

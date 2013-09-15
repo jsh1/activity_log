@@ -40,6 +40,7 @@
 		57707AE917DFBC4C009BAC5D /* ActMapView.mm in Sources */ = {isa = PBXBuildFile; fileRef = 57707AE517DFBC4C009BAC5D /* ActMapView.mm */; };
 		57707AEA17DFBC4C009BAC5D /* ActTileJSONMapSource.mm in Sources */ = {isa = PBXBuildFile; fileRef = 57707AE717DFBC4C009BAC5D /* ActTileJSONMapSource.mm */; };
 		57707AED17DFBF99009BAC5D /* ActActivityMapView.mm in Sources */ = {isa = PBXBuildFile; fileRef = 57707AEC17DFBF99009BAC5D /* ActActivityMapView.mm */; };
+		5772710A17E6150D00149040 /* ActActivityChartView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 5772710817E6150D00149040 /* ActActivityChartView.xib */; };
 		57921A5717BEAEF0001AD35D /* ActWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 57921A5517BEAEF0001AD35D /* ActWindow.xib */; };
 		57921A5A17BEAF48001AD35D /* ActWindowController.mm in Sources */ = {isa = PBXBuildFile; fileRef = 57921A5917BEAF48001AD35D /* ActWindowController.mm */; };
 		579772E217C4F3E000AA2E9D /* ActActivitySubview.mm in Sources */ = {isa = PBXBuildFile; fileRef = 579772E117C4F3E000AA2E9D /* ActActivitySubview.mm */; };
@@ -129,6 +130,7 @@
 		57707AE717DFBC4C009BAC5D /* ActTileJSONMapSource.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ActTileJSONMapSource.mm; sourceTree = "<group>"; };
 		57707AEB17DFBF99009BAC5D /* ActActivityMapView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActActivityMapView.h; sourceTree = "<group>"; };
 		57707AEC17DFBF99009BAC5D /* ActActivityMapView.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ActActivityMapView.mm; sourceTree = "<group>"; };
+		5772710917E6150D00149040 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/ActActivityChartView.xib; sourceTree = "<group>"; };
 		57921A5617BEAEF0001AD35D /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/ActWindow.xib; sourceTree = "<group>"; };
 		57921A5817BEAF48001AD35D /* ActWindowController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActWindowController.h; sourceTree = "<group>"; };
 		57921A5917BEAF48001AD35D /* ActWindowController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ActWindowController.mm; sourceTree = "<group>"; };
@@ -316,6 +318,7 @@
 				571DB9A717BE615C0001514C /* MainMenu.xib */,
 				57921A5517BEAEF0001AD35D /* ActWindow.xib */,
 				57B7A7AA17E1028E00477EAD /* ActActivityMapView.xib */,
+				5772710817E6150D00149040 /* ActActivityChartView.xib */,
 			);
 			name = Nibs;
 			sourceTree = "<group>";
@@ -413,6 +416,7 @@
 				57DB7BB217E0D4790093C735 /* opencyclemap-tiles.json in Resources */,
 				57DB7BB317E0D4790093C735 /* openstreetmap-tiles.json in Resources */,
 				57B7A7AC17E1028E00477EAD /* ActActivityMapView.xib in Resources */,
+				5772710A17E6150D00149040 /* ActActivityChartView.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -498,6 +502,14 @@
 				571DB9A817BE615C0001514C /* en */,
 			);
 			name = MainMenu.xib;
+			sourceTree = "<group>";
+		};
+		5772710817E6150D00149040 /* ActActivityChartView.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				5772710917E6150D00149040 /* en */,
+			);
+			name = ActActivityChartView.xib;
 			sourceTree = "<group>";
 		};
 		57921A5517BEAEF0001AD35D /* ActWindow.xib */ = {

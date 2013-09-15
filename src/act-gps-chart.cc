@@ -16,6 +16,8 @@
 #define MAX_TICKS 4
 #define MIN_TICKS 2
 
+#define KEY_TEXT_WIDTH 60
+
 #define LABEL_FONT "Lucida Grande"
 #define LABEL_SIZE 9
 
@@ -164,10 +166,11 @@ chart::chart(const activity &a, x_axis_type xa)
 
 void
 chart::add_line(double activity::point:: *field, bool smoothed,
-		value_conversion conv, line_color color,
+		value_conversion conv, line_color color, bool fill_bg,
 		double min_ratio, double max_ratio)
 {
-  _lines.push_back(line(field, smoothed, conv, color, min_ratio, max_ratio));
+  _lines.push_back(line(field, smoothed, conv, color,
+			fill_bg, min_ratio, max_ratio));
 }
 
 void
@@ -201,7 +204,7 @@ chart::draw(CGContextRef ctx)
   draw_background(ctx);
 
   for (size_t i = 0; i < _lines.size(); i++)
-    draw_line(ctx, _lines[i]);
+    draw_line(ctx, _lines[i], i * KEY_TEXT_WIDTH);
 
   draw_lap_markers(ctx);
 }
@@ -211,7 +214,7 @@ chart::draw_background(CGContextRef ctx)
 {
   CGContextSaveGState(ctx);
   CGContextSetLineWidth(ctx, 1);
-  CGContextSetRGBFillColor(ctx, 0, 0, 0, 0.05);
+  CGContextSetRGBFillColor(ctx, .95, .95, .95, 1);
   CGContextFillRect(ctx, _chart_rect);
   CGContextSetRGBStrokeColor(ctx, 0, 0, 0, 0.2);
   CGContextStrokeRect(ctx, CGRectInset(_chart_rect, .5, .5));
@@ -219,7 +222,7 @@ chart::draw_background(CGContextRef ctx)
 }
 
 void
-chart::draw_line(CGContextRef ctx, const line &l)
+chart::draw_line(CGContextRef ctx, const line &l, CGFloat tx)
 {
   /* x' = (x - min_v) * v_scale * chart_w + chart_x
         = x * v_scale * chart_w - min_v * v_scale * chart_w + chart_x
@@ -297,28 +300,34 @@ chart::draw_line(CGContextRef ctx, const line &l)
 
   // Fill gradient under the line
 
-  CGContextSaveGState(ctx);
-
-  switch (l.color)
+  if (l.fill_bg)
     {
-    case line_color::RED:
-      CGContextSetRGBFillColor(ctx, 1, .5, .5, .4);
-      break;
-    case line_color::GREEN:
-      CGContextSetRGBFillColor(ctx, .75, 1, .75, .4);
-      break;
-    case line_color::BLUE:
-      CGContextSetRGBFillColor(ctx, .5, .75, 1, .4);
-      break;
-    case line_color::ORANGE:
-      CGContextSetRGBFillColor(ctx, 1, .5, 0, .4);
-      break;
+      CGContextSaveGState(ctx);
+
+      switch (l.color)
+	{
+	case line_color::RED:
+	  CGContextSetRGBFillColor(ctx, 1, .5, .5, .4);
+	  break;
+	case line_color::GREEN:
+	  CGContextSetRGBFillColor(ctx, .75, 1, .75, .4);
+	  break;
+	case line_color::BLUE:
+	  CGContextSetRGBFillColor(ctx, .5, .75, 1, .4);
+	  break;
+	case line_color::ORANGE:
+	  CGContextSetRGBFillColor(ctx, 1, .5, 0, .4);
+	  break;
+	case line_color::GRAY:
+	  CGContextSetRGBFillColor(ctx, .75, .75, .75, .4);
+	  break;
+	}
+
+      CGContextAddPath(ctx, fill_path);
+      CGContextFillPath(ctx);
+
+      CGContextRestoreGState(ctx);
     }
-
-  CGContextAddPath(ctx, fill_path);
-  CGContextFillPath(ctx);
-
-  CGContextRestoreGState(ctx);
 
   // Draw data line
 
@@ -337,6 +346,9 @@ chart::draw_line(CGContextRef ctx, const line &l)
       break;
     case line_color::ORANGE:
       CGContextSetRGBStrokeColor(ctx, 1, 0.5, 0, 1);
+      break;
+    case line_color::GRAY:
+      CGContextSetRGBStrokeColor(ctx, 0.6, 0.6, 0.6, 1);
       break;
     }
 
@@ -372,7 +384,7 @@ chart::draw_line(CGContextRef ctx, const line &l)
       std::string s;
       l.format_tick(s, tick, value);
 
-      CGContextShowTextAtPoint(ctx, _chart_rect.origin.x + 2,
+      CGContextShowTextAtPoint(ctx, _chart_rect.origin.x + tx + 2,
 			       y + 2, s.c_str(), s.size());
     }
 

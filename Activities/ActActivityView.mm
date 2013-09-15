@@ -78,9 +78,7 @@ static NSArray *_ignoredFields;
 			 [ActActivityBodyView class],
 			 [ActActivityLapView class],
 			 [ActActivityMapView class],
-			 [ActActivityPaceChartView class],
-			 [ActActivityHeartRateChartView class],
-			 [ActActivityAltitudeChartView class],
+			 [ActActivityChartView class],
 			 nil];
     }
 
@@ -88,10 +86,8 @@ static NSArray *_ignoredFields;
 
   for (Class cls in subview_classes)
     {
-      ActActivitySubview *view = [[cls alloc] initWithFrame:NSZeroRect];
-      [view setActivityView:self];
-      [self addSubview:view];
-      [view release];
+      if (ActActivitySubview *subview = [cls subviewForView:self])
+	[self addSubview:subview];
     }
 }
 

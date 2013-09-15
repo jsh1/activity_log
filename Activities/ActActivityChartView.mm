@@ -4,7 +4,7 @@
 
 #import "ActActivityView.h"
 
-#define CHART_HEIGHT 130
+#define CHART_HEIGHT 200
 #define TOP_BORDER 0
 #define BOTTOM_BORDER 0
 #define LEFT_BORDER 32
@@ -12,25 +12,29 @@
 
 @implementation ActActivityChartView
 
-@synthesize chartType = _chartType;
-
-+ (ActActivityChartType)defaultChartType
++ (ActActivitySubview *)subviewForView:(ActActivityView *)view
 {
-  return CHART_NONE;
+  NSArray *objects = nil;
+  [[NSBundle mainBundle] loadNibNamed:@"ActActivityChartView"
+   owner:nil topLevelObjects:&objects];
+
+  // `objects' array can contain our NSApplication as well?
+
+  // FIXME: autorelease contents of `objects'?
+
+  for (id obj in objects)
+    {
+      if ([obj isKindOfClass:[ActActivityChartView class]])
+	{
+	  [(ActActivityChartView *)obj setActivityView:view];
+	  return obj;
+	}
+    }
+
+  return nil;
 }
 
-- (id)initWithFrame:(NSRect)frame
-{
-  self = [super initWithFrame:frame];
-  if (self == nil)
-    return nil;
-
-  _chartType = [[self class] defaultChartType];
-
-  return self;
-}
-
-- (void)activityDidChange
+- (void)_updateChart
 {
   if (_chart)
     {
@@ -38,44 +42,61 @@
       [self setNeedsDisplay:YES];
     }
 
+  const act::activity *a = [[self activityView] activity];
+  if (a == nullptr)
+    return;
+
+  const act::gps::activity *gps_a = a->gps_data();
+  if (gps_a == nullptr)
+    return;
+
+  _chart.reset(new act::gps::chart(*gps_a, act::gps::chart::x_axis_type::DISTANCE));
+
+  if (gps_a->has_altitude())
+    {
+      _chart->add_line(&act::gps::activity::point::altitude, false,
+		       act::gps::chart::value_conversion::DISTANCE_M_FT,
+		       act::gps::chart::line_color::GRAY, true, 0, 2);
+    }
+
+  if ([_segmentedControl isSelectedForSegment:0] && gps_a->has_speed())
+    {
+      _chart->add_line(&act::gps::activity::point::speed, true,
+		       act::gps::chart::value_conversion::SPEED_MS_PACE,
+		       act::gps::chart::line_color::BLUE, false, 0, 1);
+    }
+
+  if ([_segmentedControl isSelectedForSegment:1] && gps_a->has_heart_rate())
+    {
+      _chart->add_line(&act::gps::activity::point::heart_rate, true,
+		       act::gps::chart::value_conversion::IDENTITY,
+		       act::gps::chart::line_color::RED, false, 0, 1);
+    }
+
+  _chart->set_chart_rect(NSRectToCGRect([self bounds]));
+  _chart->set_selected_lap([[self activityView] selectedLapIndex]);
+  _chart->update_values();
+
+  [self setNeedsDisplay:YES];
+}
+
+- (void)activityDidChange
+{
+  bool has_pace = false, has_hr = false;
+
   if (const act::activity *a = [[self activityView] activity])
     {
       if (const act::gps::activity *gps_a = a->gps_data())
 	{
-	  _chart.reset(new act::gps::chart(*gps_a,
-			act::gps::chart::x_axis_type::DISTANCE));
-
-	  if (_chartType == CHART_ALTITUDE && gps_a->has_altitude())
-	    {
-	      _chart->add_line(&act::gps::activity::point::altitude, false,
-			       act::gps::chart::value_conversion
-			       ::DISTANCE_M_FT, act::gps::chart::line_color
-			       ::GREEN, 0, 1);
-	    }
-
-	  if (_chartType == CHART_HEART_RATE && gps_a->has_heart_rate())
-	    {
-	      _chart->add_line(&act::gps::activity::point::heart_rate, true,
-			       act::gps::chart::value_conversion
-			       ::IDENTITY, act::gps::chart::line_color::RED,
-			       0, 1);
-	    }
-
-	  if (_chartType == CHART_PACE && gps_a->has_speed())
-	    {
-	      _chart->add_line(&act::gps::activity::point::speed, true,
-			       act::gps::chart::value_conversion
-			       ::SPEED_MS_PACE, act::gps::chart::line_color
-			       ::BLUE, 0, 1);
-	    }
-
-	  _chart->set_chart_rect(NSRectToCGRect([self bounds]));
-	  _chart->set_selected_lap([[self activityView] selectedLapIndex]);
-	  _chart->update_values();
-
-	  [self setNeedsDisplay:YES];
+	  has_pace = gps_a->has_speed();
+	  has_hr = gps_a->has_heart_rate();
 	}
     }
+
+  [_segmentedControl setEnabled:has_pace forSegment:0];
+  [_segmentedControl setEnabled:has_hr forSegment:1];
+
+  [self _updateChart];
 }
 
 - (void)selectedLapDidChange
@@ -95,22 +116,15 @@
 
 - (CGFloat)preferredHeightForWidth:(CGFloat)width
 {
-  bool empty = true;
+  const act::activity *a = [[self activityView] activity];
+  if (a == nullptr)
+    return 0;
 
-  if (const act::activity *a = [[self activityView] activity])
-    {
-      if (const act::gps::activity *gps_a = a->gps_data())
-	{
-	  if (_chartType == CHART_ALTITUDE && gps_a->has_altitude())
-	    empty = false;
-	  if (_chartType == CHART_HEART_RATE && gps_a->has_heart_rate())
-	    empty = false;
-	  if (_chartType == CHART_PACE && gps_a->has_speed())
-	    empty = false;
-	}
-    }
+  const act::gps::activity *gps_a = a->gps_data();
+  if (gps_a == nullptr)
+    return 0;
 
-  return empty ? 0 : CHART_HEIGHT;
+  return CHART_HEIGHT;
 }
 
 - (void)layoutSubviews
@@ -134,8 +148,13 @@
       CGContextRef ctx = (CGContextRef) [[NSGraphicsContext
 					  currentContext] graphicsPort];
 
+      const CGRect &r = _chart->chart_rect();
+
       CGContextSaveGState(ctx);
-      CGContextClipToRect(ctx, _chart->chart_rect());
+      CGContextClipToRect(ctx, r);
+
+      CGContextTranslateCTM(ctx, 0, r.size.height);
+      CGContextScaleCTM(ctx, 1, -1);
 
       _chart->draw(ctx);
 
@@ -143,36 +162,12 @@
     }
 }
 
-- (BOOL)isFlipped
+- (IBAction)controlAction:(id)sender
 {
-  return YES;
-}
-
-@end
-
-@implementation ActActivityPaceChartView
-
-+ (ActActivityChartType)defaultChartType
-{
-  return CHART_PACE;
-}
-
-@end
-
-@implementation ActActivityHeartRateChartView
-
-+ (ActActivityChartType)defaultChartType
-{
-  return CHART_HEART_RATE;
-}
-
-@end
-
-@implementation ActActivityAltitudeChartView
-
-+ (ActActivityChartType)defaultChartType
-{
-  return CHART_ALTITUDE;
+  if (sender == _segmentedControl)
+    {
+      [self _updateChart];
+    }
 }
 
 @end
