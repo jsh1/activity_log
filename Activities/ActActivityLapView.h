@@ -5,8 +5,10 @@
 @interface ActActivityLapView : ActActivitySubview
   <NSTableViewDataSource, NSTableViewDelegate>
 {
-  NSTableHeaderView *_headerView;
-  NSTableView *_tableView;
+  IBOutlet NSTableView *_tableView;
 }
 
+@end
+
+@interface ActActivityLapTableView : NSTableView
 @end

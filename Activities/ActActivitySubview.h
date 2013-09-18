@@ -9,6 +9,12 @@
   IBOutlet ActActivityView *_activityView;
 }
 
+// Standard implementation returns nil
+
++ (NSString *)nibName;
+
+// Standard implementation loads nib if non-nil, else alloc/inits
+
 + (ActActivitySubview *)subviewForView:(ActActivityView *)view;
 
 @property(nonatomic, assign) ActActivityView *activityView;
@@ -28,8 +34,16 @@
 
 - (CGFloat)preferredHeightForWidth:(CGFloat)width;
 
+// For horizontal box views. Max of twelve columns. Standard
+// implementation returns zero.
+
+- (NSInteger)preferredNumberOfColumns;
+
 // Standard implementation does nothing
 
 - (void)layoutSubviews;
+
+- (void)drawBackgroundRect:(NSRect)r;
+- (void)drawBorderRect:(NSRect)r;
 
 @end

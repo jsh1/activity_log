@@ -212,13 +212,15 @@ chart::draw(CGContextRef ctx)
 void
 chart::draw_background(CGContextRef ctx)
 {
+#if 0
   CGContextSaveGState(ctx);
   CGContextSetLineWidth(ctx, 1);
-  CGContextSetRGBFillColor(ctx, .95, .95, .95, 1);
+  CGContextSetGrayFillColor(ctx, .98, 1);
   CGContextFillRect(ctx, _chart_rect);
-  CGContextSetRGBStrokeColor(ctx, 0, 0, 0, 0.2);
-  CGContextStrokeRect(ctx, CGRectInset(_chart_rect, .5, .5));
+//  CGContextSetRGBStrokeColor(ctx, 0, 0, 0, 0.2);
+//  CGContextStrokeRect(ctx, CGRectInset(_chart_rect, .5, .5));
   CGContextRestoreGState(ctx);
+#endif
 }
 
 void
@@ -368,7 +370,7 @@ chart::draw_line(CGContextRef ctx, const line &l, CGFloat tx)
   CGContextSelectFont(ctx, LABEL_FONT, LABEL_SIZE, kCGEncodingMacRoman);
   CGContextSetTextMatrix(ctx, CGAffineTransformIdentity);
   CGContextSetTextDrawingMode(ctx, kCGTextFill);
-  CGContextSetRGBFillColor(ctx, 0, 0, 0, 1);
+  CGContextSetGrayFillColor(ctx, 0.1, 1);
 
   for (double tick = l.tick_min; tick < l.tick_max; tick += l.tick_delta)
     {
@@ -435,7 +437,7 @@ chart::draw_lap_markers(CGContextRef ctx)
 
   if (_selected_lap >= 0 && _selected_lap < _activity.laps().size())
     {
-      CGContextSetGrayFillColor(ctx, .5, .3);
+      CGContextSetRGBFillColor(ctx, .4, .4, .6, .2);
       CGContextSetBlendMode(ctx, kCGBlendModePlusDarker);
 
       const CGPoint &p0 = lines[_selected_lap*2];

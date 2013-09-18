@@ -4,34 +4,18 @@
 
 #import "ActActivityView.h"
 
-#define CHART_HEIGHT 200
+#define CHART_HEIGHT 180
+
 #define TOP_BORDER 0
 #define BOTTOM_BORDER 0
-#define LEFT_BORDER 32
-#define RIGHT_BORDER 32
+#define LEFT_BORDER 4
+#define RIGHT_BORDER 4
 
 @implementation ActActivityChartView
 
-+ (ActActivitySubview *)subviewForView:(ActActivityView *)view
++ (NSString *)nibName
 {
-  NSArray *objects = nil;
-  [[NSBundle mainBundle] loadNibNamed:@"ActActivityChartView"
-   owner:nil topLevelObjects:&objects];
-
-  // `objects' array can contain our NSApplication as well?
-
-  // FIXME: autorelease contents of `objects'?
-
-  for (id obj in objects)
-    {
-      if ([obj isKindOfClass:[ActActivityChartView class]])
-	{
-	  [(ActActivityChartView *)obj setActivityView:view];
-	  return obj;
-	}
-    }
-
-  return nil;
+  return @"ActActivityChartView";
 }
 
 - (void)_updateChart
@@ -52,11 +36,11 @@
 
   _chart.reset(new act::gps::chart(*gps_a, act::gps::chart::x_axis_type::DISTANCE));
 
-  if (gps_a->has_altitude())
+  if ([_segmentedControl isSelectedForSegment:2] && gps_a->has_altitude())
     {
       _chart->add_line(&act::gps::activity::point::altitude, false,
 		       act::gps::chart::value_conversion::DISTANCE_M_FT,
-		       act::gps::chart::line_color::GRAY, true, 0, 2);
+		       act::gps::chart::line_color::GREEN, true, 0, 2);
     }
 
   if ([_segmentedControl isSelectedForSegment:0] && gps_a->has_speed())
@@ -82,7 +66,7 @@
 
 - (void)activityDidChange
 {
-  bool has_pace = false, has_hr = false;
+  bool has_pace = false, has_hr = false, has_altitude = false;
 
   if (const act::activity *a = [[self activityView] activity])
     {
@@ -90,11 +74,13 @@
 	{
 	  has_pace = gps_a->has_speed();
 	  has_hr = gps_a->has_heart_rate();
+	  has_altitude = gps_a->has_altitude();
 	}
     }
 
   [_segmentedControl setEnabled:has_pace forSegment:0];
   [_segmentedControl setEnabled:has_hr forSegment:1];
+  [_segmentedControl setEnabled:has_altitude forSegment:2];
 
   [self _updateChart];
 }
@@ -132,6 +118,7 @@
   if (_chart)
     {
       CGRect bounds = NSRectToCGRect([self bounds]);
+      bounds = CGRectInset(bounds, 2, 2);
 
       if (!CGRectEqualToRect(bounds, _chart->chart_rect()))
 	{
@@ -143,6 +130,8 @@
 
 - (void)drawRect:(NSRect)r
 {
+  [self drawBackgroundRect:r];
+
   if (_chart)
     {
       CGContextRef ctx = (CGContextRef) [[NSGraphicsContext
@@ -160,6 +149,8 @@
 
       CGContextRestoreGState(ctx);
     }
+
+  [self drawBorderRect:r];
 }
 
 - (IBAction)controlAction:(id)sender

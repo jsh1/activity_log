@@ -10,11 +10,8 @@
 
 #import <algorithm>
 
+#define MIN_HEIGHT 350
 #define MAP_ASPECT (16./9.)
-#define TOP_BORDER 0
-#define BOTTOM_BORDER 0
-#define LEFT_BORDER 32
-#define RIGHT_BORDER 32
 
 @implementation ActActivityMapView
 
@@ -61,10 +58,10 @@
     {
       NSMutableArray *tem = [[NSMutableArray alloc] init];
 
-      if (NSArray *a = [self _mapSourcesForKey:@"ActUserMapSources"])
+      if (NSArray *a = [self _mapSourcesForKey:@"ActMapSources"])
 	[tem addObjectsFromArray:a];
 
-      if (NSArray *a = [self _mapSourcesForKey:@"ActMapSources"])
+      if (NSArray *a = [self _mapSourcesForKey:@"ActUserMapSources"])
 	[tem addObjectsFromArray:a];
 
       array = [tem copy];
@@ -177,26 +174,23 @@
     [_mapView setNeedsDisplay:YES];
 }
 
-- (NSEdgeInsets)edgeInsets
-{
-  return NSEdgeInsetsMake(TOP_BORDER, LEFT_BORDER,
-			  BOTTOM_BORDER, RIGHT_BORDER);
-}
-
 - (CGFloat)preferredHeightForWidth:(CGFloat)width
 {
-  bool empty = true;
+  const act::activity *a = [[self activityView] activity];
+  if (a == nullptr)
+    return 0;
 
-  if (const act::activity *a = [[self activityView] activity])
-    {
-      if (const act::gps::activity *gps_a = a->gps_data())
-	{
-	  if (gps_a->has_location())
-	    empty = false;
-	}
-    }
+  const act::gps::activity *gps_a = a->gps_data();
+  if (gps_a == nullptr || !gps_a->has_location())
+    return 0;
 
-  return empty ? 0 : ceil(width * (1./MAP_ASPECT));
+  CGFloat height = ceil(width * (1./MAP_ASPECT));
+  return std::max(height, (CGFloat)MIN_HEIGHT);
+}
+
+- (NSInteger)preferredNumberOfColumns
+{
+  return 9;
 }
 
 - (void)layoutSubviews

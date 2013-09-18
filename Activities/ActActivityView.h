@@ -21,6 +21,12 @@
 
 @property(nonatomic) NSInteger selectedLapIndex;
 
+@property(nonatomic, copy) NSString *bodyString;
+
+- (NSString *)stringForField:(NSString *)name;
+- (void)setString:(NSString *)str forField:(NSString *)name;
+- (BOOL)isFieldReadOnly:(NSString *)name;
+
 - (void)activityDidChange;
 - (void)activityDidChangeField:(NSString *)name;
 - (void)activityDidChangeBody;

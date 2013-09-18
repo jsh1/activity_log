@@ -5,9 +5,7 @@
 #import "ActActivityHeaderView.h"
 #import "ActActivityView.h"
 
-#import "act-format.h"
-
-#define LABEL_INSET 32
+#define LABEL_INSET 0
 #define LABEL_WIDTH 100
 #define LABEL_HEIGHT 14
 
@@ -20,8 +18,6 @@
 @end
 
 @implementation ActActivityHeaderFieldView
-
-@synthesize fieldReadOnly = _fieldReadOnly;
 
 - (id)initWithFrame:(NSRect)frame
 {
@@ -67,6 +63,9 @@
       [_labelView setFont:font];
       [_textView setFont:font];
     }
+
+  [_labelView setTextColor:[NSColor colorWithDeviceWhite:.4 alpha:1]];
+  [_textView setTextColor:[NSColor colorWithDeviceWhite:.1 alpha:1]];
 }
 
 - (NSString *)fieldName
@@ -78,14 +77,7 @@
 {
   [_labelView setString:_fieldName];
 
-  const char *field = [_fieldName UTF8String];
-
-  if (const act::activity *a = [[self activityView] activity])
-    _fieldReadOnly = a->storage()->field_read_only_p(field);
-  else
-    _fieldReadOnly = field_read_only_p(act::lookup_field_id(field));
-
-  [_textView setEditable:!_fieldReadOnly];
+  [_textView setEditable:![[self activityView] isFieldReadOnly:_fieldName]];
 }
 
 - (void)setFieldName:(NSString *)name
@@ -101,42 +93,17 @@
 
 - (NSString *)fieldString
 {
-  if (const act::activity *a = [[self activityView] activity])
+  return [[self activityView] stringForField:_fieldName];
+}
+
+- (void)setFieldString:(NSString *)str
+{
+  ActActivityView *view = [self activityView];
+
+  if (![str isEqual:[view stringForField:_fieldName]])
     {
-      const char *field = [_fieldName UTF8String];
-      act::field_id field_id = act::lookup_field_id(field);
-      act::field_data_type field_type = act::lookup_field_data_type(field_id);
-
-      std::string tem;
-
-      switch (field_type)
-	{
-	case act::field_data_type::string:
-	  if (const std::string *s = a->field_ptr(field))
-	    return [NSString stringWithUTF8String:s->c_str()];
-	  break;
-
-	case act::field_data_type::keywords:
-	  if (const std::vector<std::string>
-	      *keys = a->field_keywords_ptr(field_id))
-	    {
-	      act::format_keywords(tem, *keys);
-	    }
-	  break;
-
-	default:
-	  if (double value = a->field_value(field_id))
-	    {
-	      act::unit_type unit = a->field_unit(field_id);
-	      act::format_value(tem, field_type, value, unit);
-	    }
-	  break;
-	}
-
-      return [NSString stringWithUTF8String:tem.c_str()];
+      [view setString:str forField:_fieldName];
     }
-
-  return @"";
 }
 
 - (void)activityDidChange
@@ -179,13 +146,14 @@
     {
       NSTextView *view = [note object];
       NSString *value = [view string];
-      std::string str([value UTF8String]);
-      std::string field_name([_fieldName UTF8String]);
 
       // FIXME: undo support
 
       if (view == _labelView)
 	{
+	  std::string str([value UTF8String]);
+	  std::string field_name([_fieldName UTF8String]);
+
 	  if (str != field_name)
 	    {
 	      a->storage()->set_field_name(field_name, str);
@@ -204,29 +172,7 @@
 	}
       else if (view == _textView)
 	{
-	  if (![value isEqual:[self fieldString]])
-	    {
-	      auto id = act::lookup_field_id(field_name.c_str());
-
-	      // FIXME: trim whitespace?
-
-	      if ([value length] != 0)
-		{
-		  auto type = act::lookup_field_data_type(id);
-
-		  std::string value(str);
-		  act::canonicalize_field_string(type, value);
-
-		  (*a->storage())[field_name] = value;
-		}
-	      else
-		a->storage()->delete_field(field_name);
-
-	      a->storage()->increment_seed();
-	      a->invalidate_cached_values();
-
-	      [[self activityView] activityDidChangeField:_fieldName];
-	    }
+	  [self setFieldString:value];
 	}
     }
 }

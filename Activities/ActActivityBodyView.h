@@ -10,6 +10,4 @@
   NSTextContainer *_layoutContainer;
 }
 
-@property(nonatomic, copy) NSString *bodyString;
-
 @end

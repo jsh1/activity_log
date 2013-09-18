@@ -74,7 +74,9 @@
 {
   assert(_connection == nil);
 
-  NSURLRequest *request = [[NSURLRequest alloc] initWithURL:url];
+  NSURLRequest *request = [[NSURLRequest alloc] initWithURL:url
+			   cachePolicy:NSURLRequestReturnCacheDataElseLoad
+			   timeoutInterval:30];
   _connection = [[NSURLConnection alloc] initWithRequest:request
 		 delegate:self startImmediately:NO];
   [_connection scheduleInRunLoop:[NSRunLoop mainRunLoop]

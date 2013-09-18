@@ -41,6 +41,14 @@
 		57707AEA17DFBC4C009BAC5D /* ActTileJSONMapSource.mm in Sources */ = {isa = PBXBuildFile; fileRef = 57707AE717DFBC4C009BAC5D /* ActTileJSONMapSource.mm */; };
 		57707AED17DFBF99009BAC5D /* ActActivityMapView.mm in Sources */ = {isa = PBXBuildFile; fileRef = 57707AEC17DFBF99009BAC5D /* ActActivityMapView.mm */; };
 		5772710A17E6150D00149040 /* ActActivityChartView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 5772710817E6150D00149040 /* ActActivityChartView.xib */; };
+		578D797717E75CD500E50C29 /* ActActivitySummaryView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 578D797517E75CD500E50C29 /* ActActivitySummaryView.xib */; };
+		578D797A17E75DE300E50C29 /* ActActivitySummaryView.mm in Sources */ = {isa = PBXBuildFile; fileRef = 578D797917E75DE300E50C29 /* ActActivitySummaryView.mm */; };
+		578D797D17E7671000E50C29 /* ActHorizontalBoxView.mm in Sources */ = {isa = PBXBuildFile; fileRef = 578D797C17E7671000E50C29 /* ActHorizontalBoxView.mm */; };
+		578D798017E7678D00E50C29 /* ActExpandableTextField.mm in Sources */ = {isa = PBXBuildFile; fileRef = 578D797F17E7678D00E50C29 /* ActExpandableTextField.mm */; };
+		578D798317E871AA00E50C29 /* ActActivityBoxView.mm in Sources */ = {isa = PBXBuildFile; fileRef = 578D798217E871AA00E50C29 /* ActActivityBoxView.mm */; };
+		578D798617E8752500E50C29 /* ActActivityDetailsView.mm in Sources */ = {isa = PBXBuildFile; fileRef = 578D798517E8752500E50C29 /* ActActivityDetailsView.mm */; };
+		578D798917E89ADB00E50C29 /* ActActivityLapView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 578D798717E89ADB00E50C29 /* ActActivityLapView.xib */; };
+		578D798C17E89DC800E50C29 /* ActActivityMiddleView.mm in Sources */ = {isa = PBXBuildFile; fileRef = 578D798B17E89DC700E50C29 /* ActActivityMiddleView.mm */; };
 		57921A5717BEAEF0001AD35D /* ActWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 57921A5517BEAEF0001AD35D /* ActWindow.xib */; };
 		57921A5A17BEAF48001AD35D /* ActWindowController.mm in Sources */ = {isa = PBXBuildFile; fileRef = 57921A5917BEAF48001AD35D /* ActWindowController.mm */; };
 		579772E217C4F3E000AA2E9D /* ActActivitySubview.mm in Sources */ = {isa = PBXBuildFile; fileRef = 579772E117C4F3E000AA2E9D /* ActActivitySubview.mm */; };
@@ -131,6 +139,20 @@
 		57707AEB17DFBF99009BAC5D /* ActActivityMapView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActActivityMapView.h; sourceTree = "<group>"; };
 		57707AEC17DFBF99009BAC5D /* ActActivityMapView.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ActActivityMapView.mm; sourceTree = "<group>"; };
 		5772710917E6150D00149040 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/ActActivityChartView.xib; sourceTree = "<group>"; };
+		578D797617E75CD500E50C29 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/ActActivitySummaryView.xib; sourceTree = "<group>"; };
+		578D797817E75DE300E50C29 /* ActActivitySummaryView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActActivitySummaryView.h; sourceTree = "<group>"; };
+		578D797917E75DE300E50C29 /* ActActivitySummaryView.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ActActivitySummaryView.mm; sourceTree = "<group>"; };
+		578D797B17E7671000E50C29 /* ActHorizontalBoxView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActHorizontalBoxView.h; sourceTree = "<group>"; };
+		578D797C17E7671000E50C29 /* ActHorizontalBoxView.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ActHorizontalBoxView.mm; sourceTree = "<group>"; };
+		578D797E17E7678D00E50C29 /* ActExpandableTextField.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActExpandableTextField.h; sourceTree = "<group>"; };
+		578D797F17E7678D00E50C29 /* ActExpandableTextField.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ActExpandableTextField.mm; sourceTree = "<group>"; };
+		578D798117E871AA00E50C29 /* ActActivityBoxView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActActivityBoxView.h; sourceTree = "<group>"; };
+		578D798217E871AA00E50C29 /* ActActivityBoxView.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ActActivityBoxView.mm; sourceTree = "<group>"; };
+		578D798417E8752500E50C29 /* ActActivityDetailsView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActActivityDetailsView.h; sourceTree = "<group>"; };
+		578D798517E8752500E50C29 /* ActActivityDetailsView.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ActActivityDetailsView.mm; sourceTree = "<group>"; };
+		578D798817E89ADB00E50C29 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/ActActivityLapView.xib; sourceTree = "<group>"; };
+		578D798A17E89DC700E50C29 /* ActActivityMiddleView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActActivityMiddleView.h; sourceTree = "<group>"; };
+		578D798B17E89DC700E50C29 /* ActActivityMiddleView.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ActActivityMiddleView.mm; sourceTree = "<group>"; };
 		57921A5617BEAEF0001AD35D /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/ActWindow.xib; sourceTree = "<group>"; };
 		57921A5817BEAF48001AD35D /* ActWindowController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActWindowController.h; sourceTree = "<group>"; };
 		57921A5917BEAF48001AD35D /* ActWindowController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ActWindowController.mm; sourceTree = "<group>"; };
@@ -216,6 +238,10 @@
 				571DB9A517BE615C0001514C /* ActAppDelegate.mm */,
 				57921A5817BEAF48001AD35D /* ActWindowController.h */,
 				57921A5917BEAF48001AD35D /* ActWindowController.mm */,
+				578D798117E871AA00E50C29 /* ActActivityBoxView.h */,
+				578D798217E871AA00E50C29 /* ActActivityBoxView.mm */,
+				578D798417E8752500E50C29 /* ActActivityDetailsView.h */,
+				578D798517E8752500E50C29 /* ActActivityDetailsView.mm */,
 				579772E317C4F63900AA2E9D /* ActActivityHeaderView.h */,
 				579772E417C4F63900AA2E9D /* ActActivityHeaderView.mm */,
 				579772E617C4FB0A00AA2E9D /* ActActivityHeaderFieldView.h */,
@@ -226,6 +252,8 @@
 				571DB9B417BE66A60001514C /* ActActivityView.mm */,
 				579772E017C4F3E000AA2E9D /* ActActivitySubview.h */,
 				579772E117C4F3E000AA2E9D /* ActActivitySubview.mm */,
+				578D797817E75DE300E50C29 /* ActActivitySummaryView.h */,
+				578D797917E75DE300E50C29 /* ActActivitySummaryView.mm */,
 				57D99EB217C3F865003709BB /* ActActivityBodyView.h */,
 				57D99EB317C3F865003709BB /* ActActivityBodyView.mm */,
 				5730789417C56E54002C5B28 /* ActActivityChartView.h */,
@@ -234,6 +262,12 @@
 				57A7352717CF8A3B0054E3EB /* ActActivityLapView.mm */,
 				57707AEB17DFBF99009BAC5D /* ActActivityMapView.h */,
 				57707AEC17DFBF99009BAC5D /* ActActivityMapView.mm */,
+				578D798A17E89DC700E50C29 /* ActActivityMiddleView.h */,
+				578D798B17E89DC700E50C29 /* ActActivityMiddleView.mm */,
+				578D797E17E7678D00E50C29 /* ActExpandableTextField.h */,
+				578D797F17E7678D00E50C29 /* ActExpandableTextField.mm */,
+				578D797B17E7671000E50C29 /* ActHorizontalBoxView.h */,
+				578D797C17E7671000E50C29 /* ActHorizontalBoxView.mm */,
 				57707AE217DFBC4C009BAC5D /* ActMapSource.h */,
 				57707AE317DFBC4C009BAC5D /* ActMapSource.mm */,
 				57707AE417DFBC4C009BAC5D /* ActMapView.h */,
@@ -317,8 +351,10 @@
 			children = (
 				571DB9A717BE615C0001514C /* MainMenu.xib */,
 				57921A5517BEAEF0001AD35D /* ActWindow.xib */,
+				578D798717E89ADB00E50C29 /* ActActivityLapView.xib */,
 				57B7A7AA17E1028E00477EAD /* ActActivityMapView.xib */,
 				5772710817E6150D00149040 /* ActActivityChartView.xib */,
+				578D797517E75CD500E50C29 /* ActActivitySummaryView.xib */,
 			);
 			name = Nibs;
 			sourceTree = "<group>";
@@ -417,6 +453,8 @@
 				57DB7BB317E0D4790093C735 /* openstreetmap-tiles.json in Resources */,
 				57B7A7AC17E1028E00477EAD /* ActActivityMapView.xib in Resources */,
 				5772710A17E6150D00149040 /* ActActivityChartView.xib in Resources */,
+				578D797717E75CD500E50C29 /* ActActivitySummaryView.xib in Resources */,
+				578D798917E89ADB00E50C29 /* ActActivityLapView.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -444,6 +482,12 @@
 				57707AE917DFBC4C009BAC5D /* ActMapView.mm in Sources */,
 				57707AEA17DFBC4C009BAC5D /* ActTileJSONMapSource.mm in Sources */,
 				57707AED17DFBF99009BAC5D /* ActActivityMapView.mm in Sources */,
+				578D797A17E75DE300E50C29 /* ActActivitySummaryView.mm in Sources */,
+				578D797D17E7671000E50C29 /* ActHorizontalBoxView.mm in Sources */,
+				578D798017E7678D00E50C29 /* ActExpandableTextField.mm in Sources */,
+				578D798317E871AA00E50C29 /* ActActivityBoxView.mm in Sources */,
+				578D798617E8752500E50C29 /* ActActivityDetailsView.mm in Sources */,
+				578D798C17E89DC800E50C29 /* ActActivityMiddleView.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -510,6 +554,22 @@
 				5772710917E6150D00149040 /* en */,
 			);
 			name = ActActivityChartView.xib;
+			sourceTree = "<group>";
+		};
+		578D797517E75CD500E50C29 /* ActActivitySummaryView.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				578D797617E75CD500E50C29 /* en */,
+			);
+			name = ActActivitySummaryView.xib;
+			sourceTree = "<group>";
+		};
+		578D798717E89ADB00E50C29 /* ActActivityLapView.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				578D798817E89ADB00E50C29 /* en */,
+			);
+			name = ActActivityLapView.xib;
 			sourceTree = "<group>";
 		};
 		57921A5517BEAEF0001AD35D /* ActWindow.xib */ = {

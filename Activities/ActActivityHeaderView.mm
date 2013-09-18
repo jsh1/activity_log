@@ -155,6 +155,11 @@
   return height;
 }
 
+- (NSInteger)preferredNumberOfColumns
+{
+  return 5;
+}
+
 - (void)layoutSubviews
 {
   NSRect bounds = [self bounds];
@@ -170,6 +175,12 @@
       frame.origin.y += frame.size.height;
       frame.origin.y += FIELD_Y_SPACING;
     }
+}
+
+- (void)drawRect:(NSRect)r
+{
+  [self drawBackgroundRect:r];
+  [self drawBorderRect:r];
 }
 
 - (BOOL)isFlipped

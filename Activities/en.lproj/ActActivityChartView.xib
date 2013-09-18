@@ -40,9 +40,10 @@
 					<object class="NSSegmentedControl" id="635415294">
 						<reference key="NSNextResponder" ref="896237045"/>
 						<int key="NSvFlags">269</int>
-						<string key="NSFrame">{{211, 261}, {147, 21}}</string>
+						<string key="NSFrame">{{176, 261}, {219, 21}}</string>
 						<reference key="NSSuperview" ref="896237045"/>
 						<reference key="NSWindow"/>
+						<reference key="NSNextKeyView"/>
 						<string key="NSReuseIdentifierKey">_NS:9</string>
 						<bool key="NSEnabled">YES</bool>
 						<object class="NSSegmentedCell" key="NSCell" id="507570144">
@@ -57,20 +58,23 @@
 							<reference key="NSControlView" ref="635415294"/>
 							<array class="NSMutableArray" key="NSSegmentImages">
 								<object class="NSSegmentItem">
-									<double key="NSSegmentItemWidth">72</double>
-									<string key="NSSegmentItemLabel">Pace</string>
+									<string key="NSSegmentItemLabel">Pace / Speed</string>
 									<bool key="NSSegmentItemSelected">YES</bool>
 									<int key="NSSegmentItemImageScaling">0</int>
 								</object>
 								<object class="NSSegmentItem">
-									<double key="NSSegmentItemWidth">72</double>
 									<string key="NSSegmentItemLabel">Heart Rate</string>
 									<int key="NSSegmentItemTag">1</int>
 									<bool key="NSSegmentItemSelected">YES</bool>
 									<int key="NSSegmentItemImageScaling">0</int>
 								</object>
+								<object class="NSSegmentItem">
+									<string key="NSSegmentItemLabel">Altitude</string>
+									<bool key="NSSegmentItemSelected">YES</bool>
+									<int key="NSSegmentItemImageScaling">0</int>
+								</object>
 							</array>
-							<int key="NSSelectedSegment">1</int>
+							<int key="NSSelectedSegment">2</int>
 							<int key="NSTrackingMode">1</int>
 							<int key="NSSegmentStyle">6</int>
 						</object>

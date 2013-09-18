@@ -13,8 +13,6 @@
 
 #define MAX_WIDTH 540
 
-#define WRAP_COLUMN 72
-
 @implementation ActActivityBodyView
 
 - (id)initWithFrame:(NSRect)frame
@@ -49,111 +47,11 @@
   [super dealloc];
 }
 
-- (NSString *)bodyString
-{
-  if (const act::activity *a = [[self activityView] activity])
-    {
-      const std::string &s = a->body();
-
-      if (s.size() != 0)
-	{
-	  NSMutableString *str = [[NSMutableString alloc] init];
-
-	  const char *ptr = s.c_str();
-
-	  while (const char *eol = strchr(ptr, '\n'))
-	    {
-	      NSString *tem = [[NSString alloc] initWithBytes:ptr
-			       length:eol-ptr encoding:NSUTF8StringEncoding];
-	      [str appendString:tem];
-	      [tem release];
-	      ptr = eol + 1;
-	      if (eol[1] == '\n')
-		[str appendString:@"\n\n"], ptr++;
-	      else if (eol[1] != 0)
-		[str appendString:@" "];
-	    }
-
-	  if (*ptr != 0)
-	    {
-	      NSString *tem = [[NSString alloc] initWithUTF8String:ptr];
-	      [str appendString:tem];
-	      [tem release];
-	    }
-
-	  return [str autorelease];
-	}
-    }
-
-  return @"";
-}
-
-- (void)setBodyString:(NSString *)str
-{
-  static const char whitespace[] = " \t\n\f\r";
-
-  const char *ptr = [str UTF8String];
-  ptr = ptr + strspn(ptr, whitespace);
-
-  std::string wrapped;
-  size_t column = 0;
-
-  while (*ptr != 0)
-    {
-      const char *word = ptr + strcspn(ptr, whitespace);
-
-      if (word > ptr)
-	{
-	  if (column >= WRAP_COLUMN)
-	    {
-	      wrapped.push_back('\n');
-	      column = 0;
-	    }
-	  else if (column > 0)
-	    {
-	      wrapped.push_back(' ');
-	      column++;
-	    }
-
-	  wrapped.append(ptr, word - ptr);
-
-	  if (word[0] == '\n' && word[1] == '\n')
-	    {
-	      wrapped.push_back('\n');
-	      column = WRAP_COLUMN;
-	    }
-	  else
-	    column += word - ptr;
-
-	  ptr = word;
-	}
-
-      if (ptr[0] != 0)
-	ptr++;
-    }
-
-  if (column > 0)
-    wrapped.push_back('\n');
-
-  if (act::activity *a = [[self activityView] activity])
-    {
-      std::string &body = a->storage()->body();
-
-      if (wrapped != body)
-	{
-	  // FIXME: undo management
-
-	  std::swap(body, wrapped);
-	  a->storage()->increment_seed();
-	  [[self activityView] activityDidChangeBody];
-	}
-    }
-}
-
 - (void)activityDidChange
 {
-  [_textView setFont:[[self activityView] font]];
-  [_textView setString:[self bodyString]];
+  ActActivityView *view = [self activityView];
+  [_textView setFont:[view font]];
+  [_textView setString:[view bodyString]];
 }
 
 - (NSEdgeInsets)edgeInsets
@@ -203,7 +101,7 @@
 {
   if ([note object] == _textView)
     {
-      [self setBodyString:[_textView string]];
+      [[self activityView] setBodyString:[_textView string]];
     }
 }
 

@@ -79,7 +79,7 @@
   const char *string_field = nullptr;
 
   if ([ident isEqualToString:@"date"])
-    act::format_date_time(str, a.date(), "%F %-l%p");
+    act::format_date_time(str, a.date(), "%D %-l%p");
   else if ([ident isEqualToString:@"distance"] && a.distance() != 0)
     act::format_distance(str, a.distance(), a.distance_unit());
   else if ([ident isEqualToString:@"duration"] && a.duration() != 0)
