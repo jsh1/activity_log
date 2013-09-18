@@ -239,6 +239,7 @@
 
   CGContextSetRGBStrokeColor(ctx, 0, 0.2, 1, .75);
   CGContextSetLineWidth(ctx, 3);
+  CGContextSetLineJoin(ctx, kCGLineJoinRound);
 
   double xa = bounds.size.width / (loc_ur.longitude - loc_ll.longitude);
   double xb = bounds.origin.x - loc_ll.longitude * xa;
@@ -247,21 +248,42 @@
   double yb = bounds.origin.y - loc_ll.latitude * ya;
 
   bool in_subpath = false;
-  CGPoint cp = CGPointZero;
-
-  int current_lap = 0;
-  int selected_lap = [[self controller] selectedLapIndex];
 
   for (const auto &lap : gps_a->laps())
     {
-      if (current_lap == selected_lap)
+      for (const auto &p : lap.track)
 	{
-	  CGContextStrokePath(ctx);
-	  CGContextSaveGState(ctx);
-	  CGContextSetRGBStrokeColor(ctx, 1, 0, 0.3, 1);
-	  CGContextBeginPath(ctx);
-	  CGContextMoveToPoint(ctx, cp.x, cp.y);
+	  if (p.location.longitude == 0 && p.location.latitude == 0)
+	    continue;
+
+	  CGFloat px = p.location.longitude * xa + xb;
+	  CGFloat py = p.location.latitude * ya + yb;
+
+	  if (!in_subpath)
+	    {
+	      CGContextBeginPath(ctx);
+	      CGContextMoveToPoint(ctx, px, py);
+	      in_subpath = true;
+	    }
+	  else
+	    CGContextAddLineToPoint(ctx, px, py);
 	}
+    }
+
+  if (in_subpath)
+    CGContextStrokePath(ctx);
+
+  int selected_lap = [[self controller] selectedLapIndex];
+
+  if (selected_lap >= 0)
+    {
+      const auto &lap = gps_a->laps()[selected_lap];
+
+      CGContextSetRGBStrokeColor(ctx, 1, 0, 0.3, 1);
+      CGContextSetLineWidth(ctx, 5);
+      CGContextBeginPath(ctx);
+
+      bool in_subpath = false;
 	
       for (const auto &p : lap.track)
 	{
@@ -278,24 +300,12 @@
 	      in_subpath = true;
 	    }
 	  else
-	    {
-	      CGContextAddLineToPoint(ctx, px, py);
-	      cp = CGPointMake(px, py);
-	    }
+	    CGContextAddLineToPoint(ctx, px, py);
 	}
 
-      if (current_lap == selected_lap)
-	{
-	  CGContextStrokePath(ctx);
-	  CGContextRestoreGState(ctx);
-	  CGContextBeginPath(ctx);
-	  CGContextMoveToPoint(ctx, cp.x, cp.y);
-	}
-
-      current_lap++;
+      if (in_subpath)
+	CGContextStrokePath(ctx);
     }
-
-  CGContextStrokePath(ctx);
 
   CGContextRestoreGState(ctx);
 }

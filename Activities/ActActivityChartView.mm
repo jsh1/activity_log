@@ -102,17 +102,6 @@
 
 - (void)layoutSubviews
 {
-  if (_chart)
-    {
-      CGRect bounds = NSRectToCGRect([self bounds]);
-      bounds = CGRectInset(bounds, 2, 2);
-
-      if (!CGRectEqualToRect(bounds, _chart->chart_rect()))
-	{
-	  _chart->set_chart_rect(bounds);
-	  [self setNeedsDisplay:YES];
-	}
-    }
 }
 
 - (void)drawRect:(NSRect)r
@@ -124,7 +113,7 @@
       CGContextRef ctx = (CGContextRef) [[NSGraphicsContext
 					  currentContext] graphicsPort];
 
-      const CGRect &r = _chart->chart_rect();
+      CGRect r = CGRectInset(NSRectToCGRect([self bounds]), 2, 2);
 
       CGContextSaveGState(ctx);
       CGContextClipToRect(ctx, r);
@@ -132,6 +121,7 @@
       CGContextTranslateCTM(ctx, 0, r.size.height);
       CGContextScaleCTM(ctx, 1, -1);
 
+      _chart->set_chart_rect(r);
       _chart->draw(ctx);
 
       CGContextRestoreGState(ctx);

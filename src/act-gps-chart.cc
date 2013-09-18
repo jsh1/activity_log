@@ -355,7 +355,8 @@ chart::draw_line(CGContextRef ctx, const line &l, CGFloat tx)
     }
 
   CGContextAddPath(ctx, path);
-  CGContextSetLineWidth(ctx, 1.5);
+  CGContextSetLineWidth(ctx, 1.75);
+  CGContextSetLineJoin(ctx, kCGLineJoinRound);
   CGContextStrokePath(ctx);
 
   CGContextRestoreGState(ctx);

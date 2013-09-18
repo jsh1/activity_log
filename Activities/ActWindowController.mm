@@ -99,6 +99,13 @@
    addObserver:self selector:@selector(windowWillClose:)
    name:NSWindowWillCloseNotification object:[self window]];
 
+  if (NSView *view = [_activityViewController view])
+    {
+      [view setFrame:[_mainContentView bounds]];
+      [view setHidden:YES];
+      [_mainContentView addSubview:view];
+    }
+
   // FIXME: only while bootstrapping
 
   act::database::query query;
@@ -113,13 +120,8 @@
     activities.push_back(it->storage());
 
   [_activityListView setActivities:activities];
-
-  if (NSView *view = [_activityViewController view])
-    {
-      [view setFrame:[_mainContentView bounds]];
-      [view setHidden:YES];
-      [_mainContentView addSubview:view];
-    }
+  if (activities.size() != 0)
+    [self setSelectedActivity:activities[0]];
 }
 
 - (void)windowWillClose:(NSNotification *)note
