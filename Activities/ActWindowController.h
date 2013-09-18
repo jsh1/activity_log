@@ -4,14 +4,16 @@
 
 #import "act-database.h"
 
-@class ActActivityView, ActActivityListView;
+@class ActActivityViewController, ActActivityListView;
 
 @interface ActWindowController : NSWindowController <NSSplitViewDelegate>
 {
-  IBOutlet ActActivityView *_activityView;
   IBOutlet ActActivityListView *_activityListView;
+  IBOutlet NSView *_mainContentView;
   IBOutlet NSSplitView *_verticalSplitView;
   IBOutlet NSSplitView *_horizontalSplitView;
+
+  ActActivityViewController *_activityViewController;
 
   NSUndoManager *_undoManager;
 

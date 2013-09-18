@@ -2,11 +2,9 @@
 
 #import "ActActivitySummaryView.h"
 
-#import "ActActivityView.h"
+#import "ActActivityViewController.h"
 #import "ActExpandableTextField.h"
 #import "ActHorizontalBoxView.h"
-
-#define MIN_HEIGHT 250
 
 @implementation ActActivitySummaryView
 
@@ -29,16 +27,16 @@
 
 - (void)activityDidChange
 {
-  ActActivityView *view = [self activityView];
+  ActActivityViewController *controller = [self controller];
 
-  [_dateTextField setStringValue:[view stringForField:@"date"]];
-  [_activityTextField setStringValue:[view stringForField:@"activity"]];
-  [_typeTextField setStringValue:[view stringForField:@"type"]];
-  [_courseTextField setStringValue:[view stringForField:@"course"]];
-  [_bodyTextView setString:[view bodyString]];
+  [_dateTextField setStringValue:[controller stringForField:@"date"]];
+  [_activityTextField setStringValue:[controller stringForField:@"activity"]];
+  [_typeTextField setStringValue:[controller stringForField:@"type"]];
+  [_courseTextField setStringValue:[controller stringForField:@"course"]];
+  [_bodyTextView setString:[controller bodyString]];
 
 #if 0
-  if (const act::activity *a = [[self activityView] activity])
+  if (const act::activity *a = [controller activity])
     {
       
     }
@@ -57,14 +55,9 @@
 {
 }
 
-- (CGFloat)preferredHeightForWidth:(CGFloat)width
+- (CGSize)preferredSize
 {
-  return MIN_HEIGHT;
-}
-
-- (NSInteger)preferredNumberOfColumns
-{
-  return 7;
+  return CGSizeMake(400, 200);
 }
 
 - (void)layoutSubviews
@@ -74,7 +67,6 @@
 - (void)drawRect:(NSRect)r
 {
   [self drawBackgroundRect:r];
-  [self drawBorderRect:r];
 }
 
 - (IBAction)controlAction:(id)sender
@@ -97,7 +89,7 @@
     {
       [_bodyTextView setDrawsBackground:NO];
 
-      [[self activityView] setBodyString:[_bodyTextView string]];
+      [[self controller] setBodyString:[_bodyTextView string]];
     }
 }
 

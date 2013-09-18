@@ -3,7 +3,7 @@
 #import "ActActivityHeaderFieldView.h"
 
 #import "ActActivityHeaderView.h"
-#import "ActActivityView.h"
+#import "ActActivityViewController.h"
 
 #define LABEL_INSET 0
 #define LABEL_WIDTH 100
@@ -25,11 +25,15 @@
   if (self == nil)
     return nil;
 
+  NSFont *font = [NSFont systemFontOfSize:[NSFont smallSystemFontSize]];
+
   _labelView = [[ActActivityHeaderFieldTextView alloc] initWithFrame:
 		NSMakeRect(0, 0, LABEL_WIDTH, LABEL_HEIGHT)];
   [_labelView setDelegate:self];
   [_labelView setDrawsBackground:NO];
   [_labelView setAlignment:NSRightTextAlignment];
+  [_labelView setFont:font];
+  [_labelView setTextColor:[NSColor colorWithDeviceWhite:.4 alpha:1]];
   [self addSubview:_labelView];
   [_labelView release];
 
@@ -38,6 +42,8 @@
 			  - LABEL_WIDTH, CONTROL_HEIGHT)];
   [_textView setDelegate:self];
   [_textView setDrawsBackground:NO];
+  [_textView setFont:font];
+  [_textView setTextColor:[NSColor colorWithDeviceWhite:.1 alpha:1]];
   [self addSubview:_textView];
   [_textView release];
 
@@ -54,20 +60,6 @@
   [super dealloc];
 }
 
-- (void)setActivityView:(ActActivityView *)view
-{
-  [super setActivityView:view];
-
-  if (NSFont *font = [view font])
-    {
-      [_labelView setFont:font];
-      [_textView setFont:font];
-    }
-
-  [_labelView setTextColor:[NSColor colorWithDeviceWhite:.4 alpha:1]];
-  [_textView setTextColor:[NSColor colorWithDeviceWhite:.1 alpha:1]];
-}
-
 - (NSString *)fieldName
 {
   return _fieldName;
@@ -77,7 +69,7 @@
 {
   [_labelView setString:_fieldName];
 
-  [_textView setEditable:![[self activityView] isFieldReadOnly:_fieldName]];
+  [_textView setEditable:![[self controller] isFieldReadOnly:_fieldName]];
 }
 
 - (void)setFieldName:(NSString *)name
@@ -93,16 +85,16 @@
 
 - (NSString *)fieldString
 {
-  return [[self activityView] stringForField:_fieldName];
+  return [[self controller] stringForField:_fieldName];
 }
 
 - (void)setFieldString:(NSString *)str
 {
-  ActActivityView *view = [self activityView];
+  ActActivityViewController *controller = [self controller];
 
-  if (![str isEqual:[view stringForField:_fieldName]])
+  if (![str isEqual:[controller stringForField:_fieldName]])
     {
-      [view setString:str forField:_fieldName];
+      [controller setString:str forField:_fieldName];
     }
 }
 
@@ -142,7 +134,7 @@
 
 - (void)textDidEndEditing:(NSNotification *)note
 {
-  if (act::activity *a = [[self activityView] activity])
+  if (act::activity *a = [[self controller] activity])
     {
       NSTextView *view = [note object];
       NSString *value = [view string];
@@ -164,8 +156,8 @@
 	      _fieldName = [value copy];
 	      [self _updateFieldName];
 
-	      [[self activityView] activityDidChangeField:oldName];
-	      [[self activityView] activityDidChangeField:_fieldName];
+	      [[self controller] activityDidChangeField:oldName];
+	      [[self controller] activityDidChangeField:_fieldName];
 
 	      [oldName release];
 	    }

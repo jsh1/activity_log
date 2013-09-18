@@ -2,16 +2,13 @@
 
 #import "ActActivityMapView.h"
 
-#import "ActActivityView.h"
+#import "ActActivityViewController.h"
 #import "ActMapView.h"
 #import "ActTileJSONMapSource.h"
 
 #import "act-gps-activity.h"
 
 #import <algorithm>
-
-#define MIN_HEIGHT 350
-#define MAP_ASPECT (16./9.)
 
 @implementation ActActivityMapView
 
@@ -88,53 +85,55 @@
   [_zoomSlider setMinValue:src_min];
   [_zoomSlider setMaxValue:src_max];
   [_zoomSlider setNumberOfTickMarks:src_max - src_min + 1];
+
+  [_mapSrcButton selectItemAtIndex:idx];
+
+  [[NSUserDefaults standardUserDefaults]
+   setObject:[src name] forKey:@"ActDefaultMapSource"];
 }
 
-- (id)initWithFrame:(NSRect)frame
+- (void)mapSourceDidFinishLoading:(NSNotification *)note
 {
-  self = [super initWithFrame:frame];
-  if (self == nil)
-    return nil;
+  if (--_pendingSources > 0)
+    return;
 
-  NSArray *objects = nil;
-  [[NSBundle mainBundle] loadNibNamed:@"ActActivityMapView"
-   owner:self topLevelObjects:&objects];
+  [_mapSrcButton removeAllItems];
 
-  for (id obj in objects)
-    {
-      if ([obj isKindOfClass:[NSView class]])
-	[self addSubview:obj];
+  NSString *default_name = [[NSUserDefaults standardUserDefaults]
+			    stringForKey:@"ActDefaultMapSource"];
+  NSInteger default_idx = 0;
+  NSInteger idx = 0;
 
-      // FIXME: [auto]release 'obj'?
-    }
-
-  BOOL loading = NO;
   for (ActMapSource *src in [[self class] mapSources])
     {
-      [_mapSrcButton addItemWithTitle:[src name]];
-      if ([src isLoading])
-	loading = YES;
+      NSString *name = [src name];
+      [_mapSrcButton addItemWithTitle:name];
+      if ([name isEqualToString:default_name])
+	default_idx = idx;
+      idx++;
     }
 
-  if (loading)
+  [self setMapSourceAtIndex:default_idx];
+}
+
+- (void)awakeFromNib
+{
+  for (ActMapSource *src in [[self class] mapSources])
+    {
+      if ([src isLoading])
+	_pendingSources++;
+    }
+
+  if (_pendingSources > 0)
     {
       [[NSNotificationCenter defaultCenter] addObserver:self
        selector:@selector(mapSourceDidFinishLoading:)
        name:ActMapSourceDidFinishLoading object:nil];
     }
+  else
+    [self mapSourceDidFinishLoading:nil];
 
-  [self setMapSourceAtIndex:0];
   [_zoomSlider setIntValue:[_mapView mapZoom]];
-
-  return self;
-}
-
-- (void)mapSourceDidFinishLoading:(NSNotification *)note
-{
-  [_mapSrcButton removeAllItems];
-
-  for (ActMapSource *src in [[self class] mapSources])
-    [_mapSrcButton addItemWithTitle:[src name]];
 }
 
 - (void)dealloc
@@ -144,9 +143,19 @@
   [super dealloc];
 }
 
+- (CGSize)preferredSize
+{
+  return CGSizeMake(600, 350);
+}
+
+- (CGSize)minimumSize
+{
+  return CGSizeMake(100, 100);
+}
+
 - (void)_updateDisplayedRegion
 {
-  const act::activity *a = [[self activityView] activity];
+  const act::activity *a = [[self controller] activity];
   if (!a)
     return;
 
@@ -168,29 +177,10 @@
 
 - (void)selectedLapDidChange
 {
-  const act::activity *a = [[self activityView] activity];
+  const act::activity *a = [[self controller] activity];
 
   if (a != nullptr && a->gps_data() != nullptr)
     [_mapView setNeedsDisplay:YES];
-}
-
-- (CGFloat)preferredHeightForWidth:(CGFloat)width
-{
-  const act::activity *a = [[self activityView] activity];
-  if (a == nullptr)
-    return 0;
-
-  const act::gps::activity *gps_a = a->gps_data();
-  if (gps_a == nullptr || !gps_a->has_location())
-    return 0;
-
-  CGFloat height = ceil(width * (1./MAP_ASPECT));
-  return std::max(height, (CGFloat)MIN_HEIGHT);
-}
-
-- (NSInteger)preferredNumberOfColumns
-{
-  return 9;
 }
 
 - (void)layoutSubviews
@@ -232,7 +222,7 @@
     mapBottomLeft:(const act::location &)loc_ll
     topRight:(const act::location &)loc_ur
 {
-  const act::activity *a = [[self activityView] activity];
+  const act::activity *a = [[self controller] activity];
   if (!a)
     return;
 
@@ -260,7 +250,7 @@
   CGPoint cp = CGPointZero;
 
   int current_lap = 0;
-  int selected_lap = [[self activityView] selectedLapIndex];
+  int selected_lap = [[self controller] selectedLapIndex];
 
   for (const auto &lap : gps_a->laps())
     {

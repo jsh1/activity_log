@@ -31,5 +31,7 @@
 		<string>mapquest-map-tiles</string>
 		<string>mapquest-sat-tiles</string>
 	</array>
+	<key>ActDefaultMapSource</key>
+	<string>OpenCycleMap</string>
 </dict>
 </plist>

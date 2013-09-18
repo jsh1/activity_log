@@ -233,9 +233,6 @@ convertPointToLocation(CGPoint p)
        topRight:l_ur];
     }
 
-  [[NSColor colorWithDeviceWhite:.75 alpha:1] setStroke];
-  [NSBezierPath strokeRect:NSInsetRect(bounds, .5, .5)];
-
   // cancel connections no longer needed and release unused images.
 
   NSMutableArray *removed = nil;

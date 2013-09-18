@@ -12,6 +12,8 @@
   IBOutlet NSButton *_zoomInButton;
   IBOutlet NSButton *_zoomOutButton;
   IBOutlet NSButton *_centerButton;
+
+  int _pendingSources;
 }
 
 - (IBAction)controlAction:(id)sender;

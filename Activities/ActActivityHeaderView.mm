@@ -2,7 +2,7 @@
 
 #import "ActActivityHeaderView.h"
 
-#import "ActActivityView.h"
+#import "ActActivityViewController.h"
 #import "ActActivityHeaderFieldView.h"
 
 #import "ActFoundationExtensions.h"
@@ -59,8 +59,8 @@
 	  new_subview = [[[ActActivityHeaderFieldView alloc]
 			  initWithFrame:NSZeroRect] autorelease];
 
-	  if (ActActivityView *view = [self activityView])
-	    [new_subview setActivityView:view];
+	  if (ActActivityViewController *controller = [self controller])
+	    [new_subview setController:controller];
 
 	  [new_subview setFieldName:field];
 	}
@@ -95,8 +95,8 @@
 
   [field setFieldName:name];
 
-  if (ActActivityView *view = [self activityView])
-    [field setActivityView:view];
+  if (ActActivityViewController *controller = [self controller])
+    [field setController:controller];
 
   [self addSubview:field];
   [field release];
@@ -114,12 +114,12 @@
     }
 }
 
-- (void)setActivityView:(ActActivityView *)view
+- (void)setController:(ActActivityViewController *)controller
 {
-  [super setActivityView:view];
+  [super setController:controller];
 
   for (ActActivityHeaderFieldView *field in [self subviews])
-    [field setActivityView:view];
+    [field setController:controller];
 }
 
 - (void)activityDidChange
@@ -134,30 +134,9 @@
     [field activityDidChangeField:name];
 }
 
-- (CGFloat)preferredHeightForWidth:(CGFloat)width
+- (CGSize)preferredSize
 {
-  NSArray *fields = [self subviews];
-
-  if ([fields count] == 0)
-    return 0;
-
-  CGFloat height = FIELD_TOP_BORDER;
-
-  for (ActActivityHeaderFieldView *field in fields)
-    {
-      height += [field preferredHeightForWidth:width];
-      height += FIELD_Y_SPACING;
-    }
-
-  height -= FIELD_Y_SPACING;
-  height += FIELD_BOTTOM_BORDER;
-
-  return height;
-}
-
-- (NSInteger)preferredNumberOfColumns
-{
-  return 5;
+  return CGSizeMake(300, 200);
 }
 
 - (void)layoutSubviews
@@ -180,7 +159,6 @@
 - (void)drawRect:(NSRect)r
 {
   [self drawBackgroundRect:r];
-  [self drawBorderRect:r];
 }
 
 - (BOOL)isFlipped

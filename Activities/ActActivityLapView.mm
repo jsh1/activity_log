@@ -2,11 +2,9 @@
 
 #import "ActActivityLapView.h"
 
-#import "ActActivityView.h"
+#import "ActActivityViewController.h"
 
 #import "act-format.h"
-
-#define MIN_HEIGHT 150
 
 @implementation ActActivityLapView
 
@@ -19,7 +17,7 @@
 {
   bool has_hr = false;
 
-  if (const act::activity *a = [[self activityView] activity])
+  if (const act::activity *a = [[self controller] activity])
     {
       if (const act::gps::activity *gps_data = a->gps_data())
 	has_hr = gps_data->has_heart_rate();
@@ -31,22 +29,14 @@
   [_tableView reloadData];
 }
 
-- (CGFloat)preferredHeightForWidth:(CGFloat)width
+- (CGSize)preferredSize
 {
-  const act::activity *a = [[self activityView] activity];
-  if (a == nullptr)
-    return 0;
-
-  const act::gps::activity *gps_a = a->gps_data();
-  if (gps_a == nullptr)
-    return 0;
-
-  return MIN_HEIGHT;
+  return CGSizeMake(210, 250);
 }
 
-- (NSInteger)preferredNumberOfColumns
+- (CGSize)minimumSize
 {
-  return 3;
+  return CGSizeMake(100, 100);
 }
 
 - (void)layoutSubviews
@@ -57,7 +47,7 @@
 
 - (NSInteger)numberOfRowsInTableView:(NSTableView *)tv
 {
-  const act::activity *a = [[self activityView] activity];
+  const act::activity *a = [[self controller] activity];
   if (!a)
     return 0;
 
@@ -71,7 +61,7 @@
 - (id)tableView:(NSTableView *)tv
   objectValueForTableColumn:(NSTableColumn *)col row:(NSInteger)row
 {
-  const act::activity *a = [[self activityView] activity];
+  const act::activity *a = [[self controller] activity];
   if (!a)
     return nil;
 
@@ -120,7 +110,7 @@
 
 - (void)tableViewSelectionDidChange:(NSNotification *)note
 {
-  [[self activityView] setSelectedLapIndex:[_tableView selectedRow]];
+  [[self controller] setSelectedLapIndex:[_tableView selectedRow]];
 }
 
 @end

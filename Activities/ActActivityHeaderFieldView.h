@@ -14,5 +14,9 @@
 
 @property(nonatomic, copy) NSString *fieldName;
 @property(nonatomic, copy) NSString *fieldString;
+
+- (CGFloat)preferredHeightForWidth:(CGFloat)width;
+
+- (void)layoutSubviews;
   
 @end

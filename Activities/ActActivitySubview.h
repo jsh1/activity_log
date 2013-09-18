@@ -2,48 +2,24 @@
 
 #import <AppKit/AppKit.h>
 
-@class ActActivityView;
+@class ActActivityViewController;
 
 @interface ActActivitySubview : NSView
 {
-  IBOutlet ActActivityView *_activityView;
+  IBOutlet ActActivityViewController *_controller;
 }
 
-// Standard implementation returns nil
+@property(nonatomic, assign) ActActivityViewController *controller;
 
-+ (NSString *)nibName;
+- (void)drawBackgroundRect:(NSRect)r;
 
-// Standard implementation loads nib if non-nil, else alloc/inits
+@end
 
-+ (ActActivitySubview *)subviewForView:(ActActivityView *)view;
-
-@property(nonatomic, assign) ActActivityView *activityView;
-
-// Standard implementations do nothing
+@interface NSView (ActActivitySubview)
 
 - (void)activityDidChange;
 - (void)activityDidChangeField:(NSString *)name;
 - (void)activityDidChangeBody;
 - (void)selectedLapDidChange;
-
-// Standard implementation returns all zeros
-
-- (NSEdgeInsets)edgeInsets;
-
-// Standard implementation returns zero
-
-- (CGFloat)preferredHeightForWidth:(CGFloat)width;
-
-// For horizontal box views. Max of twelve columns. Standard
-// implementation returns zero.
-
-- (NSInteger)preferredNumberOfColumns;
-
-// Standard implementation does nothing
-
-- (void)layoutSubviews;
-
-- (void)drawBackgroundRect:(NSRect)r;
-- (void)drawBorderRect:(NSRect)r;
 
 @end

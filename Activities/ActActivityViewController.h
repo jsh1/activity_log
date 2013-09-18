@@ -6,9 +6,9 @@
 
 @class ActWindowController;
 
-@interface ActActivityView : NSView
+@interface ActActivityViewController : NSViewController <NSSplitViewDelegate>
 {
-  IBOutlet ActWindowController *_controller;
+  ActWindowController *_controller;
 
   act::activity_storage_ref _activity_storage;
   std::unique_ptr<act::activity> _activity;
@@ -16,12 +16,16 @@
   NSInteger _selectedLapIndex;
 }
 
+@property(nonatomic, assign) ActWindowController *controller;
+
 @property(nonatomic) act::activity_storage_ref activityStorage;
 @property(nonatomic, readonly) act::activity *activity;
 
 @property(nonatomic) NSInteger selectedLapIndex;
 
 @property(nonatomic, copy) NSString *bodyString;
+
+- (id)init;
 
 - (NSString *)stringForField:(NSString *)name;
 - (void)setString:(NSString *)str forField:(NSString *)name;
@@ -31,13 +35,5 @@
 - (void)activityDidChangeField:(NSString *)name;
 - (void)activityDidChangeBody;
 - (void)selectedLapDidChange;
-
-- (void)updateHeight;
-
-- (CGFloat)preferredHeightForWidth:(CGFloat)width;
-
-- (void)layoutSubviews;
-
-- (NSFont *)font;
 
 @end

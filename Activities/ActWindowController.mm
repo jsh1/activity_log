@@ -3,7 +3,7 @@
 #import "ActWindowController.h"
 
 #import "ActActivityListView.h"
-#import "ActActivityView.h"
+#import "ActActivityViewController.h"
 
 @implementation ActWindowController
 
@@ -20,6 +20,8 @@
   if (self == nil)
     return nil;
 
+  _activityViewController = [[ActActivityViewController alloc] init];
+
   _undoManager = [[NSUndoManager alloc] init];
 
   return self;
@@ -27,6 +29,7 @@
 
 - (void)dealloc
 {
+  [_activityViewController release];
   [_undoManager release];
 
   [super dealloc];
@@ -42,13 +45,20 @@
 
 - (act::activity_storage_ref)selectedActivity
 {
-  return [_activityView activityStorage];
+  return [_activityListView selectedActivity];
 }
 
 - (void)setSelectedActivity:(act::activity_storage_ref)a
 {
-  [_activityView setActivityStorage:a];
   [_activityListView setSelectedActivity:a];
+
+  if (a == nullptr)
+    [[_activityViewController view] setHidden:YES];
+
+  [_activityViewController setActivityStorage:a];
+
+  if (a != nullptr)
+    [[_activityViewController view] setHidden:NO];
 }
 
 - (void)reloadSelectedActivity
@@ -103,6 +113,13 @@
     activities.push_back(it->storage());
 
   [_activityListView setActivities:activities];
+
+  if (NSView *view = [_activityViewController view])
+    {
+      [view setFrame:[_mainContentView bounds]];
+      [view setHidden:YES];
+      [_mainContentView addSubview:view];
+    }
 }
 
 - (void)windowWillClose:(NSNotification *)note

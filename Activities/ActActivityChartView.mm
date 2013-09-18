@@ -2,20 +2,26 @@
 
 #import "ActActivityChartView.h"
 
-#import "ActActivityView.h"
+#import "ActActivityViewController.h"
 
-#define CHART_HEIGHT 180
-
-#define TOP_BORDER 0
-#define BOTTOM_BORDER 0
-#define LEFT_BORDER 4
-#define RIGHT_BORDER 4
+#define MIN_WIDTH 500
+#define MIN_HEIGHT 200
 
 @implementation ActActivityChartView
 
 + (NSString *)nibName
 {
   return @"ActActivityChartView";
+}
+
+- (CGSize)preferredSize
+{
+  return CGSizeMake(500, 200);
+}
+
+- (CGSize)minimumSize
+{
+  return CGSizeMake(100, 100);
 }
 
 - (void)_updateChart
@@ -26,7 +32,7 @@
       [self setNeedsDisplay:YES];
     }
 
-  const act::activity *a = [[self activityView] activity];
+  const act::activity *a = [[self controller] activity];
   if (a == nullptr)
     return;
 
@@ -58,7 +64,7 @@
     }
 
   _chart->set_chart_rect(NSRectToCGRect([self bounds]));
-  _chart->set_selected_lap([[self activityView] selectedLapIndex]);
+  _chart->set_selected_lap([[self controller] selectedLapIndex]);
   _chart->update_values();
 
   [self setNeedsDisplay:YES];
@@ -68,7 +74,7 @@
 {
   bool has_pace = false, has_hr = false, has_altitude = false;
 
-  if (const act::activity *a = [[self activityView] activity])
+  if (const act::activity *a = [[self controller] activity])
     {
       if (const act::gps::activity *gps_a = a->gps_data())
 	{
@@ -89,28 +95,9 @@
 {
   if (_chart)
     {
-      _chart->set_selected_lap([[self activityView] selectedLapIndex]);
+      _chart->set_selected_lap([[self controller] selectedLapIndex]);
       [self setNeedsDisplay:YES];
     }
-}
-
-- (NSEdgeInsets)edgeInsets
-{
-  return NSEdgeInsetsMake(TOP_BORDER, LEFT_BORDER,
-			  BOTTOM_BORDER, RIGHT_BORDER);
-}
-
-- (CGFloat)preferredHeightForWidth:(CGFloat)width
-{
-  const act::activity *a = [[self activityView] activity];
-  if (a == nullptr)
-    return 0;
-
-  const act::gps::activity *gps_a = a->gps_data();
-  if (gps_a == nullptr)
-    return 0;
-
-  return CHART_HEIGHT;
 }
 
 - (void)layoutSubviews
@@ -149,8 +136,6 @@
 
       CGContextRestoreGState(ctx);
     }
-
-  [self drawBorderRect:r];
 }
 
 - (IBAction)controlAction:(id)sender

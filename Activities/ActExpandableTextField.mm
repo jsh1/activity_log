@@ -18,10 +18,11 @@
 
   CGFloat width = MIN_WIDTH;
 
-  if ([text length] != 0)
+  NSAttributedString *astr = [self attributedStringValue];
+
+  if ([astr length] != 0)
     {
-      NSDictionary *dict = [[self attributedStringValue]
-			    attributesAtIndex:0 effectiveRange:nil];
+      NSDictionary *dict = [astr attributesAtIndex:0 effectiveRange:nil];
       NSSize size = [text sizeWithAttributes:dict];
 
       width = std::max(width, size.width + 10);
