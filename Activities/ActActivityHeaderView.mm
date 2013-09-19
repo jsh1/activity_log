@@ -8,8 +8,6 @@
 #import "ActFoundationExtensions.h"
 
 #define FIELD_HEIGHT 12
-#define FIELD_TOP_BORDER 4
-#define FIELD_BOTTOM_BORDER 4
 #define FIELD_Y_SPACING 2
 
 @implementation ActActivityHeaderView
@@ -122,21 +120,18 @@
     [field setController:controller];
 }
 
-- (void)activityDidChange
+- (CGFloat)preferredHeight
 {
-  for (ActActivityHeaderFieldView *field in [self subviews])
-    [field activityDidChange];
-}
+  CGFloat h = 0;
 
-- (void)activityDidChangeField:(NSString *)name
-{
   for (ActActivityHeaderFieldView *field in [self subviews])
-    [field activityDidChangeField:name];
-}
+    {
+      if (h != 0)
+	h += FIELD_Y_SPACING;
+      h += [field preferredHeight];
+    }
 
-- (CGSize)preferredSize
-{
-  return CGSizeMake(300, 200);
+  return h;
 }
 
 - (void)layoutSubviews
@@ -144,21 +139,14 @@
   NSRect bounds = [self bounds];
   NSRect frame = bounds;
 
-  frame.origin.y += FIELD_TOP_BORDER;
-
   for (ActActivityHeaderFieldView *field in [self subviews])
     {
-      frame.size.height = [field preferredHeightForWidth:frame.size.width];
+      frame.size.height = [field preferredHeight];
       [field setFrame:frame];
       [field layoutSubviews];
       frame.origin.y += frame.size.height;
       frame.origin.y += FIELD_Y_SPACING;
     }
-}
-
-- (void)drawRect:(NSRect)r
-{
-  [self drawBackgroundRect:r];
 }
 
 - (BOOL)isFlipped

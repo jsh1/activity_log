@@ -95,16 +95,16 @@
 
 - (void)windowDidLoad
 {
-  [[NSNotificationCenter defaultCenter]
-   addObserver:self selector:@selector(windowWillClose:)
-   name:NSWindowWillCloseNotification object:[self window]];
-
   if (NSView *view = [_activityViewController view])
     {
       [view setFrame:[_mainContentView bounds]];
       [view setHidden:YES];
       [_mainContentView addSubview:view];
     }
+
+  [[NSNotificationCenter defaultCenter]
+   addObserver:self selector:@selector(windowWillClose:)
+   name:NSWindowWillCloseNotification object:[self window]];
 
   // FIXME: only while bootstrapping
 

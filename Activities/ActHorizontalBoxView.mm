@@ -7,21 +7,26 @@
 - (void)layoutSubviews
 {
   NSRect bounds = [self bounds];
-  CGFloat x = bounds.origin.x;
+  CGFloat x = 0;
 
   for (NSView *subview in [self subviews])
     {
-      NSRect r = [subview frame];
       CGFloat w = [subview preferredWidth];
 
-      if (r.origin.x != x || r.size.width != w)
-	{
-	  r.origin.x = x;
-	  r.size.width = w;
-	  [subview setFrame:r];
-	}
+      NSRect old_frame = [subview frame];
+      NSRect new_frame = old_frame;
 
-      x += r.size.width;
+      if (!_rightToLeft)
+	new_frame.origin.x = bounds.origin.x + x;
+      else
+	new_frame.origin.x = bounds.origin.x + bounds.size.width - (x + w);
+
+      new_frame.size.width = w;
+
+      if (!NSEqualRects(old_frame, new_frame))
+	[subview setFrame:new_frame];
+
+      x += w + _spacing;
     }
 }
 

@@ -173,6 +173,12 @@
 - (void)activityDidChange
 {
   [self _updateDisplayedRegion];
+  [_mapView setNeedsDisplay:YES];
+
+  const act::activity *a = [[self controller] activity];
+  bool has_map = a != nullptr && a->gps_data() != nullptr;
+
+  [_centerButton setEnabled:has_map];
 }
 
 - (void)selectedLapDidChange

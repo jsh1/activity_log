@@ -112,7 +112,7 @@
   [_textView setString:[self fieldString]];
 }
 
-- (CGFloat)preferredHeightForWidth:(CGFloat)width
+- (CGFloat)preferredHeight
 {
   return CONTROL_HEIGHT;
 }

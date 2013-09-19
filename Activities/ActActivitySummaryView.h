@@ -2,16 +2,27 @@
 
 #import "ActActivitySubview.h"
 
-@class ActExpandableTextField, ActHorizontalBoxView;
+@class ActExpandableTextField, ActHorizontalBoxView, ActActivityHeaderView;
 
 @interface ActActivitySummaryView : ActActivitySubview <NSTextViewDelegate>
 {
-  IBOutlet ActExpandableTextField *_dateTextField;
-  IBOutlet ActHorizontalBoxView *_activityTypeBoxView;
-  IBOutlet ActExpandableTextField *_activityTextField;
-  IBOutlet ActExpandableTextField *_typeTextField;
-  IBOutlet ActExpandableTextField *_courseTextField;
+  IBOutlet ActHorizontalBoxView *_dateBox;
+  IBOutlet ActExpandableTextField *_dateTimeField;
+  IBOutlet ActExpandableTextField *_dateDayField;
+  IBOutlet ActExpandableTextField *_dateDateField;
+
+  IBOutlet ActHorizontalBoxView *_typeBox;
+  IBOutlet ActExpandableTextField *_typeActivityField;
+  IBOutlet ActExpandableTextField *_typeTypeField;
+
+  IBOutlet ActHorizontalBoxView *_statsBox;
+  IBOutlet ActExpandableTextField *_statsDistanceField;
+  IBOutlet ActExpandableTextField *_statsDurationField;
+  IBOutlet ActExpandableTextField *_statsPaceField;
+
+  IBOutlet NSTextField *_courseField;
   IBOutlet NSTextView *_bodyTextView;
+  IBOutlet ActActivityHeaderView *_headerView;
 }
 
 - (IBAction)controlAction:(id)sender;

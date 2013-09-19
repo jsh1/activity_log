@@ -9,6 +9,3 @@
 }
 
 @end
-
-@interface ActActivityLapTableView : NSTableView
-@end

@@ -10,4 +10,7 @@
 - (void)addDisplayedField:(NSString *)name;
 - (void)removeDisplayedField:(NSString *)name;
 
+- (CGFloat)preferredHeight;
+- (void)layoutSubviews;
+
 @end

@@ -6,39 +6,32 @@
 
 #import <algorithm>
 
-#define MIN_WIDTH 20
+#define MIN_WIDTH 2
 
 @implementation ActExpandableTextField
 
 - (CGFloat)preferredWidth
 {
   NSString *text = [self stringValue];
+
   if ([text length] == 0)
     text = [[self cell] placeholderString];
 
   CGFloat width = MIN_WIDTH;
 
-  NSAttributedString *astr = [self attributedStringValue];
-
-  if ([astr length] != 0)
+  if ([text length] != 0)
     {
-      NSDictionary *dict = [astr attributesAtIndex:0 effectiveRange:nil];
-      NSSize size = [text sizeWithAttributes:dict];
+      NSDictionary *attrs = [[NSDictionary alloc] initWithObjectsAndKeys:
+			     [self font], NSFontAttributeName, nil];
 
-      width = std::max(width, size.width + 10);
+      NSSize size = [text sizeWithAttributes:attrs];
+
+      width = std::max(width, size.width + 1);
+
+      [attrs release];
     }
 
   return width;
-}
-
-- (void)textDidBeginEditing:(NSNotification *)notification
-{
-  [self setDrawsBackground:YES];
-}
-
-- (void)textDidEndEditing:(NSNotification *)notification
-{
-  [self setDrawsBackground:NO];
 }
 
 - (void)textDidChange:(NSNotification *)notification
