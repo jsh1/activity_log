@@ -18,6 +18,19 @@
 
 @implementation ActActivityHeaderFieldView
 
++ (NSColor *)textFieldColor:(BOOL)readOnly
+{
+  static NSColor *a, *b;
+
+  if (a == nil)
+    {
+      a = [[NSColor colorWithDeviceWhite:0 alpha:1] retain];
+      b = [[NSColor colorWithDeviceWhite:.45 alpha:1] retain];
+    }
+
+  return !readOnly ? a : b;
+}
+
 - (id)initWithFrame:(NSRect)frame
 {
   self = [super initWithFrame:frame];
@@ -32,7 +45,7 @@
   [_labelView setDrawsBackground:NO];
   [_labelView setAlignment:NSRightTextAlignment];
   [_labelView setFont:font];
-  [_labelView setTextColor:[NSColor colorWithDeviceWhite:.4 alpha:1]];
+  [_labelView setTextColor:[NSColor colorWithDeviceWhite:.25 alpha:1]];
   [self addSubview:_labelView];
   [_labelView release];
 
@@ -68,7 +81,9 @@
 {
   [_labelView setString:_fieldName];
 
-  [_textView setEditable:![[self controller] isFieldReadOnly:_fieldName]];
+  BOOL readOnly = [[self controller] isFieldReadOnly:_fieldName];
+  [_textView setEditable:!readOnly];
+  [_textView setTextColor:[[self class] textFieldColor:readOnly]];
 }
 
 - (void)setFieldName:(NSString *)name

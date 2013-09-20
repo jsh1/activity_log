@@ -139,24 +139,27 @@
 
   if (a != nullptr)
     {
-      if (a->resting_hr() != 0)
-	[_headerView addDisplayedField:@"Resting-HR"];
       if (a->average_hr() != 0)
 	[_headerView addDisplayedField:@"Average-HR"];
       if (a->max_hr() != 0)
 	[_headerView addDisplayedField:@"Max-HR"];
 
+      if (a->vdot() != 0)
+	[_headerView addDisplayedField:@"VDOT"];
       if (a->points() != 0)
 	[_headerView addDisplayedField:@"Points"];
+
       if (a->effort() != 0)
 	[_headerView addDisplayedField:@"Effort"];
       if (a->quality() != 0)
 	[_headerView addDisplayedField:@"Quality"];
 
-      if (a->weight() != 0)
-	[_headerView addDisplayedField:@"Weight"];
       if (a->calories() != 0)
 	[_headerView addDisplayedField:@"Calories"];
+      if (a->weight() != 0)
+	[_headerView addDisplayedField:@"Weight"];
+      if (a->resting_hr() != 0)
+	[_headerView addDisplayedField:@"Resting-HR"];
 
       if (a->temperature() != 0)
 	[_headerView addDisplayedField:@"Temperature"];

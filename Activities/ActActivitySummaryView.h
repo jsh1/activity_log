@@ -27,6 +27,8 @@
   NSDictionary *_fieldControls;		// FIELD-NAME -> CONTROL
 }
 
++ (NSColor *)textFieldColor:(BOOL)readOnly;
+
 - (IBAction)controlAction:(id)sender;
 
 @end

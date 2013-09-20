@@ -12,6 +12,8 @@
   NSString *_fieldName;
 }
 
++ (NSColor *)textFieldColor:(BOOL)readOnly;
+
 @property(nonatomic, copy) NSString *fieldName;
 @property(nonatomic, copy) NSString *fieldString;
 
