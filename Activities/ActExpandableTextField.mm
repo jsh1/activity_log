@@ -26,7 +26,7 @@
 
       NSSize size = [text sizeWithAttributes:attrs];
 
-      width = std::max(width, size.width + 1);
+      width = std::max(width, size.width + 3);
 
       [attrs release];
     }

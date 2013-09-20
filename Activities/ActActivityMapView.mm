@@ -143,16 +143,6 @@
   [super dealloc];
 }
 
-- (CGSize)preferredSize
-{
-  return CGSizeMake(600, 350);
-}
-
-- (CGSize)minimumSize
-{
-  return CGSizeMake(100, 100);
-}
-
 - (void)_updateDisplayedRegion
 {
   const act::activity *a = [[self controller] activity];
@@ -187,11 +177,6 @@
 
   if (a != nullptr && a->gps_data() != nullptr)
     [_mapView setNeedsDisplay:YES];
-}
-
-- (void)layoutSubviews
-{
-  [_mapView setFrame:[self bounds]];
 }
 
 - (IBAction)controlAction:(id)sender

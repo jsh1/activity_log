@@ -5,7 +5,6 @@
 #import "ActActivityHeaderView.h"
 #import "ActActivityViewController.h"
 
-#define LABEL_INSET 0
 #define LABEL_WIDTH 100
 #define LABEL_HEIGHT 14
 
@@ -126,7 +125,7 @@
   [_labelView setFrame:frame];
 
   frame.origin.x += frame.size.width;
-  frame.size.width = bounds.size.width - frame.size.width - LABEL_INSET;
+  frame.size.width = bounds.size.width - frame.origin.x;
   [_textView setFrame:frame];
 }
 
@@ -258,6 +257,10 @@
 
 	      [[self window] makeFirstResponder:item];
 	    }
+
+	  NSView *view = (id)[[self window] firstResponder];
+	  [self scrollRectToVisible:
+	   [self convertRect:[view bounds] fromView:view]];
 	}
     }
   else

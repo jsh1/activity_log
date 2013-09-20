@@ -9,21 +9,6 @@
 
 @implementation ActActivityChartView
 
-+ (NSString *)nibName
-{
-  return @"ActActivityChartView";
-}
-
-- (CGSize)preferredSize
-{
-  return CGSizeMake(500, 200);
-}
-
-- (CGSize)minimumSize
-{
-  return CGSizeMake(100, 100);
-}
-
 - (void)_updateChart
 {
   if (_chart)
@@ -98,10 +83,6 @@
       _chart->set_selected_lap([[self controller] selectedLapIndex]);
       [self setNeedsDisplay:YES];
     }
-}
-
-- (void)layoutSubviews
-{
 }
 
 - (void)drawRect:(NSRect)r

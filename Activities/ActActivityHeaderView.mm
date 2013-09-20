@@ -144,9 +144,14 @@
       frame.size.height = [field preferredHeight];
       [field setFrame:frame];
       [field layoutSubviews];
-      frame.origin.y += frame.size.height;
-      frame.origin.y += FIELD_Y_SPACING;
+      frame.origin.y += frame.size.height + FIELD_Y_SPACING;
     }
+}
+
+- (void)resizeSubviewsWithOldSize:(NSSize)oldSize
+{
+  [super resizeSubviewsWithOldSize:oldSize];
+  [self layoutSubviews];
 }
 
 - (BOOL)isFlipped

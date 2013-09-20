@@ -234,9 +234,8 @@
 {
   if (act::activity *a = [self activity])
     {
-      const char *field_name = [name UTF8String];
-
-      auto id = act::lookup_field_id(field_name);
+      auto id = act::lookup_field_id([name UTF8String]);
+      const char *field_name = act::canonical_field_name(id);
 
       // FIXME: trim whitespace?
 
@@ -256,6 +255,34 @@
       a->invalidate_cached_values();
 
       [self activityDidChangeField:name];
+    }
+}
+
+- (NSDate *)dateField
+{
+  if (const act::activity *a = [self activity])
+    return [NSDate dateWithTimeIntervalSince1970:a->date()];
+  else
+    return nil;
+}
+
+- (void)setDateField:(NSDate *)date
+{
+  if (act::activity *a = [self activity])
+    {
+      if (date != nil)
+	{
+	  std::string str;
+	  act::format_date_time(str, (time_t) [date timeIntervalSince1970]);
+	  (*a->storage())["Date"] = str;
+	}
+      else
+	a->storage()->delete_field("Date");
+
+      a->storage()->increment_seed();
+      a->invalidate_cached_values();
+
+      [self activityDidChangeField:@"Date"];
     }
 }
 

@@ -8,11 +8,6 @@
 
 @implementation ActActivityLapView
 
-+ (NSString *)nibName
-{
-  return @"ActActivityLapView";
-}
-
 - (void)activityDidChange
 {
   bool has_hr = false;
@@ -27,20 +22,6 @@
   [[_tableView tableColumnWithIdentifier:@"max-hr"] setHidden:!has_hr];
 
   [_tableView reloadData];
-}
-
-- (CGSize)preferredSize
-{
-  return CGSizeMake(210, 250);
-}
-
-- (CGSize)minimumSize
-{
-  return CGSizeMake(100, 100);
-}
-
-- (void)layoutSubviews
-{
 }
 
 // NSTableViewDataSource methods

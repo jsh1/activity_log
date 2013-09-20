@@ -23,6 +23,8 @@
   IBOutlet NSTextField *_courseField;
   IBOutlet NSTextView *_bodyTextView;
   IBOutlet ActActivityHeaderView *_headerView;
+
+  NSDictionary *_fieldControls;		// FIELD-NAME -> CONTROL
 }
 
 - (IBAction)controlAction:(id)sender;

@@ -31,6 +31,8 @@
 - (void)setString:(NSString *)str forField:(NSString *)name;
 - (BOOL)isFieldReadOnly:(NSString *)name;
 
+@property(nonatomic, copy) NSDate *dateField;
+
 - (void)activityDidChange;
 - (void)activityDidChangeField:(NSString *)name;
 - (void)activityDidChangeBody;

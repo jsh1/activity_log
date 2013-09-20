@@ -21,6 +21,7 @@
     return nil;
 
   _activityViewController = [[ActActivityViewController alloc] init];
+  [_activityViewController setController:self];
 
   _undoManager = [[NSUndoManager alloc] init];
 

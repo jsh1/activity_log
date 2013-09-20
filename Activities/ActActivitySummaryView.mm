@@ -13,12 +13,49 @@
 
 @implementation ActActivitySummaryView
 
+- (void)dealloc
+{
+  [_fieldControls release];
+
+  [super dealloc];
+}
+
 - (void)awakeFromNib
 {
   [_dateBox setRightToLeft:YES];
-  [_dateBox setSpacing:4];
-  [_typeBox setSpacing:4];
-  [_statsBox setSpacing:6];
+  [_dateBox setSpacing:3];
+  [_typeBox setSpacing:3];
+  [_statsBox setSpacing:8];
+}
+
++ (NSColor *)textFieldColor:(BOOL)readOnly
+{
+  static NSColor *a, *b;
+
+  if (a == nil)
+    {
+      a = [[NSColor colorWithDeviceWhite:.25 alpha:1] retain];
+      b = [[NSColor colorWithDeviceWhite:.45 alpha:1] retain];
+    }
+
+  return !readOnly ? a : b;
+}
+
+- (NSDictionary *)fieldControls
+{
+  if (_fieldControls == nil)
+    {
+      _fieldControls = [[NSDictionary alloc] initWithObjectsAndKeys:
+			_typeActivityField, @"activity",
+			_typeTypeField, @"type",
+			_statsDistanceField, @"distance",
+			_statsDurationField, @"duration",
+			_statsPaceField, @"pace",
+			_courseField, @"course",
+			nil];
+    }
+
+  return _fieldControls;
 }
 
 - (void)_reflowFields
@@ -32,9 +69,9 @@
 {
   ActActivityViewController *controller = [self controller];
 
-  if (const act::activity *a = [controller activity])
+  if ([controller activity] != nullptr)
     {
-      NSDate *date = [NSDate dateWithTimeIntervalSince1970:a->date()];
+      NSDate *date = [controller dateField];
       NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
 
       [formatter setDateStyle:NSDateFormatterShortStyle];
@@ -51,14 +88,23 @@
       [formatter setTimeStyle:NSDateFormatterShortStyle];
       [_dateTimeField setStringValue:[formatter stringFromDate:date]];
 
-      [_typeActivityField setStringValue:[[controller stringForField:@"activity"] capitalizedString]];
-      [_typeTypeField setStringValue:[controller stringForField:@"type"]];
+      [formatter release];
 
-      [_statsDistanceField setStringValue:[controller stringForField:@"distance"]];
-      [_statsDurationField setStringValue:[controller stringForField:@"duration"]];
-      [_statsPaceField setStringValue:[controller stringForField:@"pace"]];
+      NSDictionary *dict = [self fieldControls];
+      for (NSString *field in dict)
+	{
+	  NSString *string = [controller stringForField:field];
+	  NSTextField *control = [dict objectForKey:field];
 
-      [_courseField setStringValue:[controller stringForField:@"course"]];
+	  if ([field isEqualToString:@"activity"])
+	    string = [string capitalizedString];
+
+	  BOOL readOnly = [controller isFieldReadOnly:field];
+	  [control setStringValue:string];
+	  [control setEditable:!readOnly];
+	  [control setTextColor:[[self class] textFieldColor:readOnly]];
+	}
+
       [_bodyTextView setString:[controller bodyString]];
     }
   else
@@ -66,12 +112,19 @@
       [_dateDateField setObjectValue:nil];
       [_dateDayField setObjectValue:nil];
       [_dateTimeField setObjectValue:nil];
-      [_typeActivityField setObjectValue:nil];
-      [_typeTypeField setObjectValue:nil];
-      [_statsDistanceField setObjectValue:nil];
-      [_statsDurationField setObjectValue:nil];
-      [_statsPaceField setObjectValue:nil];
-      [_courseField setObjectValue:nil];
+
+      NSDictionary *dict = [self fieldControls];
+      NSColor *color = [[self class] textFieldColor:YES];
+
+      for (NSString *field in dict)
+	{
+	  NSTextField *control = [dict objectForKey:field];
+
+	  [control setObjectValue:nil];
+	  [control setEditable:NO];
+	  [control setTextColor:color];
+	}
+
       [_bodyTextView setString:@""];
     }
 
@@ -149,9 +202,18 @@
   [super activityDidChange];
 }
 
-- (CGSize)preferredSize
+- (void)activityDidChangeField:(NSString *)name
 {
-  return CGSizeMake(400, 200);
+  [self _reloadFields];
+
+  [super activityDidChangeField:name];
+}
+
+- (void)activityDidChangeBody
+{
+  [_bodyTextView setString:[[self controller] bodyString]];
+
+  [super activityDidChangeBody];
 }
 
 - (void)drawRect:(NSRect)r
@@ -184,6 +246,39 @@
 
 - (IBAction)controlAction:(id)sender
 {
+  if (![sender isEditable])
+    return;
+
+  NSDictionary *dict = [self fieldControls];
+
+  for (NSString *fieldName in dict)
+    {
+      if ([dict objectForKey:fieldName] == sender)
+	{
+	  [[self controller] setString:[sender stringValue]
+	   forField:fieldName];
+	  return;
+	}
+    }
+
+  if (sender == _dateTimeField || sender == _dateDateField)
+    {
+      NSString *str = [NSString stringWithFormat:@"%@ %@",
+		       [_dateDateField stringValue],
+		       [_dateTimeField stringValue]];
+
+      NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
+      [formatter setDateStyle:NSDateFormatterShortStyle];
+      [formatter setTimeStyle:NSDateFormatterShortStyle];
+
+      // FIXME: mark invalid dates somehow?
+
+      if (NSDate *date = [formatter dateFromString:str])
+	[[self controller] setDateField:date];
+
+      [formatter release];
+      return;
+    }
 }
 
 - (void)resizeSubviewsWithOldSize:(NSSize)oldSize
@@ -194,28 +289,11 @@
 
 // NSTextViewDelegate methods
 
-- (void)textDidBeginEditing:(NSNotification *)note
-{
-  if ([note object] == _bodyTextView)
-    {
-      [_bodyTextView setDrawsBackground:YES];
-    }
-}
-
 - (void)textDidEndEditing:(NSNotification *)note
 {
   if ([note object] == _bodyTextView)
     {
-      [_bodyTextView setDrawsBackground:NO];
-
       [[self controller] setBodyString:[_bodyTextView string]];
-    }
-}
-
-- (void)textDidChange:(NSNotification *)note
-{
-  if ([note object] == _bodyTextView)
-    {
     }
 }
 
