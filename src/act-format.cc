@@ -178,7 +178,7 @@ format_pace(std::string &str, double pace, unit_type unit)
     {
     case unit_type::seconds_per_mile:
     default:
-      suffix = " / mi";
+      suffix = " /mi";
       if (pace != 0)
 	dur = SECS_PER_MILE(pace);
       else
@@ -186,7 +186,7 @@ format_pace(std::string &str, double pace, unit_type unit)
       break;
 
     case unit_type::seconds_per_kilometre:
-      suffix = " / km";
+      suffix = " /km";
       if (pace != 0)
 	dur = SECS_PER_KM(pace);
       else
