@@ -186,20 +186,24 @@ activity_storage::field_read_only_p(const char *name) const
     {
     case field_id::pace:
     case field_id::speed:
-      if (field_ptr("duration") != nullptr
+      if (field_ptr("pace") == nullptr
+	  && field_ptr("speed") == nullptr
+	  && field_ptr("duration") != nullptr
 	  && field_ptr("distance") != nullptr)
 	return true;
       break;
 
     case field_id::distance:
-      if (field_ptr("duration") != nullptr
+      if (field_ptr("distance") == nullptr
+	  && field_ptr("duration") != nullptr
 	  && (field_ptr("speed") != nullptr
 	      || field_ptr("pace") != nullptr))
 	return true;
       break;
 
     case field_id::duration:
-      if (field_ptr("distance") != nullptr
+      if (field_ptr("duration") == nullptr
+	  && field_ptr("distance") != nullptr
 	  && (field_ptr("speed") != nullptr
 	      || field_ptr("pace") != nullptr))
 	return true;
