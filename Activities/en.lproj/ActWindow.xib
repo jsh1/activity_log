@@ -467,7 +467,7 @@
 																						<reference key="NSTextColor" ref="939110352"/>
 																					</object>
 																					<object class="NSTextFieldCell" key="NSDataCell" id="796668083">
-																						<int key="NSCellFlags">69206081</int>
+																						<int key="NSCellFlags">337641537</int>
 																						<int key="NSCellFlags2">2048</int>
 																						<string key="NSContents">Text Cell</string>
 																						<reference key="NSSupport" ref="26"/>
@@ -477,6 +477,7 @@
 																					</object>
 																					<int key="NSResizingMask">3</int>
 																					<bool key="NSIsResizeable">YES</bool>
+																					<bool key="NSIsEditable">YES</bool>
 																					<reference key="NSTableView" ref="988829824"/>
 																				</object>
 																				<object class="NSTableColumn" id="38496505">
@@ -501,7 +502,7 @@
 																						<reference key="NSTextColor" ref="939110352"/>
 																					</object>
 																					<object class="NSTextFieldCell" key="NSDataCell" id="209516891">
-																						<int key="NSCellFlags">69206081</int>
+																						<int key="NSCellFlags">337641537</int>
 																						<int key="NSCellFlags2">2048</int>
 																						<string key="NSContents">Text Cell</string>
 																						<reference key="NSSupport" ref="26"/>
@@ -511,6 +512,7 @@
 																					</object>
 																					<int key="NSResizingMask">3</int>
 																					<bool key="NSIsResizeable">YES</bool>
+																					<bool key="NSIsEditable">YES</bool>
 																					<reference key="NSTableView" ref="988829824"/>
 																				</object>
 																				<object class="NSTableColumn" id="926044747">
@@ -527,7 +529,7 @@
 																						<reference key="NSTextColor" ref="939110352"/>
 																					</object>
 																					<object class="NSTextFieldCell" key="NSDataCell" id="27596944">
-																						<int key="NSCellFlags">69206081</int>
+																						<int key="NSCellFlags">337641537</int>
 																						<int key="NSCellFlags2">2048</int>
 																						<string key="NSContents">Text Cell</string>
 																						<reference key="NSSupport" ref="26"/>
@@ -537,6 +539,7 @@
 																					</object>
 																					<int key="NSResizingMask">3</int>
 																					<bool key="NSIsResizeable">YES</bool>
+																					<bool key="NSIsEditable">YES</bool>
 																					<reference key="NSTableView" ref="988829824"/>
 																				</object>
 																				<object class="NSTableColumn" id="31478302">
@@ -553,7 +556,7 @@
 																						<reference key="NSTextColor" ref="939110352"/>
 																					</object>
 																					<object class="NSTextFieldCell" key="NSDataCell" id="336644510">
-																						<int key="NSCellFlags">69206081</int>
+																						<int key="NSCellFlags">337641537</int>
 																						<int key="NSCellFlags2">2048</int>
 																						<string key="NSContents">Text Cell</string>
 																						<reference key="NSSupport" ref="26"/>
@@ -563,6 +566,7 @@
 																					</object>
 																					<int key="NSResizingMask">3</int>
 																					<bool key="NSIsResizeable">YES</bool>
+																					<bool key="NSIsEditable">YES</bool>
 																					<reference key="NSTableView" ref="988829824"/>
 																				</object>
 																				<object class="NSTableColumn" id="668189629">
@@ -579,7 +583,7 @@
 																						<reference key="NSTextColor" ref="939110352"/>
 																					</object>
 																					<object class="NSTextFieldCell" key="NSDataCell" id="45199646">
-																						<int key="NSCellFlags">69206081</int>
+																						<int key="NSCellFlags">337641537</int>
 																						<int key="NSCellFlags2">2048</int>
 																						<string key="NSContents">Text Cell</string>
 																						<reference key="NSSupport" ref="26"/>
@@ -589,6 +593,7 @@
 																					</object>
 																					<int key="NSResizingMask">3</int>
 																					<bool key="NSIsResizeable">YES</bool>
+																					<bool key="NSIsEditable">YES</bool>
 																					<reference key="NSTableView" ref="988829824"/>
 																				</object>
 																				<object class="NSTableColumn" id="246050694">
@@ -605,7 +610,7 @@
 																						<reference key="NSTextColor" ref="939110352"/>
 																					</object>
 																					<object class="NSTextFieldCell" key="NSDataCell" id="280245728">
-																						<int key="NSCellFlags">69206081</int>
+																						<int key="NSCellFlags">337641537</int>
 																						<int key="NSCellFlags2">2048</int>
 																						<string key="NSContents">Text Cell</string>
 																						<reference key="NSSupport" ref="26"/>
@@ -615,6 +620,7 @@
 																					</object>
 																					<int key="NSResizingMask">3</int>
 																					<bool key="NSIsResizeable">YES</bool>
+																					<bool key="NSIsEditable">YES</bool>
 																					<reference key="NSTableView" ref="988829824"/>
 																				</object>
 																				<object class="NSTableColumn" id="499339671">
@@ -631,7 +637,7 @@
 																						<reference key="NSTextColor" ref="939110352"/>
 																					</object>
 																					<object class="NSTextFieldCell" key="NSDataCell" id="295625265">
-																						<int key="NSCellFlags">69206081</int>
+																						<int key="NSCellFlags">337641537</int>
 																						<int key="NSCellFlags2">2048</int>
 																						<string key="NSContents">Text Cell</string>
 																						<reference key="NSSupport" ref="26"/>
@@ -641,6 +647,7 @@
 																					</object>
 																					<int key="NSResizingMask">3</int>
 																					<bool key="NSIsResizeable">YES</bool>
+																					<bool key="NSIsEditable">YES</bool>
 																					<reference key="NSTableView" ref="988829824"/>
 																				</object>
 																				<object class="NSTableColumn" id="158806209">
@@ -657,7 +664,7 @@
 																						<reference key="NSTextColor" ref="939110352"/>
 																					</object>
 																					<object class="NSTextFieldCell" key="NSDataCell" id="979193692">
-																						<int key="NSCellFlags">69206081</int>
+																						<int key="NSCellFlags">337641537</int>
 																						<int key="NSCellFlags2">2048</int>
 																						<string key="NSContents">Text Cell</string>
 																						<reference key="NSSupport" ref="26"/>
@@ -667,6 +674,7 @@
 																					</object>
 																					<int key="NSResizingMask">3</int>
 																					<bool key="NSIsResizeable">YES</bool>
+																					<bool key="NSIsEditable">YES</bool>
 																					<reference key="NSTableView" ref="988829824"/>
 																				</object>
 																				<object class="NSTableColumn" id="214521420">
@@ -683,7 +691,7 @@
 																						<reference key="NSTextColor" ref="939110352"/>
 																					</object>
 																					<object class="NSTextFieldCell" key="NSDataCell" id="592229850">
-																						<int key="NSCellFlags">69206081</int>
+																						<int key="NSCellFlags">337641537</int>
 																						<int key="NSCellFlags2">2048</int>
 																						<string key="NSContents">Text Cell</string>
 																						<reference key="NSSupport" ref="26"/>
@@ -693,6 +701,7 @@
 																					</object>
 																					<int key="NSResizingMask">3</int>
 																					<bool key="NSIsResizeable">YES</bool>
+																					<bool key="NSIsEditable">YES</bool>
 																					<reference key="NSTableView" ref="988829824"/>
 																				</object>
 																			</array>

@@ -27,10 +27,23 @@
 
 @property(nonatomic, readonly) NSUndoManager *undoManager;
 
-- (void)reloadSelectedActivity;
-
 @property(nonatomic) BOOL needsSynchronize;
 
 - (void)synchronize;
+
+- (void)activity:(const act::activity_storage_ref)storage
+    didChangeField:(NSString *)name;
+- (void)activityDidChangeBody:(const act::activity_storage_ref)storage;
+
+- (NSString *)stringForField:(NSString *)name
+    ofActivity:(const act::activity &)a;
+- (BOOL)isFieldReadOnly:(NSString *)name ofActivity:(const act::activity &)a;
+- (void)setString:(NSString *)str forField:(NSString *)name
+    ofActivity:(act::activity &)a;
+- (void)renameField:(NSString *)oldName to:(NSString *)newName
+    ofActivity:(act::activity &)a;
+
+- (NSString *)bodyStringOfActivity:(const act::activity &)a;
+- (void)setBodyString:(NSString *)str ofActivity:(act::activity &)a;
 
 @end

@@ -7,8 +7,6 @@
 
 #import "act-format.h"
 
-#define BODY_WRAP_COLUMN 72
-
 @implementation ActActivityViewController
 
 @synthesize controller = _controller;
@@ -66,196 +64,66 @@
 
 - (void)activityDidChange
 {
-  [(NSView *)[self view] activityDidChange];
+  [[self view] activityDidChange];
 }
 
 - (void)activityDidChangeField:(NSString *)name
 {
-  [_controller setNeedsSynchronize:YES];
-  [_controller reloadSelectedActivity];
-
-  [(NSView *)[self view] activityDidChangeField:name];
+  [[self view] activityDidChangeField:name];
 }
 
 - (void)activityDidChangeBody
 {
-  [_controller setNeedsSynchronize:YES];
-
-  [(NSView *)[self view] activityDidChangeBody];
+  [[self view] activityDidChangeBody];
 }
 
 - (void)selectedLapDidChange
 {
-  [(NSView *)[self view] selectedLapDidChange];
+  [[self view] selectedLapDidChange];
 }
 
 - (NSString *)bodyString
 {
   if (const act::activity *a = [self activity])
-    {
-      const std::string &s = a->body();
-
-      if (s.size() != 0)
-	{
-	  NSMutableString *str = [[NSMutableString alloc] init];
-
-	  const char *ptr = s.c_str();
-
-	  while (const char *eol = strchr(ptr, '\n'))
-	    {
-	      NSString *tem = [[NSString alloc] initWithBytes:ptr
-			       length:eol-ptr encoding:NSUTF8StringEncoding];
-	      [str appendString:tem];
-	      [tem release];
-	      ptr = eol + 1;
-	      if (eol[1] == '\n')
-		[str appendString:@"\n\n"], ptr++;
-	      else if (eol[1] != 0)
-		[str appendString:@" "];
-	    }
-
-	  if (*ptr != 0)
-	    {
-	      NSString *tem = [[NSString alloc] initWithUTF8String:ptr];
-	      [str appendString:tem];
-	      [tem release];
-	    }
-
-	  return [str autorelease];
-	}
-    }
-
-  return @"";
+    return [_controller bodyStringOfActivity:*a];
+  else
+    return @"";
 }
 
 - (void)setBodyString:(NSString *)str
 {
-  static const char whitespace[] = " \t\n\f\r";
-
-  const char *ptr = [str UTF8String];
-  ptr = ptr + strspn(ptr, whitespace);
-
-  std::string wrapped;
-  size_t column = 0;
-
-  while (*ptr != 0)
-    {
-      const char *word = ptr + strcspn(ptr, whitespace);
-
-      if (word > ptr)
-	{
-	  if (column >= BODY_WRAP_COLUMN)
-	    {
-	      wrapped.push_back('\n');
-	      column = 0;
-	    }
-	  else if (column > 0)
-	    {
-	      wrapped.push_back(' ');
-	      column++;
-	    }
-
-	  wrapped.append(ptr, word - ptr);
-
-	  if (word[0] == '\n' && word[1] == '\n')
-	    {
-	      wrapped.push_back('\n');
-	      column = BODY_WRAP_COLUMN;
-	    }
-	  else
-	    column += word - ptr;
-
-	  ptr = word;
-	}
-
-      if (ptr[0] != 0)
-	ptr++;
-    }
-
-  if (column > 0)
-    wrapped.push_back('\n');
-
   if (act::activity *a = [self activity])
-    {
-      std::string &body = a->storage()->body();
-
-      if (wrapped != body)
-	{
-	  // FIXME: undo management
-
-	  std::swap(body, wrapped);
-	  a->storage()->increment_seed();
-	  [self activityDidChangeBody];
-	}
-    }
+    [_controller setBodyString:str ofActivity:*a];
 }
 
 - (NSString *)stringForField:(NSString *)name
 {
   if (const act::activity *a = [self activity])
-    {
-      const char *field = [name UTF8String];
-      act::field_id field_id = act::lookup_field_id(field);
-      act::field_data_type field_type = act::lookup_field_data_type(field_id);
+    return [_controller stringForField:name ofActivity:*a];
+  else
+    return nil;
+}
 
-      std::string tem;
+- (BOOL)isFieldReadOnly:(NSString *)name
+{
+  const char *field_name = [name UTF8String];
 
-      switch (field_type)
-	{
-	case act::field_data_type::string:
-	  if (const std::string *s = a->field_ptr(field))
-	    return [NSString stringWithUTF8String:s->c_str()];
-	  break;
-
-	case act::field_data_type::keywords:
-	  if (const std::vector<std::string>
-	      *keys = a->field_keywords_ptr(field_id))
-	    {
-	      act::format_keywords(tem, *keys);
-	    }
-	  break;
-
-	default:
-	  if (double value = a->field_value(field_id))
-	    {
-	      act::unit_type unit = a->field_unit(field_id);
-	      act::format_value(tem, field_type, value, unit);
-	    }
-	  break;
-	}
-
-      return [NSString stringWithUTF8String:tem.c_str()];
-    }
-
-  return @"";
+  if (const act::activity *a = [self activity])
+    return [_controller isFieldReadOnly:name ofActivity:*a];
+  else
+    return field_read_only_p(act::lookup_field_id(field_name));
 }
 
 - (void)setString:(NSString *)str forField:(NSString *)name
 {
   if (act::activity *a = [self activity])
-    {
-      auto id = act::lookup_field_id([name UTF8String]);
-      const char *field_name = act::canonical_field_name(id);
+    [_controller setString:str forField:name ofActivity:*a];
+}
 
-      // FIXME: trim whitespace?
-
-      if ([str length] != 0)
-	{
-	  auto type = act::lookup_field_data_type(id);
-
-	  std::string value([str UTF8String]);
-	  act::canonicalize_field_string(type, value);
-
-	  (*a->storage())[field_name] = value;
-	}
-      else
-	a->storage()->delete_field(field_name);
-
-      a->storage()->increment_seed();
-      a->invalidate_cached_values();
-
-      [self activityDidChangeField:name];
-    }
+- (void)renameField:(NSString *)oldName to:(NSString *)newName
+{
+  if (act::activity *a = [self activity])
+    [_controller renameField:oldName to:(NSString *)newName ofActivity:*a];
 }
 
 - (NSDate *)dateField
@@ -268,32 +136,16 @@
 
 - (void)setDateField:(NSDate *)date
 {
-  if (act::activity *a = [self activity])
+  NSString *value = nil;
+
+  if (date != nil)
     {
-      if (date != nil)
-	{
-	  std::string str;
-	  act::format_date_time(str, (time_t) [date timeIntervalSince1970]);
-	  (*a->storage())["Date"] = str;
-	}
-      else
-	a->storage()->delete_field("Date");
-
-      a->storage()->increment_seed();
-      a->invalidate_cached_values();
-
-      [self activityDidChangeField:@"Date"];
+      std::string str;
+      act::format_date_time(str, (time_t) [date timeIntervalSince1970]);
+      value = [NSString stringWithUTF8String:str.c_str()];
     }
-}
 
-- (BOOL)isFieldReadOnly:(NSString *)name
-{
-  const char *field_name = [name UTF8String];
-
-  if (const act::activity *a = [self activity])
-    return a->storage()->field_read_only_p(field_name);
-  else
-    return field_read_only_p(act::lookup_field_id(field_name));
+  [self setString:value forField:@"Date"];
 }
 
 // NSSplitViewDelegate methods

@@ -112,6 +112,22 @@
     }
 }
 
+- (void)renameField:(NSString *)newName
+{
+  if (![newName isEqualToString:_fieldName])
+    {
+      NSString *oldName = _fieldName;
+      _fieldName = [newName copy];
+      newName = _fieldName;
+
+      [self _updateFieldName];
+
+      [_controller renameField:oldName to:newName];
+
+      [oldName release];
+    }
+}
+
 - (void)activityDidChange
 {
   [self _updateFieldName];
@@ -148,39 +164,15 @@
 
 - (void)textDidEndEditing:(NSNotification *)note
 {
-  if (act::activity *a = [[self controller] activity])
-    {
-      NSTextView *view = [note object];
-      NSString *value = [view string];
+  NSTextView *view = [note object];
+  NSString *value = [view string];
 
-      // FIXME: undo support
+  // FIXME: undo support
 
-      if (view == _labelView)
-	{
-	  std::string str([value UTF8String]);
-	  std::string field_name([_fieldName UTF8String]);
-
-	  if (str != field_name)
-	    {
-	      a->storage()->set_field_name(field_name, str);
-	      a->storage()->increment_seed();
-	      a->invalidate_cached_values();
-
-	      NSString *oldName = _fieldName;
-	      _fieldName = [value copy];
-	      [self _updateFieldName];
-
-	      [[self controller] activityDidChangeField:oldName];
-	      [[self controller] activityDidChangeField:_fieldName];
-
-	      [oldName release];
-	    }
-	}
-      else if (view == _textView)
-	{
-	  [self setFieldString:value];
-	}
-    }
+    if (view == _labelView)
+      [self renameField:value];
+    else if (view == _textView)
+      [self setFieldString:value];
 }
 
 @end

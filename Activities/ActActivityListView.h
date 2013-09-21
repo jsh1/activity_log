@@ -22,6 +22,8 @@
 
 @property act::activity_storage_ref selectedActivity;
 
-- (void)reloadSelectedActivity;
+- (NSInteger)rowForActivity:(const act::activity_storage_ref)storage;
+
+- (void)reloadActivity:(const act::activity_storage_ref)a;
 
 @end

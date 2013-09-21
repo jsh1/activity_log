@@ -28,8 +28,9 @@
 - (id)init;
 
 - (NSString *)stringForField:(NSString *)name;
-- (void)setString:(NSString *)str forField:(NSString *)name;
 - (BOOL)isFieldReadOnly:(NSString *)name;
+- (void)setString:(NSString *)str forField:(NSString *)name;
+- (void)renameField:(NSString *)oldName to:(NSString *)newName;
 
 @property(nonatomic, copy) NSDate *dateField;
 
