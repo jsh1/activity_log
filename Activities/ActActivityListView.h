@@ -16,6 +16,8 @@
   IBOutlet NSTableView *_tableView;
 
   std::vector<act::activity_storage_ref> _activities;
+
+  std::vector<std::unique_ptr<act::activity>> _activity_cache;
 }
 
 @property const std::vector<act::activity_storage_ref> &activities;

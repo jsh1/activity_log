@@ -10,6 +10,13 @@
 
 @implementation ActActivityListView
 
+- (void)dealloc
+{
+  [NSRunLoop cancelPreviousPerformRequestsWithTarget:self];
+
+  [super dealloc];
+}
+
 - (const std::vector<act::activity_storage_ref> &)activities
 {
   return _activities;
@@ -18,6 +25,9 @@
 - (void)setActivities:(const std::vector<act::activity_storage_ref> &)vec
 {
   _activities = vec;
+
+  _activity_cache.clear();
+  _activity_cache.resize(vec.size());
 
   [_tableView reloadData];
 }
@@ -70,6 +80,16 @@
 		  NSMakeRange(0, [_tableView numberOfColumns])]];
 }
 
+- (act::activity *)activityForRow:(NSInteger)row
+{
+  if (_activity_cache[row] == nullptr)
+    _activity_cache[row].reset(new act::activity(_activities[row]));
+
+  // FIXME: flush cache periodically?
+
+  return _activity_cache[row].get();
+}
+
 // NSTableViewDataSource methods
 
 - (NSInteger)numberOfRowsInTableView:(NSTableView *)tv
@@ -80,37 +100,31 @@
 - (id)tableView:(NSTableView *)tv
   objectValueForTableColumn:(NSTableColumn *)col row:(NSInteger)row
 {
-  const act::activity_storage_ref &storage = _activities[row];
-
-  // FIXME: bootstrap hacking
-  act::activity a (storage);
+  const act::activity *a = [self activityForRow:row];
 
   NSString *ident = [col identifier];
 
   if ([ident isEqualToString:@"date"])
     {
       std::string str;
-      act::format_date_time(str, a.date(), "%D %-l%p");
+      act::format_date_time(str, a->date(), "%D %-l%p");
       return [NSString stringWithUTF8String:str.c_str()];
     }
   else
-    return [_controller stringForField:ident ofActivity:a];
+    return [_controller stringForField:ident ofActivity:*a];
 }
 
 - (void)tableView:(NSTableView *)tv setObjectValue:(id)object
     forTableColumn:(NSTableColumn *)col row:(NSInteger)row
 {
-  const act::activity_storage_ref &storage = _activities[row];
-
-  // FIXME: bootstrap hacking
-  act::activity a (storage);
+  act::activity *a = [self activityForRow:row];
 
   NSString *ident = [col identifier];
 
   if ([ident isEqualToString:@"date"])
     return;
   else
-    [_controller setString:object forField:ident ofActivity:a];
+    [_controller setString:object forField:ident ofActivity:*a];
 }
 
 // NSTableViewDelegate methods
