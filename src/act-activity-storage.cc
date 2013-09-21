@@ -71,6 +71,8 @@ activity_storage::read_file(const char *path)
   while (fgets(buf, sizeof(buf), fh))
     _body.append(buf);
 
+  increment_seed();
+
   fclose(fh);
   return true;
 }
@@ -138,6 +140,7 @@ activity_storage::operator[](const char *name)
       idx = _header.size();
       _header.resize(idx+1);
       _header[idx].first = name;
+      increment_seed();
     }
 
   return _header[idx].second;
@@ -158,6 +161,8 @@ activity_storage::delete_field(const char *name)
     return false;
 
   _header.erase(_header.begin() + idx);
+  increment_seed();
+
   return true;
 }
 
@@ -171,6 +176,8 @@ activity_storage::set_field_name(const std::string &old_name,
     return false;
 
   _header[idx].first = new_name;
+  increment_seed();
+
   return true;
 }
 

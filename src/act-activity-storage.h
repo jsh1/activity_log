@@ -11,7 +11,7 @@
 
 namespace act {
 
-class activity_storage
+class activity_storage : public uncopyable
 {
   // Using a vector here to preserve ordering. Could add a map of
   // some sort later if we need faster lookups.

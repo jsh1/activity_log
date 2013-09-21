@@ -12,15 +12,13 @@
 
 namespace act {
 
-class activity
+class activity : public uncopyable
 {
 public:
   activity(activity_storage_ref storage);
 
   activity_storage_ref storage();
   const_activity_storage_ref storage() const;
-
-  void invalidate_cached_values();
 
   bool make_filename(std::string &filename) const;
 
@@ -130,9 +128,9 @@ private:
   mutable std::vector<std::string> _keywords;
 
   mutable unsigned int _invalid_groups;
+  mutable uint32_t _seed;
 
   void validate_cached_values(unsigned int groups) const;
-  void read_cached_values(unsigned int groups) const;
 
   void print_expansion(FILE *fh, const char *name, const char *arg,
     int field_width) const;
@@ -187,19 +185,6 @@ inline const std::string *
 activity::field_ptr(const std::string &name) const
 {
   return _storage->field_ptr(name);
-}
-
-inline void
-activity::invalidate_cached_values()
-{
-  _invalid_groups = group_all;
-}
-
-inline void
-activity::validate_cached_values(unsigned int groups) const
-{
-  if (_invalid_groups & groups)
-    read_cached_values(groups);
 }
 
 } // namespace act

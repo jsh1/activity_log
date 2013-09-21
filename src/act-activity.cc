@@ -13,164 +13,172 @@ namespace act {
 
 activity::activity(activity_storage_ref storage)
 : _storage(storage),
-  _invalid_groups(group_all)
+  _invalid_groups(group_all),
+  _seed(0)
 {
 }
 
 void
-activity::read_cached_values(unsigned int groups) const
+activity::validate_cached_values(unsigned int groups) const
 {
-  groups = groups & _invalid_groups;
+  if (_seed != _storage->seed())
+    _invalid_groups |= group_all;
 
-  if (groups == 0)
-    return;
-
-  _invalid_groups &= ~groups;
-
-  if (groups & group_timing)
+  if (_invalid_groups & groups)
     {
-      _date = 0;
-      _duration = 0;
-      _distance = 0;
-      _distance_unit = unit_type::miles;
-      _speed = 0;
-      _speed_unit = unit_type::seconds_per_mile;
-      _max_speed = 0;
-      _max_speed_unit = unit_type::seconds_per_mile;
-    }
+      groups = groups & _invalid_groups;
 
-  if (groups & group_physiological)
-    {
-      _resting_hr = 0;
-      _average_hr = 0;
-      _max_hr = 0;
-      _calories = 0;
-      _weight = 0;
-      _weight_unit = unit_type::kilogrammes;
-    }
+      if (groups == 0)
+	return;
 
-  if (groups & group_other)
-    {
-      _effort = 0;
-      _quality = 0;
-      _points = 0;
-      _temperature = 0;
-      _temperature_unit = unit_type::celsius;
-      _dew_point = 0;
-      _dew_point_unit = unit_type::celsius;
-      _equipment.clear();
-      _weather.clear();
-      _keywords.clear();
-    }
+      _invalid_groups &= ~groups;
 
-  // Pull values out of the file
-
-  bool use_gps = false;
-
-  if (groups & group_timing)
-    {
-      if (const std::string *s = field_ptr("date"))
-	parse_date_time(*s, &_date, nullptr);
-
-      if (const std::string *s = field_ptr("duration"))
-	parse_duration(*s, &_duration);
-
-      if (const std::string *s = field_ptr("distance"))
-	parse_distance(*s, &_distance, &_distance_unit);
-
-      if (const std::string *s = field_ptr("pace"))
-	parse_pace(*s, &_speed, &_speed_unit);
-      else if (const std::string *s = field_ptr("speed"))
-	parse_speed(*s, &_speed, &_speed_unit);
-
-      if (const std::string *s = field_ptr("max-pace"))
-	parse_pace(*s, &_max_speed, &_max_speed_unit);
-      else if (const std::string *s = field_ptr("max-speed"))
-	parse_speed(*s, &_max_speed, &_max_speed_unit);
-
-      if (_date == 0)
-	use_gps = true;
-
-      if (_duration != 0 + _distance != 0 + _speed != 0 < 2)
-	use_gps = true;
-    }
-
-  if (groups & group_physiological)
-    {
-      if (const std::string *s = field_ptr("resting-hr"))
-	parse_number(*s, &_resting_hr);
-      if (const std::string *s = field_ptr("average-hr"))
-	parse_number(*s, &_average_hr);
-      if (const std::string *s = field_ptr("max-hr"))
-	parse_number(*s, &_max_hr);
-
-      if (const std::string *s = field_ptr("calories"))
-	parse_number(*s, &_calories);
-      if (const std::string *s = field_ptr("Weight"))
-	parse_weight(*s, &_weight, &_weight_unit);
-
-      if (_resting_hr == 0 || _average_hr == 0 || _max_hr == 0 || _calories == 0)
-	use_gps = true;
-    }
-
-  if (groups & group_other)
-    {
-      if (const std::string *s = field_ptr("effort"))
-	parse_fraction(*s, &_effort);
-      if (const std::string *s = field_ptr("quality"))
-	parse_fraction(*s, &_quality);
-      if (const std::string *s = field_ptr("points"))
-	parse_number(*s, &_points);
-
-      if (const std::string *s = field_ptr("temperature"))
-	parse_temperature(*s, &_temperature, &_temperature_unit);
-
-      if (const std::string *s = field_ptr("dew-point"))
-	parse_temperature(*s, &_dew_point, &_dew_point_unit);
-
-      if (const std::string *s = field_ptr("equipment"))
-	parse_keywords(*s, &_equipment);
-      if (const std::string *s = field_ptr("weather"))
-	parse_keywords(*s, &_weather);
-      if (const std::string *s = field_ptr("keywords"))
-	parse_keywords(*s, &_keywords);
-    }
-
-  // Look in GPS file for other missing values
-
-  if (use_gps)
-    {
-      if (const gps::activity *data = gps_data())
+      if (groups & group_timing)
 	{
-	  if (groups & group_timing)
-	    {
-	      if (_date == 0)
-		_date = (time_t) data->time();
-	      if (_duration == 0)
-		_duration = data->duration();
-	      if (_distance == 0)
-		_distance = data->distance();
-	      if (_speed == 0)
-		{
-		  _speed = data->avg_speed();
-		  if (data->sport() == gps::activity::sport_type::cycling)
-		    _speed_unit = unit_type::miles_per_hour;
-		}
-	      if (_max_speed == 0)
-		{
-		  _max_speed = data->max_speed();
-		  _max_speed_unit = _speed_unit;
-		}
-	    }
+	  _date = 0;
+	  _duration = 0;
+	  _distance = 0;
+	  _distance_unit = unit_type::miles;
+	  _speed = 0;
+	  _speed_unit = unit_type::seconds_per_mile;
+	  _max_speed = 0;
+	  _max_speed_unit = unit_type::seconds_per_mile;
+	}
 
-	  if (groups & group_physiological)
+      if (groups & group_physiological)
+	{
+	  _resting_hr = 0;
+	  _average_hr = 0;
+	  _max_hr = 0;
+	  _calories = 0;
+	  _weight = 0;
+	  _weight_unit = unit_type::kilogrammes;
+	}
+
+      if (groups & group_other)
+	{
+	  _effort = 0;
+	  _quality = 0;
+	  _points = 0;
+	  _temperature = 0;
+	  _temperature_unit = unit_type::celsius;
+	  _dew_point = 0;
+	  _dew_point_unit = unit_type::celsius;
+	  _equipment.clear();
+	  _weather.clear();
+	  _keywords.clear();
+	}
+
+      // Pull values out of the file
+
+      bool use_gps = false;
+
+      if (groups & group_timing)
+	{
+	  if (const std::string *s = field_ptr("date"))
+	    parse_date_time(*s, &_date, nullptr);
+
+	  if (const std::string *s = field_ptr("duration"))
+	    parse_duration(*s, &_duration);
+
+	  if (const std::string *s = field_ptr("distance"))
+	    parse_distance(*s, &_distance, &_distance_unit);
+
+	  if (const std::string *s = field_ptr("pace"))
+	    parse_pace(*s, &_speed, &_speed_unit);
+	  else if (const std::string *s = field_ptr("speed"))
+	    parse_speed(*s, &_speed, &_speed_unit);
+
+	  if (const std::string *s = field_ptr("max-pace"))
+	    parse_pace(*s, &_max_speed, &_max_speed_unit);
+	  else if (const std::string *s = field_ptr("max-speed"))
+	    parse_speed(*s, &_max_speed, &_max_speed_unit);
+
+	  if (_date == 0)
+	    use_gps = true;
+
+	  if (_duration != 0 + _distance != 0 + _speed != 0 < 2)
+	    use_gps = true;
+	}
+
+      if (groups & group_physiological)
+	{
+	  if (const std::string *s = field_ptr("resting-hr"))
+	    parse_number(*s, &_resting_hr);
+	  if (const std::string *s = field_ptr("average-hr"))
+	    parse_number(*s, &_average_hr);
+	  if (const std::string *s = field_ptr("max-hr"))
+	    parse_number(*s, &_max_hr);
+
+	  if (const std::string *s = field_ptr("calories"))
+	    parse_number(*s, &_calories);
+	  if (const std::string *s = field_ptr("Weight"))
+	    parse_weight(*s, &_weight, &_weight_unit);
+
+	  if (_resting_hr == 0 || _average_hr == 0
+	      || _max_hr == 0 || _calories == 0)
+	    use_gps = true;
+	}
+
+      if (groups & group_other)
+	{
+	  if (const std::string *s = field_ptr("effort"))
+	    parse_fraction(*s, &_effort);
+	  if (const std::string *s = field_ptr("quality"))
+	    parse_fraction(*s, &_quality);
+	  if (const std::string *s = field_ptr("points"))
+	    parse_number(*s, &_points);
+
+	  if (const std::string *s = field_ptr("temperature"))
+	    parse_temperature(*s, &_temperature, &_temperature_unit);
+
+	  if (const std::string *s = field_ptr("dew-point"))
+	    parse_temperature(*s, &_dew_point, &_dew_point_unit);
+
+	  if (const std::string *s = field_ptr("equipment"))
+	    parse_keywords(*s, &_equipment);
+	  if (const std::string *s = field_ptr("weather"))
+	    parse_keywords(*s, &_weather);
+	  if (const std::string *s = field_ptr("keywords"))
+	    parse_keywords(*s, &_keywords);
+	}
+
+      // Look in GPS file for other missing values
+
+      if (use_gps)
+	{
+	  if (const gps::activity *data = gps_data())
 	    {
-	      if (_average_hr == 0)
-		_average_hr = data->avg_heart_rate();
-	      if (_max_hr == 0)
-		_max_hr = data->max_heart_rate();
-	      if (_calories == 0)
-		_calories = data->calories();
+	      if (groups & group_timing)
+		{
+		  if (_date == 0)
+		    _date = (time_t) data->time();
+		  if (_duration == 0)
+		    _duration = data->duration();
+		  if (_distance == 0)
+		    _distance = data->distance();
+		  if (_speed == 0)
+		    {
+		      _speed = data->avg_speed();
+		      if (data->sport() == gps::activity::sport_type::cycling)
+			_speed_unit = unit_type::miles_per_hour;
+		    }
+		  if (_max_speed == 0)
+		    {
+		      _max_speed = data->max_speed();
+		      _max_speed_unit = _speed_unit;
+		    }
+		}
+
+	      if (groups & group_physiological)
+		{
+		  if (_average_hr == 0)
+		    _average_hr = data->avg_heart_rate();
+		  if (_max_hr == 0)
+		    _max_hr = data->max_heart_rate();
+		  if (_calories == 0)
+		    _calories = data->calories();
+		}
 	    }
 	}
     }

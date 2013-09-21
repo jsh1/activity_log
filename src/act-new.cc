@@ -162,8 +162,13 @@ print_usage(const arguments &args, bool for_import)
 void
 copy_gps_fields(activity_storage &a, const gps::activity &gps_data)
 {
+  bool changed = false;
+
   if (a.field_ptr("Date") == nullptr)
-    format_date_time(a["Date"], (time_t) gps_data.time());
+    {
+      format_date_time(a["Date"], (time_t) gps_data.time());
+      changed = true;
+    }
 
   if (gps_data.sport() != gps::activity::sport_type::unknown
       && a.field_ptr("Activity") == nullptr)
@@ -177,16 +182,25 @@ copy_gps_fields(activity_storage &a, const gps::activity &gps_data)
       if (sport == gps::activity::sport_type::swimming)
 	type = "swim";
       if (type.size() != 0)
-	a["Activity"] = type;
+	{
+	  a["Activity"] = type;
+	  changed = true;
+	}
     }
 
   if (gps_data.duration() > 0
       && a.field_ptr("Duration") == nullptr)
-    format_duration(a["Duration"], gps_data.duration());
+    {
+      format_duration(a["Duration"], gps_data.duration());
+      changed = true;
+    }
 
   if (gps_data.distance() > 0
       && a.field_ptr("Distance") == nullptr)
-    format_distance(a["Distance"], gps_data.distance(), unit_type::miles);
+    {
+      format_distance(a["Distance"], gps_data.distance(), unit_type::miles);
+      changed = true;
+    }
 
   if (gps_data.has_speed()
       && a.field_ptr("Points") == nullptr)
@@ -199,10 +213,14 @@ copy_gps_fields(activity_storage &a, const gps::activity &gps_data)
 	{
 	  points = round(points * 10) * .1;
 	  format_number(a["Points"], points);
+	  changed = true;
 	}
     }
 
   // Let other fields be read as needed.
+
+  if (changed)
+    a.increment_seed();
 }
 
 } // anonymous namespace
@@ -288,7 +306,6 @@ act_new(arguments &args)
   if (const gps::activity *gps_data = a.gps_data())
     {
       copy_gps_fields(*storage, *gps_data);
-      a.invalidate_cached_values();
     }
 
   if (storage->field_ptr("Points") == nullptr)
@@ -299,7 +316,7 @@ act_new(arguments &args)
 	{
 	  points = round(points * 10) * .1;
 	  format_number((*storage)["Points"], points);
-	  a.invalidate_cached_values();
+	  storage->increment_seed();
 	}
     }
 
