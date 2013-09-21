@@ -136,6 +136,11 @@
   [_zoomSlider setIntValue:[_mapView mapZoom]];
 }
 
+- (CGFloat)minSize
+{
+  return 200;
+}
+
 - (void)dealloc
 {
   [[NSNotificationCenter defaultCenter] removeObserver:self];

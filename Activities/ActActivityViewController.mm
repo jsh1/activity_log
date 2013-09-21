@@ -2,7 +2,12 @@
 
 #import "ActActivityViewController.h"
 
+#import "ActActivityChartView.h"
+#import "ActActivityLapView.h"
+#import "ActActivityMapView.h"
+#import "ActActivitySummaryView.h"
 #import "ActActivitySubview.h"
+#import "ActActivitySplitView.h"
 #import "ActWindowController.h"
 
 #import "act-format.h"
@@ -21,6 +26,11 @@
   _selectedLapIndex = -1;
 
   return self;
+}
+
+- (void)viewDidLoad
+{
+  [self updateShowHideButtons];
 }
 
 - (act::activity_storage_ref)activityStorage
@@ -148,6 +158,49 @@
   [self setString:value forField:@"Date"];
 }
 
+- (IBAction)controlAction:(id)sender
+{
+  if (sender == _showHideControl)
+    {
+      [_mainSplitView setSubview:_summaryView
+       collapsed:![_showHideControl isSelectedForSegment:0]];
+      [_mainSplitView setSubview:_middleSplitView
+       collapsed:![_showHideControl isSelectedForSegment:1]];
+      [_mainSplitView setSubview:_chartView
+       collapsed:![_showHideControl isSelectedForSegment:2]];
+
+      [self updateShowHideButtons];
+    }
+  else if (sender == _middleShowHideControl)
+    {
+      [_middleSplitView setSubview:_lapView
+       collapsed:![_middleShowHideControl isSelectedForSegment:0]];
+
+      [self updateShowHideButtons];
+    }
+}
+
+- (void)updateShowHideButtons
+{
+  [_showHideControl setSelected:
+   ![_mainSplitView isSubviewCollapsed:_summaryView] forSegment:0];
+  [_showHideControl setSelected:
+   ![_mainSplitView isSubviewCollapsed:_middleSplitView] forSegment:1];
+  [_showHideControl setSelected:
+   ![_mainSplitView isSubviewCollapsed:_chartView] forSegment:2];
+
+  [_middleShowHideControl setSelected:
+   ![_middleSplitView isSubviewCollapsed:_lapView] forSegment:0];
+  [_middleShowHideControl setEnabled:
+   ![_mainSplitView isSubviewCollapsed:_middleSplitView]];
+}
+
+- (void)loadView
+{
+  [super loadView];
+  [self viewDidLoad];
+}
+
 // NSSplitViewDelegate methods
 
 - (BOOL)splitView:(NSSplitView *)view canCollapseSubview:(NSView *)subview
@@ -158,19 +211,34 @@
 - (BOOL)splitView:(NSSplitView *)view shouldCollapseSubview:(NSView *)subview
     forDoubleClickOnDividerAtIndex:(NSInteger)idx
 {
-  return [[view subviews] count] <= 2;
+  return YES;
 }
 
 - (CGFloat)splitView:(NSSplitView *)view constrainMinCoordinate:(CGFloat)p
     ofSubviewAt:(NSInteger)idx
 {
-  return p + 64;
+  NSView *subview = [[view subviews] objectAtIndex:idx];
+  CGFloat min_size = [(ActActivitySplitView *)view minimumSizeOfSubview:subview];
+
+  return p + min_size;
 }
 
 - (CGFloat)splitView:(NSSplitView *)view constrainMaxCoordinate:(CGFloat)p
     ofSubviewAt:(NSInteger)idx
 {
-  return p - 64;
+  NSView *subview = [[view subviews] objectAtIndex:idx];
+  CGFloat min_size = [(ActActivitySplitView *)view minimumSizeOfSubview:subview];
+
+  return p - min_size;
+}
+
+- (BOOL)splitView:(NSSplitView *)view
+    shouldAdjustSizeOfSubview:(NSView *)subview
+{
+  if ([view isKindOfClass:[ActActivitySplitView class]])
+    return [(ActActivitySplitView *)view shouldAdjustSizeOfSubview:subview];
+  else
+    return YES;
 }
 
 @end

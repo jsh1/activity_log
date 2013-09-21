@@ -9,6 +9,11 @@
 
 @implementation ActActivityChartView
 
+- (CGFloat)minSize
+{
+  return 160;
+}
+
 - (void)_updateChart
 {
   if (_chart)

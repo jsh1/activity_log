@@ -4,10 +4,23 @@
 
 #import "act-activity.h"
 
-@class ActWindowController;
+@class ActWindowController, ActActivitySplitView;
+@class ActActivitySummaryView, ActActivityLapView;
+@class ActActivityMapView, ActActivityChartView;
 
 @interface ActActivityViewController : NSViewController <NSSplitViewDelegate>
 {
+  IBOutlet ActActivitySplitView *_mainSplitView;
+  IBOutlet ActActivitySplitView *_middleSplitView;
+
+  IBOutlet NSSegmentedControl *_showHideControl;
+  IBOutlet NSSegmentedControl *_middleShowHideControl;
+
+  IBOutlet ActActivitySummaryView *_summaryView;
+  IBOutlet ActActivityLapView *_lapView;
+  IBOutlet ActActivityMapView *_mapView;
+  IBOutlet ActActivityChartView *_chartView;
+
   ActWindowController *_controller;
 
   act::activity_storage_ref _activity_storage;
@@ -38,5 +51,9 @@
 - (void)activityDidChangeField:(NSString *)name;
 - (void)activityDidChangeBody;
 - (void)selectedLapDidChange;
+
+- (IBAction)controlAction:(id)sender;
+
+- (void)updateShowHideButtons;
 
 @end

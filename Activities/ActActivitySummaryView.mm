@@ -28,6 +28,11 @@
   [_statsBox setSpacing:8];
 }
 
+- (CGFloat)minSize
+{
+  return 180;
+}
+
 + (NSColor *)textFieldColor:(BOOL)readOnly
 {
   static NSColor *a, *b;
