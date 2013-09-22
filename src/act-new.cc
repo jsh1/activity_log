@@ -10,7 +10,7 @@
 
 #include <math.h>
 
-using namespace act;
+namespace act {
 
 namespace {
 
@@ -407,13 +407,4 @@ act_import(arguments &args)
   return 0;
 }
 
-int
-main(int argc, const char **argv)
-{
-  arguments args(argc, argv);
-
-  if (args.program_name_p("act-import"))
-    return act_import(args);
-  else
-    return act_new(args);
-}
+} // namespace act

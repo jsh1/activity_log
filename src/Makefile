@@ -45,6 +45,7 @@ libact.a_objects =		\
 	act-gps-fit-parser.o	\
 	act-gps-tcx-parser.o	\
 	act-intensity-points.o	\
+	act-new.o		\
 	act-output-table.o	\
 	act-types.o		\
 	act-util.o
@@ -73,7 +74,7 @@ act-log_deps = libact.a
 act-monthly_src = act-fold
 
 act-new_libraries = -lact -lxml2
-act-new_objects = act-new.o
+act-new_objects = act-new-main.o
 act-new_deps = libact.a
 
 act-gps-test_libraries = -lact -lxml2
