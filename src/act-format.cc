@@ -85,7 +85,7 @@ format_time(std::string &str, double dur,
 	{
 	  size_t len = strlen(buf);
 	  snprintf_l(buf + len, sizeof(buf) - len, nullptr,
-		     ".%02d", (int) floor(frac * 10 + .5));
+		     ".%02d", (int) floor(frac * 100 + .5));
 	}
     }
 
