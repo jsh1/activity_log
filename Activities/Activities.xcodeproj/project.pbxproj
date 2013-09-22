@@ -53,6 +53,7 @@
 		57A7352817CF8A3B0054E3EB /* ActActivityLapView.mm in Sources */ = {isa = PBXBuildFile; fileRef = 57A7352717CF8A3B0054E3EB /* ActActivityLapView.mm */; };
 		57C5705917EA31650000AF8D /* ActActivityViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = 57C5705817EA31650000AF8D /* ActActivityViewController.mm */; };
 		57C5705C17EB18CB0000AF8D /* ActTableView.mm in Sources */ = {isa = PBXBuildFile; fileRef = 57C5705B17EB18CB0000AF8D /* ActTableView.mm */; };
+		57C7828617EF2F21003413EA /* act-new.cc in Sources */ = {isa = PBXBuildFile; fileRef = 57C7828417EF2F21003413EA /* act-new.cc */; };
 		57DB7BAE17E0D4790093C735 /* defaults.plist in Resources */ = {isa = PBXBuildFile; fileRef = 57DB7BA817E0D4790093C735 /* defaults.plist */; };
 		57DB7BAF17E0D4790093C735 /* hikebikemap-tiles.json in Resources */ = {isa = PBXBuildFile; fileRef = 57DB7BA917E0D4790093C735 /* hikebikemap-tiles.json */; };
 		57DB7BB017E0D4790093C735 /* mapquest-map-tiles.json in Resources */ = {isa = PBXBuildFile; fileRef = 57DB7BAA17E0D4790093C735 /* mapquest-map-tiles.json */; };
@@ -157,6 +158,8 @@
 		57C5705817EA31650000AF8D /* ActActivityViewController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ActActivityViewController.mm; sourceTree = "<group>"; };
 		57C5705A17EB18CB0000AF8D /* ActTableView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActTableView.h; sourceTree = "<group>"; };
 		57C5705B17EB18CB0000AF8D /* ActTableView.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ActTableView.mm; sourceTree = "<group>"; };
+		57C7828417EF2F21003413EA /* act-new.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "act-new.cc"; path = "../src/act-new.cc"; sourceTree = "<group>"; };
+		57C7828517EF2F21003413EA /* act-new.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "act-new.h"; path = "../src/act-new.h"; sourceTree = "<group>"; };
 		57DB7BA817E0D4790093C735 /* defaults.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = defaults.plist; path = resources/defaults.plist; sourceTree = "<group>"; };
 		57DB7BA917E0D4790093C735 /* hikebikemap-tiles.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; name = "hikebikemap-tiles.json"; path = "resources/hikebikemap-tiles.json"; sourceTree = "<group>"; };
 		57DB7BAA17E0D4790093C735 /* mapquest-map-tiles.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; name = "mapquest-map-tiles.json"; path = "resources/mapquest-map-tiles.json"; sourceTree = "<group>"; };
@@ -319,6 +322,8 @@
 				571DB9D717BE67CD0001514C /* act-gps-tcx-parser.h */,
 				57638D4E17DB72EA00BE93AC /* act-intensity-points.cc */,
 				57638D4F17DB72EA00BE93AC /* act-intensity-points.h */,
+				57C7828417EF2F21003413EA /* act-new.cc */,
+				57C7828517EF2F21003413EA /* act-new.h */,
 				571DB9D817BE67CD0001514C /* act-output-table.cc */,
 				571DB9D917BE67CD0001514C /* act-output-table.h */,
 				571DB9DA17BE67CD0001514C /* act-swap-bytes.h */,
@@ -464,6 +469,7 @@
 				5711D4A917EA09B6003157AF /* ActActivitySplitView.mm in Sources */,
 				57C5705917EA31650000AF8D /* ActActivityViewController.mm in Sources */,
 				57C5705C17EB18CB0000AF8D /* ActTableView.mm in Sources */,
+				57C7828617EF2F21003413EA /* act-new.cc in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

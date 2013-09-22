@@ -5,7 +5,9 @@
 #import "ActActivityListView.h"
 #import "ActActivityViewController.h"
 
+#import "act-config.h"
 #import "act-format.h"
+#import "act-new.h"
 
 #define BODY_WRAP_COLUMN 72
 
@@ -48,6 +50,51 @@
   return _database.get();
 }
 
+- (void)loadActivities
+{
+  // FIXME: only while bootstrapping
+
+  act::database::query query;
+  query.add_date_range(act::date_range(0, time(nullptr)));
+
+  std::vector<act::database::item *> items;
+  [self database]->execute_query(query, items);
+
+  std::vector<act::activity_storage_ref> activities;
+
+  for (auto &it : items)
+    activities.push_back(it->storage());
+
+  [_activityListView setActivities:activities];
+  if (activities.size() != 0)
+    [self setSelectedActivity:activities[0]];
+}
+
+- (void)reloadActivities
+{
+  [self database]->reload();
+
+  [self loadActivities];
+
+  [self setSelectedActivity:[_activityListView selectedActivity]];
+}
+
+- (void)windowDidLoad
+{
+  if (NSView *view = [_activityViewController view])
+    {
+      [view setFrame:[_mainContentView bounds]];
+      [view setHidden:YES];
+      [_mainContentView addSubview:view];
+    }
+
+  [[NSNotificationCenter defaultCenter]
+   addObserver:self selector:@selector(windowWillClose:)
+   name:NSWindowWillCloseNotification object:[self window]];
+
+  [self loadActivities];
+}
+
 - (act::activity_storage_ref)selectedActivity
 {
   return [_activityListView selectedActivity];
@@ -74,8 +121,7 @@
 
       dispatch_time_t t = dispatch_time(DISPATCH_TIME_NOW, 2LL * NSEC_PER_SEC);
       dispatch_after(t, dispatch_get_main_queue(), ^{
-	if (_needsSynchronize)
-	  [self synchronize];
+	[self synchronizeIfNeeded];
       });
     }
 }
@@ -91,6 +137,12 @@
 
   if (_database)
     _database->synchronize();
+}
+
+- (void)synchronizeIfNeeded
+{
+  if (_needsSynchronize)
+    [self synchronize];
 }
 
 - (void)activity:(const act::activity_storage_ref)a
@@ -280,35 +332,80 @@
     }
 }
 
-- (void)windowDidLoad
+- (IBAction)newActivity:(id)sender
 {
-  if (NSView *view = [_activityViewController view])
+  if (sender == _addButton
+      && ([[[self window] currentEvent] modifierFlags] & NSAlternateKeyMask))
     {
-      [view setFrame:[_mainContentView bounds]];
-      [view setHidden:YES];
-      [_mainContentView addSubview:view];
+      return [self importFile:sender];
     }
 
-  [[NSNotificationCenter defaultCenter]
-   addObserver:self selector:@selector(windowWillClose:)
-   name:NSWindowWillCloseNotification object:[self window]];
+  [self synchronizeIfNeeded];
 
-  // FIXME: only while bootstrapping
+  act::arguments args("act-new");
+  args.push_back("--date");
+  args.push_back("now");
 
-  act::database::query query;
-  query.add_date_range(act::date_range(0, time(nullptr)));
+  act::act_new(args);
 
-  std::vector<act::database::item *> items;
-  [self database]->execute_query(query, items);
+  [self reloadActivities];
+}
 
-  std::vector<act::activity_storage_ref> activities;
+- (IBAction)importFile:(id)sender
+{
+  NSOpenPanel *panel = [NSOpenPanel openPanel];
 
-  for (auto &it : items)
-    activities.push_back(it->storage());
+  NSString *default_dir = [[NSUserDefaults standardUserDefaults]
+			   stringForKey:@"ActLastGPSImportDirectory"];
+  if (default_dir == nil)
+    {
+      if (const char *path = act::shared_config().gps_file_dir())
+	default_dir = [NSString stringWithUTF8String:path];
+    }
 
-  [_activityListView setActivities:activities];
-  if (activities.size() != 0)
-    [self setSelectedActivity:activities[0]];
+  [panel setAllowedFileTypes:@[@"fit", @"tcx"]];
+  [panel setAllowsMultipleSelection:YES];
+  [panel setDirectoryURL:[NSURL fileURLWithPath:default_dir]];
+  [panel setPrompt:@"Import"];
+  [panel setTitle:@"Select FIT/TCX Files to Import"];
+
+  [panel beginWithCompletionHandler:
+   ^(NSInteger status) {
+     if (status == NSFileHandlingPanelOKButton)
+       {
+	 NSArray *urls = [panel URLs];
+
+	 for (NSURL *url in urls)
+	   {
+	     if (![url isFileURL])
+	       continue;
+
+	     act::arguments args("act-new");
+	     args.push_back("--gps-file");
+	     args.push_back([[url path] UTF8String]);
+
+	     act::act_new(args);
+	   }
+
+	 [self reloadActivities];
+
+	 if ([urls count] != 0)
+	   {
+	     [[NSUserDefaults standardUserDefaults] setObject:
+	      [[[urls lastObject] path] stringByDeletingLastPathComponent]
+	      forKey:@"ActLastGPSImportDirectory"];
+	   }
+       }
+   }];
+}
+
+- (IBAction)delete:(id)sender
+{
+}
+
+- (IBAction)reloadDatabase:(id)sender
+{
+  [self reloadActivities];
 }
 
 - (void)windowWillClose:(NSNotification *)note

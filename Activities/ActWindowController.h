@@ -8,10 +8,14 @@
 
 @interface ActWindowController : NSWindowController <NSSplitViewDelegate>
 {
+  IBOutlet NSSplitView *_mainSplitView;
+  IBOutlet NSSplitView *_innerSplitView;
+  IBOutlet NSButton *_addButton;
+  IBOutlet NSButton *_deleteButton;
+  IBOutlet NSButton *_reloadButton;
+  IBOutlet NSButton *_revealButton;
   IBOutlet ActActivityListView *_activityListView;
   IBOutlet NSView *_mainContentView;
-  IBOutlet NSSplitView *_verticalSplitView;
-  IBOutlet NSSplitView *_horizontalSplitView;
 
   ActActivityViewController *_activityViewController;
 
@@ -30,6 +34,7 @@
 @property(nonatomic) BOOL needsSynchronize;
 
 - (void)synchronize;
+- (void)synchronizeIfNeeded;
 
 - (void)activity:(const act::activity_storage_ref)storage
     didChangeField:(NSString *)name;
@@ -45,5 +50,10 @@
 
 - (NSString *)bodyStringOfActivity:(const act::activity &)a;
 - (void)setBodyString:(NSString *)str ofActivity:(act::activity &)a;
+
+- (IBAction)newActivity:(id)sender;
+- (IBAction)importFile:(id)sender;
+- (IBAction)delete:(id)sender;
+- (IBAction)reloadDatabase:(id)sender;
 
 @end
