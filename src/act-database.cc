@@ -12,16 +12,15 @@ namespace act {
 
 database::database()
 {
-  read_activities();
+  reload();
 }
 
 void
-database::read_activities()
+database::reload()
 {
   _items.clear();
 
-  map_directory_files(shared_config().activity_dir(),
-		      read_activities_callback, this);
+  map_directory_files(shared_config().activity_dir(), reload_callback, this);
 
   std::sort(_items.begin(), _items.end(),
 	    [] (const item &a, const item &b) {
@@ -30,7 +29,7 @@ database::read_activities()
 }
 
 void
-database::read_activities_callback(const char *path, void *ctx)
+database::reload_callback(const char *path, void *ctx)
 {
   database *db = static_cast<database *>(ctx);
 

@@ -17,6 +17,9 @@ class database : public uncopyable
 public:
   database();
 
+  void reload();
+  void synchronize() const;
+
   class item
     {
       friend class database;
@@ -176,14 +179,10 @@ public:
 
   void execute_query(const query &q, std::vector<item *> &result);
 
-  void synchronize() const;
-
 private:
   std::vector<item> _items;
 
-  void read_activities();
-
-  static void read_activities_callback(const char *path, void *ctx);
+  static void reload_callback(const char *path, void *ctx);
 };
 
 } // namespace act
