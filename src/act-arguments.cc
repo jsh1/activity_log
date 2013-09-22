@@ -6,6 +6,13 @@
 
 namespace act {
 
+arguments::arguments(const char *program_name)
+: _program_name(program_name),
+  _short_opt_offset(1),
+  _getopt_finished(false)
+{
+}
+
 arguments::arguments(int argc, const char **argv)
 : _program_name(argc > 0 ? argv[0] : nullptr),
   _short_opt_offset(1),

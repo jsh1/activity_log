@@ -20,6 +20,7 @@ class arguments
   bool _getopt_finished;
 
 public:
+  explicit arguments(const char *program_name);
   arguments(int argc, const char **argv);
   arguments(const arguments &rhs);
   ~arguments();
