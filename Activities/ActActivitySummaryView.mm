@@ -104,12 +104,8 @@
 	{
 	  NSString *string = [controller stringForField:field];
 	  NSTextField *control = [dict objectForKey:field];
-
-	  if ([field isEqualToString:@"activity"])
-	    string = [string capitalizedString];
-
-	  BOOL readOnly = [controller isFieldReadOnly:field];
 	  [control setStringValue:string];
+	  BOOL readOnly = [controller isFieldReadOnly:field];
 	  [control setEditable:!readOnly];
 	  [control setTextColor:[[self class] textFieldColor:readOnly]];
 	}
@@ -304,7 +300,6 @@
     indexOfSelectedItem:(NSInteger *)index
 {
   const char *field_name = nullptr;
-  BOOL complete_keywords = NO;
 
   if (control == _typeTypeField)
     field_name = "Type";
@@ -320,13 +315,9 @@
       act::database *db = [[[self controller] controller] database];
 
       std::vector<std::string> completions;
-      if (!complete_keywords)
-	db->complete_field_string(field_name, [str UTF8String], completions);
-      else
-	db->complete_field_keyword(field_name, [str UTF8String], completions);
+      db->complete_field_value(field_name, [str UTF8String], completions);
 
       NSMutableArray *array = [NSMutableArray array];
-
       for (const auto &it : completions)
 	[array addObject:[NSString stringWithUTF8String:it.c_str()]];
 

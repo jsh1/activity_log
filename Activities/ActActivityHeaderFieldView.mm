@@ -91,11 +91,13 @@
 - (void)_updateFieldName
 {
   [_labelField setStringValue:_fieldName];
-  [_labelField setCompletesEverything:YES];
 
   BOOL readOnly = [[self controller] isFieldReadOnly:_fieldName];
   [[_valueField cell] setEditable:!readOnly];
   [[_valueField cell] setTextColor:[[self class] textFieldColor:readOnly]];
+
+  [_labelField setCompletesEverything:YES];
+  [_valueField setCompletesEverything:[_fieldName isEqualToString:@"Course"]];
 }
 
 - (void)setFieldName:(NSString *)name
@@ -217,19 +219,27 @@
     completions:(NSArray *)words forPartialWordRange:(NSRange)charRange
     indexOfSelectedItem:(NSInteger *)index
 {
-  if (control == _labelField)
+  if (control == _labelField || control == _valueField)
     {
-      // complete field names
+      if ([_fieldName length] == 0)
+	return nil;
 
       NSString *str = [[textView string] substringWithRange:charRange];
 
       act::database *db = [[[self controller] controller] database];
 
       std::vector<std::string> completions;
-      db->complete_field_name([str UTF8String], completions);
+      if (control == _labelField)
+	{
+	  db->complete_field_name([str UTF8String], completions);
+	}
+      else
+	{
+	  db->complete_field_value([_fieldName UTF8String],
+				   [str UTF8String], completions);
+	}
 
       NSMutableArray *array = [NSMutableArray array];
-
       for (const auto &it : completions)
 	[array addObject:[NSString stringWithUTF8String:it.c_str()]];
 

@@ -119,6 +119,21 @@
 
 @synthesize completesEverything = _completesEverything;
 
++ (NSCharacterSet *)wordCharacters
+{
+  static NSMutableCharacterSet *set;
+
+  if (set == nil)
+    {
+      set = [[NSMutableCharacterSet alloc] init];
+      [set formUnionWithCharacterSet:
+       [NSCharacterSet alphanumericCharacterSet]];
+      [set addCharactersInString:@"-_"];
+    }
+
+  return set;
+}
+
 - (NSRange)rangeForUserCompletion
 {
   NSArray *ranges = [self selectedRanges];
@@ -126,13 +141,20 @@
     return NSMakeRange(NSNotFound, 0);
 
   NSRange range = [[ranges objectAtIndex:0] rangeValue];
-  if (range.length > 0)
+  if (range.length > 0 || range.location == 0)
     return range;
 
   if (_completesEverything)
     return NSMakeRange(0, range.location);
-  else
-    return [super rangeForUserCompletion];
+
+  NSInteger idx = range.location;
+  NSString *str = [self string];
+  NSCharacterSet *set = [[self class] wordCharacters];
+
+  while (idx > 0 && [set characterIsMember:[str characterAtIndex:idx-1]])
+    idx--;
+
+  return NSMakeRange(idx, range.location - idx);
 }
 
 @end

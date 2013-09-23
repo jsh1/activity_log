@@ -139,13 +139,21 @@ database::complete_field_name(const char *prefix,
 }
 
 void
-database::complete_field_string(const char *field_name, const char *prefix,
-				std::vector<std::string> &results) const
+database::complete_field_value(const char *field_name, const char *prefix,
+			       std::vector<std::string> &results) const
 {
+  results.clear();
+
   time_t first = time(nullptr) - COMPLETION_DAYS*24*60*60;
   size_t prefix_len = strlen(prefix);
 
   std::set<std::string, case_insensitive_string_compare> set;
+
+  field_id id = lookup_field_id(field_name);
+  field_data_type type = lookup_field_data_type(id);
+
+  if (type != field_data_type::string && type != field_data_type::keywords)
+    return;
 
   for (const auto &it : _items)
     {
@@ -154,41 +162,21 @@ database::complete_field_string(const char *field_name, const char *prefix,
 
       if (const std::string *s = it.storage()->field_ptr(field_name))
 	{
-	  if (strncasecmp(prefix, s->c_str(), prefix_len) == 0)
-	    set.insert(*s);
-	}
-    }
-
-  for (const auto &it : set)
-    results.push_back(it);
-
-  case_insensitive_string_compare comp;
-  std::sort(results.begin(), results.end(), comp);
-}
-
-void
-database::complete_field_keyword(const char *field_name, const char *prefix,
-				 std::vector<std::string> &results) const
-{
-  time_t first = time(nullptr) - COMPLETION_DAYS*24*60*60;
-  size_t prefix_len = strlen(prefix);
-
-  std::set<std::string, case_insensitive_string_compare> set;
-
-  for (const auto &it : _items)
-    {
-      if (it.date() < first)
-	break;
-
-      if (const std::string *s = it.storage()->field_ptr(field_name))
-	{
-	  std::vector<std::string> keys;
-	  if (parse_keywords(*s, &keys))
+	  if (type == field_data_type::string)
 	    {
-	      for (const auto &it : keys)
+	      if (strncasecmp(prefix, s->c_str(), prefix_len) == 0)
+		set.insert(*s);
+	    }
+	  else if (type == field_data_type::keywords)
+	    {
+	      std::vector<std::string> keys;
+	      if (parse_keywords(*s, &keys))
 		{
-		  if (strncasecmp(prefix, it.c_str(), prefix_len) == 0)
-		    set.insert(it);
+		  for (const auto &it : keys)
+		    {
+		      if (strncasecmp(prefix, it.c_str(), prefix_len) == 0)
+			set.insert(it);
+		    }
 		}
 	    }
 	}
