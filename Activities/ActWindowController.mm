@@ -208,8 +208,10 @@
 - (void)setString:(NSString *)str forField:(NSString *)name
     ofActivity:(act::activity &)a
 {
-  auto id = act::lookup_field_id([name UTF8String]);
-  const char *field_name = act::canonical_field_name(id);
+  const char *field_name = [name UTF8String];
+  auto id = act::lookup_field_id(field_name);
+  if (id != act::field_id::custom)
+    field_name = act::canonical_field_name(id);
 
   // FIXME: trim whitespace?
 
@@ -229,9 +231,17 @@
   [self activity:a.storage() didChangeField:name];
 }
 
+- (void)deleteField:(NSString *)name ofActivity:(act::activity &)a
+{
+  [self setString:nil forField:name ofActivity:a];
+}
+
 - (void)renameField:(NSString *)oldName to:(NSString *)newName
     ofActivity:(act::activity &)a
 {
+  if ([newName length] == 0)
+    return [self deleteField:newName ofActivity:a];
+
   a.storage()->set_field_name([oldName UTF8String], [newName UTF8String]);
 
   [self activity:a.storage() didChangeField:oldName];

@@ -7,6 +7,9 @@
 #include "act-util.h"
 
 #include <algorithm>
+#include <set>
+
+#define COMPLETION_DAYS 100
 
 namespace act {
 
@@ -104,6 +107,98 @@ database::synchronize() const
 {
   for (auto &it : _items)
     it.storage()->synchronize_file();
+}
+
+void
+database::complete_field_name(const char *prefix,
+			      std::vector<std::string> &results) const
+{
+  time_t first = time(nullptr) - COMPLETION_DAYS*24*60*60;
+  size_t prefix_len = strlen(prefix);
+
+  std::set<std::string, case_insensitive_string_compare> set;
+
+  for (const auto &it : _items)
+    {
+      if (it.date() < first)
+	break;
+
+      for (const auto &it2 : *it.storage())
+	{
+	  const std::string &field = it2.first;
+	  if (strncasecmp(prefix, field.c_str(), prefix_len) == 0)
+	    set.insert(field);
+	}
+    }
+
+  for (const auto &it : set)
+    results.push_back(it);
+
+  case_insensitive_string_compare comp;
+  std::sort(results.begin(), results.end(), comp);
+}
+
+void
+database::complete_field_string(const char *field_name, const char *prefix,
+				std::vector<std::string> &results) const
+{
+  time_t first = time(nullptr) - COMPLETION_DAYS*24*60*60;
+  size_t prefix_len = strlen(prefix);
+
+  std::set<std::string, case_insensitive_string_compare> set;
+
+  for (const auto &it : _items)
+    {
+      if (it.date() < first)
+	break;
+
+      if (const std::string *s = it.storage()->field_ptr(field_name))
+	{
+	  if (strncasecmp(prefix, s->c_str(), prefix_len) == 0)
+	    set.insert(*s);
+	}
+    }
+
+  for (const auto &it : set)
+    results.push_back(it);
+
+  case_insensitive_string_compare comp;
+  std::sort(results.begin(), results.end(), comp);
+}
+
+void
+database::complete_field_keyword(const char *field_name, const char *prefix,
+				 std::vector<std::string> &results) const
+{
+  time_t first = time(nullptr) - COMPLETION_DAYS*24*60*60;
+  size_t prefix_len = strlen(prefix);
+
+  std::set<std::string, case_insensitive_string_compare> set;
+
+  for (const auto &it : _items)
+    {
+      if (it.date() < first)
+	break;
+
+      if (const std::string *s = it.storage()->field_ptr(field_name))
+	{
+	  std::vector<std::string> keys;
+	  if (parse_keywords(*s, &keys))
+	    {
+	      for (const auto &it : keys)
+		{
+		  if (strncasecmp(prefix, it.c_str(), prefix_len) == 0)
+		    set.insert(it);
+		}
+	    }
+	}
+    }
+
+  for (const auto &it : set)
+    results.push_back(it);
+
+  case_insensitive_string_compare comp;
+  std::sort(results.begin(), results.end(), comp);
 }
 
 database::not_term::not_term(const const_query_term_ref &t)

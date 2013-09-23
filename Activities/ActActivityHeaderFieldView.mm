@@ -3,18 +3,16 @@
 #import "ActActivityHeaderFieldView.h"
 
 #import "ActActivityHeaderView.h"
+#import "ActActivityTextField.h"
 #import "ActActivityViewController.h"
+#import "ActWindowController.h"
+
+#import "act-database.h"
 
 #define LABEL_WIDTH 100
 #define LABEL_HEIGHT 14
 
 #define CONTROL_HEIGHT LABEL_HEIGHT
-
-@interface ActActivityHeaderFieldTextView : NSTextView
-{
-  BOOL _drawsBorder;
-}
-@end
 
 @implementation ActActivityHeaderFieldView
 
@@ -39,33 +37,46 @@
 
   NSFont *font = [NSFont systemFontOfSize:[NSFont smallSystemFontSize]];
 
-  _labelView = [[ActActivityHeaderFieldTextView alloc] initWithFrame:
-		NSMakeRect(0, 0, LABEL_WIDTH, LABEL_HEIGHT)];
-  [_labelView setDelegate:self];
-  [_labelView setDrawsBackground:NO];
-  [_labelView setAlignment:NSRightTextAlignment];
-  [_labelView setFont:font];
-  [_labelView setTextColor:[NSColor colorWithDeviceWhite:.25 alpha:1]];
-  [self addSubview:_labelView];
-  [_labelView release];
+  _labelField = [[ActActivityTextField alloc] initWithFrame:
+		 NSMakeRect(0, 0, LABEL_WIDTH, LABEL_HEIGHT)];
+  [_labelField setTarget:self];
+  [_labelField setAction:@selector(controlAction:)];
+  [_labelField setDelegate:self];
+  [_labelField setDrawsBackground:NO];
+  [[_labelField cell] setAlignment:NSRightTextAlignment];
+  [[_labelField cell] setBordered:NO];
+  [[_labelField cell] setFont:font];
+  [[_labelField cell] setTextColor:[NSColor colorWithDeviceWhite:.25 alpha:1]];
+  [self addSubview:_labelField];
+  [_labelField release];
 
-  _textView = [[ActActivityHeaderFieldTextView alloc] initWithFrame:
-	       NSMakeRect(LABEL_WIDTH, 0, frame.size.width
-			  - LABEL_WIDTH, CONTROL_HEIGHT)];
-  [_textView setDelegate:self];
-  [_textView setDrawsBackground:NO];
-  [_textView setFont:font];
-  [_textView setTextColor:[NSColor colorWithDeviceWhite:.1 alpha:1]];
-  [self addSubview:_textView];
-  [_textView release];
+  _valueField = [[ActActivityTextField alloc] initWithFrame:
+		 NSMakeRect(LABEL_WIDTH, 0, frame.size.width
+			    - LABEL_WIDTH, CONTROL_HEIGHT)];
+  [_valueField setTarget:self];
+  [_valueField setAction:@selector(controlAction:)];
+  [_valueField setDelegate:self];
+  [_valueField setDrawsBackground:NO];
+  [[_valueField cell] setBordered:NO];
+  [[_valueField cell] setFont:font];
+  [[_valueField cell] setTextColor:[NSColor colorWithDeviceWhite:.1 alpha:1]];
+  [self addSubview:_valueField];
+  [_valueField release];
 
   return self;
 }
 
+- (void)setController:(ActActivityViewController *)controller
+{
+  [super setController:controller];
+  [_labelField setController:controller];
+  [_valueField setController:controller];
+}
+
 - (void)dealloc
 {
-  [_labelView setDelegate:nil];
-  [_textView setDelegate:nil];
+  [_labelField setDelegate:nil];
+  [_valueField setDelegate:nil];
 
   [_fieldName release];
 
@@ -79,11 +90,12 @@
 
 - (void)_updateFieldName
 {
-  [_labelView setString:_fieldName];
+  [_labelField setStringValue:_fieldName];
+  [_labelField setCompletesEverything:YES];
 
   BOOL readOnly = [[self controller] isFieldReadOnly:_fieldName];
-  [_textView setEditable:!readOnly];
-  [_textView setTextColor:[[self class] textFieldColor:readOnly]];
+  [[_valueField cell] setEditable:!readOnly];
+  [[_valueField cell] setTextColor:[[self class] textFieldColor:readOnly]];
 }
 
 - (void)setFieldName:(NSString *)name
@@ -99,17 +111,23 @@
 
 - (NSString *)fieldString
 {
-  return [[self controller] stringForField:_fieldName];
+  if ([_fieldName length] != 0)
+    return [[self controller] stringForField:_fieldName];
+  else
+    return [_valueField stringValue];
 }
 
 - (void)setFieldString:(NSString *)str
 {
   ActActivityViewController *controller = [self controller];
 
-  if (![str isEqual:[controller stringForField:_fieldName]])
+  if ([_fieldName length] != 0)
     {
-      [controller setString:str forField:_fieldName];
+      if (![str isEqual:[controller stringForField:_fieldName]])
+	[controller setString:str forField:_fieldName];
     }
+  else
+    [_valueField setStringValue:str];
 }
 
 - (void)renameField:(NSString *)newName
@@ -122,16 +140,34 @@
 
       [self _updateFieldName];
 
-      [_controller renameField:oldName to:newName];
+      if ([oldName length] != 0)
+	{
+	  if ([newName length] != 0)
+	    [_controller renameField:oldName to:newName];
+	  else
+	    [_controller deleteField:oldName];
+	}
+      else if ([newName length] != 0)
+	[_controller setString:[_valueField stringValue] forField:newName];
 
       [oldName release];
     }
 }
 
+- (NSView *)nameView
+{
+  return _labelField;
+}
+
+- (NSView *)valueView
+{
+  return _valueField;
+}
+
 - (void)activityDidChange
 {
   [self _updateFieldName];
-  [_textView setString:[self fieldString]];
+  [_valueField setStringValue:[self fieldString]];
 }
 
 - (void)activityDidChangeField:(NSString *)name
@@ -139,7 +175,7 @@
   // reload everything in case of dependent fields (pace, etc)
 
   [self _updateFieldName];
-  [_textView setString:[self fieldString]];
+  [_valueField setStringValue:[self fieldString]];
 }
 
 - (CGFloat)preferredHeight
@@ -153,127 +189,54 @@
   NSRect frame = bounds;
 
   frame.size.width = LABEL_WIDTH;
-  [_labelView setFrame:frame];
+  [_labelField setFrame:frame];
 
   frame.origin.x += frame.size.width;
   frame.size.width = bounds.size.width - frame.origin.x;
-  [_textView setFrame:frame];
+  [_valueField setFrame:frame];
 }
 
-// NSTextViewDelegate methods
-
-- (void)textDidEndEditing:(NSNotification *)note
+- (IBAction)controlAction:(id)sender
 {
-  NSTextView *view = [note object];
-  NSString *value = [view string];
-
-  // FIXME: undo support
-
-    if (view == _labelView)
-      [self renameField:value];
-    else if (view == _textView)
-      [self setFieldString:value];
+  if (sender == _labelField)
+    [self renameField:[sender stringValue]];
+  else if (sender == _valueField)
+    [self setFieldString:[sender stringValue]];
 }
 
-@end
+// NSControlTextEditingDelegate methods
 
-@implementation ActActivityHeaderFieldTextView
-
-- (BOOL)becomeFirstResponder
+- (BOOL)control:(NSControl *)control
+    textShouldEndEditing:(NSText *)fieldEditor
 {
-  if (![super becomeFirstResponder])
-    return NO;
-
-  _drawsBorder = YES;
-  [self setNeedsDisplay:YES];
-
+  [self controlAction:control];
   return YES;
 }
 
-- (BOOL)resignFirstResponder
+- (NSArray *)control:(NSControl *)control textView:(NSTextView *)textView
+    completions:(NSArray *)words forPartialWordRange:(NSRange)charRange
+    indexOfSelectedItem:(NSInteger *)index
 {
-  if (![super resignFirstResponder])
-    return NO;
-
-  _drawsBorder = NO;
-  [self setNeedsDisplay:YES];
-
-  return YES;
-}
-
-- (void)drawRect:(NSRect)r
-{
-  if (_drawsBorder)
+  if (control == _labelField)
     {
-      if ([self isEditable])
-	[[NSColor keyboardFocusIndicatorColor] setStroke];
-      else
-	[[NSColor secondarySelectedControlColor] setStroke];
+      // complete field names
 
-      [NSBezierPath strokeRect:NSInsetRect([self bounds], .5, .5)];
+      NSString *str = [[textView string] substringWithRange:charRange];
+
+      act::database *db = [[[self controller] controller] database];
+
+      std::vector<std::string> completions;
+      db->complete_field_name([str UTF8String], completions);
+
+      NSMutableArray *array = [NSMutableArray array];
+
+      for (const auto &it : completions)
+	[array addObject:[NSString stringWithUTF8String:it.c_str()]];
+
+      return array;
     }
 
-  [super drawRect:r];
-}
-
-- (void)keyDown:(NSEvent *)e
-{
-  unsigned int keyCode = [e keyCode];
-
-  if (keyCode == 125 /* Down */ || keyCode == 126 /* Up */
-      || keyCode == 36 /* RET */ || keyCode == 48 /* TAB */)
-    {
-      if ([[self window] firstResponder] == self)
-	{
-	  if (keyCode == 48 /* TAB */)
-	    {
-	      if (!([e modifierFlags] & NSShiftKeyMask))
-		[[self window] selectNextKeyView:self];
-	      else
-		[[self window] selectPreviousKeyView:self];
-	    }
-	  else
-	    {
-	      BOOL backwards = keyCode == 126;
-
-	      ActActivityHeaderFieldView *field = (id) [self superview];
-	      ActActivityHeaderView *header = (id) [field superview];
-
-	      NSInteger item_idx
-	        = [[field subviews] indexOfObjectIdenticalTo:self];
-	      NSInteger field_idx
-	        = [[header subviews] indexOfObjectIdenticalTo:field];
-
-	      if (!backwards)
-		{
-		  if (field_idx + 1 < [[header subviews] count])
-		    field_idx += 1;
-		  else
-		    field_idx = 0;
-		}
-	      else
-		{
-		  if (field_idx - 1 >= 0)
-		    field_idx -= 1;
-		  else
-		    field_idx = [[header subviews] count] - 1;
-		}
-
-	      field = [[header subviews] objectAtIndex:field_idx];
-	      NSView *item = [[field subviews] objectAtIndex:item_idx];
-
-	      [[self window] makeFirstResponder:item];
-	    }
-
-	  NSView *view = (id)[[self window] firstResponder];
-	  [self scrollRectToVisible:
-	   [self convertRect:[view bounds] fromView:view]];
-	}
-    }
-  else
-    {
-      [super keyDown:e];
-    }
+  return nil;
 }
 
 @end

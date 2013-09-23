@@ -3,6 +3,9 @@
 #import "ActActivitySubview.h"
 
 @interface ActActivityHeaderView : ActActivitySubview
+{
+  IBOutlet NSButton *_addFieldButton;
+}
 
 @property(nonatomic, copy) NSArray *displayedFields;
 
@@ -12,5 +15,8 @@
 
 - (CGFloat)preferredHeight;
 - (void)layoutSubviews;
+- (void)layoutAndResize;
+
+- (IBAction)controlAction:(id)sender;
 
 @end

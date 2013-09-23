@@ -4,8 +4,11 @@
 
 #import "ActActivityHeaderView.h"
 #import "ActActivityViewController.h"
-#import "ActExpandableTextField.h"
+#import "ActActivityTextField.h"
 #import "ActHorizontalBoxView.h"
+#import "ActWindowController.h"
+
+#import "act-database.h"
 
 #import "ActFoundationExtensions.h"
 
@@ -26,6 +29,7 @@
   [_dateBox setSpacing:3];
   [_typeBox setSpacing:3];
   [_statsBox setSpacing:8];
+  [_courseField setCompletesEverything:YES];
 }
 
 - (CGFloat)minSize
@@ -190,16 +194,7 @@
 	}
     }
 
-  NSRect frame = [_headerView frame];
-  CGFloat height = [_headerView preferredHeight];
-
-  if (frame.size.height != height)
-    {
-      frame.size.height = height;
-      [_headerView setFrame:frame];
-    }
-
-  [_headerView layoutSubviews];
+  [_headerView layoutAndResize];
 }
 
 - (void)activityDidChange
@@ -293,6 +288,52 @@
 {
   [super resizeSubviewsWithOldSize:oldSize];
   [self _reflowFields];
+}
+
+// NSControlTextEditingDelegate methods
+
+- (BOOL)control:(NSControl *)control
+    textShouldEndEditing:(NSText *)fieldEditor
+{
+  [self controlAction:control];
+  return YES;
+}
+
+- (NSArray *)control:(NSControl *)control textView:(NSTextView *)textView
+    completions:(NSArray *)words forPartialWordRange:(NSRange)charRange
+    indexOfSelectedItem:(NSInteger *)index
+{
+  const char *field_name = nullptr;
+  BOOL complete_keywords = NO;
+
+  if (control == _typeTypeField)
+    field_name = "Type";
+  else if (control == _typeActivityField)
+    field_name = "Activity";
+  else if (control == _courseField)
+    field_name = "Course";
+
+  if (field_name != nullptr)
+    {
+      NSString *str = [[textView string] substringWithRange:charRange];
+
+      act::database *db = [[[self controller] controller] database];
+
+      std::vector<std::string> completions;
+      if (!complete_keywords)
+	db->complete_field_string(field_name, [str UTF8String], completions);
+      else
+	db->complete_field_keyword(field_name, [str UTF8String], completions);
+
+      NSMutableArray *array = [NSMutableArray array];
+
+      for (const auto &it : completions)
+	[array addObject:[NSString stringWithUTF8String:it.c_str()]];
+
+      return array;
+    }
+
+  return nil;
 }
 
 // NSTextViewDelegate methods

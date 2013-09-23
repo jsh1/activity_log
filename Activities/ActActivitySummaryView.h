@@ -2,7 +2,8 @@
 
 #import "ActActivitySubview.h"
 
-@class ActExpandableTextField, ActHorizontalBoxView, ActActivityHeaderView;
+@class ActActivityTextField, ActExpandableTextField;
+@class ActHorizontalBoxView, ActActivityHeaderView;
 
 @interface ActActivitySummaryView : ActActivitySubview <NSTextViewDelegate>
 {
@@ -20,7 +21,7 @@
   IBOutlet ActExpandableTextField *_statsDurationField;
   IBOutlet ActExpandableTextField *_statsPaceField;
 
-  IBOutlet NSTextField *_courseField;
+  IBOutlet ActActivityTextField *_courseField;
   IBOutlet NSTextView *_bodyTextView;
   IBOutlet ActActivityHeaderView *_headerView;
 

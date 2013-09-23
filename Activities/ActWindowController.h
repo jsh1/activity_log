@@ -45,6 +45,7 @@
 - (BOOL)isFieldReadOnly:(NSString *)name ofActivity:(const act::activity &)a;
 - (void)setString:(NSString *)str forField:(NSString *)name
     ofActivity:(act::activity &)a;
+- (void)deleteField:(NSString *)name ofActivity:(act::activity &)a;
 - (void)renameField:(NSString *)oldName to:(NSString *)newName
     ofActivity:(act::activity &)a;
 

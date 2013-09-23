@@ -20,6 +20,15 @@ public:
   void reload();
   void synchronize() const;
 
+  void complete_field_name(const char *prefix,
+    std::vector<std::string> &results) const;
+
+  void complete_field_string(const char *field_name, const char *prefix,
+    std::vector<std::string> &results) const;
+
+  void complete_field_keyword(const char *field_name, const char *prefix,
+    std::vector<std::string> &results) const;
+
   class item
     {
       friend class database;

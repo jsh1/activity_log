@@ -9,6 +9,7 @@
 
 #define FIELD_HEIGHT 12
 #define FIELD_Y_SPACING 2
+#define FOCUS_INSET 2
 
 @implementation ActActivityHeaderView
 
@@ -26,7 +27,11 @@
   NSMutableArray *array = [[NSMutableArray alloc] init];
 
   for (ActActivityHeaderFieldView *subview in [self subviews])
-    [array addObject:[subview fieldName]];
+    {
+      NSString *name = [subview fieldName];
+      if ([name length] != 0)
+	[array addObject:name];
+    }
 
   return [array autorelease];
 }
@@ -56,10 +61,8 @@
 	{
 	  new_subview = [[[ActActivityHeaderFieldView alloc]
 			  initWithFrame:NSZeroRect] autorelease];
-
-	  if (ActActivityViewController *controller = [self controller])
-	    [new_subview setController:controller];
-
+	  [new_subview setHeaderView:self];
+	  [new_subview setController:[self controller]];
 	  [new_subview setFieldName:field];
 	}
 
@@ -70,6 +73,27 @@
 
   [new_subviews release];
   [old_subviews release];
+}
+
+- (ActActivityHeaderFieldView *)_ensureField:(NSString *)name
+{
+  for (ActActivityHeaderFieldView *subview in [self subviews])
+    {
+      if ([[subview fieldName] isEqualToStringNoCase:name])
+	return subview;
+    }
+
+  ActActivityHeaderFieldView *field
+    = [[ActActivityHeaderFieldView alloc] initWithFrame:NSZeroRect];
+
+  [field setHeaderView:self];
+  [field setController:[self controller]];
+  [field setFieldName:name];
+
+  [self addSubview:field];
+  [field release];
+
+  return field;
 }
 
 - (BOOL)displaysField:(NSString *)name
@@ -85,19 +109,7 @@
 
 - (void)addDisplayedField:(NSString *)name
 {
-  if ([self displaysField:name])
-    return;
-
-  ActActivityHeaderFieldView *field
-    = [[ActActivityHeaderFieldView alloc] initWithFrame:NSZeroRect];
-
-  [field setFieldName:name];
-
-  if (ActActivityViewController *controller = [self controller])
-    [field setController:controller];
-
-  [self addSubview:field];
-  [field release];
+  [self _ensureField:name];
 }
 
 - (void)removeDisplayedField:(NSString *)name
@@ -120,6 +132,17 @@
     [field setController:controller];
 }
 
+- (IBAction)controlAction:(id)sender
+{
+  if (sender == _addFieldButton)
+    {
+      ActActivityHeaderFieldView *field = [self _ensureField:@""];
+      [self layoutAndResize];
+      [[self window] makeFirstResponder:[field nameView]];
+      [self scrollRectToVisible:[field convertRect:[field bounds] toView:self]];
+    }
+}
+
 - (CGFloat)preferredHeight
 {
   CGFloat h = 0;
@@ -131,13 +154,13 @@
       h += [field preferredHeight];
     }
 
-  return h;
+  return h + FOCUS_INSET * 2;
 }
 
 - (void)layoutSubviews
 {
   NSRect bounds = [self bounds];
-  NSRect frame = bounds;
+  NSRect frame = NSInsetRect(bounds, FOCUS_INSET, FOCUS_INSET);
 
   for (ActActivityHeaderFieldView *field in [self subviews])
     {
@@ -146,6 +169,20 @@
       [field layoutSubviews];
       frame.origin.y += frame.size.height + FIELD_Y_SPACING;
     }
+}
+
+- (void)layoutAndResize
+{
+  NSRect frame = [self frame];
+  CGFloat height = [self preferredHeight];
+
+  if (frame.size.height != height)
+    {
+      frame.size.height = height;
+      [self setFrame:frame];
+    }
+
+  [self layoutSubviews];
 }
 
 - (void)resizeSubviewsWithOldSize:(NSSize)oldSize

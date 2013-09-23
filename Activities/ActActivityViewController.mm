@@ -8,6 +8,7 @@
 #import "ActActivitySummaryView.h"
 #import "ActActivitySubview.h"
 #import "ActActivitySplitView.h"
+#import "ActActivityTextField.h"
 #import "ActWindowController.h"
 
 #import "act-format.h"
@@ -28,10 +29,30 @@
   return self;
 }
 
+- (void)dealloc
+{
+  [_fieldEditor release];
+
+  [super dealloc];
+}
+
 - (void)viewDidLoad
 {
   [self updateShowHideButtons];
 }
+
+- (ActActivityFieldEditor *)fieldEditor
+{
+  if (_fieldEditor == nil)
+    {
+      _fieldEditor = [[ActActivityFieldEditor alloc]
+		      initWithFrame:NSZeroRect];
+      [_fieldEditor setFieldEditor:YES];
+    }
+
+  return _fieldEditor;
+}
+
 
 - (act::activity_storage_ref)activityStorage
 {
@@ -128,6 +149,12 @@
 {
   if (act::activity *a = [self activity])
     [_controller setString:str forField:name ofActivity:*a];
+}
+
+- (void)deleteField:(NSString *)name
+{
+  if (act::activity *a = [self activity])
+    [_controller deleteField:name ofActivity:*a];
 }
 
 - (void)renameField:(NSString *)oldName to:(NSString *)newName

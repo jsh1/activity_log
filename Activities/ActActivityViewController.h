@@ -7,6 +7,7 @@
 @class ActWindowController, ActActivitySplitView;
 @class ActActivitySummaryView, ActActivityLapView;
 @class ActActivityMapView, ActActivityChartView;
+@class ActActivityFieldEditor;
 
 @interface ActActivityViewController : NSViewController <NSSplitViewDelegate>
 {
@@ -23,6 +24,8 @@
 
   ActWindowController *_controller;
 
+  ActActivityFieldEditor *_fieldEditor;
+
   act::activity_storage_ref _activity_storage;
   std::unique_ptr<act::activity> _activity;
 
@@ -30,6 +33,8 @@
 }
 
 @property(nonatomic, assign) ActWindowController *controller;
+
+@property(nonatomic, readonly) ActActivityFieldEditor *fieldEditor;
 
 @property(nonatomic) act::activity_storage_ref activityStorage;
 @property(nonatomic, readonly) act::activity *activity;
@@ -43,6 +48,7 @@
 - (NSString *)stringForField:(NSString *)name;
 - (BOOL)isFieldReadOnly:(NSString *)name;
 - (void)setString:(NSString *)str forField:(NSString *)name;
+- (void)deleteField:(NSString *)name;
 - (void)renameField:(NSString *)oldName to:(NSString *)newName;
 
 @property(nonatomic, copy) NSDate *dateField;
