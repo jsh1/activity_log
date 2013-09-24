@@ -161,7 +161,10 @@
   while (idx > 0 && [set characterIsMember:[str characterAtIndex:idx-1]])
     idx--;
 
-  return NSMakeRange(idx, range.location - idx);
+  if (idx < range.location)
+    return NSMakeRange(idx, range.location - idx);
+  else
+    return NSMakeRange(NSNotFound, 0);
 }
 
 - (void)didChangeText
