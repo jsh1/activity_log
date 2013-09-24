@@ -117,6 +117,7 @@
 
 @implementation ActActivityFieldEditor
 
+@synthesize autoCompletes = _autoCompletes;
 @synthesize completesEverything = _completesEverything;
 
 + (NSCharacterSet *)wordCharacters
@@ -132,6 +133,12 @@
     }
 
   return set;
+}
+
+- (id)initWithFrame:(NSRect)rect
+{
+  _autoCompletes = YES;
+  return [super initWithFrame:rect];
 }
 
 - (NSRange)rangeForUserCompletion
@@ -155,6 +162,25 @@
     idx--;
 
   return NSMakeRange(idx, range.location - idx);
+}
+
+- (void)didChangeText
+{
+  [super didChangeText];
+
+  if (_autoCompletes && [[self string] length] != 0 && _completionDepth == 0)
+    {
+      _completionDepth++;
+
+      @try
+	{
+	  [self complete:nil];
+	} 
+      @finally
+	{
+	  _completionDepth--;
+	}
+    }
 }
 
 @end

@@ -18,9 +18,12 @@
 
 @interface ActActivityFieldEditor : NSTextView
 {
+  BOOL _autoCompletes;
   BOOL _completesEverything;
+  int _completionDepth;
 }
 
+@property(nonatomic) BOOL autoCompletes;
 @property(nonatomic) BOOL completesEverything;
 
 @end
