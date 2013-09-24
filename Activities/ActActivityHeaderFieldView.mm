@@ -221,7 +221,7 @@
 {
   if (control == _labelField || control == _valueField)
     {
-      if ([_fieldName length] == 0)
+      if (control == _valueField && [_fieldName length] == 0)
 	return nil;
 
       NSString *str = [[textView string] substringWithRange:charRange];
