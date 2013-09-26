@@ -300,7 +300,7 @@
 
       if (word > ptr)
 	{
-	  if (column >= BODY_WRAP_COLUMN)
+	  if (column + (word - ptr) >= BODY_WRAP_COLUMN)
 	    {
 	      wrapped.push_back('\n');
 	      column = 0;
