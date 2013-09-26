@@ -309,5 +309,98 @@ activity::update_region()
   _region = location_region(cen, sz);
 }
 
+void
+activity::smooth(const activity &src, int width)
+{
+  _activity_id = src._activity_id;
+  _sport = src._sport;
+  _device = src._device;
+
+  _time = src._time;
+  _duration = src._duration;
+  _distance = src._distance;
+  _avg_speed = src._avg_speed;
+  _max_speed = src._max_speed;
+  _calories = src._calories;
+  _avg_heart_rate = src._avg_heart_rate;
+  _max_heart_rate = src._max_heart_rate;
+
+  _has_location = src._has_location;
+  _has_speed = src._has_speed;
+  _has_heart_rate = src._has_heart_rate;
+  _has_altitude = src._has_altitude;
+
+  for (const auto &it : src.laps())
+    {
+      _laps.push_back(lap());
+      lap &l = _laps.back();
+
+      l.time = it.time;
+      l.duration = it.duration;
+      l.distance = it.distance;
+      l.avg_speed = it.avg_speed;
+      l.max_speed = it.max_speed;
+      l.calories = it.calories;
+      l.avg_heart_rate = it.avg_heart_rate;
+      l.max_heart_rate = it.max_heart_rate;
+      l.region = it.region;
+
+      l.track.resize(it.track.size());
+    }
+
+  const_iterator s_in = src.begin();
+  const_iterator s_out = s_in;
+  iterator it = begin();
+
+  point sum;
+  int sum_n = 0;
+  int i = 0;
+
+  while (s_in != src.end())
+    {
+      if (i >= width)
+	{
+	  const point &p = *s_out;
+	  if (p.distance != 0)
+	    {
+	      sum.altitude -= p.altitude;
+	      sum.speed -= p.speed;
+	      sum.heart_rate -= p.heart_rate;
+	      sum_n--;
+	    }
+	  s_out++;
+	}
+
+      const point &s = *s_in;
+
+      if (s.distance != 0)
+	{
+	  sum.altitude += s.altitude;
+	  sum.speed += s.speed;
+	  sum.heart_rate += s.heart_rate;
+	  sum_n++;
+	}
+
+      point &d = *it;
+
+      if (sum_n > 0)
+	{
+	  double mul = 1. / sum_n;
+	  d.time = s.time;
+	  d.location = s.location;
+	  d.altitude = sum.altitude * mul;
+	  d.distance = s.distance;
+	  d.speed = sum.speed * mul;
+	  d.heart_rate = sum.heart_rate * mul;
+	}
+      else
+	d = s;
+
+      i++;
+      s_in++;
+      it++;
+    }
+}
+
 } // namespace gps
 } // namespace act

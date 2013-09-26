@@ -56,6 +56,42 @@ public:
       void update_region();
     };
 
+  class iterator
+    {
+      activity *activity;
+      size_t lap;
+      size_t point;
+
+    public:
+      iterator(class activity &a, bool end);
+      iterator(const iterator &rhs);
+      iterator &operator=(const iterator &rhs);
+      iterator &operator++();
+      iterator operator++(int);
+      bool operator==(const iterator &rhs) const;
+      bool operator!=(const iterator &rhs) const;
+      struct point &operator*() const;
+      struct point *operator->() const;
+    };
+
+  class const_iterator
+    {
+      const activity *activity;
+      size_t lap;
+      size_t point;
+
+    public:
+      const_iterator(const class activity &a, bool end);
+      const_iterator(const const_iterator &rhs);
+      const_iterator &operator=(const const_iterator &rhs);
+      const_iterator &operator++();
+      const_iterator operator++(int);
+      bool operator==(const const_iterator &rhs) const;
+      bool operator!=(const const_iterator &rhs) const;
+      const struct point &operator*() const;
+      const struct point *operator->() const;
+    };
+
 private:
   std::string _activity_id;
   sport_type _sport;
@@ -81,6 +117,15 @@ private:
 
 public:
   activity();
+
+  // iterates over all points, ignoring lap boundaries
+
+  iterator begin();
+  iterator end();
+  const_iterator begin() const;
+  const_iterator end() const;
+  const_iterator cbegin() const;
+  const_iterator cend() const;
 
   // uses file extension to deduce format
   bool read_file(const char *path);
@@ -147,7 +192,187 @@ public:
   bool has_altitude() const {return _has_altitude;}
 
   void update_region();
+
+  void smooth(const activity &src, int width);
 };
+
+// implementation details
+
+inline
+activity::iterator::iterator(class activity &a, bool end)
+: activity(&a), lap(!end ? 0 : a.laps().size()), point(0)
+{
+}
+
+inline
+activity::iterator::iterator(const iterator &rhs)
+: activity(rhs.activity), lap(rhs.lap), point(rhs.point)
+{
+}
+
+inline activity::iterator &
+activity::iterator::operator=(const iterator &rhs)
+{
+  activity = rhs.activity;
+  lap = rhs.lap;
+  point = rhs.point;
+  return *this;
+}
+
+inline activity::iterator &
+activity::iterator::operator++()
+{
+  ++point;
+  if (point >= activity->laps()[lap].track.size())
+    lap++, point = 0;
+  return *this;
+}
+
+inline activity::iterator
+activity::iterator::operator++(int)
+{
+  iterator ret = *this;
+  ++(*this);
+  return ret;
+}
+
+inline bool
+activity::iterator::operator==(const iterator &rhs) const
+{
+  return activity == rhs.activity && lap == rhs.lap && point == rhs.point;
+}
+
+inline bool
+activity::iterator::operator!=(const iterator &rhs) const
+{
+  return !(activity == rhs.activity && lap == rhs.lap && point == rhs.point);
+}
+
+inline activity::point &
+activity::iterator::operator*() const
+{
+#if DEBUG
+  assert(lap < activity->laps().size()
+	 && point < activity->laps()[lap].track.size());
+#endif
+  return activity->laps()[lap].track[point];
+}
+
+inline activity::point *
+activity::iterator::operator->() const
+{
+#if DEBUG
+  assert(lap < activity->laps().size()
+	 && point < activity->laps()[lap].track.size());
+#endif
+  return &activity->laps()[lap].track[point];
+}
+
+inline
+activity::const_iterator::const_iterator(const class activity &a, bool end)
+: activity(&a), lap(!end ? 0 : a.laps().size()), point(0)
+{
+}
+
+inline
+activity::const_iterator::const_iterator(const const_iterator &rhs)
+: activity(rhs.activity), lap(rhs.lap), point(rhs.point)
+{
+}
+
+inline activity::const_iterator &
+activity::const_iterator::operator=(const const_iterator &rhs)
+{
+  activity = rhs.activity;
+  lap = rhs.lap;
+  point = rhs.point;
+  return *this;
+}
+
+inline activity::const_iterator &
+activity::const_iterator::operator++()
+{
+  ++point;
+  if (point >= activity->laps()[lap].track.size())
+    lap++, point = 0;
+  return *this;
+}
+
+inline activity::const_iterator
+activity::const_iterator::operator++(int)
+{
+  const_iterator ret = *this;
+  ++(*this);
+  return ret;
+}
+
+inline bool
+activity::const_iterator::operator==(const const_iterator &rhs) const
+{
+  return activity == rhs.activity && lap == rhs.lap && point == rhs.point;
+}
+
+inline bool
+activity::const_iterator::operator!=(const const_iterator &rhs) const
+{
+  return !(activity == rhs.activity && lap == rhs.lap && point == rhs.point);
+}
+
+inline const activity::point &
+activity::const_iterator::operator*() const
+{
+#if DEBUG
+  assert(lap < activity->laps().size()
+	 && point < activity->laps()[lap].track.size());
+#endif
+  return activity->laps()[lap].track[point];
+}
+
+inline const activity::point *
+activity::const_iterator::operator->() const
+{
+#if DEBUG
+  assert(lap < activity->laps().size()
+	 && point < activity->laps()[lap].track.size());
+#endif
+  return &activity->laps()[lap].track[point];
+}
+
+inline activity::iterator
+activity::begin()
+{
+  return iterator(*this, false);
+}
+
+inline activity::iterator
+activity::end()
+{
+  return iterator(*this, true);
+}
+
+inline activity::const_iterator
+activity::begin() const
+{
+  return const_iterator(*this, false);
+}
+
+inline activity::const_iterator
+activity::end() const
+{
+  return const_iterator(*this, true);
+}
+
+inline activity::const_iterator
+activity::cbegin() const
+{
+  return begin();
+}
+
+inline activity::const_iterator
+activity::cend() const
+{
+  return end();
+}
 
 } // namespace gps
 } // namespace act
