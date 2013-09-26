@@ -11,7 +11,6 @@
 		5711D4AC17EA2B24003157AF /* ActActivityView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 5711D4AA17EA2B24003157AF /* ActActivityView.xib */; };
 		571DB99D17BE615C0001514C /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 571DB99B17BE615C0001514C /* InfoPlist.strings */; };
 		571DB99F17BE615C0001514C /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 571DB99E17BE615C0001514C /* main.m */; };
-		571DB9A317BE615C0001514C /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = 571DB9A117BE615C0001514C /* Credits.rtf */; };
 		571DB9A617BE615C0001514C /* ActAppDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = 571DB9A517BE615C0001514C /* ActAppDelegate.mm */; };
 		571DB9A917BE615C0001514C /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 571DB9A717BE615C0001514C /* MainMenu.xib */; };
 		571DB9AF17BE63AC0001514C /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 571DB99517BE615C0001514C /* AppKit.framework */; };
@@ -83,7 +82,6 @@
 		571DB99C17BE615C0001514C /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		571DB99E17BE615C0001514C /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		571DB9A017BE615C0001514C /* Activities-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Activities-Prefix.pch"; sourceTree = "<group>"; };
-		571DB9A217BE615C0001514C /* en */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; name = en; path = en.lproj/Credits.rtf; sourceTree = "<group>"; };
 		571DB9A417BE615C0001514C /* ActAppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ActAppDelegate.h; sourceTree = "<group>"; };
 		571DB9A517BE615C0001514C /* ActAppDelegate.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = ActAppDelegate.mm; sourceTree = "<group>"; };
 		571DB9A817BE615C0001514C /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/MainMenu.xib; sourceTree = "<group>"; };
@@ -273,7 +271,6 @@
 				571DB99B17BE615C0001514C /* InfoPlist.strings */,
 				571DB99E17BE615C0001514C /* main.m */,
 				571DB9A017BE615C0001514C /* Activities-Prefix.pch */,
-				571DB9A117BE615C0001514C /* Credits.rtf */,
 			);
 			name = "Supporting Files";
 			sourceTree = "<group>";
@@ -428,7 +425,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				571DB99D17BE615C0001514C /* InfoPlist.strings in Resources */,
-				571DB9A317BE615C0001514C /* Credits.rtf in Resources */,
 				571DB9A917BE615C0001514C /* MainMenu.xib in Resources */,
 				57921A5717BEAEF0001AD35D /* ActWindow.xib in Resources */,
 				57DB7BAE17E0D4790093C735 /* defaults.plist in Resources */,
@@ -520,14 +516,6 @@
 				571DB99C17BE615C0001514C /* en */,
 			);
 			name = InfoPlist.strings;
-			sourceTree = "<group>";
-		};
-		571DB9A117BE615C0001514C /* Credits.rtf */ = {
-			isa = PBXVariantGroup;
-			children = (
-				571DB9A217BE615C0001514C /* en */,
-			);
-			name = Credits.rtf;
 			sourceTree = "<group>";
 		};
 		571DB9A717BE615C0001514C /* MainMenu.xib */ = {
