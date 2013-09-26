@@ -191,7 +191,8 @@ copy_gps_fields(activity_storage &a, const gps::activity &gps_data)
   if (gps_data.duration() > 0
       && a.field_ptr("Duration") == nullptr)
     {
-      format_duration(a["Duration"], gps_data.duration());
+      // rounding to seconds, don't need fractional precision
+      format_duration(a["Duration"], round(gps_data.duration()));
       changed = true;
     }
 
