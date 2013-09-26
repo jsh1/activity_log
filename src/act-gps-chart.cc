@@ -165,12 +165,11 @@ chart::chart(const activity &a, x_axis_type xa)
 }
 
 void
-chart::add_line(double activity::point:: *field, bool smoothed,
-		value_conversion conv, line_color color, bool fill_bg,
-		double min_ratio, double max_ratio)
+chart::add_line(double activity::point:: *field, value_conversion conv,
+		line_color color, bool fill_bg, double min_ratio,
+		double max_ratio)
 {
-  _lines.push_back(line(field, smoothed, conv, color,
-			fill_bg, min_ratio, max_ratio));
+  _lines.push_back(line(field, conv, color, fill_bg, min_ratio, max_ratio));
 }
 
 void
@@ -438,7 +437,7 @@ chart::draw_lap_markers(CGContextRef ctx)
 
   if (_selected_lap >= 0 && _selected_lap < _activity.laps().size())
     {
-      CGContextSetRGBFillColor(ctx, .4, .4, .6, .2);
+      CGContextSetRGBFillColor(ctx, .4, .4, .8, .2);
       CGContextSetBlendMode(ctx, kCGBlendModePlusDarker);
 
       const CGPoint &p0 = lines[_selected_lap*2];
