@@ -59,6 +59,7 @@
 		57DB7BB117E0D4790093C735 /* mapquest-sat-tiles.json in Resources */ = {isa = PBXBuildFile; fileRef = 57DB7BAB17E0D4790093C735 /* mapquest-sat-tiles.json */; };
 		57DB7BB217E0D4790093C735 /* opencyclemap-tiles.json in Resources */ = {isa = PBXBuildFile; fileRef = 57DB7BAC17E0D4790093C735 /* opencyclemap-tiles.json */; };
 		57DB7BB317E0D4790093C735 /* openstreetmap-tiles.json in Resources */ = {isa = PBXBuildFile; fileRef = 57DB7BAD17E0D4790093C735 /* openstreetmap-tiles.json */; };
+		57DCE3FC17F31D7D0072C67B /* app-icon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 57DCE3FB17F31D7D0072C67B /* app-icon.icns */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -164,6 +165,7 @@
 		57DB7BAB17E0D4790093C735 /* mapquest-sat-tiles.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; name = "mapquest-sat-tiles.json"; path = "resources/mapquest-sat-tiles.json"; sourceTree = "<group>"; };
 		57DB7BAC17E0D4790093C735 /* opencyclemap-tiles.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; name = "opencyclemap-tiles.json"; path = "resources/opencyclemap-tiles.json"; sourceTree = "<group>"; };
 		57DB7BAD17E0D4790093C735 /* openstreetmap-tiles.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; name = "openstreetmap-tiles.json"; path = "resources/openstreetmap-tiles.json"; sourceTree = "<group>"; };
+		57DCE3FB17F31D7D0072C67B /* app-icon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; name = "app-icon.icns"; path = "resources/app-icon.icns"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -278,6 +280,7 @@
 		571DB9B717BE66CC0001514C /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				57DCE3FB17F31D7D0072C67B /* app-icon.icns */,
 				571DB99A17BE615C0001514C /* Activities-Info.plist */,
 				57DB7BA817E0D4790093C735 /* defaults.plist */,
 				57DB7BA917E0D4790093C735 /* hikebikemap-tiles.json */,
@@ -426,6 +429,7 @@
 			files = (
 				571DB99D17BE615C0001514C /* InfoPlist.strings in Resources */,
 				571DB9A917BE615C0001514C /* MainMenu.xib in Resources */,
+				57DCE3FC17F31D7D0072C67B /* app-icon.icns in Resources */,
 				57921A5717BEAEF0001AD35D /* ActWindow.xib in Resources */,
 				57DB7BAE17E0D4790093C735 /* defaults.plist in Resources */,
 				57DB7BAF17E0D4790093C735 /* hikebikemap-tiles.json in Resources */,
