@@ -6,6 +6,7 @@
 
 #define MIN_WIDTH 500
 #define MIN_HEIGHT 200
+#define SMOOTHING 10
 
 @implementation ActActivityChartView
 
@@ -30,27 +31,37 @@
   if (gps_a == nullptr)
     return;
 
-  _chart.reset(new act::gps::chart(*gps_a, act::gps::chart::x_axis_type::DISTANCE));
+  if (!_smoothed_data
+      || _smoothed_data->time() != gps_a->time()
+      || _smoothed_data->distance() != gps_a->distance()
+      || _smoothed_data->duration() != gps_a->duration())
+    {
+      _smoothed_data.reset(new act::gps::activity);
+      _smoothed_data->smooth(*gps_a, SMOOTHING);
+    }
+
+  _chart.reset(new act::gps::chart(*_smoothed_data.get(),
+				   act::gps::chart::x_axis_type::DISTANCE));
 
   if ([_segmentedControl isSelectedForSegment:2] && gps_a->has_altitude())
     {
-      _chart->add_line(&act::gps::activity::point::altitude, false,
+      _chart->add_line(&act::gps::activity::point::altitude,
 		       act::gps::chart::value_conversion::DISTANCE_M_FT,
-		       act::gps::chart::line_color::GREEN, true, 0, 2);
+		       act::gps::chart::line_color::GRAY, true, -0.05, 2);
     }
 
   if ([_segmentedControl isSelectedForSegment:0] && gps_a->has_speed())
     {
-      _chart->add_line(&act::gps::activity::point::speed, true,
+      _chart->add_line(&act::gps::activity::point::speed,
 		       act::gps::chart::value_conversion::SPEED_MS_PACE,
-		       act::gps::chart::line_color::BLUE, false, 0, 1);
+		       act::gps::chart::line_color::BLUE, false, -0.05, 1.05);
     }
 
   if ([_segmentedControl isSelectedForSegment:1] && gps_a->has_heart_rate())
     {
-      _chart->add_line(&act::gps::activity::point::heart_rate, true,
+      _chart->add_line(&act::gps::activity::point::heart_rate,
 		       act::gps::chart::value_conversion::IDENTITY,
-		       act::gps::chart::line_color::RED, false, 0, 1);
+		       act::gps::chart::line_color::RED, false, -0.05, 1.05);
     }
 
   _chart->set_chart_rect(NSRectToCGRect([self bounds]));
