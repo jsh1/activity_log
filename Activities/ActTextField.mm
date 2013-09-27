@@ -1,29 +1,39 @@
 // -*- c-style: gnu -*-
 
-#import "ActActivityTextField.h"
+#import "ActTextField.h"
 
-#import "ActActivityViewController.h"
+#import "ActWindowController.h"
 #import "ActHorizontalBoxView.h"
 
 #import <algorithm>
 
-@interface ActActivityTextFieldCell : NSTextFieldCell
+@interface ActTextFieldCell : NSTextFieldCell
 {
-  ActActivityViewController *_controller;
+  ActWindowController *_controller;
   BOOL _completesEverything;
 }
 
-@property(nonatomic, assign) ActActivityViewController *controller;
+@property(nonatomic, assign) ActWindowController *controller;
 @property(nonatomic) BOOL completesEverything;
 
 @end
 
 
-@implementation ActActivityTextField
+@implementation ActTextField
 
 + (Class)cellClass
 {
-  return [ActActivityTextFieldCell class];
+  return [ActTextFieldCell class];
+}
+
+- (ActFieldEditor *)actFieldEditor
+{
+  id<ActTextFieldDelegate> delegate = (id)[self delegate];
+
+  if ([delegate respondsToSelector:@selector(actFieldEditor:)])
+    return [delegate actFieldEditor:self];
+  else
+    return nil;
 }
 
 - (BOOL)becomeFirstResponder
@@ -36,21 +46,11 @@
       // which fails if the view is entered then completion key is typed
       // before anything is changed. So use this.
 
-      [[[[self cell] controller] fieldEditor]
-       setCompletesEverything:[[self cell] completesEverything]];
+      BOOL flag = [[self cell] completesEverything];
+      [[self actFieldEditor] setCompletesEverything:flag];
     }
 
   return ret;
-}
-
-- (void)setController:(ActActivityViewController *)obj
-{
-  [[self cell] setController:obj];
-}
-
-- (ActActivityViewController *)controller
-{
-  return [[self cell] controller];
 }
 
 - (void)setCompletesEverything:(BOOL)flag
@@ -104,18 +104,19 @@
 @end
 
 
-@implementation ActActivityTextFieldCell
-
-@synthesize controller = _controller;
+@implementation ActTextFieldCell
 
 - (NSTextView *)fieldEditorForView:(NSView *)view
 {
-  return [_controller fieldEditor];
+  if ([view isKindOfClass:[ActTextField class]])
+    return [(ActTextField *)view actFieldEditor];
+  else
+    return nil;
 }
 
 @end
 
-@implementation ActActivityFieldEditor
+@implementation ActFieldEditor
 
 @synthesize autoCompletes = _autoCompletes;
 @synthesize completesEverything = _completesEverything;

@@ -1,10 +1,8 @@
 // -*- c-style: gnu -*-
 
-#import "ActActivityHeaderFieldView.h"
+#import "ActHeaderFieldView.h"
 
-#import "ActActivityHeaderView.h"
-#import "ActActivityTextField.h"
-#import "ActActivityViewController.h"
+#import "ActHeaderView.h"
 #import "ActWindowController.h"
 
 #import "act-database.h"
@@ -14,7 +12,7 @@
 
 #define CONTROL_HEIGHT LABEL_HEIGHT
 
-@implementation ActActivityHeaderFieldView
+@implementation ActHeaderFieldView
 
 + (NSColor *)textFieldColor:(BOOL)readOnly
 {
@@ -37,7 +35,7 @@
 
   NSFont *font = [NSFont systemFontOfSize:[NSFont smallSystemFontSize]];
 
-  _labelField = [[ActActivityTextField alloc] initWithFrame:
+  _labelField = [[ActTextField alloc] initWithFrame:
 		 NSMakeRect(0, 0, LABEL_WIDTH, LABEL_HEIGHT)];
   [_labelField setTarget:self];
   [_labelField setAction:@selector(controlAction:)];
@@ -50,7 +48,7 @@
   [self addSubview:_labelField];
   [_labelField release];
 
-  _valueField = [[ActActivityTextField alloc] initWithFrame:
+  _valueField = [[ActTextField alloc] initWithFrame:
 		 NSMakeRect(LABEL_WIDTH, 0, frame.size.width
 			    - LABEL_WIDTH, CONTROL_HEIGHT)];
   [_valueField setTarget:self];
@@ -66,13 +64,6 @@
   return self;
 }
 
-- (void)setController:(ActActivityViewController *)controller
-{
-  [super setController:controller];
-  [_labelField setController:controller];
-  [_valueField setController:controller];
-}
-
 - (void)dealloc
 {
   [_labelField setDelegate:nil];
@@ -83,6 +74,11 @@
   [super dealloc];
 }
 
+- (ActWindowController *)controller
+{
+  return (ActWindowController *)[[self window] windowController];
+}
+
 - (NSString *)fieldName
 {
   return _fieldName;
@@ -91,10 +87,12 @@
 - (void)_updateFieldName
 {
   [_labelField setStringValue:_fieldName];
+  [[_labelField cell] setTruncatesLastVisibleLine:YES];
 
   BOOL readOnly = [[self controller] isFieldReadOnly:_fieldName];
   [[_valueField cell] setEditable:!readOnly];
   [[_valueField cell] setTextColor:[[self class] textFieldColor:readOnly]];
+  [[_valueField cell] setTruncatesLastVisibleLine:YES];
 
   [_labelField setCompletesEverything:YES];
   [_valueField setCompletesEverything:[_fieldName isEqualToString:@"Course"]];
@@ -121,10 +119,9 @@
 
 - (void)setFieldString:(NSString *)str
 {
-  ActActivityViewController *controller = [self controller];
-
   if ([_fieldName length] != 0)
     {
+      ActWindowController *controller = [self controller];
       if (![str isEqual:[controller stringForField:_fieldName]])
 	[controller setString:str forField:_fieldName];
     }
@@ -136,6 +133,8 @@
 {
   if (![newName isEqualToString:_fieldName])
     {
+      ActWindowController *controller = [self controller];
+
       NSString *oldName = _fieldName;
       _fieldName = [newName copy];
       newName = _fieldName;
@@ -145,12 +144,12 @@
       if ([oldName length] != 0)
 	{
 	  if ([newName length] != 0)
-	    [_controller renameField:oldName to:newName];
+	    [controller renameField:oldName to:newName];
 	  else
-	    [_controller deleteField:oldName];
+	    [controller deleteField:oldName];
 	}
       else if ([newName length] != 0)
-	[_controller setString:[_valueField stringValue] forField:newName];
+	[controller setString:[_valueField stringValue] forField:newName];
 
       [oldName release];
     }
@@ -166,13 +165,7 @@
   return _valueField;
 }
 
-- (void)activityDidChange
-{
-  [self _updateFieldName];
-  [_valueField setStringValue:[self fieldString]];
-}
-
-- (void)activityDidChangeField:(NSString *)name
+- (void)update
 {
   // reload everything in case of dependent fields (pace, etc)
 
@@ -226,7 +219,7 @@
 
       NSString *str = [[textView string] substringWithRange:charRange];
 
-      act::database *db = [[[self controller] controller] database];
+      act::database *db = [[self controller] database];
 
       std::vector<std::string> completions;
       if (control == _labelField)
@@ -247,6 +240,13 @@
     }
 
   return nil;
+}
+
+// ActTextFieldDelegate methods
+
+- (ActFieldEditor *)actFieldEditor:(ActTextField *)obj
+{
+  return [[self controller] fieldEditor];
 }
 
 @end

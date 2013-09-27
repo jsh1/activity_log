@@ -1,18 +1,40 @@
 // -*- c-style: gnu -*-
 
-#import "ActActivityLapView.h"
+#import "ActLapViewController.h"
 
-#import "ActActivityViewController.h"
+#import "ActWindowController.h"
 
 #import "act-format.h"
 
-@implementation ActActivityLapView
+@implementation ActLapViewController
 
-- (void)activityDidChange
++ (NSString *)viewNibName
+{
+  return @"ActLapView";
+}
+
+- (void)viewDidLoad
+{
+  [[NSNotificationCenter defaultCenter]
+   addObserver:self selector:@selector(selectedActivityDidChange:)
+   name:ActSelectedActivityDidChange object:_controller];
+
+  [[NSNotificationCenter defaultCenter]
+   addObserver:self selector:@selector(selectedLapIndexDidChange:)
+   name:ActSelectedActivityDidChange object:_controller];
+}
+
+- (void)dealloc
+{
+  [[NSNotificationCenter defaultCenter] removeObserver:self];
+  [super dealloc];
+}
+
+- (void)selectedActivityDidChange:(NSNotification *)note
 {
   bool has_hr = false;
 
-  if (const act::activity *a = [[self controller] activity])
+  if (const act::activity *a = [_controller selectedActivity])
     {
       if (const act::gps::activity *gps_data = a->gps_data())
 	has_hr = gps_data->has_heart_rate();
@@ -24,11 +46,28 @@
   [_tableView reloadData];
 }
 
+- (void)selectedLapIndexDidChange:(NSNotification *)note
+{
+  NSInteger row = [_controller selectedLapIndex];
+  NSIndexSet *set = nil;
+
+  if (row >= 0)
+    {
+      if (row != [_tableView selectedRow])
+	set = [NSIndexSet indexSetWithIndex:row];
+    }
+  else
+    set = [NSIndexSet indexSet];
+
+  if (set != nil)
+    [_tableView selectRowIndexes:set byExtendingSelection:NO];
+}
+
 // NSTableViewDataSource methods
 
 - (NSInteger)numberOfRowsInTableView:(NSTableView *)tv
 {
-  const act::activity *a = [[self controller] activity];
+  const act::activity *a = [_controller selectedActivity];
   if (!a)
     return 0;
 
@@ -42,7 +81,7 @@
 - (id)tableView:(NSTableView *)tv
   objectValueForTableColumn:(NSTableColumn *)col row:(NSInteger)row
 {
-  const act::activity *a = [[self controller] activity];
+  const act::activity *a = [_controller selectedActivity];
   if (!a)
     return nil;
 
@@ -91,7 +130,7 @@
 
 - (void)tableViewSelectionDidChange:(NSNotification *)note
 {
-  [[self controller] setSelectedLapIndex:[_tableView selectedRow]];
+  [_controller setSelectedLapIndex:[_tableView selectedRow]];
 }
 
 @end

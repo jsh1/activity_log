@@ -2,14 +2,25 @@
 
 #import "ActWindowController.h"
 
-#import "ActActivityListView.h"
-#import "ActActivityViewController.h"
+#import "ActChartViewController.h"
+#import "ActLapViewController.h"
+#import "ActListViewController.h"
+#import "ActMapViewController.h"
+#import "ActSummaryViewController.h"
+#import "ActSplitView.h"
+#import "ActTextField.h"
 
 #import "act-config.h"
 #import "act-format.h"
 #import "act-new.h"
 
 #define BODY_WRAP_COLUMN 72
+
+NSString *const ActActivityListDidChange = @"ActActivityListDidChange";
+NSString *const ActSelectedActivityDidChange = @"ActSelectedActivityDidChange";
+NSString *const ActSelectedLapIndexDidChange = @"ActSelectedLapIndexDidChange";
+NSString *const ActActivityDidChangeField = @"ActActivityDidChangeField";
+NSString *const ActActivityDidChangeBody = @"ActActivityDidChangeBody";
 
 @implementation ActWindowController
 
@@ -20,26 +31,175 @@
   return @"ActWindow";
 }
 
+- (ActViewController *)viewControllerWithClass:(Class)cls
+{
+  for (ActViewController *obj in _viewControllers)
+    {
+      if ([obj isKindOfClass:cls])
+	return obj;
+    }
+
+  if (ActViewController *obj = [[cls alloc] initWithController:self])
+    {
+      [_viewControllers addObject:obj];
+      [obj release];
+      return obj;
+    }
+  else
+    return nil;
+}
+
 - (id)init
 {
   self = [super initWithWindow:nil];
   if (self == nil)
     return nil;
 
-  _activityViewController = [[ActActivityViewController alloc] init];
-  [_activityViewController setController:self];
-
+  _viewControllers = [[NSMutableArray alloc] init];
+  _splitViews = [[NSMapTable mapTableWithKeyOptions:NSMapTableStrongMemory
+		  valueOptions:NSMapTableWeakMemory] retain];
   _undoManager = [[NSUndoManager alloc] init];
+
+  _selectedLapIndex = -1;
 
   return self;
 }
 
+- (void)windowDidLoad
+{
+  [self addSplitView:_outerSplitView identifier:@"Window.outerSplitView"];
+  [self addSplitView:_leftSplitView identifier:@"Window.leftSplitView"];
+  [self addSplitView:_rightSplitView identifier:@"Window.rightSplitView"];
+  [self addSplitView:_leftRightSplitView identifier:@"Window.leftRightSplitView"];
+  [self addSplitView:_rightTopSplitView identifier:@"Window.rightTopSplitView"];
+
+  _fieldEditor = [[ActFieldEditor alloc] initWithFrame:NSZeroRect];
+  [_fieldEditor setFieldEditor:YES];
+
+  if (ActViewController *obj
+      = [self viewControllerWithClass:[ActListViewController class]])
+    {
+      NSView *view = [obj view];
+      [view setFrame:[_topLeftContainer bounds]];
+      [_topLeftContainer addSubview:view];
+      [[self window] setInitialFirstResponder:[obj initialFirstResponder]];
+    }
+
+  if (ActViewController *obj
+      = [self viewControllerWithClass:[ActSummaryViewController class]])
+    {
+      NSView *view = [obj view];
+      [view setFrame:[_bottomLeftContainer bounds]];
+      [_bottomLeftContainer addSubview:view];
+    }
+
+  if (ActViewController *obj
+      = [self viewControllerWithClass:[ActMapViewController class]])
+    {
+      NSView *view = [obj view];
+      [view setFrame:[_topRightRightContainer bounds]];
+      [_topRightRightContainer addSubview:view];
+    }
+
+  if (ActViewController *obj
+      = [self viewControllerWithClass:[ActLapViewController class]])
+    {
+      NSView *view = [obj view];
+      [view setFrame:[_topRightLeftContainer bounds]];
+      [_topRightLeftContainer addSubview:view];
+    }
+
+  if (ActViewController *obj
+      = [self viewControllerWithClass:[ActChartViewController class]])
+    {
+      NSView *view = [obj view];
+      [view setFrame:[_bottomRightContainer bounds]];
+      [_bottomRightContainer addSubview:view];
+    }
+
+  [self applySavedWindowState];
+
+  [[NSNotificationCenter defaultCenter]
+   addObserver:self selector:@selector(windowWillClose:)
+   name:NSWindowWillCloseNotification object:[self window]];
+
+  [self loadActivities];
+}
+
 - (void)dealloc
 {
-  [_activityViewController release];
+  [_viewControllers release];
+  [_splitViews release];
   [_undoManager release];
+  [_fieldEditor release];
 
   [super dealloc];
+}
+
+- (void)addSplitView:(ActSplitView *)view identifier:(NSString *)ident
+{
+  [_splitViews setObject:ident forKey:view];
+}
+
+- (void)removeSplitView:(ActSplitView *)view
+{
+  [_splitViews removeObjectForKey:view];
+}
+
+- (void)saveWindowState
+{
+  if (![self isWindowLoaded] || [self window] == nil)
+    return;
+
+  NSMutableDictionary *controllers = [NSMutableDictionary dictionary];
+
+  for (ActViewController *controller in _viewControllers)
+    {
+      if (NSDictionary *sub = [controller savedViewState])
+	[controllers setObject:sub forKey:[controller identifier]];
+    }
+
+  NSMutableDictionary *split = [NSMutableDictionary dictionary];
+
+  for (ActSplitView *view in _splitViews)
+    {
+      NSString *ident = [_splitViews objectForKey:view];
+      if (NSDictionary *sub = [view savedViewState])
+	[split setObject:sub forKey:ident];
+    }
+
+  NSDictionary *dict = @{@"ActViewControllers": controllers,
+			 @"ActSplitViews": split};
+
+  [[NSUserDefaults standardUserDefaults]
+   setObject:dict forKey:@"ActSavedWindowState"];
+}
+
+- (void)applySavedWindowState
+{
+  NSDictionary *state = [[NSUserDefaults standardUserDefaults]
+			 dictionaryForKey:@"ActSavedWindowState"];
+  if (state == nil)
+    return;
+
+  if (NSDictionary *dict = [state objectForKey:@"ActViewControllers"])
+    {
+      for (ActViewController *controller in _viewControllers)
+	{
+	  if (NSDictionary *sub = [dict objectForKey:[controller identifier]])
+	    [controller applySavedViewState:sub];
+	}
+    }
+
+  if (NSDictionary *dict = [state objectForKey:@"ActSplitViews"])
+    {
+      for (ActSplitView *view in _splitViews)
+	{
+	  NSString *ident = [_splitViews objectForKey:view];
+	  if (NSDictionary *sub = [dict objectForKey:ident])
+	    [view applySavedViewState:sub];
+	}
+    }
 }
 
 - (act::database *)database
@@ -65,52 +225,60 @@
   for (auto &it : items)
     activities.push_back(it->storage());
 
-  [_activityListView setActivities:activities];
+  [[NSNotificationCenter defaultCenter]
+   postNotificationName:ActActivityListDidChange object:self
+   userInfo:@{@"activities": [NSValue valueWithPointer:&activities]}];
+
   if (activities.size() != 0)
-    [self setSelectedActivity:activities[0]];
+    [self setSelectedActivityStorage:activities[0]];
 }
 
 - (void)reloadActivities
 {
+  [self setSelectedActivityStorage:nullptr];
+
   [self database]->reload();
 
   [self loadActivities];
-
-  [self setSelectedActivity:[_activityListView selectedActivity]];
 }
 
-- (void)windowDidLoad
+- (act::activity_storage_ref)selectedActivityStorage
 {
-  if (NSView *view = [_activityViewController view])
+  return _selectedActivityStorage;
+}
+
+- (void)setSelectedActivityStorage:(act::activity_storage_ref)storage
+{
+  if (_selectedActivityStorage != storage)
     {
-      [view setFrame:[_mainContentView bounds]];
-      [view setHidden:YES];
-      [_mainContentView addSubview:view];
+      _selectedActivityStorage = storage;
+      _selectedActivity.reset();
+
+      [self selectedActivityDidChange];
     }
-
-  [[NSNotificationCenter defaultCenter]
-   addObserver:self selector:@selector(windowWillClose:)
-   name:NSWindowWillCloseNotification object:[self window]];
-
-  [self loadActivities];
 }
 
-- (act::activity_storage_ref)selectedActivity
+- (act::activity *)selectedActivity
 {
-  return [_activityListView selectedActivity];
+  if (_selectedActivity == nullptr && _selectedActivityStorage != nullptr)
+    _selectedActivity.reset(new act::activity(_selectedActivityStorage));
+
+  return _selectedActivity.get();
 }
 
-- (void)setSelectedActivity:(act::activity_storage_ref)a
+- (NSInteger)selectedLapIndex
 {
-  [_activityListView setSelectedActivity:a];
+  return _selectedLapIndex;
+}
 
-  if (a == nullptr)
-    [[_activityViewController view] setHidden:YES];
+- (void)setSelectedLapIndex:(NSInteger)idx
+{
+  if (_selectedLapIndex != idx)
+    {
+      _selectedLapIndex = idx;
 
-  [_activityViewController setActivityStorage:a];
-
-  if (a != nullptr)
-    [[_activityViewController view] setHidden:NO];
+      [self selectedLapDidChange];
+    }
 }
 
 - (void)setNeedsSynchronize:(BOOL)flag
@@ -145,23 +313,79 @@
     [self synchronize];
 }
 
+- (void)selectedActivityDidChange
+{
+  [[NSNotificationCenter defaultCenter]
+   postNotificationName:ActSelectedActivityDidChange object:self];
+}
+
+- (void)selectedLapDidChange
+{
+  [[NSNotificationCenter defaultCenter]
+   postNotificationName:ActSelectedLapIndexDidChange object:self];
+}
+
 - (void)activity:(const act::activity_storage_ref)a
     didChangeField:(NSString *)name;
 {
   [self setNeedsSynchronize:YES];
 
-  [_activityListView reloadActivity:a];
-
-  if (a == [self selectedActivity])
-    [_activityViewController activityDidChangeField:name];
+  [[NSNotificationCenter defaultCenter]
+   postNotificationName:ActActivityDidChangeField object:self
+   userInfo:@{@"activity": [NSValue valueWithPointer:&a], @"field": name}];
 }
 
 - (void)activityDidChangeBody:(const act::activity_storage_ref)a
 {
   [self setNeedsSynchronize:YES];
 
-  if (a == [self selectedActivity])
-    [_activityViewController activityDidChangeBody];
+  [[NSNotificationCenter defaultCenter]
+   postNotificationName:ActActivityDidChangeField object:self
+   userInfo:@{@"activity": [NSValue valueWithPointer:&a]}];
+}
+
+- (NSString *)bodyString
+{
+  if (const act::activity *a = [self selectedActivity])
+    return [self bodyStringOfActivity:*a];
+  else
+    return @"";
+}
+
+- (void)setBodyString:(NSString *)str
+{
+  if (act::activity *a = [self selectedActivity])
+    [self setBodyString:str ofActivity:*a];
+}
+
+- (NSDate *)dateField
+{
+  if (const act::activity *a = [self selectedActivity])
+    return [NSDate dateWithTimeIntervalSince1970:a->date()];
+  else
+    return nil;
+}
+
+- (void)setDateField:(NSDate *)date
+{
+  NSString *value = nil;
+
+  if (date != nil)
+    {
+      std::string str;
+      act::format_date_time(str, (time_t) [date timeIntervalSince1970]);
+      value = [NSString stringWithUTF8String:str.c_str()];
+    }
+
+  [self setString:value forField:@"Date"];
+}
+
+- (NSString *)stringForField:(NSString *)name
+{
+  if (const act::activity *a = [self selectedActivity])
+    return [self stringForField:name ofActivity:*a];
+  else
+    return nil;
 }
 
 - (NSString *)stringForField:(NSString *)name
@@ -200,9 +424,23 @@
   return [NSString stringWithUTF8String:ret.c_str()];
 }
 
+- (BOOL)isFieldReadOnly:(NSString *)name
+{
+  if (const act::activity *a = [self selectedActivity])
+    return [self isFieldReadOnly:name ofActivity:*a];
+  else
+    return YES;
+}
+
 - (BOOL)isFieldReadOnly:(NSString *)name ofActivity:(const act::activity &)a
 {
   return a.storage()->field_read_only_p([name UTF8String]);
+}
+
+- (void)setString:(NSString *)str forField:(NSString *)name
+{
+  if (act::activity *a = [self selectedActivity])
+    [self setString:str forField:name ofActivity:*a];
 }
 
 - (void)setString:(NSString *)str forField:(NSString *)name
@@ -231,9 +469,21 @@
   [self activity:a.storage() didChangeField:name];
 }
 
+- (void)deleteField:(NSString *)name
+{
+  if (act::activity *a = [self selectedActivity])
+    [self deleteField:name ofActivity:*a];
+}
+
 - (void)deleteField:(NSString *)name ofActivity:(act::activity &)a
 {
   [self setString:nil forField:name ofActivity:a];
+}
+
+- (void)renameField:(NSString *)oldName to:(NSString *)newName
+{
+  if (act::activity *a = [self selectedActivity])
+    [self renameField:oldName to:newName ofActivity:*a];
 }
 
 - (void)renameField:(NSString *)oldName to:(NSString *)newName
@@ -422,12 +672,54 @@
 {
   [[NSNotificationCenter defaultCenter] removeObserver:self];
 
+  [self saveWindowState];
+
   [NSApp terminate:self];
 }
 
 - (NSUndoManager *)windowWillReturnUndoManager:(NSWindow *)window
 {
   return _undoManager;
+}
+
+// NSSplitViewDelegate methods
+
+- (BOOL)splitView:(NSSplitView *)view canCollapseSubview:(NSView *)subview
+{
+  return NO;
+}
+
+- (BOOL)splitView:(NSSplitView *)view shouldCollapseSubview:(NSView *)subview
+    forDoubleClickOnDividerAtIndex:(NSInteger)idx
+{
+  return YES;
+}
+
+- (CGFloat)splitView:(NSSplitView *)view constrainMinCoordinate:(CGFloat)p
+    ofSubviewAt:(NSInteger)idx
+{
+  NSView *subview = [[view subviews] objectAtIndex:idx];
+  CGFloat min_size = [(ActSplitView *)view minimumSizeOfSubview:subview];
+
+  return p + min_size;
+}
+
+- (CGFloat)splitView:(NSSplitView *)view constrainMaxCoordinate:(CGFloat)p
+    ofSubviewAt:(NSInteger)idx
+{
+  NSView *subview = [[view subviews] objectAtIndex:idx];
+  CGFloat min_size = [(ActSplitView *)view minimumSizeOfSubview:subview];
+
+  return p - min_size;
+}
+
+- (BOOL)splitView:(NSSplitView *)view
+    shouldAdjustSizeOfSubview:(NSView *)subview
+{
+  if ([view isKindOfClass:[ActSplitView class]])
+    return [(ActSplitView *)view shouldAdjustSizeOfSubview:subview];
+  else
+    return YES;
 }
 
 @end

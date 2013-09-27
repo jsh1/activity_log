@@ -1,10 +1,10 @@
 // -*- c-style: gnu -*-
 
-#import "ActActivitySubview.h"
+#import "ActViewController.h"
 
 @class ActMapView;
 
-@interface ActActivityMapView : ActActivitySubview
+@interface ActMapViewController : ActViewController
 {
   IBOutlet ActMapView *_mapView;
   IBOutlet NSPopUpButton *_mapSrcButton;

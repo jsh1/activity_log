@@ -1,8 +1,8 @@
 // -*- c-style: gnu -*-
 
-#import "ActActivitySubview.h"
+#import "ActViewController.h"
 
-@interface ActActivityLapView : ActActivitySubview
+@interface ActLapViewController : ActViewController
   <NSTableViewDataSource, NSTableViewDelegate>
 {
   IBOutlet NSTableView *_tableView;

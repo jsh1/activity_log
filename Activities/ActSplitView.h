@@ -1,12 +1,15 @@
 // -*- c-style: gnu -*-
 
-#import "ActActivitySubview.h"
+#import <AppKit/AppKit.h>
 
-@interface ActActivitySplitView : NSSplitView
+@interface ActSplitView : NSSplitView
 {
 @private
   NSView *_collapsingSubview;
 }
+
+- (NSDictionary *)savedViewState;
+- (void)applySavedViewState:(NSDictionary *)dict;
 
 - (void)setSubview:(NSView *)subview collapsed:(BOOL)flag;
 
@@ -16,7 +19,7 @@
 
 @end
 
-@interface NSView (ActActivitySplitView)
+@interface NSView (ActSplitView)
 
 - (CGFloat)minSize;
 

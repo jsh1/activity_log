@@ -1,18 +1,40 @@
 // -*- c-style: gnu -*-
 
-#import "ActActivityChartView.h"
+#import "ActChartViewController.h"
 
-#import "ActActivityViewController.h"
+#import "ActWindowController.h"
 
 #define MIN_WIDTH 500
 #define MIN_HEIGHT 200
 #define SMOOTHING 10
 
-@implementation ActActivityChartView
+@implementation ActChartViewController
 
-- (CGFloat)minSize
++ (NSString *)viewNibName
 {
-  return 160;
+  return @"ActChartView";
+}
+
+- (void)viewDidLoad
+{
+  [[NSNotificationCenter defaultCenter]
+   addObserver:self selector:@selector(selectedActivityDidChange:)
+   name:ActSelectedActivityDidChange object:_controller];
+
+  [[NSNotificationCenter defaultCenter]
+   addObserver:self selector:@selector(selectedLapIndexDidChange:)
+   name:ActSelectedLapIndexDidChange object:_controller];
+}
+
+- (void)dealloc
+{
+  [[NSNotificationCenter defaultCenter] removeObserver:self];
+  [super dealloc];
+}
+
+- (act::gps::chart *)chart
+{
+  return _chart.get();
 }
 
 - (void)_updateChart
@@ -20,10 +42,10 @@
   if (_chart)
     {
       _chart.reset();
-      [self setNeedsDisplay:YES];
+      [_chartView setNeedsDisplay:YES];
     }
 
-  const act::activity *a = [[self controller] activity];
+  const act::activity *a = [_controller selectedActivity];
   if (a == nullptr)
     return;
 
@@ -64,18 +86,18 @@
 		       act::gps::chart::line_color::RED, false, -0.05, 1.05);
     }
 
-  _chart->set_chart_rect(NSRectToCGRect([self bounds]));
-  _chart->set_selected_lap([[self controller] selectedLapIndex]);
+  _chart->set_chart_rect(NSRectToCGRect([_chartView bounds]));
+  _chart->set_selected_lap([_controller selectedLapIndex]);
   _chart->update_values();
 
-  [self setNeedsDisplay:YES];
+  [_chartView setNeedsDisplay:YES];
 }
 
-- (void)activityDidChange
+- (void)selectedActivityDidChange:(NSNotification *)note
 {
   bool has_pace = false, has_hr = false, has_altitude = false;
 
-  if (const act::activity *a = [[self controller] activity])
+  if (const act::activity *a = [_controller selectedActivity])
     {
       if (const act::gps::activity *gps_a = a->gps_data())
 	{
@@ -92,36 +114,12 @@
   [self _updateChart];
 }
 
-- (void)selectedLapDidChange
+- (void)selectedLapIndexDidChange:(NSNotification *)note
 {
   if (_chart)
     {
-      _chart->set_selected_lap([[self controller] selectedLapIndex]);
-      [self setNeedsDisplay:YES];
-    }
-}
-
-- (void)drawRect:(NSRect)r
-{
-  [self drawBackgroundRect:r];
-
-  if (_chart)
-    {
-      CGContextRef ctx = (CGContextRef) [[NSGraphicsContext
-					  currentContext] graphicsPort];
-
-      CGRect r = CGRectInset(NSRectToCGRect([self bounds]), 2, 2);
-
-      CGContextSaveGState(ctx);
-      CGContextClipToRect(ctx, r);
-
-      CGContextTranslateCTM(ctx, 0, r.size.height);
-      CGContextScaleCTM(ctx, 1, -1);
-
-      _chart->set_chart_rect(r);
-      _chart->draw(ctx);
-
-      CGContextRestoreGState(ctx);
+      _chart->set_selected_lap([_controller selectedLapIndex]);
+      [_chartView setNeedsDisplay:YES];
     }
 }
 
@@ -130,6 +128,40 @@
   if (sender == _segmentedControl)
     {
       [self _updateChart];
+    }
+}
+
+@end
+
+
+@implementation ActChartView
+
+- (void)drawRect:(NSRect)r
+{
+  CGContextRef ctx = (CGContextRef) [[NSGraphicsContext
+				      currentContext] graphicsPort];
+
+  CGRect bounds = NSRectToCGRect([self bounds]);
+
+  CGContextSaveGState(ctx);
+  CGContextSetGrayFillColor(ctx, 1, 1);
+  CGContextFillRect(ctx, bounds);
+  CGContextRestoreGState(ctx);
+
+  if (act::gps::chart *chart = [_controller chart])
+    {
+      CGRect r = CGRectInset(bounds, 2, 2);
+
+      CGContextSaveGState(ctx);
+      CGContextClipToRect(ctx, r);
+
+      CGContextTranslateCTM(ctx, 0, r.size.height);
+      CGContextScaleCTM(ctx, 1, -1);
+
+      chart->set_chart_rect(r);
+      chart->draw(ctx);
+
+      CGContextRestoreGState(ctx);
     }
 }
 

@@ -1,9 +1,9 @@
 // -*- c-style: gnu -*-
 
-#import "ActActivityHeaderView.h"
+#import "ActHeaderView.h"
 
-#import "ActActivityViewController.h"
-#import "ActActivityHeaderFieldView.h"
+#import "ActHeaderFieldView.h"
+#import "ActWindowController.h"
 
 #import "ActFoundationExtensions.h"
 
@@ -11,7 +11,12 @@
 #define FIELD_Y_SPACING 2
 #define FOCUS_INSET 2
 
-@implementation ActActivityHeaderView
+@implementation ActHeaderView
+
+- (ActWindowController *)controller
+{
+  return (ActWindowController *)[[self window] windowController];
+}
 
 - (id)initWithFrame:(NSRect)frame
 {
@@ -22,11 +27,28 @@
   return self;
 }
 
+- (void)viewDidLoad
+{
+  [[NSNotificationCenter defaultCenter]
+   addObserver:self selector:@selector(selectedActivityDidChange:)
+   name:ActSelectedActivityDidChange object:[self controller]];
+
+  [[NSNotificationCenter defaultCenter]
+   addObserver:self selector:@selector(activityDidChangeField:)
+   name:ActActivityDidChangeField object:[self controller]];
+}
+
+- (void)dealloc
+{
+  [[NSNotificationCenter defaultCenter] removeObserver:self];
+  [super dealloc];
+}
+
 - (NSArray *)displayedFields
 {
   NSMutableArray *array = [[NSMutableArray alloc] init];
 
-  for (ActActivityHeaderFieldView *subview in [self subviews])
+  for (ActHeaderFieldView *subview in [self subviews])
     {
       NSString *name = [subview fieldName];
       if ([name length] != 0)
@@ -43,10 +65,10 @@
 
   for (NSString *field in array)
     {
-      ActActivityHeaderFieldView *new_subview = nil;
+      ActHeaderFieldView *new_subview = nil;
 
       NSInteger old_idx = 0;
-      for (ActActivityHeaderFieldView *old_subview in old_subviews)
+      for (ActHeaderFieldView *old_subview in old_subviews)
 	{
 	  if ([[old_subview fieldName] isEqualToStringNoCase:field])
 	    {
@@ -59,10 +81,9 @@
 
       if (new_subview == nil)
 	{
-	  new_subview = [[[ActActivityHeaderFieldView alloc]
+	  new_subview = [[[ActHeaderFieldView alloc]
 			  initWithFrame:NSZeroRect] autorelease];
 	  [new_subview setHeaderView:self];
-	  [new_subview setController:[self controller]];
 	  [new_subview setFieldName:field];
 	}
 
@@ -75,19 +96,18 @@
   [old_subviews release];
 }
 
-- (ActActivityHeaderFieldView *)_ensureField:(NSString *)name
+- (ActHeaderFieldView *)_ensureField:(NSString *)name
 {
-  for (ActActivityHeaderFieldView *subview in [self subviews])
+  for (ActHeaderFieldView *subview in [self subviews])
     {
       if ([[subview fieldName] isEqualToStringNoCase:name])
 	return subview;
     }
 
-  ActActivityHeaderFieldView *field
-    = [[ActActivityHeaderFieldView alloc] initWithFrame:NSZeroRect];
+  ActHeaderFieldView *field
+    = [[ActHeaderFieldView alloc] initWithFrame:NSZeroRect];
 
   [field setHeaderView:self];
-  [field setController:[self controller]];
   [field setFieldName:name];
 
   [self addSubview:field];
@@ -98,7 +118,7 @@
 
 - (BOOL)displaysField:(NSString *)name
 {
-  for (ActActivityHeaderFieldView *subview in [self subviews])
+  for (ActHeaderFieldView *subview in [self subviews])
     {
       if ([[subview fieldName] isEqualToStringNoCase:name])
 	return YES;
@@ -114,7 +134,7 @@
 
 - (void)removeDisplayedField:(NSString *)name
 {
-  for (ActActivityHeaderFieldView *subview in [self subviews])
+  for (ActHeaderFieldView *subview in [self subviews])
     {
       if ([[subview fieldName] isEqualToStringNoCase:name])
 	{
@@ -124,22 +144,34 @@
     }
 }
 
-- (void)setController:(ActActivityViewController *)controller
-{
-  [super setController:controller];
-
-  for (ActActivityHeaderFieldView *field in [self subviews])
-    [field setController:controller];
-}
-
 - (IBAction)controlAction:(id)sender
 {
   if (sender == _addFieldButton)
     {
-      ActActivityHeaderFieldView *field = [self _ensureField:@""];
+      ActHeaderFieldView *field = [self _ensureField:@""];
       [self layoutAndResize];
       [[self window] makeFirstResponder:[field nameView]];
       [self scrollRectToVisible:[field convertRect:[field bounds] toView:self]];
+    }
+}
+
+- (void)selectedActivityDidChange:(NSNotification *)note
+{
+  for (ActHeaderFieldView *subview in [self subviews])
+    [subview update];
+}
+
+- (void)activityDidChangeField:(NSNotification *)note
+{
+  NSDictionary *dict = [note userInfo];
+
+  void *ptr = [[dict objectForKey:@"activity"] pointerValue];
+  const auto &a = *reinterpret_cast<const act::activity_storage_ref *> (ptr);
+  
+  if (a == [[self controller] selectedActivityStorage])
+    {
+      for (ActHeaderFieldView *subview in [self subviews])
+	[subview update];
     }
 }
 
@@ -147,7 +179,7 @@
 {
   CGFloat h = 0;
 
-  for (ActActivityHeaderFieldView *field in [self subviews])
+  for (ActHeaderFieldView *field in [self subviews])
     {
       if (h != 0)
 	h += FIELD_Y_SPACING;
@@ -162,7 +194,7 @@
   NSRect bounds = [self bounds];
   NSRect frame = NSInsetRect(bounds, FOCUS_INSET, FOCUS_INSET);
 
-  for (ActActivityHeaderFieldView *field in [self subviews])
+  for (ActHeaderFieldView *field in [self subviews])
     {
       frame.size.height = [field preferredHeight];
       [field setFrame:frame];

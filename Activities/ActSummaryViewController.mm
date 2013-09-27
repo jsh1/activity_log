@@ -1,10 +1,8 @@
 // -*- c-style: gnu -*-
 
-#import "ActActivitySummaryView.h"
+#import "ActSummaryViewController.h"
 
-#import "ActActivityHeaderView.h"
-#import "ActActivityViewController.h"
-#import "ActActivityTextField.h"
+#import "ActHeaderView.h"
 #import "ActHorizontalBoxView.h"
 #import "ActWindowController.h"
 
@@ -14,27 +12,48 @@
 
 #define CORNER_RADIUS 6
 
-@implementation ActActivitySummaryView
+@implementation ActSummaryViewController
 
-- (void)dealloc
++ (NSString *)viewNibName
 {
-  [_fieldControls release];
-
-  [super dealloc];
+  return @"ActSummaryView";
 }
 
-- (void)awakeFromNib
+- (void)viewDidLoad
 {
+  [super viewDidLoad];
+
+  [[NSNotificationCenter defaultCenter]
+   addObserver:self selector:@selector(selectedActivityDidChange:)
+   name:ActSelectedActivityDidChange object:_controller];
+
+  [[NSNotificationCenter defaultCenter]
+   addObserver:self selector:@selector(activityDidChangeField:)
+   name:ActActivityDidChangeField object:_controller];
+
+  [[NSNotificationCenter defaultCenter]
+   addObserver:self selector:@selector(activityDidChangeBody:)
+   name:ActActivityDidChangeBody object:_controller];
+
+  [_controller addSplitView:_splitView identifier:@"Summary.mainSplitView"];
+
   [_dateBox setRightToLeft:YES];
   [_dateBox setSpacing:3];
   [_typeBox setSpacing:3];
   [_statsBox setSpacing:8];
+
   [_courseField setCompletesEverything:YES];
+
+  [_headerView viewDidLoad];
 }
 
-- (CGFloat)minSize
+- (void)dealloc
 {
-  return 180;
+  [[NSNotificationCenter defaultCenter] removeObserver:self];
+
+  [_fieldControls release];
+
+  [super dealloc];
 }
 
 + (NSColor *)textFieldColor:(BOOL)readOnly
@@ -76,11 +95,9 @@
 
 - (void)_reloadFields
 {
-  ActActivityViewController *controller = [self controller];
-
-  if ([controller activity] != nullptr)
+  if ([_controller selectedActivity] != nullptr)
     {
-      NSDate *date = [controller dateField];
+      NSDate *date = [_controller dateField];
       NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
 
       [formatter setDateStyle:NSDateFormatterShortStyle];
@@ -102,15 +119,15 @@
       NSDictionary *dict = [self fieldControls];
       for (NSString *field in dict)
 	{
-	  NSString *string = [controller stringForField:field];
+	  NSString *string = [_controller stringForField:field];
 	  NSTextField *control = [dict objectForKey:field];
 	  [control setStringValue:string];
-	  BOOL readOnly = [controller isFieldReadOnly:field];
+	  BOOL readOnly = [_controller isFieldReadOnly:field];
 	  [control setEditable:!readOnly];
 	  [control setTextColor:[[self class] textFieldColor:readOnly]];
 	}
 
-      [_bodyTextView setString:[controller bodyString]];
+      [_bodyTextView setString:[_controller bodyString]];
     }
   else
     {
@@ -138,7 +155,7 @@
 
 - (void)_updateHeaderFields
 {
-  const act::activity *a = [[self controller] activity];
+  const act::activity *a = [_controller selectedActivity];
 
   [_headerView setDisplayedFields:[NSArray array]];
 
@@ -193,26 +210,131 @@
   [_headerView layoutAndResize];
 }
 
-- (void)activityDidChange
+- (void)selectedActivityDidChange:(NSNotification *)note
 {
   [self _reloadFields];
   [self _updateHeaderFields];
-
-  [super activityDidChange];
 }
 
-- (void)activityDidChangeField:(NSString *)name
+- (void)activityDidChangeField:(NSNotification *)note
 {
-  [self _reloadFields];
+  void *ptr = [[[note userInfo] objectForKey:@"activity"] pointerValue];
+  const auto &a = *reinterpret_cast<const act::activity_storage_ref *> (ptr);
 
-  [super activityDidChangeField:name];
+  if (a == [_controller selectedActivityStorage])
+    [self _reloadFields];
 }
 
-- (void)activityDidChangeBody
+- (void)activityDidChangeBody:(NSNotification *)note
 {
-  [_bodyTextView setString:[[self controller] bodyString]];
+  void *ptr = [[[note userInfo] objectForKey:@"activity"] pointerValue];
+  const auto &a = *reinterpret_cast<const act::activity_storage_ref *> (ptr);
 
-  [super activityDidChangeBody];
+  if (a == [_controller selectedActivityStorage])
+    [_bodyTextView setString:[_controller bodyString]];
+}
+
+- (IBAction)controlAction:(id)sender
+{
+  if (![sender isEditable])
+    return;
+
+  NSDictionary *dict = [self fieldControls];
+
+  for (NSString *fieldName in dict)
+    {
+      if ([dict objectForKey:fieldName] == sender)
+	{
+	  [_controller setString:[sender stringValue] forField:fieldName];
+	  return;
+	}
+    }
+
+  if (sender == _dateTimeField || sender == _dateDateField)
+    {
+      NSString *str = [NSString stringWithFormat:@"%@ %@",
+		       [_dateDateField stringValue],
+		       [_dateTimeField stringValue]];
+
+      NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
+      [formatter setDateStyle:NSDateFormatterShortStyle];
+      [formatter setTimeStyle:NSDateFormatterShortStyle];
+
+      // FIXME: mark invalid dates somehow?
+
+      if (NSDate *date = [formatter dateFromString:str])
+	[_controller setDateField:date];
+
+      [formatter release];
+      return;
+    }
+}
+
+// NSControlTextEditingDelegate methods
+
+- (BOOL)control:(NSControl *)control
+    textShouldEndEditing:(NSText *)fieldEditor
+{
+  [self controlAction:control];
+  return YES;
+}
+
+- (NSArray *)control:(NSControl *)control textView:(NSTextView *)textView
+    completions:(NSArray *)words forPartialWordRange:(NSRange)charRange
+    indexOfSelectedItem:(NSInteger *)index
+{
+  const char *field_name = nullptr;
+
+  if (control == _typeTypeField)
+    field_name = "Type";
+  else if (control == _typeActivityField)
+    field_name = "Activity";
+  else if (control == _courseField)
+    field_name = "Course";
+
+  if (field_name != nullptr)
+    {
+      NSString *str = [[textView string] substringWithRange:charRange];
+
+      act::database *db = [_controller database];
+
+      std::vector<std::string> completions;
+      db->complete_field_value(field_name, [str UTF8String], completions);
+
+      NSMutableArray *array = [NSMutableArray array];
+      for (const auto &it : completions)
+	[array addObject:[NSString stringWithUTF8String:it.c_str()]];
+
+      return array;
+    }
+
+  return nil;
+}
+
+// NSTextViewDelegate methods
+
+- (void)textDidEndEditing:(NSNotification *)note
+{
+  if ([note object] == _bodyTextView)
+    {
+      [_controller setBodyString:[_bodyTextView string]];
+    }
+}
+
+// ActActivityTextFieldDelegate methods
+
+- (ActFieldEditor *)actFieldEditor:(ActTextField *)obj
+{
+  return [_controller fieldEditor];
+}
+
+@end
+
+@implementation ActSummaryView
+
+- (CGFloat)minSize
+{
+  return 300;
 }
 
 - (void)drawRect:(NSRect)r
@@ -243,98 +365,10 @@
   CGContextRestoreGState(ctx);
 }
 
-- (IBAction)controlAction:(id)sender
-{
-  if (![sender isEditable])
-    return;
-
-  NSDictionary *dict = [self fieldControls];
-
-  for (NSString *fieldName in dict)
-    {
-      if ([dict objectForKey:fieldName] == sender)
-	{
-	  [[self controller] setString:[sender stringValue]
-	   forField:fieldName];
-	  return;
-	}
-    }
-
-  if (sender == _dateTimeField || sender == _dateDateField)
-    {
-      NSString *str = [NSString stringWithFormat:@"%@ %@",
-		       [_dateDateField stringValue],
-		       [_dateTimeField stringValue]];
-
-      NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
-      [formatter setDateStyle:NSDateFormatterShortStyle];
-      [formatter setTimeStyle:NSDateFormatterShortStyle];
-
-      // FIXME: mark invalid dates somehow?
-
-      if (NSDate *date = [formatter dateFromString:str])
-	[[self controller] setDateField:date];
-
-      [formatter release];
-      return;
-    }
-}
-
 - (void)resizeSubviewsWithOldSize:(NSSize)oldSize
 {
   [super resizeSubviewsWithOldSize:oldSize];
-  [self _reflowFields];
-}
-
-// NSControlTextEditingDelegate methods
-
-- (BOOL)control:(NSControl *)control
-    textShouldEndEditing:(NSText *)fieldEditor
-{
-  [self controlAction:control];
-  return YES;
-}
-
-- (NSArray *)control:(NSControl *)control textView:(NSTextView *)textView
-    completions:(NSArray *)words forPartialWordRange:(NSRange)charRange
-    indexOfSelectedItem:(NSInteger *)index
-{
-  const char *field_name = nullptr;
-
-  if (control == _typeTypeField)
-    field_name = "Type";
-  else if (control == _typeActivityField)
-    field_name = "Activity";
-  else if (control == _courseField)
-    field_name = "Course";
-
-  if (field_name != nullptr)
-    {
-      NSString *str = [[textView string] substringWithRange:charRange];
-
-      act::database *db = [[[self controller] controller] database];
-
-      std::vector<std::string> completions;
-      db->complete_field_value(field_name, [str UTF8String], completions);
-
-      NSMutableArray *array = [NSMutableArray array];
-      for (const auto &it : completions)
-	[array addObject:[NSString stringWithUTF8String:it.c_str()]];
-
-      return array;
-    }
-
-  return nil;
-}
-
-// NSTextViewDelegate methods
-
-- (void)textDidEndEditing:(NSNotification *)note
-{
-  if ([note object] == _bodyTextView)
-    {
-      [[self controller] setBodyString:[_bodyTextView string]];
-    }
+  [_controller _reflowFields];
 }
 
 @end

@@ -1,11 +1,12 @@
 // -*- c-style: gnu -*-
 
-#import "ActActivitySubview.h"
+#import "ActViewController.h"
+#import "ActTextField.h"
 
-@class ActActivityTextField, ActExpandableTextField;
-@class ActHorizontalBoxView, ActActivityHeaderView;
+@class ActHorizontalBoxView, ActHeaderView, ActSplitView;
 
-@interface ActActivitySummaryView : ActActivitySubview <NSTextViewDelegate>
+@interface ActSummaryViewController : ActViewController
+    <NSTextViewDelegate, ActTextFieldDelegate>
 {
   IBOutlet ActHorizontalBoxView *_dateBox;
   IBOutlet ActExpandableTextField *_dateTimeField;
@@ -21,9 +22,10 @@
   IBOutlet ActExpandableTextField *_statsDurationField;
   IBOutlet ActExpandableTextField *_statsPaceField;
 
-  IBOutlet ActActivityTextField *_courseField;
+  IBOutlet ActTextField *_courseField;
+  IBOutlet ActSplitView *_splitView;
   IBOutlet NSTextView *_bodyTextView;
-  IBOutlet ActActivityHeaderView *_headerView;
+  IBOutlet ActHeaderView *_headerView;
 
   NSDictionary *_fieldControls;		// FIELD-NAME -> CONTROL
 }
@@ -32,4 +34,12 @@
 
 - (IBAction)controlAction:(id)sender;
 
+@end
+
+// draws the background rounded rect
+
+@interface ActSummaryView : NSView
+{
+  IBOutlet ActSummaryViewController *_controller;
+}
 @end

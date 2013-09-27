@@ -2,21 +2,18 @@
 
 #import <AppKit/AppKit.h>
 
-@class ActActivityViewController;
+@interface ActTextField : NSTextField
 
-@interface ActActivityTextField : NSTextField
-
-@property(nonatomic, assign) IBOutlet ActActivityViewController *controller;
 @property(nonatomic) BOOL completesEverything;
 
 @end
 
 
-@interface ActExpandableTextField : ActActivityTextField
+@interface ActExpandableTextField : ActTextField
 @end
 
 
-@interface ActActivityFieldEditor : NSTextView
+@interface ActFieldEditor : NSTextView
 {
   BOOL _autoCompletes;
   BOOL _completesEverything;
@@ -28,3 +25,10 @@
 
 @end
 
+
+@protocol ActTextFieldDelegate <NSTextFieldDelegate>
+@optional
+
+- (ActFieldEditor *)actFieldEditor:(ActTextField *)obj;
+
+@end

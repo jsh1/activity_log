@@ -1,26 +1,27 @@
 // -*- c-style: gnu -*-
 
-#import "ActActivitySubview.h"
+#import "ActTextField.h"
 
-@class ActActivityTextField, ActActivityHeaderView;
+@class ActHeaderView;
 
-@interface ActActivityHeaderFieldView : ActActivitySubview
-    <NSTextFieldDelegate>
+@interface ActHeaderFieldView : NSView <ActTextFieldDelegate>
 {
-  ActActivityHeaderView *_headerView;
+  ActHeaderView *_headerView;
 
-  ActActivityTextField *_labelField;
-  ActActivityTextField *_valueField;
+  ActTextField *_labelField;
+  ActTextField *_valueField;
 
   NSString *_fieldName;
 }
 
 + (NSColor *)textFieldColor:(BOOL)readOnly;
 
-@property(nonatomic, assign) ActActivityHeaderView *headerView;
+@property(nonatomic, assign) ActHeaderView *headerView;
 
 @property(nonatomic, copy) NSString *fieldName;
 @property(nonatomic, copy) NSString *fieldString;
+
+- (void)update;
 
 - (CGFloat)preferredHeight;
 - (void)layoutSubviews;

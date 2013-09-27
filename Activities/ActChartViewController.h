@@ -1,13 +1,16 @@
 // -*- c-style: gnu -*-
 
-#import "ActActivitySubview.h"
+#import "ActViewController.h"
 
 #import "act-gps-chart.h"
 
 #import <memory>
 
-@interface ActActivityChartView : ActActivitySubview
+@class ActChartView;
+
+@interface ActChartViewController : ActViewController
 {
+  IBOutlet ActChartView *_chartView;
   IBOutlet NSSegmentedControl *_segmentedControl;
 
   std::unique_ptr<act::gps::chart> _chart;
@@ -16,4 +19,11 @@
 
 - (IBAction)controlAction:(id)sender;
 
+@end
+
+
+@interface ActChartView : NSView
+{
+  IBOutlet ActChartViewController *_controller;
+}
 @end

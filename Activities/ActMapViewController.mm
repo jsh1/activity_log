@@ -1,16 +1,21 @@
 // -*- c-style: gnu -*-
 
-#import "ActActivityMapView.h"
+#import "ActMapViewController.h"
 
-#import "ActActivityViewController.h"
 #import "ActMapView.h"
 #import "ActTileJSONMapSource.h"
+#import "ActWindowController.h"
 
 #import "act-gps-activity.h"
 
 #import <algorithm>
 
-@implementation ActActivityMapView
+@implementation ActMapViewController
+
++ (NSString *)viewNibName
+{
+  return @"ActMapView";
+}
 
 + (NSArray *)_mapSourcesForKey:(NSString *)key
 {
@@ -68,6 +73,12 @@
   return array;
 }
 
+- (void)dealloc
+{
+  [[NSNotificationCenter defaultCenter] removeObserver:self];
+  [super dealloc];
+}
+
 - (void)setMapSourceAtIndex:(int)idx
 {
   NSArray *sources = [[self class] mapSources];
@@ -116,8 +127,18 @@
   [self setMapSourceAtIndex:default_idx];
 }
 
-- (void)awakeFromNib
+- (void)viewDidLoad
 {
+  [super viewDidLoad];
+
+  [[NSNotificationCenter defaultCenter]
+   addObserver:self selector:@selector(selectedActivityDidChange:)
+   name:ActSelectedActivityDidChange object:_controller];
+
+  [[NSNotificationCenter defaultCenter]
+   addObserver:self selector:@selector(selectedLapIndexDidChange:)
+   name:ActSelectedLapIndexDidChange object:_controller];
+
   for (ActMapSource *src in [[self class] mapSources])
     {
       if ([src isLoading])
@@ -136,21 +157,9 @@
   [_zoomSlider setIntValue:[_mapView mapZoom]];
 }
 
-- (CGFloat)minSize
-{
-  return 200;
-}
-
-- (void)dealloc
-{
-  [[NSNotificationCenter defaultCenter] removeObserver:self];
-
-  [super dealloc];
-}
-
 - (void)_updateDisplayedRegion
 {
-  const act::activity *a = [[self controller] activity];
+  const act::activity *a = [_controller selectedActivity];
   if (!a)
     return;
 
@@ -165,20 +174,20 @@
   [_zoomSlider setIntValue:[_mapView mapZoom]];
 }
 
-- (void)activityDidChange
+- (void)selectedActivityDidChange:(NSNotification *)note
 {
   [self _updateDisplayedRegion];
   [_mapView setNeedsDisplay:YES];
 
-  const act::activity *a = [[self controller] activity];
+  const act::activity *a = [_controller selectedActivity];
   bool has_map = a != nullptr && a->gps_data() != nullptr;
 
   [_centerButton setEnabled:has_map];
 }
 
-- (void)selectedLapDidChange
+- (void)selectedLapIndexDidChange:(NSNotification *)note
 {
-  const act::activity *a = [[self controller] activity];
+  const act::activity *a = [_controller selectedActivity];
 
   if (a != nullptr && a->gps_data() != nullptr)
     [_mapView setNeedsDisplay:YES];
@@ -218,7 +227,7 @@
     mapBottomLeft:(const act::location &)loc_ll
     topRight:(const act::location &)loc_ur
 {
-  const act::activity *a = [[self controller] activity];
+  const act::activity *a = [_controller selectedActivity];
   if (!a)
     return;
 
@@ -269,7 +278,7 @@
   if (in_subpath)
     CGContextStrokePath(ctx);
 
-  int selected_lap = [[self controller] selectedLapIndex];
+  int selected_lap = [_controller selectedLapIndex];
 
   if (selected_lap >= 0)
     {

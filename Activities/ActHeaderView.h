@@ -1,13 +1,15 @@
 // -*- c-style: gnu -*-
 
-#import "ActActivitySubview.h"
+#import <AppKit/AppKit.h>
 
-@interface ActActivityHeaderView : ActActivitySubview
+@interface ActHeaderView : NSView
 {
   IBOutlet NSButton *_addFieldButton;
 }
 
 @property(nonatomic, copy) NSArray *displayedFields;
+
+- (void)viewDidLoad;
 
 - (BOOL)displaysField:(NSString *)name;
 - (void)addDisplayedField:(NSString *)name;
