@@ -69,9 +69,8 @@ NSString *const ActActivityDidChangeBody = @"ActActivityDidChangeBody";
 {
   [self addSplitView:_outerSplitView identifier:@"Window.outerSplitView"];
   [self addSplitView:_leftSplitView identifier:@"Window.leftSplitView"];
-  [self addSplitView:_rightSplitView identifier:@"Window.rightSplitView"];
   [self addSplitView:_leftRightSplitView identifier:@"Window.leftRightSplitView"];
-  [self addSplitView:_rightTopSplitView identifier:@"Window.rightTopSplitView"];
+  [self addSplitView:_rightSplitView identifier:@"Window.rightSplitView"];
 
   _fieldEditor = [[ActFieldEditor alloc] initWithFrame:NSZeroRect];
   [_fieldEditor setFieldEditor:YES];
@@ -97,16 +96,16 @@ NSString *const ActActivityDidChangeBody = @"ActActivityDidChangeBody";
       = [self viewControllerWithClass:[ActMapViewController class]])
     {
       NSView *view = [obj view];
-      [view setFrame:[_topRightRightContainer bounds]];
-      [_topRightRightContainer addSubview:view];
+      [view setFrame:[_topRightContainer bounds]];
+      [_topRightContainer addSubview:view];
     }
 
   if (ActViewController *obj
       = [self viewControllerWithClass:[ActLapViewController class]])
     {
       NSView *view = [obj view];
-      [view setFrame:[_topRightLeftContainer bounds]];
-      [_topRightLeftContainer addSubview:view];
+      [view setFrame:[_middleRightContainer bounds]];
+      [_middleRightContainer addSubview:view];
     }
 
   if (ActViewController *obj

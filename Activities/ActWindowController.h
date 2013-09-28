@@ -26,12 +26,11 @@ extern NSString *const ActActivityDidChangeBody;
   IBOutlet ActSplitView *_leftRightSplitView;
   IBOutlet ActSplitView *_leftSplitView;
   IBOutlet ActSplitView *_rightSplitView;
-  IBOutlet ActSplitView *_rightTopSplitView;
 
   IBOutlet NSView *_topLeftContainer;		// activity list
   IBOutlet NSView *_bottomLeftContainer;	// activity summary
-  IBOutlet NSView *_topRightLeftContainer;	// lap view
-  IBOutlet NSView *_topRightRightContainer;	// map view
+  IBOutlet NSView *_topRightContainer;		// map view
+  IBOutlet NSView *_middleRightContainer;	// lap view
   IBOutlet NSView *_bottomRightContainer;	// chart view
 
   NSMutableArray *_viewControllers;

@@ -13,14 +13,13 @@
                 <outlet property="_deleteButton" destination="90" id="113"/>
                 <outlet property="_leftRightSplitView" destination="65" id="3ei-yq-zSz"/>
                 <outlet property="_leftSplitView" destination="JOl-o5-rfM" id="orw-Ms-1bi"/>
+                <outlet property="_middleRightContainer" destination="KSz-PJ-NMt" id="Uvv-fN-Gfj"/>
                 <outlet property="_outerSplitView" destination="3" id="skD-be-5bj"/>
                 <outlet property="_reloadButton" destination="98" id="114"/>
                 <outlet property="_revealButton" destination="100" id="115"/>
                 <outlet property="_rightSplitView" destination="564-ie-tPh" id="tS3-nt-GTb"/>
-                <outlet property="_rightTopSplitView" destination="vca-09-3FW" id="9aM-iC-vry"/>
                 <outlet property="_topLeftContainer" destination="bTd-EI-nZg" id="vsa-nw-tk1"/>
-                <outlet property="_topRightLeftContainer" destination="zEi-s4-zJF" id="Ddh-QI-rUE"/>
-                <outlet property="_topRightRightContainer" destination="KSz-PJ-NMt" id="TRV-k2-uWO"/>
+                <outlet property="_topRightContainer" destination="zEi-s4-zJF" id="9cA-Hn-6nX"/>
                 <outlet property="window" destination="1" id="17"/>
             </connections>
         </customObject>
@@ -176,33 +175,21 @@
                                                 <rect key="frame" x="0.0" y="0.0" width="366" height="645"/>
                                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                 <subviews>
-                                                    <splitView dividerStyle="thin" vertical="YES" id="vca-09-3FW" customClass="ActSplitView">
-                                                        <rect key="frame" x="0.0" y="0.0" width="366" height="484"/>
-                                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                                        <subviews>
-                                                            <customView id="zEi-s4-zJF">
-                                                                <rect key="frame" x="0.0" y="0.0" width="192" height="484"/>
-                                                                <autoresizingMask key="autoresizingMask"/>
-                                                            </customView>
-                                                            <customView id="KSz-PJ-NMt">
-                                                                <rect key="frame" x="193" y="0.0" width="173" height="484"/>
-                                                                <autoresizingMask key="autoresizingMask"/>
-                                                            </customView>
-                                                        </subviews>
-                                                        <holdingPriorities>
-                                                            <real value="250"/>
-                                                            <real value="250"/>
-                                                        </holdingPriorities>
-                                                        <connections>
-                                                            <outlet property="delegate" destination="-2" id="Rey-9d-qvf"/>
-                                                        </connections>
-                                                    </splitView>
+                                                    <customView id="zEi-s4-zJF">
+                                                        <rect key="frame" x="0.0" y="0.0" width="366" height="304"/>
+                                                        <autoresizingMask key="autoresizingMask"/>
+                                                    </customView>
+                                                    <customView id="KSz-PJ-NMt">
+                                                        <rect key="frame" x="0.0" y="305" width="366" height="166"/>
+                                                        <autoresizingMask key="autoresizingMask"/>
+                                                    </customView>
                                                     <customView id="12P-AB-C5o">
-                                                        <rect key="frame" x="0.0" y="485" width="366" height="160"/>
+                                                        <rect key="frame" x="0.0" y="472" width="366" height="173"/>
                                                         <autoresizingMask key="autoresizingMask"/>
                                                     </customView>
                                                 </subviews>
                                                 <holdingPriorities>
+                                                    <real value="250"/>
                                                     <real value="250"/>
                                                     <real value="250"/>
                                                 </holdingPriorities>

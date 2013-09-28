@@ -32,17 +32,6 @@
 
 - (void)selectedActivityDidChange:(NSNotification *)note
 {
-  bool has_hr = false;
-
-  if (const act::activity *a = [_controller selectedActivity])
-    {
-      if (const act::gps::activity *gps_data = a->gps_data())
-	has_hr = gps_data->has_heart_rate();
-    }
-
-  [[_tableView tableColumnWithIdentifier:@"average-hr"] setHidden:!has_hr];
-  [[_tableView tableColumnWithIdentifier:@"max-hr"] setHidden:!has_hr];
-
   [_tableView reloadData];
 }
 
