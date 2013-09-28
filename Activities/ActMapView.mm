@@ -3,6 +3,7 @@
 #import "ActMapView.h"
 
 #import "ActMapSource.h"
+#import "ActURLCache.h"
 
 #import <algorithm>
 
@@ -16,13 +17,13 @@
 @public
   uint32_t _seed;
   CGImageRef _image;
-  NSMutableData *_data;
-  NSURLConnection *_connection;
+  ActCachedURL *_url;
   BOOL _failed;
 }
 
 - (void)drawInRect:(CGRect)r;
 
+- (BOOL)decodeImageData:(NSData *)data;
 - (void)invalidate;
 
 @end
@@ -271,76 +272,48 @@ convertPointToLocation(CGPoint p)
       [im release];
     }
 
-  if (im->_image == NULL && im->_connection == nil && !im->_failed)
+  if (im->_image == NULL && im->_url == nil && !im->_failed)
     {
-      if (im->_data == nil)
-	im->_data = [[NSMutableData alloc] init];
+      ActCachedURL *cached_url = [[ActCachedURL alloc] init];
 
-      NSURLRequest *request = [[NSURLRequest alloc] initWithURL:url];
-      im->_connection = [[NSURLConnection alloc] initWithRequest:request
-			 delegate:self startImmediately:NO];
-      [im->_connection scheduleInRunLoop:[NSRunLoop mainRunLoop]
-       forMode:NSRunLoopCommonModes];
-      [im->_connection start];
-      [request release];
+      [cached_url setURL:url];
+      [cached_url setDelegate:self];
+      [cached_url setUserInfo:im];
+
+      if ([[ActURLCache sharedURLCache] loadURL:cached_url])
+	im->_url = cached_url;
+      else
+	{
+	  [cached_url release];
+	  im->_failed = YES;
+	}
     }
 
   im->_seed = _seed;
   return im;
 }
 
-// NSURLConnectionDataDelegate methods
+// ActURLCacheDelegate methods
 
-- (void)connection:(NSURLConnection *)conn
-    didReceiveResponse:(NSURLResponse *)response
+- (void)cachedURLDidFinish:(ActCachedURL *)url
 {
-  NSURL *url = [[conn originalRequest] URL];
-  ActMapImage *im = [_images objectForKey:url];
+  ActMapImage *im = [url userInfo];
+  NSData *data = [url data];
 
-  [im->_data setLength:0];
-}
-
-- (void)connection:(NSURLConnection *)conn didFailWithError:(NSError *)error
-{
-  NSURL *url = [[conn originalRequest] URL];
-  ActMapImage *im = [_images objectForKey:url];
-
-  im->_failed = YES;
-  [im invalidate];
-}
-
-- (void)connection:(NSURLConnection *)conn didReceiveData:(NSData *)data
-{
-  NSURL *url = [[conn originalRequest] URL];
-  ActMapImage *im = [_images objectForKey:url];
-
-  [im->_data appendData:data];
-}
-
-- (void)connectionDidFinishLoading:(NSURLConnection *)conn
-{
-  NSURL *url = [[conn originalRequest] URL];
-  ActMapImage *im = [_images objectForKey:url];
-
-  if (CGImageSourceRef src
-      = CGImageSourceCreateWithData((CFDataRef)im->_data, NULL))
+  if ([data length] != 0)
     {
-      if (CGImageRef image = CGImageSourceCreateImageAtIndex(src, 0, NULL))
-	{
-	  im->_image = image;
-	  [self setNeedsDisplay:YES];			// FIXME: shoddy
-	}
-
-      CFRelease(src);
+      im->_failed = NO;
+      if ([im decodeImageData:data])
+	[self setNeedsDisplay:YES];		// FIXME: shoddy
+    }
+  else
+    {
+      im->_failed = YES;
+      [im invalidate];
     }
 
-  [im->_connection release];
-  im->_connection = nil;
-
-  [im->_data release];
-  im->_data = nil;
-
-  im->_failed = NO;
+  [im->_url release];
+  im->_url = nil;
 }
 
 // Event handling
@@ -397,17 +370,33 @@ convertPointToLocation(CGPoint p)
 
 @implementation ActMapImage
 
+- (BOOL)decodeImageData:(NSData *)data
+{
+  BOOL ret = NO;
+
+  if (CGImageSourceRef src
+      = CGImageSourceCreateWithData((CFDataRef)data, NULL))
+    {
+      if (CGImageRef image = CGImageSourceCreateImageAtIndex(src, 0, NULL))
+	{
+	  _image = image;
+	  ret = YES;
+	}
+
+      CFRelease(src);
+    }
+
+  return ret;
+}
+
 - (void)invalidate
 {
   CGImageRelease(_image);
   _image = NULL;
 
-  [_data release];
-  _data = nil;
-
-  [_connection cancel];
-  [_connection release];
-  _connection = nil;
+  [_url cancel];
+  [_url release];
+  _url = nil;
 }
 
 - (void)dealloc

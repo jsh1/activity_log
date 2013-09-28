@@ -2,13 +2,15 @@
 
 #import <AppKit/AppKit.h>
 
+#import "ActURLCache.h"
+
 #import "act-types.h"
 
 @class ActMapSource;
 
 @protocol ActMapViewDelegate;
 
-@interface ActMapView : NSView <NSURLConnectionDataDelegate>
+@interface ActMapView : NSView <ActURLCacheDelegate>
 {
   ActMapSource *_mapSource;
   int _mapZoom;

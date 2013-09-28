@@ -63,39 +63,33 @@
 {
   [_dict release];
 
-  [_connection cancel];
-  [_connection release];
-  [_connectionData release];
+  [_url cancel];
+  [_url release];
 
   [super dealloc];
 }
 
 - (void)startLoadingURL:(NSURL *)url
 {
-  assert(_connection == nil);
+  assert(_url == nil);
 
-  NSURLRequest *request = [[NSURLRequest alloc] initWithURL:url
-			   cachePolicy:NSURLRequestReturnCacheDataElseLoad
-			   timeoutInterval:30];
-  _connection = [[NSURLConnection alloc] initWithRequest:request
-		 delegate:self startImmediately:NO];
-  [_connection scheduleInRunLoop:[NSRunLoop mainRunLoop]
-   forMode:NSRunLoopCommonModes];
-  [_connection start];
-  [request release];
-  _connectionData = [[NSMutableData alloc] init];
+  _url = [[ActCachedURL alloc] init];
+  [_url setURL:url];
+  [_url setDelegate:self];
+
+  [[ActURLCache sharedURLCache] loadURL:_url];
 }
 
 - (BOOL)isLoading
 {
-  return _connection != nil;
+  return _url != nil;
 }
 
 - (NSString *)name
 {
   if (NSString *name = [_dict objectForKey:@"name"])
     return name;
-  else if (_connection != nil)
+  else if (_url != nil)
     return @"(loading)";
   else if (_dict == nil)
     return @"(null)";
@@ -148,39 +142,16 @@
   return [NSURL URLWithString:str];
 }
 
-// NSURLConnectionDataDelegate methods
+// ActURLCacheDelegate methods
 
-- (void)connection:(NSURLConnection *)conn
-    didReceiveResponse:(NSURLResponse *)response
-{
-  [_connectionData setLength:0];
-}
-
-- (void)connection:(NSURLConnection *)conn didFailWithError:(NSError *)error
-{
-  [_connection release];
-  _connection = nil;
-
-  [_connectionData release];
-  _connectionData = nil;
-}
-
-- (void)connection:(NSURLConnection *)conn didReceiveData:(NSData *)data
-{
-  [_connectionData appendData:data];
-}
-
-- (void)connectionDidFinishLoading:(NSURLConnection *)conn
+- (void)cachedURLDidFinish:(ActCachedURL *)url
 {
   [_dict release];
-  _dict = [[NSJSONSerialization JSONObjectWithData:_connectionData
+  _dict = [[NSJSONSerialization JSONObjectWithData:[url data]
 	    options:0 error:nil] retain];
 
-  [_connection release];
-  _connection = nil;
-
-  [_connectionData release];
-  _connectionData = nil;
+  [_url release];
+  _url = nil;
 
   [[NSNotificationCenter defaultCenter]
    postNotificationName:ActMapSourceDidFinishLoading object:self];

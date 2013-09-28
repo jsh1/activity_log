@@ -2,12 +2,13 @@
 
 #import "ActMapSource.h"
 
-@interface ActTileJSONMapSource : ActMapSource <NSURLConnectionDataDelegate>
+#import "ActURLCache.h"
+
+@interface ActTileJSONMapSource : ActMapSource <ActURLCacheDelegate>
 {
 @private
   NSDictionary *_dict;
-  NSURLConnection *_connection;
-  NSMutableData *_connectionData;
+  ActCachedURL *_url;
 }
 
 + (ActTileJSONMapSource *)mapSourceFromResource:(NSString *)name;

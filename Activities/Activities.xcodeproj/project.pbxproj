@@ -13,6 +13,8 @@
 		570E6AC717F474F700A5BB4D /* ActSummaryView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 570E6AC517F474F700A5BB4D /* ActSummaryView.xib */; };
 		570E6ACA17F4793700A5BB4D /* ActChartView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 570E6AC817F4793700A5BB4D /* ActChartView.xib */; };
 		570E6ACD17F47A9C00A5BB4D /* ActListView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 570E6ACB17F47A9C00A5BB4D /* ActListView.xib */; };
+		570E6AD017F717FB00A5BB4D /* ActURLCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 570E6ACF17F717FB00A5BB4D /* ActURLCache.m */; };
+		570E6AD217F71B4F00A5BB4D /* libsqlite3.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 570E6AD117F71B4F00A5BB4D /* libsqlite3.dylib */; };
 		5711D4A917EA09B6003157AF /* ActSplitView.mm in Sources */ = {isa = PBXBuildFile; fileRef = 5711D4A817EA09B6003157AF /* ActSplitView.mm */; };
 		571DB99D17BE615C0001514C /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 571DB99B17BE615C0001514C /* InfoPlist.strings */; };
 		571DB99F17BE615C0001514C /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 571DB99E17BE615C0001514C /* main.m */; };
@@ -83,6 +85,9 @@
 		570E6AC617F474F700A5BB4D /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/ActSummaryView.xib; sourceTree = "<group>"; };
 		570E6AC917F4793700A5BB4D /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/ActChartView.xib; sourceTree = "<group>"; };
 		570E6ACC17F47A9C00A5BB4D /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/ActListView.xib; sourceTree = "<group>"; };
+		570E6ACE17F717FB00A5BB4D /* ActURLCache.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActURLCache.h; sourceTree = "<group>"; };
+		570E6ACF17F717FB00A5BB4D /* ActURLCache.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ActURLCache.m; sourceTree = "<group>"; };
+		570E6AD117F71B4F00A5BB4D /* libsqlite3.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libsqlite3.dylib; path = usr/lib/libsqlite3.dylib; sourceTree = SDKROOT; };
 		5711D4A717EA09B6003157AF /* ActSplitView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActSplitView.h; sourceTree = "<group>"; };
 		5711D4A817EA09B6003157AF /* ActSplitView.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ActSplitView.mm; sourceTree = "<group>"; };
 		571DB98F17BE615C0001514C /* Activities.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Activities.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -181,6 +186,7 @@
 				571DB9FF17BE689D0001514C /* libact.a in Frameworks */,
 				571DB9AF17BE63AC0001514C /* AppKit.framework in Frameworks */,
 				571DB9B017BE63AF0001514C /* Foundation.framework in Frameworks */,
+				570E6AD217F71B4F00A5BB4D /* libsqlite3.dylib in Frameworks */,
 				571DBA0317BE6B6C0001514C /* libxml2.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -220,6 +226,7 @@
 		571DB99117BE615C0001514C /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				570E6AD117F71B4F00A5BB4D /* libsqlite3.dylib */,
 				571DB99517BE615C0001514C /* AppKit.framework */,
 				571DB99717BE615C0001514C /* Foundation.framework */,
 				571DB9FD17BE68090001514C /* libxml2.dylib */,
@@ -264,6 +271,8 @@
 				57707AE717DFBC4C009BAC5D /* ActTileJSONMapSource.mm */,
 				57C5705A17EB18CB0000AF8D /* ActTableView.h */,
 				57C5705B17EB18CB0000AF8D /* ActTableView.mm */,
+				570E6ACE17F717FB00A5BB4D /* ActURLCache.h */,
+				570E6ACF17F717FB00A5BB4D /* ActURLCache.m */,
 				579772E917C5015600AA2E9D /* ActFoundationExtensions.h */,
 				579772EA17C5015600AA2E9D /* ActFoundationExtensions.mm */,
 			);
@@ -474,6 +483,7 @@
 				57707AEA17DFBC4C009BAC5D /* ActTileJSONMapSource.mm in Sources */,
 				57707AED17DFBF99009BAC5D /* ActMapViewController.mm in Sources */,
 				578D797A17E75DE300E50C29 /* ActSummaryViewController.mm in Sources */,
+				570E6AD017F717FB00A5BB4D /* ActURLCache.m in Sources */,
 				570E6ABE17F4711500A5BB4D /* ActViewController.mm in Sources */,
 				578D797D17E7671000E50C29 /* ActHorizontalBoxView.mm in Sources */,
 				5711D4A917EA09B6003157AF /* ActSplitView.mm in Sources */,
