@@ -50,6 +50,7 @@
 
 - (void)insertData:(NSData *)data forURL:(NSURL *)url;
 
-- (void)purgeCaches;
+- (void)pruneCaches;
+- (void)emptyCaches;
 
 @end

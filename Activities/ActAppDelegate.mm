@@ -2,6 +2,7 @@
 
 #import "ActAppDelegate.h"
 
+#import "ActURLCache.h"
 #import "ActWindowController.h"
 
 @implementation ActAppDelegate
@@ -35,6 +36,7 @@
 - (void)applicationWillTerminate:(NSNotification *)note
 {
   [_windowController synchronize];
+  [[ActURLCache sharedURLCache] pruneCaches];
 }
 
 - (IBAction)showWindow:(id)sender
@@ -48,6 +50,11 @@
     _windowController = [[ActWindowController alloc] init];
 
   return _windowController;
+}
+
+- (IBAction)emptyCaches:(id)sender
+{
+  [[ActURLCache sharedURLCache] emptyCaches];
 }
 
 @end

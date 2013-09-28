@@ -13,6 +13,8 @@
 - (void)dispatch;
 @end
 
+#define MAX_SIZE (64*1024*1024)
+
 #define TRY(x)								\
   do {									\
     int err = x;							\
@@ -199,9 +201,70 @@ static ActURLCache *_sharedCache;
   TRY(sqlite3_clear_bindings(_insertStmt));
 }
 
-- (void)purgeCaches
+- (void)pruneCaches
 {
-  // FIXME: implement this
+  NSFileManager *fm = [NSFileManager defaultManager];
+
+  sqlite3_stmt *stmt = NULL;
+
+  TRY(sqlite3_prepare_v2(_handle, "SELECT fileid, expires, size"
+			 " FROM cache ORDER BY expires", -1, &stmt, NULL));
+
+  size_t total_size = 0;
+  int min_expires = INT_MAX;
+  
+  while (sqlite3_step(stmt) == SQLITE_ROW)
+    {
+      total_size += sqlite3_column_int(stmt, 2);
+
+      if (total_size > MAX_SIZE)
+	{
+	  int fileid = sqlite3_column_int(stmt, 0);
+	  int expires = sqlite3_column_int(stmt, 1);
+
+	  NSString *path = [_path stringByAppendingPathComponent:
+			    [NSString stringWithFormat:@"%08x.dat",
+			     (unsigned int)fileid]];
+	  [fm removeItemAtPath:path error:NULL];
+
+	  if (min_expires > expires)
+	    min_expires = expires;
+	}
+    }
+
+  sqlite3_finalize(stmt);
+
+  if (min_expires < INT_MAX)
+    {
+      TRY(sqlite3_prepare_v2(_handle, "DELETE FROM cache WHERE expires <= ?",
+			     -1, &stmt, NULL));
+      TRY(sqlite3_bind_int(stmt, 1, min_expires));
+
+      sqlite3_step(stmt);
+      sqlite3_finalize(stmt);
+    }
+}
+
+- (void)emptyCaches
+{
+  NSFileManager *fm = [NSFileManager defaultManager];
+
+  sqlite3_stmt *stmt = NULL;
+  TRY(sqlite3_prepare_v2(_handle, "SELECT fileid FROM cache",
+			 -1, &stmt, NULL));
+
+  while (sqlite3_step(stmt) == SQLITE_ROW)
+    {
+      int fileid = sqlite3_column_int(_queryStmt, 0);
+      NSString *path = [_path stringByAppendingPathComponent:
+			[NSString stringWithFormat:@"%08x.dat",
+			 (unsigned int)fileid]];
+      [fm removeItemAtPath:path error:NULL];
+    }
+
+  sqlite3_finalize(stmt);
+
+  TRY(sqlite3_exec(_handle, "DELETE FROM cache", NULL, NULL, NULL));
 }
 
 @end

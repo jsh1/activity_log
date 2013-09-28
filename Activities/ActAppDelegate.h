@@ -13,4 +13,6 @@
 
 - (IBAction)showWindow:(id)sender;
 
+- (IBAction)emptyCaches:(id)sender;
+
 @end
