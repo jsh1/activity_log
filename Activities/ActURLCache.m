@@ -4,16 +4,23 @@
 
 #import <sqlite3.h>
 
+@interface ActURLCache (internal)
+- (void)commitCachedURL:(ActCachedURL *)url;
+@end
+
 @interface ActCachedURL (internal) <NSURLConnectionDataDelegate>
 - (void)setCache:(ActURLCache *)cache;
 - (void)setData:(NSData *)data;
 - (void)setError:(NSError *)err;
 - (NSURLConnection *)connection;
 - (void)setConnection:(NSURLConnection *)conn;
+- (int)fileId;
+- (void)setFileId:(int)x;
 - (void)dispatch;
 @end
 
 #define MAX_SIZE (64*1024*1024)
+#define EXPIRES (365*24*60*60)
 
 #define TRY(x)								\
   do {									\
@@ -104,6 +111,12 @@ static ActURLCache *_sharedCache;
   [super dealloc];
 }
 
+- (NSString *)_pathForFileId:(int)x
+{
+  return [_path stringByAppendingPathComponent:
+	  [NSString stringWithFormat:@"%08x.dat", (unsigned int)x]];
+}
+
 - (BOOL)loadURL:(ActCachedURL *)url
 {
   assert([url URL] != nil && [url delegate] != nil);
@@ -114,8 +127,6 @@ static ActURLCache *_sharedCache;
       TRY(sqlite3_prepare_v2(_handle, "SELECT fileid, expires"
 			     " FROM cache WHERE url = ?", -1,
 			     (sqlite3_stmt **) &_queryStmt, NULL));
-      if (_queryStmt == NULL)
-	return NO;
     }
 
   [url setCache:self];
@@ -134,17 +145,20 @@ static ActURLCache *_sharedCache;
   TRY(sqlite3_reset(_queryStmt));
   TRY(sqlite3_clear_bindings(_queryStmt));
 
-  if (fileid != 0 && time(NULL) < (time_t)expires)
+  if (fileid != 0)
     {
-      NSString *file = [_path stringByAppendingPathComponent:
-			[NSString stringWithFormat:@"%08x.dat",
-			 (unsigned int)fileid]];
-      [url setData:[NSData dataWithContentsOfFile:file]];
+      [url setFileId:fileid];
 
-      if ([[url data] length] != 0)
+      if (time(NULL) < (time_t)expires)
 	{
-	  [url dispatch];
-	  return YES;
+	  [url setData:[NSData dataWithContentsOfFile:
+			[self _pathForFileId:fileid]]];
+
+	  if ([[url data] length] != 0)
+	    {
+	      [url dispatch];
+	      return YES;
+	    }
 	}
     }
 
@@ -161,44 +175,64 @@ static ActURLCache *_sharedCache;
   return YES;
 }
 
-- (void)insertData:(NSData *)data forURL:(NSURL *)url
+- (void)commitCachedURL:(ActCachedURL *)url
 {            
+  NSData *data = [url data];
+  const char *url_str = [[[url URL] absoluteString] UTF8String];
   NSFileManager *fm = [NSFileManager defaultManager];
 
-  int fileid = 0;
-  NSString *path = nil;
-  while (1)
+  if ([url fileId] != 0)
     {
-      fileid = (int)arc4random();
-      path = [_path stringByAppendingPathComponent:
-	      [NSString stringWithFormat:@"%08x.dat", (unsigned int)fileid]];
-      if (![fm fileExistsAtPath:path])
-	break;
+      int fileid = [url fileId];
+
+      [fm removeItemAtPath:[self _pathForFileId:fileid] error:NULL];
+
+      if (_deleteStmt == NULL)
+	{
+	  TRY(sqlite3_prepare_v2(_handle, "DELETE FROM cache WHERE fileid = ?",
+				 -1, (sqlite3_stmt **)&_deleteStmt, NULL));
+	}
+
+      TRY(sqlite3_bind_int(_deleteStmt, 1, fileid));
+      assert(sqlite3_step(_deleteStmt) == SQLITE_DONE);
+      TRY(sqlite3_reset(_deleteStmt));
     }
 
-  int expires = time(NULL) + 7*24*60*60;	// FIXME: honour http headers?
-
-  if (_insertStmt == NULL)
+  if (data != nil)
     {
-      TRY(sqlite3_prepare_v2(_handle, "INSERT INTO cache VALUES(?, ?, ?, ?)",
-			     -1, (sqlite3_stmt **) &_insertStmt, NULL));
+      int fileid = 0;
+      NSString *path = nil;
+
+      while (1)
+	{
+	  fileid = (int)arc4random();
+	  path = [self _pathForFileId:fileid];
+	  if (![fm fileExistsAtPath:path])
+	    break;
+	}
+
+      int expires = time(NULL) + EXPIRES;	// FIXME: honour http headers?
+
       if (_insertStmt == NULL)
-	return;
+	{
+	  TRY(sqlite3_prepare_v2(_handle, "INSERT INTO cache"
+				 " VALUES(?, ?, ?, ?)", -1,
+				 (sqlite3_stmt **) &_insertStmt, NULL));
+	}
+
+      TRY(sqlite3_bind_text(_insertStmt, 1, url_str, -1, SQLITE_TRANSIENT));
+      TRY(sqlite3_bind_int(_insertStmt, 2, fileid));
+      TRY(sqlite3_bind_int(_insertStmt, 3, expires));
+      TRY(sqlite3_bind_int(_insertStmt, 4, (int) [data length]));
+
+      if (sqlite3_step(_insertStmt) == SQLITE_DONE)
+	{
+	  [data writeToFile:path atomically:NO];
+	}
+
+      TRY(sqlite3_reset(_insertStmt));
+      TRY(sqlite3_clear_bindings(_insertStmt));
     }
-
-  TRY(sqlite3_bind_text(_insertStmt, 1, [[url absoluteString] UTF8String],
-			-1, SQLITE_TRANSIENT));
-  TRY(sqlite3_bind_int(_insertStmt, 2, fileid));
-  TRY(sqlite3_bind_int(_insertStmt, 3, expires));
-  TRY(sqlite3_bind_int(_insertStmt, 4, (int) [data length]));
-
-  if (sqlite3_step(_insertStmt) == SQLITE_DONE)
-    {
-      [data writeToFile:path atomically:NO];
-    }
-
-  TRY(sqlite3_reset(_insertStmt));
-  TRY(sqlite3_clear_bindings(_insertStmt));
 }
 
 - (void)pruneCaches
@@ -222,10 +256,7 @@ static ActURLCache *_sharedCache;
 	  int fileid = sqlite3_column_int(stmt, 0);
 	  int expires = sqlite3_column_int(stmt, 1);
 
-	  NSString *path = [_path stringByAppendingPathComponent:
-			    [NSString stringWithFormat:@"%08x.dat",
-			     (unsigned int)fileid]];
-	  [fm removeItemAtPath:path error:NULL];
+	  [fm removeItemAtPath:[self _pathForFileId:fileid] error:NULL];
 
 	  if (min_expires > expires)
 	    min_expires = expires;
@@ -240,7 +271,7 @@ static ActURLCache *_sharedCache;
 			     -1, &stmt, NULL));
       TRY(sqlite3_bind_int(stmt, 1, min_expires));
 
-      sqlite3_step(stmt);
+      assert(sqlite3_step(stmt) == SQLITE_DONE);
       sqlite3_finalize(stmt);
     }
 }
@@ -256,10 +287,7 @@ static ActURLCache *_sharedCache;
   while (sqlite3_step(stmt) == SQLITE_ROW)
     {
       int fileid = sqlite3_column_int(_queryStmt, 0);
-      NSString *path = [_path stringByAppendingPathComponent:
-			[NSString stringWithFormat:@"%08x.dat",
-			 (unsigned int)fileid]];
-      [fm removeItemAtPath:path error:NULL];
+      [fm removeItemAtPath:[self _pathForFileId:fileid] error:NULL];
     }
 
   sqlite3_finalize(stmt);
@@ -348,7 +376,7 @@ static ActURLCache *_sharedCache;
   [_connection release];
   _connection = nil;
 
-  [_cache insertData:_data forURL:_url];
+  [_cache commitCachedURL:self];
 
   [self dispatch];
 }
@@ -384,6 +412,16 @@ static ActURLCache *_sharedCache;
 {
   [_connection release];
   _connection = [conn retain];
+}
+
+- (int)fileId
+{
+  return _fileId;
+}
+
+- (void)setFileId:(int)x
+{
+  _fileId = x;
 }
 
 - (void)dispatch

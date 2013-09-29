@@ -12,6 +12,7 @@
 
 @interface ActCachedURL : NSObject
 {
+@private
   NSURL *_url;
   id<ActURLCacheDelegate> _delegate;
   id _userInfo;
@@ -20,6 +21,7 @@
   NSMutableData *_data;
   NSError *_error;
   BOOL _dispatching;
+  int _fileId;
 }
 
 - (void)cancel;
@@ -40,6 +42,7 @@
   void *_handle;
   void *_queryStmt;
   void *_insertStmt;
+  void *_deleteStmt;
 }
 
 + (ActURLCache *)sharedURLCache;
@@ -47,8 +50,6 @@
 - (id)initWithPath:(NSString *)path;
 
 - (BOOL)loadURL:(ActCachedURL *)url;
-
-- (void)insertData:(NSData *)data forURL:(NSURL *)url;
 
 - (void)pruneCaches;
 - (void)emptyCaches;
