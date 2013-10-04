@@ -13,6 +13,7 @@
                 <outlet property="_deleteButton" destination="90" id="113"/>
                 <outlet property="_leftRightSplitView" destination="65" id="3ei-yq-zSz"/>
                 <outlet property="_leftSplitView" destination="JOl-o5-rfM" id="orw-Ms-1bi"/>
+                <outlet property="_listViewControl" destination="4qj-1R-RaG" id="weX-Nm-GJh"/>
                 <outlet property="_middleRightContainer" destination="KSz-PJ-NMt" id="Uvv-fN-Gfj"/>
                 <outlet property="_outerSplitView" destination="3" id="skD-be-5bj"/>
                 <outlet property="_reloadButton" destination="98" id="114"/>
@@ -75,7 +76,7 @@
                                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                 <subviews>
                                                     <button verticalHuggingPriority="750" id="88">
-                                                        <rect key="frame" x="2" y="646" width="20" height="20"/>
+                                                        <rect key="frame" x="2" y="644" width="20" height="21"/>
                                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                         <buttonCell key="cell" type="smallSquare" bezelStyle="smallSquare" image="NSAddTemplate" imagePosition="overlaps" alignment="center" controlSize="small" state="on" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="89">
                                                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -86,7 +87,7 @@
                                                         </connections>
                                                     </button>
                                                     <button verticalHuggingPriority="750" id="90">
-                                                        <rect key="frame" x="24" y="646" width="20" height="20"/>
+                                                        <rect key="frame" x="24" y="644" width="20" height="21"/>
                                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                         <buttonCell key="cell" type="smallSquare" bezelStyle="smallSquare" image="NSRemoveTemplate" imagePosition="overlaps" alignment="center" controlSize="small" state="on" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="91">
                                                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -97,7 +98,7 @@
                                                         </connections>
                                                     </button>
                                                     <button verticalHuggingPriority="750" id="98">
-                                                        <rect key="frame" x="46" y="646" width="20" height="20"/>
+                                                        <rect key="frame" x="46" y="644" width="20" height="21"/>
                                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                         <buttonCell key="cell" type="smallSquare" bezelStyle="smallSquare" image="NSRefreshTemplate" imagePosition="overlaps" alignment="center" controlSize="small" state="on" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="99">
                                                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -108,47 +109,23 @@
                                                         </connections>
                                                     </button>
                                                     <button verticalHuggingPriority="750" id="100">
-                                                        <rect key="frame" x="68" y="646" width="20" height="20"/>
+                                                        <rect key="frame" x="68" y="644" width="20" height="21"/>
                                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                         <buttonCell key="cell" type="smallSquare" bezelStyle="smallSquare" image="NSRevealFreestandingTemplate" imagePosition="overlaps" alignment="center" controlSize="small" state="on" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="101">
                                                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                             <font key="font" metaFont="smallSystem"/>
                                                         </buttonCell>
                                                     </button>
-                                                    <button verticalHuggingPriority="750" id="92">
-                                                        <rect key="frame" x="311" y="646" width="20" height="20"/>
-                                                        <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES"/>
-                                                        <buttonCell key="cell" type="smallSquare" bezelStyle="smallSquare" image="NSIconViewTemplate" imagePosition="overlaps" alignment="center" controlSize="small" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="93">
-                                                            <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES" changeBackground="YES" changeGray="YES"/>
-                                                            <font key="font" metaFont="smallSystem"/>
-                                                        </buttonCell>
-                                                    </button>
-                                                    <button verticalHuggingPriority="750" id="94">
-                                                        <rect key="frame" x="330" y="646" width="20" height="20"/>
-                                                        <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES"/>
-                                                        <buttonCell key="cell" type="smallSquare" bezelStyle="smallSquare" image="NSListViewTemplate" imagePosition="overlaps" alignment="center" controlSize="small" state="on" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="95">
-                                                            <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES" changeBackground="YES" changeGray="YES"/>
-                                                            <font key="font" metaFont="smallSystem"/>
-                                                        </buttonCell>
-                                                    </button>
-                                                    <button verticalHuggingPriority="750" id="96">
-                                                        <rect key="frame" x="349" y="646" width="20" height="20"/>
-                                                        <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES"/>
-                                                        <buttonCell key="cell" type="smallSquare" bezelStyle="smallSquare" image="NSColumnViewTemplate" imagePosition="overlaps" alignment="center" controlSize="small" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="97">
-                                                            <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES" changeBackground="YES" changeGray="YES"/>
-                                                            <font key="font" metaFont="smallSystem"/>
-                                                        </buttonCell>
-                                                    </button>
                                                     <splitView autosaveName="" dividerStyle="thin" id="JOl-o5-rfM" customClass="ActSplitView">
-                                                        <rect key="frame" x="2" y="0.0" width="369" height="645"/>
+                                                        <rect key="frame" x="2" y="0.0" width="368" height="644"/>
                                                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                         <subviews>
                                                             <customView id="bTd-EI-nZg">
-                                                                <rect key="frame" x="0.0" y="0.0" width="369" height="304"/>
+                                                                <rect key="frame" x="0.0" y="0.0" width="368" height="304"/>
                                                                 <autoresizingMask key="autoresizingMask"/>
                                                             </customView>
                                                             <customView id="QLs-qn-Sqk">
-                                                                <rect key="frame" x="0.0" y="305" width="369" height="340"/>
+                                                                <rect key="frame" x="0.0" y="305" width="368" height="339"/>
                                                                 <autoresizingMask key="autoresizingMask"/>
                                                             </customView>
                                                         </subviews>
@@ -160,6 +137,20 @@
                                                             <outlet property="delegate" destination="-2" id="Hqg-rr-cwj"/>
                                                         </connections>
                                                     </splitView>
+                                                    <segmentedControl verticalHuggingPriority="750" id="4qj-1R-RaG">
+                                                        <rect key="frame" x="321" y="644" width="49" height="21"/>
+                                                        <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES"/>
+                                                        <segmentedCell key="cell" controlSize="small" alignment="left" style="smallSquare" trackingMode="selectOne" id="Xjs-sh-mJZ">
+                                                            <font key="font" metaFont="smallSystem"/>
+                                                            <segments>
+                                                                <segment image="NSListViewTemplate" selected="YES"/>
+                                                                <segment image="NSIconViewTemplate" tag="1"/>
+                                                            </segments>
+                                                        </segmentedCell>
+                                                        <connections>
+                                                            <action selector="controlAction:" target="-2" id="WmH-4u-6nz"/>
+                                                        </connections>
+                                                    </segmentedControl>
                                                 </subviews>
                                             </customView>
                                         </subviews>
@@ -172,19 +163,19 @@
                                         <autoresizingMask key="autoresizingMask"/>
                                         <subviews>
                                             <splitView autosaveName="" dividerStyle="thin" id="564-ie-tPh" customClass="ActSplitView">
-                                                <rect key="frame" x="0.0" y="0.0" width="366" height="645"/>
+                                                <rect key="frame" x="1" y="0.0" width="365" height="644"/>
                                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                 <subviews>
                                                     <customView id="zEi-s4-zJF">
-                                                        <rect key="frame" x="0.0" y="0.0" width="366" height="304"/>
+                                                        <rect key="frame" x="0.0" y="0.0" width="365" height="305"/>
                                                         <autoresizingMask key="autoresizingMask"/>
                                                     </customView>
                                                     <customView id="KSz-PJ-NMt">
-                                                        <rect key="frame" x="0.0" y="305" width="366" height="166"/>
+                                                        <rect key="frame" x="0.0" y="306" width="365" height="166"/>
                                                         <autoresizingMask key="autoresizingMask"/>
                                                     </customView>
                                                     <customView id="12P-AB-C5o">
-                                                        <rect key="frame" x="0.0" y="472" width="366" height="173"/>
+                                                        <rect key="frame" x="0.0" y="473" width="365" height="171"/>
                                                         <autoresizingMask key="autoresizingMask"/>
                                                     </customView>
                                                 </subviews>
@@ -226,7 +217,6 @@
     </objects>
     <resources>
         <image name="NSAddTemplate" width="8" height="8"/>
-        <image name="NSColumnViewTemplate" width="13" height="10"/>
         <image name="NSIconViewTemplate" width="11" height="10"/>
         <image name="NSListViewTemplate" width="11" height="10"/>
         <image name="NSRefreshTemplate" width="10" height="12"/>

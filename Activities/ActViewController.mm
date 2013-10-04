@@ -55,4 +55,19 @@
 {
 }
 
+- (void)addToContainerView:(NSView *)superview
+{
+  if (NSView *view = [self view])
+    {
+      assert([view superview] == nil);
+      [view setFrame:[superview bounds]];
+      [superview addSubview:view];
+    }
+}
+
+- (void)removeFromContainer
+{
+  [[self view] removeFromSuperview];
+}
+
 @end

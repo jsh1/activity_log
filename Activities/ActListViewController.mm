@@ -43,39 +43,53 @@
   return _tableView;
 }
 
-- (const std::vector<act::activity_storage_ref> &)activities
-{
-  return _activities;
-}
-
-- (NSInteger)rowForActivity:(const act::activity_storage_ref)storage
+- (NSInteger)rowForActivityStorage:(const act::activity_storage_ref)storage
 {
   if (storage == nullptr)
     return NSNotFound;
 
-  const auto &pos = std::find(_activities.begin(), _activities.end(), storage);
+  const std::vector<act::activity_storage_ref> &activities
+    = [_controller activityList];
 
-  if (pos != _activities.end())
-    return pos - _activities.begin();
+  const auto &pos = std::find(activities.begin(), activities.end(), storage);
+
+  if (pos != activities.end())
+    return pos - activities.begin();
   else
     return NSNotFound;
 }
 
-- (act::activity_storage_ref)selectedActivity
+- (act::activity *)activityForRow:(NSInteger)row
 {
-  NSInteger row = [_tableView selectedRow];
+  const std::vector<act::activity_storage_ref> vec
+    = [_controller activityList];
+  act::activity_storage_ref storage = vec[row];
 
-  if (row >= 0 && row < _activities.size())
-    return _activities[row];
-  else
-    return act::activity_storage_ref();
+  act::activity *a = _activity_cache[storage].get();
+
+  if (a == nullptr)
+    {
+      a = new act::activity(storage);
+      _activity_cache[storage].reset(a);
+    }
+
+  // FIXME: flush cache periodically?
+
+  return a;
 }
 
-- (void)setSelectedActivity:(act::activity_storage_ref)storage
+- (void)activityListDidChange:(NSNotification *)note
 {
+  [_tableView reloadData];
+}
+
+- (void)selectedActivityDidChange:(NSNotification *)note
+{
+  NSInteger newRow = [self rowForActivityStorage:
+		      [_controller selectedActivityStorage]];
+
   NSIndexSet *set = nil;
 
-  NSInteger newRow = [self rowForActivity:storage];
   if (newRow != NSNotFound)
     {
       if (newRow != [_tableView selectedRow])
@@ -86,34 +100,8 @@
 
   if (set != nil)
     [_tableView selectRowIndexes:set byExtendingSelection:NO];
-}
 
-- (act::activity *)activityForRow:(NSInteger)row
-{
-  if (_activity_cache[row] == nullptr)
-    _activity_cache[row].reset(new act::activity(_activities[row]));
-
-  // FIXME: flush cache periodically?
-
-  return _activity_cache[row].get();
-}
-
-- (void)activityListDidChange:(NSNotification *)note
-{
-  void *ptr = [[[note userInfo] objectForKey:@"activities"] pointerValue];
-  auto vec = static_cast<const std::vector<act::activity_storage_ref> *> (ptr);
-
-  _activities = *vec;			// copies the entire vector
-
-  _activity_cache.clear();
-  _activity_cache.resize(_activities.size());
-
-  [_tableView reloadData];
-}
-
-- (void)selectedActivityDidChange:(NSNotification *)note
-{
-  [self setSelectedActivity:[_controller selectedActivityStorage]];
+  [_tableView scrollRectToVisible:[_tableView rectOfRow:newRow]];
 }
 
 - (void)activityDidChangeField:(NSNotification *)note
@@ -121,7 +109,7 @@
   void *ptr = [[[note userInfo] objectForKey:@"activity"] pointerValue];
   const auto &a = *reinterpret_cast<const act::activity_storage_ref *> (ptr);
 
-  NSInteger row = [self rowForActivity:a];
+  NSInteger row = [self rowForActivityStorage:a];
   if (row == NSNotFound)
     return;
 
@@ -134,7 +122,10 @@
 
 - (NSInteger)numberOfRowsInTableView:(NSTableView *)tv
 {
-  return _activities.size();
+  const std::vector<act::activity_storage_ref> &activities
+    = [_controller activityList];
+
+  return activities.size();
 }
 
 - (id)tableView:(NSTableView *)tv
@@ -172,9 +163,11 @@
 - (void)tableViewSelectionDidChange:(NSNotification *)note
 {
   NSInteger row = [_tableView selectedRow];
+  const std::vector<act::activity_storage_ref> &activities
+    = [_controller activityList];
 
-  if (row >= 0 && row < _activities.size())
-    [_controller setSelectedActivityStorage:_activities[row]];
+  if (row >= 0 && row < activities.size())
+    [_controller setSelectedActivityStorage:activities[row]];
   else
     [_controller setSelectedActivityStorage:nullptr];
 }

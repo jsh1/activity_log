@@ -330,6 +330,45 @@ CA
                         </items>
                     </menu>
                 </menuItem>
+                <menuItem title="Activity" id="9I3-qE-Fje">
+                    <modifierMask key="keyEquivalentModifierMask"/>
+                    <menu key="submenu" title="Activity" id="T7D-hF-QSF">
+                        <items>
+                            <menuItem title="Edit Activity" id="6Z5-vY-ZGO">
+                                <string key="keyEquivalent" base64-UTF8="YES">
+DQ
+</string>
+                                <connections>
+                                    <action selector="editActivity:" target="-1" id="hgg-6h-iz7"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem isSeparatorItem="YES" id="zx8-8X-6wq"/>
+                            <menuItem title="Next Activity" keyEquivalent="]" id="4lo-8d-lRR">
+                                <connections>
+                                    <action selector="nextActivity:" target="-1" id="RFM-qM-Ehr"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem title="Previous Activity" keyEquivalent="[" id="2SS-WH-Wkn">
+                                <connections>
+                                    <action selector="previousActivity:" target="-1" id="T7i-iB-1wX"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem isSeparatorItem="YES" id="m9I-QJ-Av6"/>
+                            <menuItem title="First Activity" keyEquivalent="[" id="UaR-hD-tU5">
+                                <modifierMask key="keyEquivalentModifierMask" shift="YES" command="YES"/>
+                                <connections>
+                                    <action selector="firstActivity:" target="-1" id="Lqw-50-VEt"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem title="Last Activity" keyEquivalent="]" id="PFe-1v-ZXb">
+                                <modifierMask key="keyEquivalentModifierMask" shift="YES" command="YES"/>
+                                <connections>
+                                    <action selector="lastActivity:" target="-1" id="FHc-5m-j68"/>
+                                </connections>
+                            </menuItem>
+                        </items>
+                    </menu>
+                </menuItem>
                 <menuItem title="Format" id="375">
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <menu key="submenu" title="Format" id="376">

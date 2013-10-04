@@ -25,4 +25,7 @@
 - (NSDictionary *)savedViewState;
 - (void)applySavedViewState:(NSDictionary *)dict;
 
+- (void)addToContainerView:(NSView *)view;
+- (void)removeFromContainer;
+
 @end

@@ -5,6 +5,7 @@
 #import "ActChartViewController.h"
 #import "ActLapViewController.h"
 #import "ActListViewController.h"
+#import "ActNotesListViewController.h"
 #import "ActMapViewController.h"
 #import "ActSummaryViewController.h"
 #import "ActSplitView.h"
@@ -78,45 +79,44 @@ NSString *const ActActivityDidChangeBody = @"ActActivityDidChangeBody";
   if (ActViewController *obj
       = [self viewControllerWithClass:[ActListViewController class]])
     {
-      NSView *view = [obj view];
-      [view setFrame:[_topLeftContainer bounds]];
-      [_topLeftContainer addSubview:view];
+      [obj addToContainerView:_topLeftContainer];
+      [[self window] setInitialFirstResponder:[obj initialFirstResponder]];
+    }
+
+  if (ActViewController *obj
+      = [self viewControllerWithClass:[ActNotesListViewController class]])
+    {
+      [obj addToContainerView:_topLeftContainer];
       [[self window] setInitialFirstResponder:[obj initialFirstResponder]];
     }
 
   if (ActViewController *obj
       = [self viewControllerWithClass:[ActSummaryViewController class]])
     {
-      NSView *view = [obj view];
-      [view setFrame:[_bottomLeftContainer bounds]];
-      [_bottomLeftContainer addSubview:view];
+      [obj addToContainerView:_bottomLeftContainer];
     }
 
   if (ActViewController *obj
       = [self viewControllerWithClass:[ActMapViewController class]])
     {
-      NSView *view = [obj view];
-      [view setFrame:[_topRightContainer bounds]];
-      [_topRightContainer addSubview:view];
+      [obj addToContainerView:_topRightContainer];
     }
 
   if (ActViewController *obj
       = [self viewControllerWithClass:[ActLapViewController class]])
     {
-      NSView *view = [obj view];
-      [view setFrame:[_middleRightContainer bounds]];
-      [_middleRightContainer addSubview:view];
+      [obj addToContainerView:_middleRightContainer];
     }
 
   if (ActViewController *obj
       = [self viewControllerWithClass:[ActChartViewController class]])
     {
-      NSView *view = [obj view];
-      [view setFrame:[_bottomRightContainer bounds]];
-      [_bottomRightContainer addSubview:view];
+      [obj addToContainerView:_bottomRightContainer];
     }
 
   [self applySavedWindowState];
+
+  [self controlAction:_listViewControl];
 
   [[NSNotificationCenter defaultCenter]
    addObserver:self selector:@selector(windowWillClose:)
@@ -167,8 +167,13 @@ NSString *const ActActivityDidChangeBody = @"ActActivityDidChangeBody";
 	[split setObject:sub forKey:ident];
     }
 
-  NSDictionary *dict = @{@"ActViewControllers": controllers,
-			 @"ActSplitViews": split};
+  NSDictionary *dict = [NSDictionary dictionaryWithObjectsAndKeys:
+			controllers, @"ActViewControllers",
+			split, @"ActSplitViews",
+			[NSNumber numberWithInt:
+			 [_listViewControl selectedSegment]],
+			@"ActSelectedListView",
+			nil];
 
   [[NSUserDefaults standardUserDefaults]
    setObject:dict forKey:@"ActSavedWindowState"];
@@ -199,6 +204,9 @@ NSString *const ActActivityDidChangeBody = @"ActActivityDidChangeBody";
 	    [view applySavedViewState:sub];
 	}
     }
+
+  if (NSNumber *obj = [state objectForKey:@"ActSelectedListView"])
+    [_listViewControl setSelectedSegment:[obj intValue]];
 }
 
 - (act::database *)database
@@ -219,17 +227,17 @@ NSString *const ActActivityDidChangeBody = @"ActActivityDidChangeBody";
   std::vector<act::database::item *> items;
   [self database]->execute_query(query, items);
 
-  std::vector<act::activity_storage_ref> activities;
-
+  _activityList.clear();
   for (auto &it : items)
-    activities.push_back(it->storage());
+    _activityList.push_back(it->storage());
 
   [[NSNotificationCenter defaultCenter]
-   postNotificationName:ActActivityListDidChange object:self
-   userInfo:@{@"activities": [NSValue valueWithPointer:&activities]}];
+   postNotificationName:ActActivityListDidChange object:self];
 
-  if (activities.size() != 0)
-    [self setSelectedActivityStorage:activities[0]];
+  if (_activityList.size() != 0)
+    [self setSelectedActivityStorage:_activityList[0]];
+  else
+    [self setSelectedActivityStorage:nullptr];
 }
 
 - (void)reloadActivities
@@ -239,6 +247,19 @@ NSString *const ActActivityDidChangeBody = @"ActActivityDidChangeBody";
   [self database]->reload();
 
   [self loadActivities];
+}
+
+- (const std::vector<act::activity_storage_ref> &)activityList
+{
+  return _activityList;
+}
+
+- (void)setActivityList:(const std::vector<act::activity_storage_ref> &)vec
+{
+  _activityList = vec;
+
+  [[NSNotificationCenter defaultCenter]
+   postNotificationName:ActActivityListDidChange object:self];
 }
 
 - (act::activity_storage_ref)selectedActivityStorage
@@ -665,6 +686,58 @@ NSString *const ActActivityDidChangeBody = @"ActActivityDidChangeBody";
 - (IBAction)reloadDatabase:(id)sender
 {
   [self reloadActivities];
+}
+
+- (IBAction)editActivity:(id)sender
+{
+  [[self window] makeFirstResponder:
+   [[self viewControllerWithClass:[ActSummaryViewController class]]
+    initialFirstResponder]];
+}
+
+- (IBAction)nextActivity:(id)sender
+{
+  auto it = std::find(_activityList.begin(), _activityList.end(),
+		      _selectedActivityStorage);
+
+  if (++it < _activityList.end())
+    [self setSelectedActivityStorage:*it];
+  else
+    NSBeep();
+}
+
+- (IBAction)previousActivity:(id)sender
+{
+  auto it = std::find(_activityList.begin(), _activityList.end(),
+		      _selectedActivityStorage);
+
+  if (--it >= _activityList.begin())
+    [self setSelectedActivityStorage:*it];
+  else
+    NSBeep();
+}
+
+- (IBAction)firstActivity:(id)sender
+{
+  if (_activityList.size() > 0)
+    [self setSelectedActivityStorage:_activityList.front()];
+}
+
+- (IBAction)lastActivity:(id)sender
+{
+  if (_activityList.size() > 0)
+    [self setSelectedActivityStorage:_activityList.back()];
+}
+
+- (IBAction)controlAction:(id)sender
+{
+  if (sender == _listViewControl)
+    {
+      [[[self viewControllerWithClass:[ActListViewController class]] view]
+       setHidden:![_listViewControl isSelectedForSegment:0]];
+      [[[self viewControllerWithClass:[ActNotesListViewController class]] view]
+       setHidden:![_listViewControl isSelectedForSegment:1]];
+    }
 }
 
 - (void)windowWillClose:(NSNotification *)note

@@ -32,7 +32,7 @@
             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
             <subviews>
                 <customView id="Akv-mQ-RuP" customClass="ActHorizontalBoxView">
-                    <rect key="frame" x="290" y="210" width="270" height="22"/>
+                    <rect key="frame" x="289.99999999999989" y="210" width="270" height="22"/>
                     <autoresizingMask key="autoresizingMask" flexibleMinX="YES" widthSizable="YES" flexibleMinY="YES"/>
                     <subviews>
                         <textField verticalHuggingPriority="750" id="dev-ec-GNT" customClass="ActExpandableTextField">

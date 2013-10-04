@@ -21,6 +21,7 @@ extern NSString *const ActActivityDidChangeBody;
   IBOutlet NSButton *_deleteButton;
   IBOutlet NSButton *_reloadButton;
   IBOutlet NSButton *_revealButton;
+  IBOutlet NSSegmentedControl *_listViewControl;
 
   IBOutlet ActSplitView *_outerSplitView;
   IBOutlet ActSplitView *_leftRightSplitView;
@@ -42,6 +43,7 @@ extern NSString *const ActActivityDidChangeBody;
   std::unique_ptr<act::database> _database;
   BOOL _needsSynchronize;
 
+  std::vector<act::activity_storage_ref> _activityList;
   act::activity_storage_ref _selectedActivityStorage;
   std::unique_ptr<act::activity> _selectedActivity;
   NSInteger _selectedLapIndex;
@@ -49,6 +51,7 @@ extern NSString *const ActActivityDidChangeBody;
 
 @property(nonatomic, readonly) act::database *database;
 
+@property(nonatomic) const std::vector<act::activity_storage_ref> &activityList;
 @property(nonatomic) act::activity_storage_ref selectedActivityStorage;
 @property(nonatomic, readonly) act::activity *selectedActivity;
 @property(nonatomic) NSInteger selectedLapIndex;
@@ -105,5 +108,12 @@ extern NSString *const ActActivityDidChangeBody;
 - (IBAction)importFile:(id)sender;
 - (IBAction)delete:(id)sender;
 - (IBAction)reloadDatabase:(id)sender;
+- (IBAction)editActivity:(id)sender;
+- (IBAction)nextActivity:(id)sender;
+- (IBAction)previousActivity:(id)sender;
+- (IBAction)firstActivity:(id)sender;
+- (IBAction)lastActivity:(id)sender;
+
+- (IBAction)controlAction:(id)sender;
 
 @end

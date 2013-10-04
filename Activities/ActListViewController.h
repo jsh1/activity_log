@@ -4,6 +4,8 @@
 
 #import "act-activity.h"
 
+#import <unordered_map>
+
 @class ActViewController;
 
 @interface ActListViewController : ActViewController
@@ -11,12 +13,10 @@
 {
   IBOutlet NSTableView *_tableView;
 
-  std::vector<act::activity_storage_ref> _activities;
-  std::vector<std::unique_ptr<act::activity>> _activity_cache;
+  std::unordered_map<act::activity_storage_ref,
+    std::unique_ptr<act::activity>> _activity_cache;
 }
 
-@property act::activity_storage_ref selectedActivity;
-
-- (NSInteger)rowForActivity:(const act::activity_storage_ref)storage;
+- (NSInteger)rowForActivityStorage:(const act::activity_storage_ref)storage;
 
 @end

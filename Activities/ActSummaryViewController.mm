@@ -47,6 +47,11 @@
   [_headerView viewDidLoad];
 }
 
+- (NSView *)initialFirstResponder
+{
+  return _typeActivityField;
+}
+
 - (void)dealloc
 {
   [[NSNotificationCenter defaultCenter] removeObserver:self];
