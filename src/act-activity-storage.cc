@@ -25,8 +25,8 @@ activity_storage::set_path(const char *path)
 bool
 activity_storage::read_file(const char *path)
 {
-  FILE *fh = fopen(path, "r");
-  if (fh == nullptr)
+  FILE_ptr fh(fopen(path, "r"));
+  if (!fh)
     return false;
 
   _header.clear();
@@ -39,7 +39,7 @@ activity_storage::read_file(const char *path)
      the previous header. */
 
   char buf[4096];
-  while (fgets(buf, sizeof(buf), fh))
+  while (fgets(buf, sizeof(buf), fh.get()))
     {
       if (buf[0] == '\n')
 	break;
@@ -68,30 +68,28 @@ activity_storage::read_file(const char *path)
 	}
     }
 
-  while (fgets(buf, sizeof(buf), fh))
+  while (fgets(buf, sizeof(buf), fh.get()))
     _body.append(buf);
 
   increment_seed();
 
-  fclose(fh);
   return true;
 }
 
 bool
 activity_storage::write_file(const char *path) const
 {
-  FILE *fh = fopen(path, "w");
-  if (fh == nullptr)
+  FILE_ptr fh(fopen(path, "w"));
+  if (!fh)
     return false;
 
   for (const auto &it : _header)
-    fprintf(fh, "%s: %s\n", it.first.c_str(), it.second.c_str());
+    fprintf(fh.get(), "%s: %s\n", it.first.c_str(), it.second.c_str());
 
-  fputs("\n", fh);
+  fputs("\n", fh.get());
 
-  fputs(_body.c_str(), fh);
+  fputs(_body.c_str(), fh.get());
 
-  fclose(fh);
   return true;
 }
 
