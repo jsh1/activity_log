@@ -55,6 +55,7 @@ bool parse_keywords(const std::string &str,
 
 bool parse_value(const std::string &str, field_data_type type,
   double *value_ptr, unit_type *unit_ptr);
+bool parse_unit(const std::string &str, field_data_type type, unit_type &unit);
 
 } // namespace act
 

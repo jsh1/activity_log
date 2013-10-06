@@ -545,12 +545,58 @@ parse_number(const std::string &str, size_t &idx, double &value)
   return true;
 }
 
+namespace {
+
 struct parsable_unit
 {
   const char *word_list;
   unit_type unit;
   double multiplier;
   double offset;
+};
+
+static const parsable_unit distance_units[] =
+{
+  {"cm\0centimetres\0centimetre\0centimeters\0centimeter\0",
+   unit_type::centimetres, .01},
+  {"m\0metres\0metre\0meters\0meter\0", unit_type::metres, 1},
+  {"km\0kilometres\0kilometre\0kilometers\0kilometer\0",
+   unit_type::kilometres, 1000},
+  {"in\0inches\0inch\0", unit_type::inches, 1/INCHES_PER_METER},
+  {"ft\0feet\0foot\0", unit_type::feet, 1/FEET_PER_METER},
+  {"yd\0yards\0yard\0", unit_type::yards, 1/YARDS_PER_METER},
+  {"mi\0mile\0miles\0", unit_type::miles, 1/MILES_PER_METER},
+  {0}
+};
+
+static const parsable_unit pace_units[] =
+{
+  {"mi\0mile\0", unit_type::seconds_per_mile, 1/MILES_PER_METER},
+  {"km\0kilometre\0kilometer\0", unit_type::seconds_per_kilometre, 1000},
+  {0}
+};
+
+static const parsable_unit speed_units[] =
+{
+  {"m/s\0mps\0", unit_type::metres_per_second, 1},
+  {"km/h\0kmh\0", unit_type::kilometres_per_hour, 1000/3600.},
+  {"mph\0", unit_type::miles_per_hour, METERS_PER_MILE/3600.},
+  {0}
+};
+
+static const parsable_unit temperature_units[] =
+{
+  {"c\0celsius\0centigrade\0", unit_type::celsius, 1},
+  {"f\0fahrenheit\0", unit_type::fahrenheit, 5/9., -160/9.},
+  {0}
+};
+
+static const parsable_unit weight_units[] =
+{
+  {"kg\0kilos\0kilogram\0kilograms\0kilogramme\0kilogrammes\0",
+   unit_type::kilogrammes, 1},
+  {"lb\0lbs\0pound\0pounds\0", unit_type::pounds, 1/POUNDS_PER_KILO},
+  {0}
 };
 
 bool
@@ -594,6 +640,8 @@ parse_unit(const parsable_unit *units, const std::string &str,
 
   return false;
 }
+
+} // anonymous namespace
 
 bool
 parse_date(const std::string &str, size_t &idx,
@@ -1202,20 +1250,6 @@ parse_distance(const std::string &str, double *dist_ptr, unit_type *unit_ptr)
 
   idx = skip_whitespace(str, idx);
 
-  static const parsable_unit distance_units[] =
-    {
-      {"cm\0centimetres\0centimetre\0centimeters\0centimeter\0",
-       unit_type::centimetres, .01},
-      {"m\0metres\0metre\0meters\0meter\0", unit_type::metres, 1},
-      {"km\0kilometres\0kilometre\0kilometers\0kilometer\0",
-       unit_type::kilometres, 1000},
-      {"in\0inches\0inch\0", unit_type::inches, 1/INCHES_PER_METER},
-      {"ft\0feet\0foot\0", unit_type::feet, 1/FEET_PER_METER},
-      {"yd\0yards\0yard\0", unit_type::yards, 1/YARDS_PER_METER},
-      {"mi\0mile\0miles\0", unit_type::miles, 1/MILES_PER_METER},
-      {0}
-    };
-
   unit_type unit = shared_config().default_distance_unit();
 
   parse_unit(distance_units, str, idx, value, unit);
@@ -1247,13 +1281,6 @@ parse_pace(const std::string &str, double *pace_ptr, unit_type *unit_ptr)
     {
       idx = skip_whitespace(str, idx + 1);
 
-      static const parsable_unit pace_units[] =
-	{
-	  {"mi\0mile\0", unit_type::seconds_per_mile, 1/MILES_PER_METER},
-	  {"km\0kilometre\0kilometer\0", unit_type::seconds_per_kilometre, 1000},
-	  {0}
-	};
-
       unit = shared_config().default_pace_unit();
 
       if (!parse_unit(pace_units, str, idx, value, unit))
@@ -1281,14 +1308,6 @@ parse_speed(const std::string &str, double *speed_ptr, unit_type *unit_ptr)
 
   idx = skip_whitespace(str, idx);
 
-  static const parsable_unit speed_units[] =
-    {
-      {"m/s\0mps\0", unit_type::metres_per_second, 1},
-      {"km/h\0kmh\0", unit_type::kilometres_per_hour, 1000/3600.},
-      {"mph\0", unit_type::miles_per_hour, METERS_PER_MILE/3600.},
-      {0}
-    };
-
   unit_type unit = shared_config().default_speed_unit();
 
   parse_unit(speed_units, str, idx, value, unit);
@@ -1313,16 +1332,9 @@ parse_temperature(const std::string &str, double *temp_ptr,
 
   idx = skip_whitespace(str, idx);
 
-  static const parsable_unit temp_units[] =
-    {
-      {"c\0celsius\0centigrade\0", unit_type::celsius, 1},
-      {"f\0fahrenheit\0", unit_type::fahrenheit, 5/9., -160/9.},
-      {0}
-    };
-
   unit_type unit = shared_config().default_temperature_unit();
 
-  parse_unit(temp_units, str, idx, value, unit);
+  parse_unit(temperature_units, str, idx, value, unit);
 
   *temp_ptr = value;
 
@@ -1342,14 +1354,6 @@ parse_weight(const std::string &str, double *weight_ptr, unit_type *unit_ptr)
     return false;
 
   idx = skip_whitespace(str, idx);
-
-  static const parsable_unit weight_units[] =
-    {
-      {"kg\0kilos\0kilogram\0kilograms\0kilogramme\0kilogrammes\0",
-       unit_type::kilogrammes, 1},
-      {"lb\0lbs\0pound\0pounds\0", unit_type::pounds, 1/POUNDS_PER_KILO},
-      {0}
-    };
 
   unit_type unit = shared_config().default_weight_unit();
 
@@ -1468,6 +1472,40 @@ parse_value(const std::string &str, field_data_type type,
     case field_data_type::keywords:
       return false;
     }
+
+  return false;
+}
+
+bool
+parse_unit(const std::string &str, field_data_type type, unit_type &unit)
+{
+  size_t idx = 0;
+  double value = 0;
+
+  if ((type == field_data_type::unknown
+       || type == field_data_type::distance)
+      && parse_unit(distance_units, str, idx, value, unit))
+    return true;
+
+  if ((type == field_data_type::unknown
+       || type == field_data_type::pace)
+      && parse_unit(pace_units, str, idx, value, unit))
+    return true;
+
+  if ((type == field_data_type::unknown
+       || type == field_data_type::speed)
+      && parse_unit(speed_units, str, idx, value, unit))
+    return true;
+
+  if ((type == field_data_type::unknown
+       || type == field_data_type::temperature)
+      && parse_unit(temperature_units, str, idx, value, unit))
+    return true;
+
+  if ((type == field_data_type::unknown
+       || type == field_data_type::weight)
+      && parse_unit(weight_units, str, idx, value, unit))
+    return true;
 
   return false;
 }
