@@ -54,6 +54,7 @@ enum class field_data_type
   fraction,
   weight,
   keywords,
+  unknown = string,
 };
 
 field_id lookup_field_id(const char *field_name);

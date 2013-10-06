@@ -61,6 +61,10 @@ public:
   bool find_gps_file(std::string &str) const;
 
   void edit_file(const char *filename) const;
+
+private:
+  void read_config_file(const char *path);
+  void set_start_of_week(const char *value);
 };
 
 const config &shared_config();
