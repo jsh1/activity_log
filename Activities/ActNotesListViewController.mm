@@ -180,6 +180,12 @@
   return NSNotFound;
 }
 
+- (void)selectRow:(NSInteger)row
+{
+  if (row >= 0 && row < _activities.size())
+    [_controller setSelectedActivityStorage:_activities[row].storage];
+}
+
 - (void)updateListViewBounds
 {
   CGFloat y = 0;
@@ -378,14 +384,23 @@
       [[_controller controller] previousActivity:_controller];
       return;
 
-    case 116:
+    case 115:
       [[_controller controller] firstActivity:_controller];
       return;
 
-    case 121:
+    case 119:
       [[_controller controller] lastActivity:_controller];
       return;
     }
+}
+
+- (void)mouseDown:(NSEvent *)e
+{
+  NSPoint p = [self convertPoint:[e locationInWindow] fromView:nil];
+  NSInteger row = [_controller rowForYPosition:p.y startPosition:nullptr];
+
+  if (row != NSNotFound)
+    [_controller selectRow:row];
 }
 
 @end
@@ -456,7 +471,7 @@ ActNotesItem::initialize()
 			  NSForegroundColorAttributeName,
 			  nil];
   body_attrs = [[NSDictionary alloc] initWithObjectsAndKeys:
-		[NSFont fontWithName:@"Helvetica Neue" size:BODY_FONT_SIZE],
+		[NSFont fontWithName:@"Helvetica" size:BODY_FONT_SIZE],
 		NSFontAttributeName,
 		greyColor, NSForegroundColorAttributeName,
 		nil];

@@ -6,7 +6,7 @@
 
 #define MIN_WIDTH 500
 #define MIN_HEIGHT 200
-#define SMOOTHING 10
+#define SMOOTHING 5
 
 @implementation ActChartViewController
 

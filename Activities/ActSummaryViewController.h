@@ -3,10 +3,9 @@
 #import "ActViewController.h"
 #import "ActTextField.h"
 
-@class ActHorizontalBoxView, ActHeaderView, ActSplitView;
+@class ActHorizontalBoxView, ActSplitView;
 
-@interface ActSummaryViewController : ActViewController
-    <NSTextViewDelegate, ActTextFieldDelegate>
+@interface ActSummaryViewController : ActViewController <NSTextViewDelegate>
 {
   IBOutlet ActHorizontalBoxView *_dateBox;
   IBOutlet ActExpandableTextField *_dateTimeField;
@@ -23,14 +22,11 @@
   IBOutlet ActExpandableTextField *_statsPaceField;
 
   IBOutlet ActTextField *_courseField;
-  IBOutlet ActSplitView *_splitView;
+
   IBOutlet NSTextView *_bodyTextView;
-  IBOutlet ActHeaderView *_headerView;
 
   NSDictionary *_fieldControls;		// FIELD-NAME -> CONTROL
 }
-
-+ (NSColor *)textFieldColor:(BOOL)readOnly;
 
 - (IBAction)controlAction:(id)sender;
 

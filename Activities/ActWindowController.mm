@@ -3,6 +3,7 @@
 #import "ActWindowController.h"
 
 #import "ActChartViewController.h"
+#import "ActHeaderViewController.h"
 #import "ActLapViewController.h"
 #import "ActListViewController.h"
 #import "ActNotesListViewController.h"
@@ -69,9 +70,10 @@ NSString *const ActActivityDidChangeBody = @"ActActivityDidChangeBody";
 - (void)windowDidLoad
 {
   [self addSplitView:_outerSplitView identifier:@"Window.outerSplitView"];
-  [self addSplitView:_leftSplitView identifier:@"Window.leftSplitView"];
   [self addSplitView:_leftRightSplitView identifier:@"Window.leftRightSplitView"];
   [self addSplitView:_rightSplitView identifier:@"Window.rightSplitView"];
+  [self addSplitView:_rightTopSplitView identifier:@"Window.rightTopSplitView"];
+  [self addSplitView:_rightMiddleSplitView identifier:@"Window.rightMiddleSplitView"];
 
   _fieldEditor = [[ActFieldEditor alloc] initWithFrame:NSZeroRect];
   [_fieldEditor setFieldEditor:YES];
@@ -79,27 +81,33 @@ NSString *const ActActivityDidChangeBody = @"ActActivityDidChangeBody";
   if (ActViewController *obj
       = [self viewControllerWithClass:[ActListViewController class]])
     {
-      [obj addToContainerView:_topLeftContainer];
+      [obj addToContainerView:_listContainer];
       [[self window] setInitialFirstResponder:[obj initialFirstResponder]];
     }
 
   if (ActViewController *obj
       = [self viewControllerWithClass:[ActNotesListViewController class]])
     {
-      [obj addToContainerView:_topLeftContainer];
+      [obj addToContainerView:_listContainer];
       [[self window] setInitialFirstResponder:[obj initialFirstResponder]];
     }
 
   if (ActViewController *obj
       = [self viewControllerWithClass:[ActSummaryViewController class]])
     {
-      [obj addToContainerView:_bottomLeftContainer];
+      [obj addToContainerView:_topLeftContainer];
+    }
+
+  if (ActViewController *obj
+      = [self viewControllerWithClass:[ActHeaderViewController class]])
+    {
+      [obj addToContainerView:_topRightContainer];
     }
 
   if (ActViewController *obj
       = [self viewControllerWithClass:[ActMapViewController class]])
     {
-      [obj addToContainerView:_topRightContainer];
+      [obj addToContainerView:_middleLeftContainer];
     }
 
   if (ActViewController *obj
@@ -111,12 +119,15 @@ NSString *const ActActivityDidChangeBody = @"ActActivityDidChangeBody";
   if (ActViewController *obj
       = [self viewControllerWithClass:[ActChartViewController class]])
     {
-      [obj addToContainerView:_bottomRightContainer];
+      [obj addToContainerView:_bottomContainer];
     }
+
+  _listViewType = -1;
 
   [self applySavedWindowState];
 
-  [self controlAction:_listViewControl];
+  if (_listViewType < 0)
+    [self setListViewType:0];
 
   [[NSNotificationCenter defaultCenter]
    addObserver:self selector:@selector(windowWillClose:)
@@ -170,8 +181,7 @@ NSString *const ActActivityDidChangeBody = @"ActActivityDidChangeBody";
   NSDictionary *dict = [NSDictionary dictionaryWithObjectsAndKeys:
 			controllers, @"ActViewControllers",
 			split, @"ActSplitViews",
-			[NSNumber numberWithInt:
-			 [_listViewControl selectedSegment]],
+			[NSNumber numberWithInt:_listViewType],
 			@"ActSelectedListView",
 			nil];
 
@@ -206,7 +216,9 @@ NSString *const ActActivityDidChangeBody = @"ActActivityDidChangeBody";
     }
 
   if (NSNumber *obj = [state objectForKey:@"ActSelectedListView"])
-    [_listViewControl setSelectedSegment:[obj intValue]];
+    {
+      [self setListViewType:[obj intValue]];
+    }
 }
 
 - (act::database *)database
@@ -360,7 +372,7 @@ NSString *const ActActivityDidChangeBody = @"ActActivityDidChangeBody";
   [self setNeedsSynchronize:YES];
 
   [[NSNotificationCenter defaultCenter]
-   postNotificationName:ActActivityDidChangeField object:self
+   postNotificationName:ActActivityDidChangeBody object:self
    userInfo:@{@"activity": [NSValue valueWithPointer:&a]}];
 }
 
@@ -582,20 +594,34 @@ NSString *const ActActivityDidChangeBody = @"ActActivityDidChangeBody";
 	    }
 
 	  wrapped.append(ptr, word - ptr);
-
-	  if (word[0] == '\n' && word[1] == '\n')
-	    {
-	      wrapped.push_back('\n');
-	      column = BODY_WRAP_COLUMN;
-	    }
-	  else
-	    column += word - ptr;
-
+	  column += word - ptr;
 	  ptr = word;
 	}
 
-      if (ptr[0] != 0)
-	ptr++;
+      int newlines = 0;
+
+    again:
+      switch (*ptr)
+	{
+	case ' ':
+	case '\t':
+	case '\f':
+	case '\r':
+	  ptr++;
+	  goto again;
+	case '\n':
+	  newlines++;
+	  ptr++;
+	  goto again;
+	default:
+	  break;
+	}
+
+      while (newlines-- > 1)
+	{
+	  wrapped.push_back('\n');
+	  column = BODY_WRAP_COLUMN;
+	}
     }
 
   if (column > 0)
@@ -612,14 +638,40 @@ NSString *const ActActivityDidChangeBody = @"ActActivityDidChangeBody";
     }
 }
 
+- (void)setListViewType:(NSInteger)type
+{
+  if (_listViewType != type)
+    {
+      ActViewController *list = [self viewControllerWithClass:
+				 [ActListViewController class]];
+      ActViewController *notes = [self viewControllerWithClass:
+				  [ActNotesListViewController class]];
+
+      ActViewController *oldC = type == 1 ? list : notes;
+      ActViewController *newC = type == 0 ? list : notes;
+
+      NSResponder *first = [[self window] firstResponder];
+
+      BOOL firstResponder = ([first isKindOfClass:[NSView class]]
+			     && [(NSView *)first isDescendantOf:[oldC view]]);
+
+      _listViewType = type;
+
+      [[newC view] setHidden:NO];
+      [[oldC view] setHidden:YES];
+
+      if (firstResponder)
+	[[self window] makeFirstResponder:[newC initialFirstResponder]];
+    }
+}
+
+- (NSInteger)listViewType
+{
+  return _listViewType;
+}
+
 - (IBAction)newActivity:(id)sender
 {
-  if (sender == _addButton
-      && ([[[self window] currentEvent] modifierFlags] & NSAlternateKeyMask))
-    {
-      return [self importFile:sender];
-    }
-
   [self synchronizeIfNeeded];
 
   act::arguments args("act-new");
@@ -729,15 +781,9 @@ NSString *const ActActivityDidChangeBody = @"ActActivityDidChangeBody";
     [self setSelectedActivityStorage:_activityList.back()];
 }
 
-- (IBAction)controlAction:(id)sender
+- (IBAction)setListViewAction:(id)sender
 {
-  if (sender == _listViewControl)
-    {
-      [[[self viewControllerWithClass:[ActListViewController class]] view]
-       setHidden:![_listViewControl isSelectedForSegment:0]];
-      [[[self viewControllerWithClass:[ActNotesListViewController class]] view]
-       setHidden:![_listViewControl isSelectedForSegment:1]];
-    }
+  [self setListViewType:[sender tag]];
 }
 
 - (void)windowWillClose:(NSNotification *)note

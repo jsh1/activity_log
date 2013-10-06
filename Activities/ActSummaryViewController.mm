@@ -2,7 +2,6 @@
 
 #import "ActSummaryViewController.h"
 
-#import "ActHeaderView.h"
 #import "ActHorizontalBoxView.h"
 #import "ActWindowController.h"
 
@@ -35,16 +34,14 @@
    addObserver:self selector:@selector(activityDidChangeBody:)
    name:ActActivityDidChangeBody object:_controller];
 
-  [_controller addSplitView:_splitView identifier:@"Summary.mainSplitView"];
-
   [_dateBox setRightToLeft:YES];
   [_dateBox setSpacing:3];
   [_typeBox setSpacing:3];
   [_statsBox setSpacing:8];
 
-  [_courseField setCompletesEverything:YES];
+  [_bodyTextView setFont:[NSFont fontWithName:@"Helvetica" size:12]];
 
-  [_headerView viewDidLoad];
+  [_courseField setCompletesEverything:YES];
 }
 
 - (NSView *)initialFirstResponder
@@ -59,19 +56,6 @@
   [_fieldControls release];
 
   [super dealloc];
-}
-
-+ (NSColor *)textFieldColor:(BOOL)readOnly
-{
-  static NSColor *a, *b;
-
-  if (a == nil)
-    {
-      a = [[NSColor colorWithDeviceWhite:.25 alpha:1] retain];
-      b = [[NSColor colorWithDeviceWhite:.45 alpha:1] retain];
-    }
-
-  return !readOnly ? a : b;
 }
 
 - (NSDictionary *)fieldControls
@@ -129,7 +113,12 @@
 	  [control setStringValue:string];
 	  BOOL readOnly = [_controller isFieldReadOnly:field];
 	  [control setEditable:!readOnly];
-	  [control setTextColor:[[self class] textFieldColor:readOnly]];
+	  NSColor *color;
+	  if ([control superview] != _statsBox)
+	    color = [[self class] textFieldColor:readOnly];
+	  else
+	    color = [[self class] redTextFieldColor:readOnly];
+	  [control setTextColor:color];
 	}
 
       [_bodyTextView setString:[_controller bodyString]];
@@ -158,67 +147,9 @@
   [self _reflowFields];
 }
 
-- (void)_updateHeaderFields
-{
-  const act::activity *a = [_controller selectedActivity];
-
-  [_headerView setDisplayedFields:[NSArray array]];
-
-  if (a != nullptr)
-    {
-      if (a->average_hr() != 0)
-	[_headerView addDisplayedField:@"Average-HR"];
-      if (a->max_hr() != 0)
-	[_headerView addDisplayedField:@"Max-HR"];
-
-      if (a->vdot() != 0)
-	[_headerView addDisplayedField:@"VDOT"];
-      if (a->points() != 0)
-	[_headerView addDisplayedField:@"Points"];
-
-      if (a->effort() != 0)
-	[_headerView addDisplayedField:@"Effort"];
-      if (a->quality() != 0)
-	[_headerView addDisplayedField:@"Quality"];
-
-      if (a->calories() != 0)
-	[_headerView addDisplayedField:@"Calories"];
-      if (a->weight() != 0)
-	[_headerView addDisplayedField:@"Weight"];
-      if (a->resting_hr() != 0)
-	[_headerView addDisplayedField:@"Resting-HR"];
-
-      if (a->temperature() != 0)
-	[_headerView addDisplayedField:@"Temperature"];
-      if (a->dew_point() != 0)
-	[_headerView addDisplayedField:@"Dew-Point"];
-      if (a->field_ptr("weather") != nullptr)
-	[_headerView addDisplayedField:@"Weather"];
-
-      if (a->field_ptr("equipment") != nullptr)
-	[_headerView addDisplayedField:@"Equipment"];
-
-      NSArray *ignoredFields = @[@"Date", @"Activity", @"Type", @"Course",
-	@"Distance", @"Duration", @"Pace", @"Speed", @"GPS-File"];
-
-      for (const auto &it : *a->storage())
-	{
-	  NSString *str = [[NSString alloc]
-			   initWithUTF8String:it.first.c_str()];
-	  if (![_headerView displaysField:str]
-	      && ![ignoredFields containsStringNoCase:str])
-	    [_headerView addDisplayedField:str];
-	  [str release];
-	}
-    }
-
-  [_headerView layoutAndResize];
-}
-
 - (void)selectedActivityDidChange:(NSNotification *)note
 {
   [self _reloadFields];
-  [self _updateHeaderFields];
 }
 
 - (void)activityDidChangeField:(NSNotification *)note
@@ -326,13 +257,6 @@
     }
 }
 
-// ActActivityTextFieldDelegate methods
-
-- (ActFieldEditor *)actFieldEditor:(ActTextField *)obj
-{
-  return [_controller fieldEditor];
-}
-
 @end
 
 @implementation ActSummaryView
@@ -344,30 +268,8 @@
 
 - (void)drawRect:(NSRect)r
 {
-  NSRect rect = NSInsetRect([self bounds], 5, 5);
-  rect.origin.y += 2;
-
-  CGContextRef ctx = (CGContextRef) [[NSGraphicsContext
-				      currentContext] graphicsPort];
-  CGContextSaveGState(ctx);
-
-  static CGColorRef shadow_color;
-
-  if (shadow_color == nullptr)
-    {
-      const CGFloat comp[2] = {0, .5};
-      CGColorSpaceRef space = CGColorSpaceCreateDeviceGray();
-      shadow_color = CGColorCreate(space, comp);
-      CGColorSpaceRelease(space);
-    }
-
-  CGContextSetShadowWithColor(ctx, CGSizeMake(0, -1), 2.5, shadow_color);
-
   [[NSColor whiteColor] setFill];
-  [[NSBezierPath bezierPathWithRoundedRect:rect
-    xRadius:CORNER_RADIUS yRadius:CORNER_RADIUS] fill];
-
-  CGContextRestoreGState(ctx);
+  [NSBezierPath fillRect:r];
 }
 
 - (void)resizeSubviewsWithOldSize:(NSSize)oldSize

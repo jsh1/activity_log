@@ -8,6 +8,32 @@
 
 @synthesize controller = _controller;
 
++ (NSColor *)textFieldColor:(BOOL)readOnly
+{
+  static NSColor *a, *b;
+
+  if (a == nil)
+    {
+      a = [[NSColor colorWithDeviceWhite:.25 alpha:1] retain];
+      b = [[NSColor colorWithDeviceWhite:.45 alpha:1] retain];
+    }
+
+  return !readOnly ? a : b;
+}
+
++ (NSColor *)redTextFieldColor:(BOOL)readOnly
+{
+  static NSColor *a, *b;
+
+  if (a == nil)
+    {
+      a = [[NSColor colorWithDeviceRed:197/255. green:56/255. blue:51/255. alpha:1] retain];
+      b = [[NSColor colorWithDeviceRed:197/255. green:121/255. blue:118/255. alpha:1] retain];
+    }
+
+  return !readOnly ? a : b;
+}
+
 + (NSString *)viewNibName
 {
   return nil;
@@ -68,6 +94,13 @@
 - (void)removeFromContainer
 {
   [[self view] removeFromSuperview];
+}
+
+// ActActivityTextFieldDelegate methods
+
+- (ActFieldEditor *)actFieldEditor:(ActTextField *)obj
+{
+  return [_controller fieldEditor];
 }
 
 @end

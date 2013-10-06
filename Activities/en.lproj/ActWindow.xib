@@ -7,20 +7,17 @@
     <objects>
         <customObject id="-2" userLabel="File's Owner" customClass="ActWindowController">
             <connections>
-                <outlet property="_addButton" destination="88" id="112"/>
-                <outlet property="_bottomLeftContainer" destination="QLs-qn-Sqk" id="nVH-pl-WeC"/>
-                <outlet property="_bottomRightContainer" destination="12P-AB-C5o" id="tlK-At-ZmY"/>
-                <outlet property="_deleteButton" destination="90" id="113"/>
+                <outlet property="_bottomContainer" destination="12P-AB-C5o" id="fQ9-w8-Zrt"/>
                 <outlet property="_leftRightSplitView" destination="65" id="3ei-yq-zSz"/>
-                <outlet property="_leftSplitView" destination="JOl-o5-rfM" id="orw-Ms-1bi"/>
-                <outlet property="_listViewControl" destination="4qj-1R-RaG" id="weX-Nm-GJh"/>
-                <outlet property="_middleRightContainer" destination="KSz-PJ-NMt" id="Uvv-fN-Gfj"/>
+                <outlet property="_listContainer" destination="7" id="R4K-Mz-Mxe"/>
+                <outlet property="_middleLeftContainer" destination="Fav-cp-B49" id="4ji-oU-kI6"/>
+                <outlet property="_middleRightContainer" destination="vQ7-Ki-VC4" id="QCs-dF-MaY"/>
                 <outlet property="_outerSplitView" destination="3" id="skD-be-5bj"/>
-                <outlet property="_reloadButton" destination="98" id="114"/>
-                <outlet property="_revealButton" destination="100" id="115"/>
+                <outlet property="_rightMiddleSplitView" destination="JOl-o5-rfM" id="pdO-Jy-Fvx"/>
                 <outlet property="_rightSplitView" destination="564-ie-tPh" id="tS3-nt-GTb"/>
-                <outlet property="_topLeftContainer" destination="bTd-EI-nZg" id="vsa-nw-tk1"/>
-                <outlet property="_topRightContainer" destination="zEi-s4-zJF" id="9cA-Hn-6nX"/>
+                <outlet property="_rightTopSplitView" destination="hx5-84-FAM" id="VRw-Xz-F8P"/>
+                <outlet property="_topLeftContainer" destination="LZo-4B-KQ7" id="upi-FX-ix6"/>
+                <outlet property="_topRightContainer" destination="VDt-N0-7eK" id="PLp-ZX-cOM"/>
                 <outlet property="window" destination="1" id="17"/>
             </connections>
         </customObject>
@@ -36,97 +33,84 @@
                 <rect key="frame" x="0.0" y="0.0" width="905" height="665"/>
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
-                    <splitView autosaveName="" dividerStyle="thin" vertical="YES" id="3" customClass="ActSplitView">
+                    <splitView autosaveName="" dividerStyle="paneSplitter" vertical="YES" id="3" customClass="ActSplitView">
                         <rect key="frame" x="0.0" y="0.0" width="905" height="665"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <scrollView borderType="none" horizontalLineScroll="10" horizontalPageScroll="10" verticalLineScroll="10" verticalPageScroll="10" usesPredominantAxisScrolling="NO" id="74">
-                                <rect key="frame" x="0.0" y="0.0" width="166" height="665"/>
+                            <scrollView borderType="none" autohidesScrollers="YES" horizontalLineScroll="10" horizontalPageScroll="10" verticalLineScroll="10" verticalPageScroll="10" usesPredominantAxisScrolling="NO" id="74">
+                                <rect key="frame" x="0.0" y="0.0" width="157" height="665"/>
                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                 <clipView key="contentView" id="VuC-gS-c1e">
-                                    <rect key="frame" x="0.0" y="0.0" width="166" height="665"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="157" height="665"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
                                         <view id="75">
-                                            <rect key="frame" x="0.0" y="0.0" width="166" height="665"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="157" height="665"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                         </view>
                                     </subviews>
                                     <color key="backgroundColor" red="0.84705889229999998" green="0.87450987099999999" blue="0.90196084980000002" alpha="1" colorSpace="deviceRGB"/>
                                 </clipView>
-                                <scroller key="horizontalScroller" verticalHuggingPriority="750" id="76">
-                                    <rect key="frame" x="0.0" y="649" width="166" height="16"/>
+                                <scroller key="horizontalScroller" hidden="YES" verticalHuggingPriority="750" id="76">
+                                    <rect key="frame" x="0.0" y="650" width="142" height="15"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                 </scroller>
-                                <scroller key="verticalScroller" verticalHuggingPriority="750" doubleValue="1" id="77">
-                                    <rect key="frame" x="150" y="0.0" width="16" height="665"/>
+                                <scroller key="verticalScroller" hidden="YES" verticalHuggingPriority="750" doubleValue="1" id="77">
+                                    <rect key="frame" x="142" y="0.0" width="15" height="650"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                 </scroller>
                             </scrollView>
-                            <splitView autosaveName="" dividerStyle="thin" vertical="YES" id="65" customClass="ActSplitView">
+                            <splitView autosaveName="" dividerStyle="paneSplitter" vertical="YES" id="65" customClass="ActSplitView">
                                 <rect key="frame" x="167" y="0.0" width="738" height="665"/>
                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                 <subviews>
                                     <customView focusRingType="none" id="7">
-                                        <rect key="frame" x="0.0" y="0.0" width="371" height="665"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="281" height="665"/>
+                                        <autoresizingMask key="autoresizingMask"/>
+                                        <connections>
+                                            <outlet property="_controller" destination="-2" id="22"/>
+                                        </connections>
+                                    </customView>
+                                    <customView id="58">
+                                        <rect key="frame" x="291" y="0.0" width="447" height="665"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <subviews>
-                                            <customView id="MIO-tx-yBV">
-                                                <rect key="frame" x="0.0" y="0.0" width="371" height="665"/>
+                                            <splitView autosaveName="" dividerStyle="thin" id="564-ie-tPh" customClass="ActSplitView">
+                                                <rect key="frame" x="1" y="0.0" width="446" height="665"/>
                                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                 <subviews>
-                                                    <button verticalHuggingPriority="750" id="88">
-                                                        <rect key="frame" x="2" y="644" width="20" height="21"/>
-                                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                                        <buttonCell key="cell" type="smallSquare" bezelStyle="smallSquare" image="NSAddTemplate" imagePosition="overlaps" alignment="center" controlSize="small" state="on" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="89">
-                                                            <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
-                                                            <font key="font" metaFont="smallSystem"/>
-                                                        </buttonCell>
-                                                        <connections>
-                                                            <action selector="newActivity:" target="-2" id="107"/>
-                                                        </connections>
-                                                    </button>
-                                                    <button verticalHuggingPriority="750" id="90">
-                                                        <rect key="frame" x="24" y="644" width="20" height="21"/>
-                                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                                        <buttonCell key="cell" type="smallSquare" bezelStyle="smallSquare" image="NSRemoveTemplate" imagePosition="overlaps" alignment="center" controlSize="small" state="on" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="91">
-                                                            <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
-                                                            <font key="font" metaFont="smallSystem"/>
-                                                        </buttonCell>
-                                                        <connections>
-                                                            <action selector="delete:" target="-2" id="106"/>
-                                                        </connections>
-                                                    </button>
-                                                    <button verticalHuggingPriority="750" id="98">
-                                                        <rect key="frame" x="46" y="644" width="20" height="21"/>
-                                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                                        <buttonCell key="cell" type="smallSquare" bezelStyle="smallSquare" image="NSRefreshTemplate" imagePosition="overlaps" alignment="center" controlSize="small" state="on" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="99">
-                                                            <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
-                                                            <font key="font" metaFont="smallSystem"/>
-                                                        </buttonCell>
-                                                        <connections>
-                                                            <action selector="reloadDatabase:" target="-2" id="108"/>
-                                                        </connections>
-                                                    </button>
-                                                    <button verticalHuggingPriority="750" id="100">
-                                                        <rect key="frame" x="68" y="644" width="20" height="21"/>
-                                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                                        <buttonCell key="cell" type="smallSquare" bezelStyle="smallSquare" image="NSRevealFreestandingTemplate" imagePosition="overlaps" alignment="center" controlSize="small" state="on" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="101">
-                                                            <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
-                                                            <font key="font" metaFont="smallSystem"/>
-                                                        </buttonCell>
-                                                    </button>
-                                                    <splitView autosaveName="" dividerStyle="thin" id="JOl-o5-rfM" customClass="ActSplitView">
-                                                        <rect key="frame" x="2" y="0.0" width="368" height="644"/>
+                                                    <splitView autosaveName="" dividerStyle="thin" vertical="YES" id="hx5-84-FAM" customClass="ActSplitView">
+                                                        <rect key="frame" x="0.0" y="0.0" width="446" height="241"/>
                                                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                         <subviews>
-                                                            <customView id="bTd-EI-nZg">
-                                                                <rect key="frame" x="0.0" y="0.0" width="368" height="304"/>
-                                                                <autoresizingMask key="autoresizingMask"/>
+                                                            <customView id="LZo-4B-KQ7">
+                                                                <rect key="frame" x="0.0" y="0.0" width="303" height="241"/>
+                                                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                             </customView>
-                                                            <customView id="QLs-qn-Sqk">
-                                                                <rect key="frame" x="0.0" y="305" width="368" height="339"/>
-                                                                <autoresizingMask key="autoresizingMask"/>
+                                                            <customView id="VDt-N0-7eK">
+                                                                <rect key="frame" x="304" y="0.0" width="142" height="241"/>
+                                                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                                            </customView>
+                                                        </subviews>
+                                                        <holdingPriorities>
+                                                            <real value="250"/>
+                                                            <real value="250"/>
+                                                        </holdingPriorities>
+                                                        <connections>
+                                                            <outlet property="delegate" destination="-2" id="DEz-hG-8C5"/>
+                                                        </connections>
+                                                    </splitView>
+                                                    <splitView autosaveName="" dividerStyle="thin" vertical="YES" id="JOl-o5-rfM" customClass="ActSplitView">
+                                                        <rect key="frame" x="0.0" y="242" width="446" height="256"/>
+                                                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                                        <subviews>
+                                                            <customView id="Fav-cp-B49">
+                                                                <rect key="frame" x="0.0" y="0.0" width="303" height="256"/>
+                                                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                                            </customView>
+                                                            <customView id="vQ7-Ki-VC4">
+                                                                <rect key="frame" x="304" y="0.0" width="142" height="256"/>
+                                                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                             </customView>
                                                         </subviews>
                                                         <holdingPriorities>
@@ -137,45 +121,8 @@
                                                             <outlet property="delegate" destination="-2" id="Hqg-rr-cwj"/>
                                                         </connections>
                                                     </splitView>
-                                                    <segmentedControl verticalHuggingPriority="750" id="4qj-1R-RaG">
-                                                        <rect key="frame" x="321" y="644" width="49" height="21"/>
-                                                        <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES"/>
-                                                        <segmentedCell key="cell" controlSize="small" alignment="left" style="smallSquare" trackingMode="selectOne" id="Xjs-sh-mJZ">
-                                                            <font key="font" metaFont="smallSystem"/>
-                                                            <segments>
-                                                                <segment image="NSListViewTemplate" selected="YES"/>
-                                                                <segment image="NSIconViewTemplate" tag="1"/>
-                                                            </segments>
-                                                        </segmentedCell>
-                                                        <connections>
-                                                            <action selector="controlAction:" target="-2" id="WmH-4u-6nz"/>
-                                                        </connections>
-                                                    </segmentedControl>
-                                                </subviews>
-                                            </customView>
-                                        </subviews>
-                                        <connections>
-                                            <outlet property="_controller" destination="-2" id="22"/>
-                                        </connections>
-                                    </customView>
-                                    <customView id="58">
-                                        <rect key="frame" x="372" y="0.0" width="366" height="665"/>
-                                        <autoresizingMask key="autoresizingMask"/>
-                                        <subviews>
-                                            <splitView autosaveName="" dividerStyle="thin" id="564-ie-tPh" customClass="ActSplitView">
-                                                <rect key="frame" x="1" y="0.0" width="365" height="644"/>
-                                                <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                                                <subviews>
-                                                    <customView id="zEi-s4-zJF">
-                                                        <rect key="frame" x="0.0" y="0.0" width="365" height="305"/>
-                                                        <autoresizingMask key="autoresizingMask"/>
-                                                    </customView>
-                                                    <customView id="KSz-PJ-NMt">
-                                                        <rect key="frame" x="0.0" y="306" width="365" height="166"/>
-                                                        <autoresizingMask key="autoresizingMask"/>
-                                                    </customView>
                                                     <customView id="12P-AB-C5o">
-                                                        <rect key="frame" x="0.0" y="473" width="365" height="171"/>
+                                                        <rect key="frame" x="0.0" y="499" width="446" height="166"/>
                                                         <autoresizingMask key="autoresizingMask"/>
                                                     </customView>
                                                 </subviews>
@@ -215,12 +162,4 @@
             </connections>
         </window>
     </objects>
-    <resources>
-        <image name="NSAddTemplate" width="8" height="8"/>
-        <image name="NSIconViewTemplate" width="11" height="10"/>
-        <image name="NSListViewTemplate" width="11" height="10"/>
-        <image name="NSRefreshTemplate" width="10" height="12"/>
-        <image name="NSRemoveTemplate" width="8" height="8"/>
-        <image name="NSRevealFreestandingTemplate" width="14" height="14"/>
-    </resources>
 </document>

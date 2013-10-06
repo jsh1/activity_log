@@ -9,7 +9,8 @@
 
 #define FIELD_HEIGHT 12
 #define FIELD_Y_SPACING 2
-#define FOCUS_INSET 2
+#define X_INSET 2
+#define Y_INSET 10
 
 @implementation ActHeaderView
 
@@ -186,13 +187,13 @@
       h += [field preferredHeight];
     }
 
-  return h + FOCUS_INSET * 2;
+  return h + Y_INSET * 2;
 }
 
 - (void)layoutSubviews
 {
   NSRect bounds = [self bounds];
-  NSRect frame = NSInsetRect(bounds, FOCUS_INSET, FOCUS_INSET);
+  NSRect frame = NSInsetRect(bounds, X_INSET, Y_INSET);
 
   for (ActHeaderFieldView *field in [self subviews])
     {

@@ -17,22 +17,20 @@ extern NSString *const ActActivityDidChangeBody;
 
 @interface ActWindowController : NSWindowController <NSSplitViewDelegate>
 {
-  IBOutlet NSButton *_addButton;
-  IBOutlet NSButton *_deleteButton;
-  IBOutlet NSButton *_reloadButton;
-  IBOutlet NSButton *_revealButton;
-  IBOutlet NSSegmentedControl *_listViewControl;
-
   IBOutlet ActSplitView *_outerSplitView;
   IBOutlet ActSplitView *_leftRightSplitView;
-  IBOutlet ActSplitView *_leftSplitView;
   IBOutlet ActSplitView *_rightSplitView;
+  IBOutlet ActSplitView *_rightTopSplitView;
+  IBOutlet ActSplitView *_rightMiddleSplitView;
 
-  IBOutlet NSView *_topLeftContainer;		// activity list
-  IBOutlet NSView *_bottomLeftContainer;	// activity summary
-  IBOutlet NSView *_topRightContainer;		// map view
-  IBOutlet NSView *_middleRightContainer;	// lap view
-  IBOutlet NSView *_bottomRightContainer;	// chart view
+  IBOutlet NSView *_listContainer;		// activity list
+  IBOutlet NSView *_topLeftContainer;		// summary
+  IBOutlet NSView *_topRightContainer;		// header fields
+  IBOutlet NSView *_middleLeftContainer;	// map
+  IBOutlet NSView *_middleRightContainer;	// laps
+  IBOutlet NSView *_bottomContainer;		// charts
+
+  NSInteger _listViewType;
 
   NSMutableArray *_viewControllers;
   NSMapTable *_splitViews;
@@ -60,6 +58,8 @@ extern NSString *const ActActivityDidChangeBody;
 @property(nonatomic, readonly) NSUndoManager *undoManager;
 
 @property(nonatomic) BOOL needsSynchronize;
+
+@property(nonatomic) NSInteger listViewType;
 
 - (ActViewController *)viewControllerWithClass:(Class)cls;
 
@@ -114,6 +114,6 @@ extern NSString *const ActActivityDidChangeBody;
 - (IBAction)firstActivity:(id)sender;
 - (IBAction)lastActivity:(id)sender;
 
-- (IBAction)controlAction:(id)sender;
+- (IBAction)setListViewAction:(id)sender;
 
 @end

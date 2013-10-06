@@ -18,6 +18,8 @@
 		5711D4A917EA09B6003157AF /* ActSplitView.mm in Sources */ = {isa = PBXBuildFile; fileRef = 5711D4A817EA09B6003157AF /* ActSplitView.mm */; };
 		57193D4617FDFC9D009634B4 /* ActNotesListViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = 57193D4517FDFC9D009634B4 /* ActNotesListViewController.mm */; };
 		57193D4917FDFCAE009634B4 /* ActNotesListView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 57193D4717FDFCAE009634B4 /* ActNotesListView.xib */; };
+		57193D4D1801A4C9009634B4 /* ActHeaderViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = 57193D4C1801A4C9009634B4 /* ActHeaderViewController.mm */; };
+		57193D521801A514009634B4 /* ActHeaderView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 57193D501801A514009634B4 /* ActHeaderView.xib */; };
 		571DB99D17BE615C0001514C /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 571DB99B17BE615C0001514C /* InfoPlist.strings */; };
 		571DB99F17BE615C0001514C /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 571DB99E17BE615C0001514C /* main.m */; };
 		571DB9A617BE615C0001514C /* ActAppDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = 571DB9A517BE615C0001514C /* ActAppDelegate.mm */; };
@@ -96,6 +98,9 @@
 		57193D4517FDFC9D009634B4 /* ActNotesListViewController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ActNotesListViewController.mm; sourceTree = "<group>"; };
 		57193D4817FDFCAE009634B4 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/ActNotesListView.xib; sourceTree = "<group>"; };
 		57193D4A17FF2469009634B4 /* objc-ptr.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "objc-ptr.h"; sourceTree = "<group>"; };
+		57193D4B1801A4C9009634B4 /* ActHeaderViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActHeaderViewController.h; sourceTree = "<group>"; };
+		57193D4C1801A4C9009634B4 /* ActHeaderViewController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ActHeaderViewController.mm; sourceTree = "<group>"; };
+		57193D511801A514009634B4 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/ActHeaderView.xib; sourceTree = "<group>"; };
 		571DB98F17BE615C0001514C /* Activities.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Activities.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		571DB99517BE615C0001514C /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
 		571DB99717BE615C0001514C /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
@@ -255,6 +260,8 @@
 				57193D4517FDFC9D009634B4 /* ActNotesListViewController.mm */,
 				5730789417C56E54002C5B28 /* ActChartViewController.h */,
 				5730789517C56E54002C5B28 /* ActChartViewController.mm */,
+				57193D4B1801A4C9009634B4 /* ActHeaderViewController.h */,
+				57193D4C1801A4C9009634B4 /* ActHeaderViewController.mm */,
 				57A7352617CF8A3B0054E3EB /* ActLapViewController.h */,
 				57A7352717CF8A3B0054E3EB /* ActLapViewController.mm */,
 				57707AEB17DFBF99009BAC5D /* ActMapViewController.h */,
@@ -362,6 +369,7 @@
 				571DB9A717BE615C0001514C /* MainMenu.xib */,
 				57921A5517BEAEF0001AD35D /* ActWindow.xib */,
 				570E6AC817F4793700A5BB4D /* ActChartView.xib */,
+				57193D501801A514009634B4 /* ActHeaderView.xib */,
 				570E6AC217F473C600A5BB4D /* ActLapView.xib */,
 				570E6ACB17F47A9C00A5BB4D /* ActListView.xib */,
 				57193D4717FDFCAE009634B4 /* ActNotesListView.xib */,
@@ -465,6 +473,7 @@
 				57DB7BB017E0D4790093C735 /* mapquest-map-tiles.json in Resources */,
 				57DB7BB117E0D4790093C735 /* mapquest-sat-tiles.json in Resources */,
 				57DB7BB217E0D4790093C735 /* opencyclemap-tiles.json in Resources */,
+				57193D521801A514009634B4 /* ActHeaderView.xib in Resources */,
 				57DB7BB317E0D4790093C735 /* openstreetmap-tiles.json in Resources */,
 				57193D4917FDFCAE009634B4 /* ActNotesListView.xib in Resources */,
 				570E6AC717F474F700A5BB4D /* ActSummaryView.xib in Resources */,
@@ -481,6 +490,7 @@
 			files = (
 				571DB99F17BE615C0001514C /* main.m in Sources */,
 				571DB9A617BE615C0001514C /* ActAppDelegate.mm in Sources */,
+				57193D4D1801A4C9009634B4 /* ActHeaderViewController.mm in Sources */,
 				571DB9B517BE66A60001514C /* ActListViewController.mm in Sources */,
 				57921A5A17BEAF48001AD35D /* ActWindowController.mm in Sources */,
 				579772E517C4F63900AA2E9D /* ActHeaderView.mm in Sources */,
@@ -584,6 +594,14 @@
 				57193D4817FDFCAE009634B4 /* en */,
 			);
 			name = ActNotesListView.xib;
+			sourceTree = "<group>";
+		};
+		57193D501801A514009634B4 /* ActHeaderView.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				57193D511801A514009634B4 /* en */,
+			);
+			name = ActHeaderView.xib;
 			sourceTree = "<group>";
 		};
 		571DB99B17BE615C0001514C /* InfoPlist.strings */ = {

@@ -1,15 +1,18 @@
 // -*- c-style: gnu -*-
 
-#import <AppKit/AppKit.h>
+#import "ActTextField.h"
 
 #import "act-activity-storage.h"
 
 @class ActWindowController;
 
-@interface ActViewController : NSViewController
+@interface ActViewController : NSViewController <ActTextFieldDelegate>
 {
   ActWindowController *_controller;
 }
+
++ (NSColor *)textFieldColor:(BOOL)readOnly;
++ (NSColor *)redTextFieldColor:(BOOL)readOnly;
 
 + (NSString *)viewNibName;
 - (NSString *)identifier;

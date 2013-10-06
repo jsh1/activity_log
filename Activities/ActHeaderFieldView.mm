@@ -7,7 +7,7 @@
 
 #import "act-database.h"
 
-#define LABEL_WIDTH 100
+#define LABEL_WIDTH 90
 #define LABEL_HEIGHT 14
 
 #define CONTROL_HEIGHT LABEL_HEIGHT

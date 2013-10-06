@@ -634,6 +634,17 @@ DQ
                 <menuItem title="View" id="295">
                     <menu key="submenu" title="View" id="296">
                         <items>
+                            <menuItem title="Show List View" keyEquivalent="1" id="eGp-Xe-Xqf">
+                                <connections>
+                                    <action selector="setListViewAction:" target="-1" id="ScQ-T2-4x9"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem title="Show Notes View" tag="1" keyEquivalent="2" id="KyP-Fn-7v4">
+                                <connections>
+                                    <action selector="setListViewAction:" target="-1" id="8f3-1O-89n"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem isSeparatorItem="YES" id="yeB-Bt-ud4"/>
                             <menuItem title="Show Toolbar" keyEquivalent="t" id="297">
                                 <modifierMask key="keyEquivalentModifierMask" option="YES" command="YES"/>
                                 <connections>
