@@ -29,6 +29,7 @@ public:
     {
       IDENTITY,
       HEARTRATE_BPM_HRR,
+      HEARTRATE_BPM_PMAX,
       SPEED_MS_PACE,
       DISTANCE_M_MI,
       DISTANCE_M_FT,

@@ -34,6 +34,9 @@ chart::line::convert_from_si(double x) const
     case value_conversion::HEARTRATE_BPM_HRR: {
       const config &cfg = shared_config();
       return (x - cfg.resting_hr()) / (cfg.max_hr() - cfg.resting_hr()) * 100.; }
+    case value_conversion::HEARTRATE_BPM_PMAX: {
+      const config &cfg = shared_config();
+      return x / cfg.max_hr() * 100.; }
     case value_conversion::SPEED_MS_PACE:
       return x > 0 ? SECS_PER_MILE(x) : 0;
     case value_conversion::DISTANCE_M_MI:
@@ -55,6 +58,9 @@ chart::line::convert_to_si(double x) const
     case value_conversion::HEARTRATE_BPM_HRR: {
       const config &cfg = shared_config();
       return x * (1./100) * (cfg.max_hr() - cfg.resting_hr()) + cfg.resting_hr(); }
+    case value_conversion::HEARTRATE_BPM_PMAX: {
+      const config &cfg = shared_config();
+      return x * (1./100) * cfg.max_hr(); }
     case value_conversion::SPEED_MS_PACE:
       return x > 0 ? MILES_PER_SEC(x) : 0;
     case value_conversion::DISTANCE_M_MI:
@@ -80,8 +86,8 @@ chart::line::update_values(const chart &c)
 
   if (field == &activity::point::speed)
     {
-      min_value = mean - 2.5 * sdev;
-      max_value = mean + 2.5 * sdev;
+      min_value = mean - 3 * sdev;
+      max_value = mean + 3 * sdev;
     }
   else if (field == &activity::point::altitude)
     {
@@ -102,6 +108,7 @@ chart::line::update_values(const chart &c)
   switch (conversion)
     {
     case value_conversion::HEARTRATE_BPM_HRR:
+    case value_conversion::HEARTRATE_BPM_PMAX:
       tick_delta = 5;
       break;
     case value_conversion::SPEED_MS_PACE:
@@ -143,6 +150,8 @@ chart::line::format_tick(std::string &s, double tick, double value) const
       format_number(s, tick);
       if (conversion == value_conversion::HEARTRATE_BPM_HRR)
 	s.append(" %HRR");
+      else if (conversion == value_conversion::HEARTRATE_BPM_PMAX)
+	s.append(" % max");
       else
 	s.append(" bpm");
     }
@@ -169,6 +178,7 @@ chart::add_line(double activity::point:: *field, value_conversion conv,
 		line_color color, bool fill_bg, double min_ratio,
 		double max_ratio)
 {
+
   _lines.push_back(line(field, conv, color, fill_bg, min_ratio, max_ratio));
 }
 
@@ -355,7 +365,7 @@ chart::draw_line(CGContextRef ctx, const line &l, CGFloat tx)
 
   CGContextAddPath(ctx, path);
   CGContextSetLineWidth(ctx, 1.75);
-  CGContextSetLineJoin(ctx, kCGLineJoinRound);
+  CGContextSetLineJoin(ctx, kCGLineJoinBevel);
   CGContextStrokePath(ctx);
 
   CGContextRestoreGState(ctx);
