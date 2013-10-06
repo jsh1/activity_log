@@ -2,7 +2,6 @@
 
 #include "act-util.h"
 
-#include <dirent.h>
 #include <errno.h>
 #include <sys/stat.h>
 #include <string.h>
@@ -109,34 +108,14 @@ matches_word_list(const char *str, const char *lst)
   return false;
 }
 
-namespace {
-
-struct FILE_wrapper
-{
-  FILE *fh;
-
-  explicit FILE_wrapper(FILE *f) : fh(f) {}
-  ~FILE_wrapper() {fclose(fh);}
-};
-
-struct DIR_wrapper
-{
-  DIR *dir;
-
-  explicit DIR_wrapper(DIR *d) : dir(d) {}
-  ~DIR_wrapper() {closedir(dir);}
-};
-
-} // anonymous namespace
-
 bool
 find_file_under_directory(std::string &file, const char *dir)
 {
-  DIR_wrapper d(opendir(dir));
+  DIR_ptr d(opendir(dir));
 
-  if (d.dir)
+  if (d.get())
     {
-      while (struct dirent *de = readdir(d.dir))
+      while (struct dirent *de = readdir(d.get()))
 	{
 	  if (de->d_type == DT_DIR)
 	    {
@@ -176,11 +155,11 @@ void
 map_directory_files(const char *dir,
 		    void (*fun) (const char *path, void *ctx), void *ctx)
 {
-  DIR_wrapper d(opendir(dir));
+  DIR_ptr d(opendir(dir));
 
-  if (d.dir)
+  if (d)
     {
-      while (struct dirent *de = readdir(d.dir))
+      while (struct dirent *de = readdir(d.get()))
 	{
 	  if (de->d_name[0] == '.'
 	      || de->d_name[de->d_namlen-1] == '~')
@@ -203,12 +182,12 @@ map_directory_files(const char *dir,
 void
 cat_file(const char *src)
 {
-  FILE_wrapper f(fopen(src, "r"));
+  FILE_ptr f(fopen(src, "r"));
 
-  if (f.fh)
+  if (f)
     {
       char buf[4096];
-      while (size_t n = fread(buf, 1, sizeof(buf), f.fh))
+      while (size_t n = fread(buf, 1, sizeof(buf), f.get()))
 	fwrite(buf, 1, n, stdout);
     }
 }
@@ -244,6 +223,23 @@ path_has_extension(const char *path, const char *ext)
     return false;
 
   return strcasecmp(path + 1, ext) == 0;
+}
+
+void
+tilde_expand_file_name(std::string &dest, const char *src)
+{
+  dest.clear();
+
+  if (src[0] == '~' && src[1] == '/')
+    {
+      if (const char *home_dir = getenv("HOME"))
+	{
+	  dest.append(home_dir);
+	  src++;
+	}
+    }
+
+  dest.append(src);
 }
 
 } // namespace act

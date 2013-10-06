@@ -5,6 +5,8 @@
 
 #include "act-base.h"
 
+#include <dirent.h>
+#include <stdio.h>
 #include <string>
 
 namespace act {
@@ -49,6 +51,34 @@ struct case_insensitive_string_compare
   bool operator() (const char *a, const char *b) const;
 };
 
+class FILE_ptr
+{
+  FILE *fh;
+
+public:
+  explicit FILE_ptr(FILE *f) : fh(f) {}
+  ~FILE_ptr() {fclose(fh);}
+
+  operator bool() const {return fh != nullptr;}
+  bool operator!() const {return fh == nullptr;}
+
+  FILE *get() const {return fh;}
+};
+
+class DIR_ptr
+{
+  DIR *dir;
+
+public:
+  explicit DIR_ptr(DIR *d) : dir(d) {}
+  ~DIR_ptr() {closedir(dir);}
+
+  operator bool() const {return dir != nullptr;}
+  bool operator!() const {return dir == nullptr;}
+
+  DIR *get() const {return dir;}
+};
+
 // misc functions
 
 bool string_has_suffix(const std::string &str, const char *suffix);
@@ -75,6 +105,8 @@ void cat_file(const char *src);
 bool make_path(const char *path);
 
 bool path_has_extension(const char *path, const char *ext);
+
+void tilde_expand_file_name(std::string &dest, const char *src);
 
 // implementation details
 
