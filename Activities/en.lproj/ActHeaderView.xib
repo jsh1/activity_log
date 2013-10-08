@@ -27,6 +27,9 @@
                             <customView id="ajO-uX-nl4" customClass="ActHeaderView">
                                 <rect key="frame" x="0.0" y="0.0" width="206" height="250"/>
                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                <connections>
+                                    <outlet property="_addFieldButton" destination="sEa-c4-ywe" id="SFb-F4-3EY"/>
+                                </connections>
                             </customView>
                         </subviews>
                         <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -47,6 +50,9 @@
                         <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                         <font key="font" metaFont="system"/>
                     </buttonCell>
+                    <connections>
+                        <action selector="controlAction:" target="ajO-uX-nl4" id="i4V-ql-kEH"/>
+                    </connections>
                 </button>
             </subviews>
         </customView>

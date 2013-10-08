@@ -27,10 +27,6 @@
    addObserver:self selector:@selector(selectedActivityDidChange:)
    name:ActSelectedActivityDidChange object:_controller];
 
-  [[NSNotificationCenter defaultCenter]
-   addObserver:self selector:@selector(activityDidChangeField:)
-   name:ActActivityDidChangeField object:_controller];
-
   [_headerView viewDidLoad];
 }
 
@@ -101,15 +97,6 @@
 - (void)selectedActivityDidChange:(NSNotification *)note
 {
   [self _updateHeaderFields];
-}
-
-- (void)activityDidChangeField:(NSNotification *)note
-{
-  void *ptr = [[[note userInfo] objectForKey:@"activity"] pointerValue];
-  const auto &a = *reinterpret_cast<const act::activity_storage_ref *> (ptr);
-
-  if (a == [_controller selectedActivityStorage])
-    [self _updateHeaderFields];
 }
 
 @end

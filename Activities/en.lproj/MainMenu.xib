@@ -664,12 +664,17 @@ DQ
                         <items>
                             <menuItem title="Minimize" keyEquivalent="m" id="23">
                                 <connections>
-                                    <action selector="performMiniaturize:" target="-1" id="37"/>
+                                    <action selector="miniaturize:" target="-1" id="xAD-1U-hg2"/>
                                 </connections>
                             </menuItem>
                             <menuItem title="Zoom" id="239">
                                 <connections>
                                     <action selector="performZoom:" target="-1" id="240"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem title="Toggle Full Screen" keyEquivalent="F" id="qmP-iX-TOH">
+                                <connections>
+                                    <action selector="toggleFullScreen:" target="-1" id="LB4-w5-l9p"/>
                                 </connections>
                             </menuItem>
                             <menuItem isSeparatorItem="YES" id="92">
