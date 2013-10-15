@@ -5,8 +5,6 @@
 #import "act-database.h"
 
 @class ActViewController;
-@class ActListViewController, ActSummaryViewController;
-@class ActMapViewController, ActChartViewController;
 @class ActFieldEditor, ActSplitView;
 
 extern NSString *const ActActivityListDidChange;
@@ -18,17 +16,10 @@ extern NSString *const ActActivityDidChangeBody;
 @interface ActWindowController : NSWindowController <NSSplitViewDelegate>
 {
   IBOutlet ActSplitView *_outerSplitView;
-  IBOutlet ActSplitView *_leftRightSplitView;
-  IBOutlet ActSplitView *_rightSplitView;
-  IBOutlet ActSplitView *_rightTopSplitView;
-  IBOutlet ActSplitView *_rightMiddleSplitView;
+  IBOutlet ActSplitView *_innerSplitView;
 
   IBOutlet NSView *_listContainer;		// activity list
-  IBOutlet NSView *_topLeftContainer;		// summary
-  IBOutlet NSView *_topRightContainer;		// header fields
-  IBOutlet NSView *_middleLeftContainer;	// map
-  IBOutlet NSView *_middleRightContainer;	// laps
-  IBOutlet NSView *_bottomContainer;		// charts
+  IBOutlet NSView *_contentContainer;		// activity / summary
 
   NSInteger _listViewType;
 

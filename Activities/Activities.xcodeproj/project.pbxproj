@@ -59,6 +59,8 @@
 		579772E817C4FB0A00AA2E9D /* ActHeaderFieldView.mm in Sources */ = {isa = PBXBuildFile; fileRef = 579772E717C4FB0A00AA2E9D /* ActHeaderFieldView.mm */; };
 		579772EB17C5015600AA2E9D /* ActFoundationExtensions.mm in Sources */ = {isa = PBXBuildFile; fileRef = 579772EA17C5015600AA2E9D /* ActFoundationExtensions.mm */; };
 		57A7352817CF8A3B0054E3EB /* ActLapViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = 57A7352717CF8A3B0054E3EB /* ActLapViewController.mm */; };
+		57B51B09180DFC18004F1A1D /* ActActivityView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 57B51B07180DFC18004F1A1D /* ActActivityView.xib */; };
+		57B51B0C180DFC63004F1A1D /* ActActivityViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = 57B51B0B180DFC63004F1A1D /* ActActivityViewController.mm */; };
 		57C5705C17EB18CB0000AF8D /* ActTableView.mm in Sources */ = {isa = PBXBuildFile; fileRef = 57C5705B17EB18CB0000AF8D /* ActTableView.mm */; };
 		57C7828617EF2F21003413EA /* act-new.cc in Sources */ = {isa = PBXBuildFile; fileRef = 57C7828417EF2F21003413EA /* act-new.cc */; };
 		57C8663317F096BC00241C7D /* ActTextField.mm in Sources */ = {isa = PBXBuildFile; fileRef = 57C8663217F096BC00241C7D /* ActTextField.mm */; };
@@ -174,6 +176,9 @@
 		579772EA17C5015600AA2E9D /* ActFoundationExtensions.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ActFoundationExtensions.mm; sourceTree = "<group>"; };
 		57A7352617CF8A3B0054E3EB /* ActLapViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActLapViewController.h; sourceTree = "<group>"; };
 		57A7352717CF8A3B0054E3EB /* ActLapViewController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ActLapViewController.mm; sourceTree = "<group>"; };
+		57B51B08180DFC18004F1A1D /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/ActActivityView.xib; sourceTree = "<group>"; };
+		57B51B0A180DFC63004F1A1D /* ActActivityViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActActivityViewController.h; sourceTree = "<group>"; };
+		57B51B0B180DFC63004F1A1D /* ActActivityViewController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ActActivityViewController.mm; sourceTree = "<group>"; };
 		57C5705A17EB18CB0000AF8D /* ActTableView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActTableView.h; sourceTree = "<group>"; };
 		57C5705B17EB18CB0000AF8D /* ActTableView.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ActTableView.mm; sourceTree = "<group>"; };
 		57C7828417EF2F21003413EA /* act-new.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "act-new.cc"; path = "../src/act-new.cc"; sourceTree = "<group>"; };
@@ -258,6 +263,8 @@
 				571DB9B217BE66A60001514C /* ActListViewController.mm */,
 				57193D4417FDFC9D009634B4 /* ActNotesListViewController.h */,
 				57193D4517FDFC9D009634B4 /* ActNotesListViewController.mm */,
+				57B51B0A180DFC63004F1A1D /* ActActivityViewController.h */,
+				57B51B0B180DFC63004F1A1D /* ActActivityViewController.mm */,
 				5730789417C56E54002C5B28 /* ActChartViewController.h */,
 				5730789517C56E54002C5B28 /* ActChartViewController.mm */,
 				57193D4B1801A4C9009634B4 /* ActHeaderViewController.h */,
@@ -368,6 +375,7 @@
 			children = (
 				571DB9A717BE615C0001514C /* MainMenu.xib */,
 				57921A5517BEAEF0001AD35D /* ActWindow.xib */,
+				57B51B07180DFC18004F1A1D /* ActActivityView.xib */,
 				570E6AC817F4793700A5BB4D /* ActChartView.xib */,
 				57193D501801A514009634B4 /* ActHeaderView.xib */,
 				570E6AC217F473C600A5BB4D /* ActLapView.xib */,
@@ -465,6 +473,7 @@
 				571DB9A917BE615C0001514C /* MainMenu.xib in Resources */,
 				57DCE3FC17F31D7D0072C67B /* app-icon.icns in Resources */,
 				570E6ACD17F47A9C00A5BB4D /* ActListView.xib in Resources */,
+				57B51B09180DFC18004F1A1D /* ActActivityView.xib in Resources */,
 				57921A5717BEAEF0001AD35D /* ActWindow.xib in Resources */,
 				570E6AC117F472E800A5BB4D /* ActMapView.xib in Resources */,
 				570E6AC417F473C600A5BB4D /* ActLapView.xib in Resources */,
@@ -498,6 +507,7 @@
 				579772EB17C5015600AA2E9D /* ActFoundationExtensions.mm in Sources */,
 				5730789317C56820002C5B28 /* act-gps-chart.cc in Sources */,
 				5730789617C56E54002C5B28 /* ActChartViewController.mm in Sources */,
+				57B51B0C180DFC63004F1A1D /* ActActivityViewController.mm in Sources */,
 				57A7352817CF8A3B0054E3EB /* ActLapViewController.mm in Sources */,
 				57707AE817DFBC4C009BAC5D /* ActMapSource.mm in Sources */,
 				57707AE917DFBC4C009BAC5D /* ActMapView.mm in Sources */,
@@ -626,6 +636,14 @@
 				57921A5617BEAEF0001AD35D /* en */,
 			);
 			name = ActWindow.xib;
+			sourceTree = "<group>";
+		};
+		57B51B07180DFC18004F1A1D /* ActActivityView.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				57B51B08180DFC18004F1A1D /* en */,
+			);
+			name = ActActivityView.xib;
 			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */

@@ -96,6 +96,14 @@
   [[self view] removeFromSuperview];
 }
 
+- (ActViewController *)viewControllerWithClass:(Class)cls
+{
+  if ([self class] == cls)
+    return self;
+  else
+    return nil;
+}
+
 // ActActivityTextFieldDelegate methods
 
 - (ActFieldEditor *)actFieldEditor:(ActTextField *)obj

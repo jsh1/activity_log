@@ -31,4 +31,6 @@
 - (void)addToContainerView:(NSView *)view;
 - (void)removeFromContainer;
 
+- (ActViewController *)viewControllerWithClass:(Class)cls;
+
 @end

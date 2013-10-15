@@ -7,17 +7,10 @@
     <objects>
         <customObject id="-2" userLabel="File's Owner" customClass="ActWindowController">
             <connections>
-                <outlet property="_bottomContainer" destination="12P-AB-C5o" id="fQ9-w8-Zrt"/>
-                <outlet property="_leftRightSplitView" destination="65" id="3ei-yq-zSz"/>
+                <outlet property="_contentContainer" destination="58" id="zvd-KC-j11"/>
+                <outlet property="_innerSplitView" destination="65" id="qqU-bU-p0N"/>
                 <outlet property="_listContainer" destination="7" id="R4K-Mz-Mxe"/>
-                <outlet property="_middleLeftContainer" destination="Fav-cp-B49" id="4ji-oU-kI6"/>
-                <outlet property="_middleRightContainer" destination="vQ7-Ki-VC4" id="QCs-dF-MaY"/>
                 <outlet property="_outerSplitView" destination="3" id="skD-be-5bj"/>
-                <outlet property="_rightMiddleSplitView" destination="JOl-o5-rfM" id="pdO-Jy-Fvx"/>
-                <outlet property="_rightSplitView" destination="564-ie-tPh" id="tS3-nt-GTb"/>
-                <outlet property="_rightTopSplitView" destination="hx5-84-FAM" id="VRw-Xz-F8P"/>
-                <outlet property="_topLeftContainer" destination="LZo-4B-KQ7" id="upi-FX-ix6"/>
-                <outlet property="_topRightContainer" destination="VDt-N0-7eK" id="PLp-ZX-cOM"/>
                 <outlet property="window" destination="1" id="17"/>
             </connections>
         </customObject>
@@ -74,86 +67,18 @@
                                     <customView id="58">
                                         <rect key="frame" x="291" y="0.0" width="447" height="665"/>
                                         <autoresizingMask key="autoresizingMask"/>
-                                        <subviews>
-                                            <splitView autosaveName="" dividerStyle="thin" id="564-ie-tPh" customClass="ActSplitView">
-                                                <rect key="frame" x="1" y="0.0" width="446" height="665"/>
-                                                <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                                                <subviews>
-                                                    <splitView autosaveName="" dividerStyle="thin" vertical="YES" id="hx5-84-FAM" customClass="ActSplitView">
-                                                        <rect key="frame" x="0.0" y="0.0" width="446" height="241"/>
-                                                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                                                        <subviews>
-                                                            <customView id="LZo-4B-KQ7">
-                                                                <rect key="frame" x="0.0" y="0.0" width="303" height="241"/>
-                                                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                                            </customView>
-                                                            <customView id="VDt-N0-7eK">
-                                                                <rect key="frame" x="304" y="0.0" width="142" height="241"/>
-                                                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                                            </customView>
-                                                        </subviews>
-                                                        <holdingPriorities>
-                                                            <real value="250"/>
-                                                            <real value="250"/>
-                                                        </holdingPriorities>
-                                                        <connections>
-                                                            <outlet property="delegate" destination="-2" id="DEz-hG-8C5"/>
-                                                        </connections>
-                                                    </splitView>
-                                                    <splitView autosaveName="" dividerStyle="thin" vertical="YES" id="JOl-o5-rfM" customClass="ActSplitView">
-                                                        <rect key="frame" x="0.0" y="242" width="446" height="256"/>
-                                                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                                                        <subviews>
-                                                            <customView id="Fav-cp-B49">
-                                                                <rect key="frame" x="0.0" y="0.0" width="303" height="256"/>
-                                                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                                            </customView>
-                                                            <customView id="vQ7-Ki-VC4">
-                                                                <rect key="frame" x="304" y="0.0" width="142" height="256"/>
-                                                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                                            </customView>
-                                                        </subviews>
-                                                        <holdingPriorities>
-                                                            <real value="250"/>
-                                                            <real value="250"/>
-                                                        </holdingPriorities>
-                                                        <connections>
-                                                            <outlet property="delegate" destination="-2" id="Hqg-rr-cwj"/>
-                                                        </connections>
-                                                    </splitView>
-                                                    <customView id="12P-AB-C5o">
-                                                        <rect key="frame" x="0.0" y="499" width="446" height="166"/>
-                                                        <autoresizingMask key="autoresizingMask"/>
-                                                    </customView>
-                                                </subviews>
-                                                <holdingPriorities>
-                                                    <real value="250"/>
-                                                    <real value="250"/>
-                                                    <real value="250"/>
-                                                </holdingPriorities>
-                                                <connections>
-                                                    <outlet property="delegate" destination="-2" id="8VC-6J-om4"/>
-                                                </connections>
-                                            </splitView>
-                                        </subviews>
                                     </customView>
                                 </subviews>
                                 <holdingPriorities>
                                     <real value="250"/>
                                     <real value="250"/>
                                 </holdingPriorities>
-                                <connections>
-                                    <outlet property="delegate" destination="-2" id="4cX-Wc-4ff"/>
-                                </connections>
                             </splitView>
                         </subviews>
                         <holdingPriorities>
                             <real value="250"/>
                             <real value="250"/>
                         </holdingPriorities>
-                        <connections>
-                            <outlet property="delegate" destination="-2" id="20"/>
-                        </connections>
                     </splitView>
                 </subviews>
             </view>

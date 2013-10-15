@@ -2,12 +2,9 @@
 
 #import "ActWindowController.h"
 
-#import "ActChartViewController.h"
-#import "ActHeaderViewController.h"
-#import "ActLapViewController.h"
+#import "ActActivityViewController.h"
 #import "ActListViewController.h"
 #import "ActNotesListViewController.h"
-#import "ActMapViewController.h"
 #import "ActSummaryViewController.h"
 #import "ActSplitView.h"
 #import "ActTextField.h"
@@ -37,18 +34,12 @@ NSString *const ActActivityDidChangeBody = @"ActActivityDidChangeBody";
 {
   for (ActViewController *obj in _viewControllers)
     {
-      if ([obj isKindOfClass:cls])
+      obj = [obj viewControllerWithClass:cls];
+      if (obj != nil)
 	return obj;
     }
 
-  if (ActViewController *obj = [[cls alloc] initWithController:self])
-    {
-      [_viewControllers addObject:obj];
-      [obj release];
-      return obj;
-    }
-  else
-    return nil;
+  return nil;
 }
 
 - (id)init
@@ -70,57 +61,36 @@ NSString *const ActActivityDidChangeBody = @"ActActivityDidChangeBody";
 - (void)windowDidLoad
 {
   [self addSplitView:_outerSplitView identifier:@"Window.outerSplitView"];
-  [self addSplitView:_leftRightSplitView identifier:@"Window.leftRightSplitView"];
-  [self addSplitView:_rightSplitView identifier:@"Window.rightSplitView"];
-  [self addSplitView:_rightTopSplitView identifier:@"Window.rightTopSplitView"];
-  [self addSplitView:_rightMiddleSplitView identifier:@"Window.rightMiddleSplitView"];
+  [self addSplitView:_innerSplitView identifier:@"Window.innerSplitView"];
 
   _fieldEditor = [[ActFieldEditor alloc] initWithFrame:NSZeroRect];
   [_fieldEditor setFieldEditor:YES];
 
   if (ActViewController *obj
-      = [self viewControllerWithClass:[ActListViewController class]])
+      = [[ActListViewController alloc] initWithController:self])
     {
+      [_viewControllers addObject:obj];
       [obj addToContainerView:_listContainer];
-      [[self window] setInitialFirstResponder:[obj initialFirstResponder]];
+      [obj release];
     }
 
   if (ActViewController *obj
-      = [self viewControllerWithClass:[ActNotesListViewController class]])
+      = [[ActNotesListViewController alloc] initWithController:self])
     {
+      [_viewControllers addObject:obj];
       [obj addToContainerView:_listContainer];
-      [[self window] setInitialFirstResponder:[obj initialFirstResponder]];
+      [obj release];
     }
 
   if (ActViewController *obj
-      = [self viewControllerWithClass:[ActSummaryViewController class]])
+      = [[ActActivityViewController alloc] initWithController:self])
     {
-      [obj addToContainerView:_topLeftContainer];
+      [_viewControllers addObject:obj];
+      [obj addToContainerView:_contentContainer];
+      [obj release];
     }
 
-  if (ActViewController *obj
-      = [self viewControllerWithClass:[ActHeaderViewController class]])
-    {
-      [obj addToContainerView:_topRightContainer];
-    }
-
-  if (ActViewController *obj
-      = [self viewControllerWithClass:[ActMapViewController class]])
-    {
-      [obj addToContainerView:_middleLeftContainer];
-    }
-
-  if (ActViewController *obj
-      = [self viewControllerWithClass:[ActLapViewController class]])
-    {
-      [obj addToContainerView:_middleRightContainer];
-    }
-
-  if (ActViewController *obj
-      = [self viewControllerWithClass:[ActChartViewController class]])
-    {
-      [obj addToContainerView:_bottomContainer];
-    }
+  // FIXME: also some kind of multi-activity summary view
 
   _listViewType = -1;
 
@@ -148,12 +118,14 @@ NSString *const ActActivityDidChangeBody = @"ActActivityDidChangeBody";
 
 - (void)addSplitView:(ActSplitView *)view identifier:(NSString *)ident
 {
+  [view setDelegate:self];
   [_splitViews setObject:ident forKey:view];
 }
 
 - (void)removeSplitView:(ActSplitView *)view
 {
   [_splitViews removeObjectForKey:view];
+  [view setDelegate:nil];
 }
 
 - (void)saveWindowState
@@ -659,6 +631,8 @@ NSString *const ActActivityDidChangeBody = @"ActActivityDidChangeBody";
 
       [[newC view] setHidden:NO];
       [[oldC view] setHidden:YES];
+
+      [[self window] setInitialFirstResponder:[newC initialFirstResponder]];
 
       if (firstResponder)
 	[[self window] makeFirstResponder:[newC initialFirstResponder]];
