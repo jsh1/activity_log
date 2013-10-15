@@ -680,7 +680,11 @@ NSString *const ActActivityDidChangeBody = @"ActActivityDidChangeBody";
 
   act::act_new(args);
 
-  [self reloadActivities];
+  // FIXME: calling -reloadActivities immediately doesn't recognize the
+  // new file for some reason.
+
+  [self performSelector:@selector(reloadActivities)
+   withObject:nil afterDelay:.25];
 }
 
 - (IBAction)importFile:(id)sender
@@ -719,14 +723,15 @@ NSString *const ActActivityDidChangeBody = @"ActActivityDidChangeBody";
 	     act::act_new(args);
 	   }
 
-	 [self reloadActivities];
-
 	 if ([urls count] != 0)
 	   {
 	     [[NSUserDefaults standardUserDefaults] setObject:
 	      [[[urls lastObject] path] stringByDeletingLastPathComponent]
 	      forKey:@"ActLastGPSImportDirectory"];
 	   }
+
+	 [self performSelector:@selector(reloadActivities)
+	  withObject:nil afterDelay:.25];
        }
    }];
 }
