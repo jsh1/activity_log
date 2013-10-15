@@ -32,8 +32,8 @@ static CGPoint
 convertLocationToPoint(act::location l)
 {
   CGPoint p;
-  p.x = (180 - l.longitude) / 360;
-  double lat_rad = l.latitude * (M_PI / 180);
+  p.x = (l.longitude + 180) / 360;
+  double lat_rad = l.latitude * (-M_PI / 180);
   p.y = (1 - (log(tan(lat_rad) + 1/cos(lat_rad)) / M_PI)) / 2;
   return p;
 }
@@ -42,8 +42,8 @@ static act::location
 convertPointToLocation(CGPoint p)
 {
   act::location l;
-  l.longitude = 180 - p.x * 360;
-  l.latitude = atan(sinh(M_PI * (1 - 2 * p.y))) * 180 / M_PI;
+  l.longitude = p.x * 360 - 180;
+  l.latitude = atan(sinh(M_PI * (1 - 2 * p.y))) * -180 / M_PI;
   return l;
 }
 

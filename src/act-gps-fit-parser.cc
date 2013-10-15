@@ -422,7 +422,7 @@ make_sport(int32_t value)
 inline double
 make_lat_long(int32_t value)
 {
-  return value * (180. / (1 << 31));
+  return value * (-180. / (1 << 31));
 }
 
 inline double
