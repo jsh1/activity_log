@@ -330,8 +330,6 @@ act_new(arguments &args)
   if (!storage->write_file(filename.c_str()))
     return 1;
 
-  fprintf(stderr, "Created %s\n", filename.c_str());
-
   if (edit)
     shared_config().edit_file(filename.c_str());
 
