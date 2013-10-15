@@ -11,6 +11,7 @@
 #import <algorithm>
 
 // list view constants
+#define Y_OFFSET 8
 #define Y_SPACING 10
 #define TITLE_HEIGHT 24
 #define TITLE_FONT_SIZE 18
@@ -19,12 +20,13 @@
 #define TIME_HEIGHT TITLE_HEIGHT
 #define TIME_FONT_SIZE 12
 #define BODY_FONT_SIZE 12
+#define BODY_NIL_HEIGHT 9
 #define STATS_FONT_SIZE 14
 #define STATS_HEIGHT 20
 #define DATE_WIDTH 70
 #define DAY_OF_WEEK_HEIGHT 20
-#define DAY_OF_WEEK_FONT_SIZE TITLE_FONT_SIZE
-#define DAY_OF_MONTH_HEIGHT 42
+#define DAY_OF_WEEK_FONT_SIZE 14
+#define DAY_OF_MONTH_HEIGHT 36
 #define DAY_OF_MONTH_FONT_SIZE 32
 
 // header view constants
@@ -103,7 +105,7 @@
   if (NSIsEmptyRect(bounds))
     return bounds;
 
-  CGFloat y = bounds.origin.y;
+  CGFloat y = 0;
 
   for (size_t i = 0; i < _activities.size(); i++)
     {
@@ -112,7 +114,8 @@
 
       if (i == row)
 	{
-	  return NSMakeRect(bounds.origin.x, y,
+	  return NSMakeRect(bounds.origin.x,
+			    bounds.origin.y + Y_OFFSET + y,
 			    bounds.size.width, _activities[i].height);
 	}
 
@@ -130,7 +133,7 @@
   if (NSIsEmptyRect(vis_rect))
     return vis_rect;
 
-  CGFloat y = bounds.origin.y;
+  CGFloat y = 0;
 
   for (size_t i = 0; i < _activities.size(); i++)
     {
@@ -142,7 +145,8 @@
 
       if (i == row)
 	{
-	  NSRect r = NSMakeRect(bounds.origin.x, y,
+	  NSRect r = NSMakeRect(bounds.origin.x,
+				bounds.origin.y + Y_OFFSET + y,
 				bounds.size.width, _activities[i].height);
 	  return NSIntersectionRect(r, vis_rect);
 	}
@@ -155,10 +159,7 @@
 
 - (NSInteger)rowForYPosition:(CGFloat)p startPosition:(CGFloat *)ret_p
 {
-  CGFloat y = [_listView bounds].origin.y;
-
-  if (p < y)
-    return NSNotFound;
+  CGFloat y = [_listView bounds].origin.y + Y_OFFSET;
 
   for (size_t i = 0; i < _activities.size(); i++)
     {
@@ -188,7 +189,7 @@
 
 - (void)updateListViewBounds
 {
-  CGFloat y = 0;
+  CGFloat y = Y_OFFSET;
 
   for (size_t i = 0; i < _activities.size(); i++)
     {
@@ -223,21 +224,10 @@
   const std::vector<act::activity_storage_ref> &activities
     = [_controller activityList];
 
-  size_t count = activities.size();
+  _activities.clear();
 
-  _activities.resize(count);
-
-  for (size_t i = 0; i < count; i++)
-    {
-      if (_activities[i].storage != activities[i])
-	{
-	  _activities[i].storage = activities[i];
-	  _activities[i].activity.reset();
-	  _activities[i].body_width = 0;
-	  _activities[i].valid_date = false;
-	  _activities[i].valid_height = false;
-	}
-    }
+  for (const auto &it : activities)
+    _activities.emplace_back(it);
 
   [self updateListViewBounds];
 
@@ -296,7 +286,7 @@
 {
   NSRect bounds = [self bounds];
 
-  [[NSColor whiteColor] setFill];
+  [[NSColor colorWithDeviceWhite:.98 alpha:1] setFill];
   [NSBezierPath fillRect:r];
 
   CGFloat y = r.origin.y;
@@ -304,7 +294,7 @@
   if (row == NSNotFound)
     return;
 
-  std::vector<ActNotesItem> const &activities = [_controller activities];
+  const std::vector<ActNotesItem> &activities = [_controller activities];
 
   act::activity_storage_ref selection = [[_controller controller]
 					 selectedActivityStorage];
@@ -409,7 +399,7 @@
 
 - (void)drawRect:(NSRect)r
 {
-  [[NSColor whiteColor] setFill];
+  [[NSColor colorWithDeviceWhite:.98 alpha:1] setFill];
   [NSBezierPath fillRect:r];
 
   if (const ActNotesItem *item = [_controller headerItem])
@@ -509,7 +499,7 @@ ActNotesItem::initialize()
 		greyColor, NSForegroundColorAttributeName,
 		nil];
 
-  separator_color = [[NSColor colorWithDeviceWhite:.92 alpha:1] retain];
+  separator_color = [[NSColor colorWithDeviceWhite:.80 alpha:1] retain];
 
   time_formatter = [[NSDateFormatter alloc] init];
   [time_formatter setDateStyle:NSDateFormatterNoStyle];
@@ -519,15 +509,22 @@ ActNotesItem::initialize()
 }
 
 ActNotesItem::ActNotesItem()
-: body_width(0), body_height(0),
-  valid_date(false), valid_height(false)
+: body_width(0),
+  body_height(0),
+  valid_date(false),
+  valid_height(false)
 {
 }
 
-ActNotesItem::ActNotesItem(const ActNotesItem &rhs)
+ActNotesItem::ActNotesItem(act::activity_storage_ref s)
 : ActNotesItem()
 {
-  storage = rhs.storage;
+  storage = s;
+}
+
+ActNotesItem::ActNotesItem(const ActNotesItem &rhs)
+: ActNotesItem(rhs.storage)
+{
 }
 
 void
@@ -546,20 +543,21 @@ ActNotesItem::draw(const NSRect &bounds, uint32_t flags) const
       NSRect subR = bounds;
       subR.size.width = std::min(subR.size.width, (CGFloat)DATE_WIDTH);
 
-      subR.size.height = DAY_OF_WEEK_HEIGHT;
-
-      // draw day-of-week
-
-      [[[time_formatter shortWeekdaySymbols] objectAtIndex:day_of_week]
-       drawInRect:subR withAttributes:dow_attrs];
-
-      subR.origin.y += subR.size.height;
-      subR.size.height = DAY_OF_MONTH_HEIGHT;
+      subR.origin.y -= 3;
 
       // draw day-of-month
 
+      subR.size.height = DAY_OF_MONTH_HEIGHT;
       [[NSString stringWithFormat:@"%d", day_of_month]
        drawInRect:subR withAttributes:dom_attrs];
+
+      subR.origin.y += subR.size.height;
+
+      // draw day-of-week
+
+      subR.size.height = DAY_OF_WEEK_HEIGHT;
+      [[[[time_formatter shortWeekdaySymbols] objectAtIndex:day_of_week] uppercaseString]
+       drawInRect:subR withAttributes:dow_attrs];
     }
 
   NSRect itemR = bounds;
@@ -665,6 +663,9 @@ ActNotesItem::draw(const NSRect &bounds, uint32_t flags) const
 
   [separator_color setFill];
   [NSBezierPath fillRect:subR];
+  subR.origin.y += 1;
+  [[NSColor whiteColor] setFill];
+  [NSBezierPath fillRect:subR];
 }
 
 void
@@ -677,7 +678,8 @@ ActNotesItem::draw_header(const NSRect &bounds, uint32_t flags) const
 
   subR.size.height = MONTH_HEIGHT;
 
-  [[[time_formatter monthSymbols] objectAtIndex:month - 1]
+  [[NSString stringWithFormat:@"%@ %d",
+    [[time_formatter monthSymbols] objectAtIndex:month], year]
    drawInRect:subR withAttributes:month_attrs];
 
   subR.origin.y += subR.size.height;
@@ -688,11 +690,14 @@ ActNotesItem::draw_header(const NSRect &bounds, uint32_t flags) const
 
   subR.origin.y += subR.size.height;
 
-  subR.origin.y += floor(Y_SPACING * .5);
   subR.origin.x = bounds.origin.x;
+  subR.origin.y = bounds.origin.y + bounds.size.height - 2;
   subR.size.width = bounds.size.width;
   subR.size.height = 1;
 
+  [[NSColor whiteColor] setFill];
+  [NSBezierPath fillRect:subR];
+  subR.origin.y += 1;
   [separator_color setFill];
   [NSBezierPath fillRect:subR];
 }
@@ -771,10 +776,12 @@ ActNotesItem::update_body_height(CGFloat width) const
 {
   if (body_width != width)
     {
+      CGFloat old_body_height = body_height;
+
       update_body();
 
       if (!body)
-	body_height = 16;
+	body_height = BODY_NIL_HEIGHT;
       else
 	{
 	  if (!initialized)
@@ -789,24 +796,22 @@ ActNotesItem::update_body_height(CGFloat width) const
 	}
 
       body_width = width;
+
+      if (body_height != old_body_height)
+	valid_height = false;
     }
 }
 
 void
 ActNotesItem::update_height(CGFloat width) const
 {
-  if (!valid_height || body_width != width)
+  update_body_height(width - (DATE_WIDTH + ITEM_INSET));
+
+  if (!valid_height)
     {
-      if (!activity)
-	activity.reset(new act::activity(storage));
-
       height = TITLE_HEIGHT;
-
-      update_body_height(width - (DATE_WIDTH + ITEM_INSET));
       height += body_height;
-
       height += STATS_HEIGHT;
-
       height += Y_SPACING;
 
       valid_height = true;

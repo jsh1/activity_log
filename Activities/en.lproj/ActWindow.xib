@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="4510" systemVersion="12F37" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="4510" systemVersion="12F45" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
     <dependencies>
         <deployment defaultVersion="1080" identifier="macosx"/>
         <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="4510"/>
@@ -33,23 +33,23 @@
                 <rect key="frame" x="0.0" y="0.0" width="905" height="665"/>
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
-                    <splitView autosaveName="" dividerStyle="paneSplitter" vertical="YES" id="3" customClass="ActSplitView">
+                    <splitView autosaveName="" dividerStyle="thin" vertical="YES" id="3" customClass="ActSplitView">
                         <rect key="frame" x="0.0" y="0.0" width="905" height="665"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <scrollView borderType="none" autohidesScrollers="YES" horizontalLineScroll="10" horizontalPageScroll="10" verticalLineScroll="10" verticalPageScroll="10" usesPredominantAxisScrolling="NO" id="74">
-                                <rect key="frame" x="0.0" y="0.0" width="157" height="665"/>
+                                <rect key="frame" x="0.0" y="0.0" width="166" height="665"/>
                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                 <clipView key="contentView" id="VuC-gS-c1e">
-                                    <rect key="frame" x="0.0" y="0.0" width="157" height="665"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="166" height="665"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
                                         <view id="75">
-                                            <rect key="frame" x="0.0" y="0.0" width="157" height="665"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="166" height="665"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                         </view>
                                     </subviews>
-                                    <color key="backgroundColor" red="0.84705889229999998" green="0.87450987099999999" blue="0.90196084980000002" alpha="1" colorSpace="deviceRGB"/>
+                                    <color key="backgroundColor" red="0.16078431904315948" green="0.18431372940540314" blue="0.20392158627510071" alpha="1" colorSpace="deviceRGB"/>
                                 </clipView>
                                 <scroller key="horizontalScroller" hidden="YES" verticalHuggingPriority="750" id="76">
                                     <rect key="frame" x="0.0" y="650" width="142" height="15"/>
@@ -60,12 +60,12 @@
                                     <autoresizingMask key="autoresizingMask"/>
                                 </scroller>
                             </scrollView>
-                            <splitView autosaveName="" dividerStyle="paneSplitter" vertical="YES" id="65" customClass="ActSplitView">
+                            <splitView autosaveName="" dividerStyle="thin" vertical="YES" id="65" customClass="ActSplitView">
                                 <rect key="frame" x="167" y="0.0" width="738" height="665"/>
                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                 <subviews>
                                     <customView focusRingType="none" id="7">
-                                        <rect key="frame" x="0.0" y="0.0" width="281" height="665"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="290" height="665"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <connections>
                                             <outlet property="_controller" destination="-2" id="22"/>

@@ -32,6 +32,7 @@ struct ActNotesItem
   mutable bool valid_height :1;
 
   ActNotesItem();
+  explicit ActNotesItem(act::activity_storage_ref storage);
   explicit ActNotesItem(const ActNotesItem &rhs);
 
   void draw(const NSRect &bounds, uint32_t flags) const;
