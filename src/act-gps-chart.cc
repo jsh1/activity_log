@@ -318,19 +318,19 @@ chart::draw_line(CGContextRef ctx, const line &l, CGFloat tx)
       switch (l.color)
 	{
 	case line_color::RED:
-	  CGContextSetRGBFillColor(ctx, 1, .5, .5, .4);
+	  CGContextSetRGBFillColor(ctx, 1, .5, .5, .2);
 	  break;
 	case line_color::GREEN:
-	  CGContextSetRGBFillColor(ctx, .75, 1, .75, .4);
+	  CGContextSetRGBFillColor(ctx, .75, 1, .75, .2);
 	  break;
 	case line_color::BLUE:
-	  CGContextSetRGBFillColor(ctx, .5, .75, 1, .4);
+	  CGContextSetRGBFillColor(ctx, .5, .75, 1, .2);
 	  break;
 	case line_color::ORANGE:
-	  CGContextSetRGBFillColor(ctx, 1, .5, 0, .4);
+	  CGContextSetRGBFillColor(ctx, 1, .5, 0, .2);
 	  break;
 	case line_color::GRAY:
-	  CGContextSetRGBFillColor(ctx, .75, .75, .75, .4);
+	  CGContextSetRGBFillColor(ctx, .75, .75, .75, .2);
 	  break;
 	}
 

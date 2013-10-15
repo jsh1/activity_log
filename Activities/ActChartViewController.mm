@@ -65,25 +65,33 @@
   _chart.reset(new act::gps::chart(*_smoothed_data.get(),
 				   act::gps::chart::x_axis_type::DISTANCE));
 
-  if ([_segmentedControl isSelectedForSegment:2] && gps_a->has_altitude())
+  bool draw_altitude = [_segmentedControl isSelectedForSegment:2] && gps_a->has_altitude();
+  bool draw_hr = [_segmentedControl isSelectedForSegment:1] && gps_a->has_heart_rate();
+  bool draw_pace = [_segmentedControl isSelectedForSegment:0] && gps_a->has_speed();
+
+  if (draw_altitude)
     {
       _chart->add_line(&act::gps::activity::point::altitude,
 		       act::gps::chart::value_conversion::DISTANCE_M_FT,
-		       act::gps::chart::line_color::GRAY, true, -0.05, 2);
+		       act::gps::chart::line_color::GREEN, true, -0.05, 2);
     }
 
-  if ([_segmentedControl isSelectedForSegment:0] && gps_a->has_speed())
+  if (draw_pace)
     {
+      double bot = !draw_hr ? -0.05 : -1;
+
       _chart->add_line(&act::gps::activity::point::speed,
 		       act::gps::chart::value_conversion::SPEED_MS_PACE,
-		       act::gps::chart::line_color::BLUE, false, -0.05, 1.05);
+		       act::gps::chart::line_color::BLUE, true, bot, 1.05);
     }
 
-  if ([_segmentedControl isSelectedForSegment:1] && gps_a->has_heart_rate())
+  if (draw_hr)
     {
+      double top = !draw_pace ? 1.05 : 2;
+
       _chart->add_line(&act::gps::activity::point::heart_rate,
 		       act::gps::chart::value_conversion::IDENTITY,
-		       act::gps::chart::line_color::RED, false, -0.05, 1.05);
+		       act::gps::chart::line_color::ORANGE, true, -0.05, top);
     }
 
   _chart->set_chart_rect(NSRectToCGRect([_chartView bounds]));
@@ -144,7 +152,7 @@
   CGRect bounds = NSRectToCGRect([self bounds]);
 
   CGContextSaveGState(ctx);
-  CGContextSetGrayFillColor(ctx, 1, 1);
+  CGContextSetGrayFillColor(ctx, .98, 1);
   CGContextFillRect(ctx, bounds);
   CGContextRestoreGState(ctx);
 
