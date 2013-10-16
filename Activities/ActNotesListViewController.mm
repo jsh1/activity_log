@@ -69,6 +69,14 @@
   [[NSNotificationCenter defaultCenter]
    addObserver:self selector:@selector(activityDidChangeBody:)
    name:ActActivityDidChangeBody object:_controller];
+
+  [_listView setPostsBoundsChangedNotifications:YES];
+
+  [[NSNotificationCenter defaultCenter]
+   addObserver:self selector:@selector(listBoundsDidChange:)
+   name:NSViewBoundsDidChangeNotification object:[_scrollView contentView]];
+
+  _headerItemIndex = 0;
 }
 
 - (void)dealloc
@@ -187,6 +195,18 @@
     [_controller setSelectedActivityStorage:_activities[row].storage];
 }
 
+- (void)toggleRowSelected:(NSInteger)row
+{
+  if (row >= 0 && row < _activities.size())
+    {
+      act::activity_storage_ref sel = [_controller selectedActivityStorage];
+      if (_activities[row].storage == sel)
+	[_controller setSelectedActivityStorage:nullptr];
+      else
+	[_controller setSelectedActivityStorage:_activities[row].storage];
+    }
+}
+
 - (void)updateListViewBounds
 {
   CGFloat y = Y_OFFSET;
@@ -208,17 +228,6 @@
     }
 }
 
-- (const ActNotesItem *)headerItem
-{
-  NSInteger row = [self rowForYPosition:[_listView bounds].origin.y
-		   startPosition:nullptr];
-
-  if (row != NSNotFound)
-    return &_activities[row];
-  else
-    return nullptr;
-}
-
 - (void)activityListDidChange:(NSNotification *)note
 {
   const std::vector<act::activity_storage_ref> &activities
@@ -232,6 +241,7 @@
   [self updateListViewBounds];
 
   [_listView setNeedsDisplay:YES];
+  [_headerView setNeedsDisplay:YES];
 }
 
 - (void)selectedActivityDidChange:(NSNotification *)note
@@ -239,8 +249,11 @@
   NSInteger row = [self rowForActivityStorage:
 		   [_controller selectedActivityStorage]];
 
-  NSRect r = NSInsetRect([self rectForRow:row], 0, -Y_SPACING*.5);
-  [_listView scrollRectToVisible:r];
+  if (row != NSNotFound)
+    {
+      NSRect r = NSInsetRect([self rectForRow:row], 0, -Y_SPACING*.5);
+      [_listView scrollRectToVisible:r];
+    }
 
   [_listView setNeedsDisplay:YES];
 }
@@ -276,6 +289,29 @@
   _activities[row].body_width = 0;
 
   [_listView setNeedsDisplayInRect:[self visibleRectForRow:row]];
+}
+
+- (void)listBoundsDidChange:(NSNotification *)note
+{
+  NSView *view = [note object];
+  NSInteger idx = [self rowForYPosition:[view bounds].origin.y
+		   startPosition:nullptr];
+
+  // FIXME: only if week/month changed?
+
+  if (idx != _headerItemIndex)
+    {
+      _headerItemIndex = idx;
+      [_headerView setNeedsDisplay:YES];
+    }
+}
+
+- (const ActNotesItem *)headerItem
+{
+  if (_headerItemIndex >= 0 && _headerItemIndex < _activities.size())
+    return &_activities[_headerItemIndex];
+  else
+    return nullptr;
 }
 
 @end
@@ -390,7 +426,7 @@
   NSInteger row = [_controller rowForYPosition:p.y startPosition:nullptr];
 
   if (row != NSNotFound)
-    [_controller selectRow:row];
+    [_controller toggleRowSelected:row];
 }
 
 @end
@@ -685,7 +721,7 @@ ActNotesItem::draw_header(const NSRect &bounds, uint32_t flags) const
   subR.origin.y += subR.size.height;
   subR.size.height = WEEK_HEIGHT;
 
-  [[NSString stringWithFormat:@"Week %d", week]
+  [[NSString stringWithFormat:@"Week %d", week + 1]
    drawInRect:subR withAttributes:week_attrs];
 
   subR.origin.y += subR.size.height;

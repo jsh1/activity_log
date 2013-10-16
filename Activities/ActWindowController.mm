@@ -87,6 +87,7 @@ NSString *const ActActivityDidChangeBody = @"ActActivityDidChangeBody";
     {
       [_viewControllers addObject:obj];
       [obj addToContainerView:_contentContainer];
+      [[obj view] setHidden:_selectedActivityStorage ? NO : YES];
       [obj release];
     }
 
@@ -218,10 +219,7 @@ NSString *const ActActivityDidChangeBody = @"ActActivityDidChangeBody";
   [[NSNotificationCenter defaultCenter]
    postNotificationName:ActActivityListDidChange object:self];
 
-  if (_activityList.size() != 0)
-    [self setSelectedActivityStorage:_activityList[0]];
-  else
-    [self setSelectedActivityStorage:nullptr];
+  [self setSelectedActivityStorage:nullptr];
 }
 
 - (void)reloadActivities
@@ -319,6 +317,11 @@ NSString *const ActActivityDidChangeBody = @"ActActivityDidChangeBody";
 
 - (void)selectedActivityDidChange
 {
+  ActViewController *activityC = [self viewControllerWithClass:
+				  [ActActivityViewController class]];
+
+  [[activityC view] setHidden:_selectedActivityStorage ? NO : YES];
+
   [[NSNotificationCenter defaultCenter]
    postNotificationName:ActSelectedActivityDidChange object:self];
 }

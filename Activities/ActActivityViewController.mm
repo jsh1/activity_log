@@ -96,7 +96,7 @@
 	return obj;
     }
 
-  return nil;
+  return [super viewControllerWithClass:cls];
 }
 
 - (NSDictionary *)savedViewState

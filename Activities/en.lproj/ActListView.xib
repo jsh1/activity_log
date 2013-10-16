@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="4510" systemVersion="12F37" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="4510" systemVersion="12F45" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
     <dependencies>
         <deployment defaultVersion="1080" identifier="macosx"/>
         <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="4510"/>
@@ -18,7 +18,7 @@
                 <rect key="frame" x="1" y="17" width="283" height="612"/>
                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                 <subviews>
-                    <tableView focusRingType="none" verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="none" alternatingRowBackgroundColors="YES" columnSelection="YES" autosaveColumns="NO" headerView="K28-lw-ees" id="6O5-fV-qnL" customClass="ActTableView">
+                    <tableView focusRingType="none" verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="none" alternatingRowBackgroundColors="YES" columnSelection="YES" multipleSelection="NO" autosaveColumns="NO" headerView="K28-lw-ees" id="6O5-fV-qnL" customClass="ActTableView">
                         <rect key="frame" x="0.0" y="0.0" width="647" height="612"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <size key="intercellSpacing" width="3" height="2"/>
@@ -27,7 +27,7 @@
                         <tableColumns>
                             <tableColumn identifier="date" editable="NO" width="90" minWidth="40" maxWidth="1000" id="SJ7-00-2LF">
                                 <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left" title="Date">
-                                    <font key="font" size="11" name="LucidaGrande"/>
+                                    <font key="font" metaFont="smallSystem"/>
                                     <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
                                     <color key="backgroundColor" white="0.33333298560000002" alpha="1" colorSpace="calibratedWhite"/>
                                 </tableHeaderCell>
@@ -40,7 +40,7 @@
                             </tableColumn>
                             <tableColumn identifier="activity" width="40" minWidth="40" maxWidth="1000" id="X6Z-j8-l6W">
                                 <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left" title="Activity">
-                                    <font key="font" size="11" name="LucidaGrande"/>
+                                    <font key="font" metaFont="smallSystem"/>
                                     <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
                                     <color key="backgroundColor" white="0.33333298560000002" alpha="1" colorSpace="calibratedWhite"/>
                                 </tableHeaderCell>
@@ -53,7 +53,7 @@
                             </tableColumn>
                             <tableColumn identifier="type" width="50" minWidth="40" maxWidth="1000" id="eYk-L9-IfT">
                                 <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left" title="Type">
-                                    <font key="font" size="11" name="LucidaGrande"/>
+                                    <font key="font" metaFont="smallSystem"/>
                                     <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
                                     <color key="backgroundColor" name="headerColor" catalog="System" colorSpace="catalog"/>
                                 </tableHeaderCell>
@@ -66,7 +66,7 @@
                             </tableColumn>
                             <tableColumn identifier="distance" width="55" minWidth="40" maxWidth="1000" id="TlC-Wg-keE">
                                 <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left" title="Distance">
-                                    <font key="font" size="11" name="LucidaGrande"/>
+                                    <font key="font" metaFont="smallSystem"/>
                                     <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
                                     <color key="backgroundColor" name="headerColor" catalog="System" colorSpace="catalog"/>
                                 </tableHeaderCell>
@@ -79,7 +79,7 @@
                             </tableColumn>
                             <tableColumn identifier="duration" width="60" minWidth="40" maxWidth="1000" id="K9e-iB-1Zm">
                                 <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left" title="Duration">
-                                    <font key="font" size="11" name="LucidaGrande"/>
+                                    <font key="font" metaFont="smallSystem"/>
                                     <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
                                     <color key="backgroundColor" name="headerColor" catalog="System" colorSpace="catalog"/>
                                 </tableHeaderCell>
@@ -92,7 +92,7 @@
                             </tableColumn>
                             <tableColumn identifier="pace" width="50" minWidth="40" maxWidth="1000" id="e1n-U7-SQF">
                                 <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left" title="Pace">
-                                    <font key="font" size="11" name="LucidaGrande"/>
+                                    <font key="font" metaFont="smallSystem"/>
                                     <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
                                     <color key="backgroundColor" name="headerColor" catalog="System" colorSpace="catalog"/>
                                 </tableHeaderCell>
@@ -105,7 +105,7 @@
                             </tableColumn>
                             <tableColumn identifier="course" width="140" minWidth="40" maxWidth="1000" id="yhS-aw-rbm">
                                 <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left" title="Course">
-                                    <font key="font" size="11" name="LucidaGrande"/>
+                                    <font key="font" metaFont="smallSystem"/>
                                     <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
                                     <color key="backgroundColor" name="headerColor" catalog="System" colorSpace="catalog"/>
                                 </tableHeaderCell>
@@ -118,7 +118,7 @@
                             </tableColumn>
                             <tableColumn identifier="points" width="44" minWidth="40" maxWidth="1000" id="o9T-6J-0cy">
                                 <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left" title="Points">
-                                    <font key="font" size="11" name="LucidaGrande"/>
+                                    <font key="font" metaFont="smallSystem"/>
                                     <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
                                     <color key="backgroundColor" name="headerColor" catalog="System" colorSpace="catalog"/>
                                 </tableHeaderCell>
@@ -131,7 +131,7 @@
                             </tableColumn>
                             <tableColumn identifier="average-hr" width="44" minWidth="40" maxWidth="1000" id="q5d-am-QMl">
                                 <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left" title="Avg HR">
-                                    <font key="font" size="11" name="LucidaGrande"/>
+                                    <font key="font" metaFont="smallSystem"/>
                                     <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
                                     <color key="backgroundColor" name="headerColor" catalog="System" colorSpace="catalog"/>
                                 </tableHeaderCell>
@@ -144,7 +144,7 @@
                             </tableColumn>
                             <tableColumn identifier="max-hr" width="44" minWidth="40" maxWidth="1000" id="KBO-ih-1qZ">
                                 <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left" title="Max HR">
-                                    <font key="font" size="11" name="LucidaGrande"/>
+                                    <font key="font" metaFont="smallSystem"/>
                                     <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
                                     <color key="backgroundColor" name="headerColor" catalog="System" colorSpace="catalog"/>
                                 </tableHeaderCell>

@@ -69,6 +69,8 @@ private:
   IBOutlet ActNotesHeaderView *_headerView;
 
   std::vector<ActNotesItem> _activities;
+
+  NSInteger _headerItemIndex;
 }
 
 @property(nonatomic, readonly) const std::vector<ActNotesItem> &activities;
