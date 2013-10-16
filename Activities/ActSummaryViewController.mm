@@ -2,6 +2,7 @@
 
 #import "ActSummaryViewController.h"
 
+#import "ActAppDelegate.h"
 #import "ActHorizontalBoxView.h"
 #import "ActWindowController.h"
 
@@ -89,6 +90,7 @@
       NSDate *date = [_controller dateField];
       NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
 
+      [formatter setLocale:[(ActAppDelegate *)[NSApp delegate] currentLocale]];
       [formatter setDateStyle:NSDateFormatterShortStyle];
       [formatter setTimeStyle:NSDateFormatterNoStyle];
       [_dateDateField setStringValue:[formatter stringFromDate:date]];
@@ -193,6 +195,7 @@
 		       [_dateTimeField stringValue]];
 
       NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
+      [formatter setLocale:[(ActAppDelegate *)[NSApp delegate] currentLocale]];
       [formatter setDateStyle:NSDateFormatterShortStyle];
       [formatter setTimeStyle:NSDateFormatterShortStyle];
 

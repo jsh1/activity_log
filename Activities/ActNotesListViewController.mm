@@ -2,6 +2,7 @@
 
 #import "ActNotesListViewController.h"
 
+#import "ActAppDelegate.h"
 #import "ActWindowController.h"
 
 #import "ActFoundationExtensions.h"
@@ -538,6 +539,7 @@ ActNotesItem::initialize()
   separator_color = [[NSColor colorWithDeviceWhite:.80 alpha:1] retain];
 
   time_formatter = [[NSDateFormatter alloc] init];
+  [time_formatter setLocale:[(ActAppDelegate *)[NSApp delegate] currentLocale]];
   [time_formatter setDateStyle:NSDateFormatterNoStyle];
   [time_formatter setTimeStyle:NSDateFormatterShortStyle];
 

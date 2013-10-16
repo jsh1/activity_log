@@ -52,6 +52,26 @@
   return _windowController;
 }
 
+- (NSLocale *)currentLocale
+{
+  // allow system locale to be overridden by a hidden default
+
+  static BOOL initialized;
+  static NSLocale *locale;
+
+  if (!initialized)
+    {
+      if (NSString *str = [[NSUserDefaults standardUserDefaults]
+			   stringForKey:@"ActLocaleIdentifier"])
+	{
+	  locale = [[NSLocale alloc] initWithLocaleIdentifier:str];
+	}
+      initialized = YES;
+    }
+
+  return locale != nil ? locale : [NSLocale autoupdatingCurrentLocale];
+}
+
 - (IBAction)emptyCaches:(id)sender
 {
   [[ActURLCache sharedURLCache] emptyCaches];
