@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="4510" systemVersion="12F37" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="4510" systemVersion="12F45" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
     <dependencies>
         <deployment defaultVersion="1080" identifier="macosx"/>
         <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="4510"/>
@@ -25,8 +25,8 @@
                         <font key="font" metaFont="smallSystem"/>
                         <segments>
                             <segment label="→" selected="YES"/>
-                            <segment label="♡" selected="YES" tag="1"/>
-                            <segment label="↑" selected="YES"/>
+                            <segment label="♡" tag="1"/>
+                            <segment label="↑"/>
                         </segments>
                     </segmentedCell>
                     <connections>

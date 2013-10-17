@@ -44,13 +44,20 @@ public:
       GRAY
     };
 
+  enum line_flags
+    {
+      FILL_BG = 1U << 0,
+      OPAQUE_BG = 1U << 1,
+      TICK_LINES = 1U << 2,
+    };
+
 private:
   struct line
     {
       double activity::point:: *field;
       value_conversion conversion;
       line_color color;
-      bool fill_bg;
+      uint32_t flags;
       double min_ratio, max_ratio;
 
       // in "standard unit" source space
@@ -62,7 +69,7 @@ private:
 
       line();
       line(double activity::point:: *field, value_conversion conversion,
-	line_color color, bool fill_bg, double min_ratio, double max_ratio);
+	line_color color, uint32_t flags, double min_ratio, double max_ratio);
 
       void update_values(const chart &c);
 
@@ -90,7 +97,7 @@ public:
   chart(const activity &a, x_axis_type x_axis);
 
   void add_line(double activity::point:: *field, value_conversion conv,
-    line_color color, bool fill_bg, double min_ratio, double max_ratio);
+    line_color color, uint32_t fill_bg, double min_ratio, double max_ratio);
 
   void set_selected_lap(int idx);
   int selected_lap() const;
@@ -114,12 +121,12 @@ chart::line::line()
 
 inline
 chart::line::line(double activity::point:: *field_, value_conversion
-		  conversion_, line_color color_, bool fill_bg_,
+		  conversion_, line_color color_, uint32_t flags_,
 		  double min_ratio_, double max_ratio_)
 : field(field_),
   conversion(conversion_),
   color(color_),
-  fill_bg(fill_bg_),
+  flags(flags_),
   min_ratio(min_ratio_),
   max_ratio(max_ratio_)
 {

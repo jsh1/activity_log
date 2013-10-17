@@ -22,6 +22,9 @@
   [[NSNotificationCenter defaultCenter]
    addObserver:self selector:@selector(selectedLapIndexDidChange:)
    name:ActSelectedActivityDidChange object:_controller];
+
+  for (NSTableColumn *col in [_tableView tableColumns])
+    [[col dataCell] setVerticallyCentered:YES];
 }
 
 - (void)dealloc

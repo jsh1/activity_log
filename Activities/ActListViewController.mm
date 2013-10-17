@@ -28,6 +28,9 @@
   [[NSNotificationCenter defaultCenter]
    addObserver:self selector:@selector(activityDidChangeField:)
    name:ActActivityDidChangeField object:_controller];
+
+  for (NSTableColumn *col in [_tableView tableColumns])
+    [[col dataCell] setVerticallyCentered:YES];
 }
 
 - (void)dealloc

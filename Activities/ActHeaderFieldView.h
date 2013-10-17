@@ -14,8 +14,6 @@
   NSString *_fieldName;
 }
 
-+ (NSColor *)textFieldColor:(BOOL)readOnly;
-
 @property(nonatomic, assign) ActHeaderView *headerView;
 
 @property(nonatomic, copy) NSString *fieldName;

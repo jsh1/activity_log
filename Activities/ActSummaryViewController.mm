@@ -3,6 +3,7 @@
 #import "ActSummaryViewController.h"
 
 #import "ActAppDelegate.h"
+#import "ActColor.h"
 #import "ActHorizontalBoxView.h"
 #import "ActWindowController.h"
 
@@ -117,9 +118,9 @@
 	  [control setEditable:!readOnly];
 	  NSColor *color;
 	  if ([control superview] != _statsBox)
-	    color = [[self class] textFieldColor:readOnly];
+	    color = [ActColor controlTextColor:readOnly];
 	  else
-	    color = [[self class] redTextFieldColor:readOnly];
+	    color = [ActColor controlDetailTextColor:readOnly];
 	  [control setTextColor:color];
 	}
 
@@ -132,7 +133,7 @@
       [_dateTimeField setObjectValue:nil];
 
       NSDictionary *dict = [self fieldControls];
-      NSColor *color = [[self class] textFieldColor:YES];
+      NSColor *color = [ActColor disabledControlTextColor];
 
       for (NSString *field in dict)
 	{
@@ -271,7 +272,7 @@
 
 - (void)drawRect:(NSRect)r
 {
-  [[NSColor whiteColor] setFill];
+  [[ActColor controlBackgroundColor] setFill];
   [NSBezierPath fillRect:r];
 }
 
@@ -279,6 +280,11 @@
 {
   [super resizeSubviewsWithOldSize:oldSize];
   [_controller _reflowFields];
+}
+
+- (BOOL)isOpaque
+{
+  return YES;
 }
 
 @end

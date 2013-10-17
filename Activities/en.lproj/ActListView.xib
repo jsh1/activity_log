@@ -11,14 +11,14 @@
                 <outlet property="view" destination="DVo-eg-d7Y" id="FLg-4h-T40"/>
             </connections>
         </customObject>
-        <scrollView focusRingType="none" autohidesScrollers="YES" horizontalLineScroll="19" horizontalPageScroll="10" verticalLineScroll="19" verticalPageScroll="10" usesPredominantAxisScrolling="NO" id="DVo-eg-d7Y">
+        <scrollView focusRingType="none" autohidesScrollers="YES" horizontalLineScroll="22" horizontalPageScroll="10" verticalLineScroll="22" verticalPageScroll="10" usesPredominantAxisScrolling="NO" id="DVo-eg-d7Y">
             <rect key="frame" x="0.0" y="0.0" width="285" height="630"/>
             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
             <clipView key="contentView" id="NFm-AO-52i">
                 <rect key="frame" x="1" y="17" width="283" height="612"/>
                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                 <subviews>
-                    <tableView focusRingType="none" verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="none" alternatingRowBackgroundColors="YES" columnSelection="YES" multipleSelection="NO" autosaveColumns="NO" headerView="K28-lw-ees" id="6O5-fV-qnL" customClass="ActTableView">
+                    <tableView focusRingType="none" verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="none" alternatingRowBackgroundColors="YES" columnSelection="YES" multipleSelection="NO" autosaveColumns="NO" rowHeight="20" headerView="K28-lw-ees" id="6O5-fV-qnL" customClass="ActTableView">
                         <rect key="frame" x="0.0" y="0.0" width="647" height="612"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <size key="intercellSpacing" width="3" height="2"/>

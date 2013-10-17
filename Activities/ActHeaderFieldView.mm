@@ -2,6 +2,7 @@
 
 #import "ActHeaderFieldView.h"
 
+#import "ActColor.h"
 #import "ActHeaderView.h"
 #import "ActWindowController.h"
 
@@ -13,19 +14,6 @@
 #define CONTROL_HEIGHT LABEL_HEIGHT
 
 @implementation ActHeaderFieldView
-
-+ (NSColor *)textFieldColor:(BOOL)readOnly
-{
-  static NSColor *a, *b;
-
-  if (a == nil)
-    {
-      a = [[NSColor colorWithDeviceWhite:0 alpha:1] retain];
-      b = [[NSColor colorWithDeviceWhite:.45 alpha:1] retain];
-    }
-
-  return !readOnly ? a : b;
-}
 
 - (id)initWithFrame:(NSRect)frame
 {
@@ -91,7 +79,7 @@
 
   BOOL readOnly = [[self controller] isFieldReadOnly:_fieldName];
   [[_valueField cell] setEditable:!readOnly];
-  [[_valueField cell] setTextColor:[[self class] textFieldColor:readOnly]];
+  [[_valueField cell] setTextColor:[ActColor controlTextColor:readOnly]];
   [[_valueField cell] setTruncatesLastVisibleLine:YES];
 
   [_labelField setCompletesEverything:YES];

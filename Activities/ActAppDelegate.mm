@@ -77,4 +77,18 @@
   [[ActURLCache sharedURLCache] emptyCaches];
 }
 
+// NSMenuDelegate methods
+
+- (void)menuNeedsUpdate:(NSMenu *)menu
+{
+  if (menu == _viewMenu)
+    {
+      for (NSMenuItem *item in [menu itemArray])
+	{
+	  if ([item action] == @selector(toggleChartField:))
+	    [item setState:[_windowController chartFieldIsShown:[item tag]]];
+	}
+    }
+}
+
 @end

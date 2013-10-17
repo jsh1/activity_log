@@ -3,6 +3,7 @@
 #import "ActWindowController.h"
 
 #import "ActActivityViewController.h"
+#import "ActChartViewController.h"
 #import "ActListViewController.h"
 #import "ActNotesListViewController.h"
 #import "ActSummaryViewController.h"
@@ -731,6 +732,9 @@ NSString *const ActActivityDidChangeBody = @"ActActivityDidChangeBody";
 
 - (IBAction)nextActivity:(id)sender
 {
+  if (_selectedActivityStorage == nullptr)
+    return [self firstActivity:sender];
+
   auto it = std::find(_activityList.begin(), _activityList.end(),
 		      _selectedActivityStorage);
 
@@ -742,6 +746,9 @@ NSString *const ActActivityDidChangeBody = @"ActActivityDidChangeBody";
 
 - (IBAction)previousActivity:(id)sender
 {
+  if (_selectedActivityStorage == nullptr)
+    return [self lastActivity:sender];
+
   auto it = std::find(_activityList.begin(), _activityList.end(),
 		      _selectedActivityStorage);
 
@@ -767,6 +774,23 @@ NSString *const ActActivityDidChangeBody = @"ActActivityDidChangeBody";
 {
   [self setListViewType:[sender tag]];
 }
+
+- (IBAction)toggleChartField:(id)sender
+{
+  ActChartViewController *controller
+    = (id)[self viewControllerWithClass:[ActChartViewController class]];
+
+  [controller toggleChartField:sender];
+}
+
+- (BOOL)chartFieldIsShown:(NSInteger)field
+{
+  ActChartViewController *controller
+    = (id)[self viewControllerWithClass:[ActChartViewController class]];
+
+  return [controller chartFieldIsShown:field];
+}
+
 
 - (void)windowWillClose:(NSNotification *)note
 {

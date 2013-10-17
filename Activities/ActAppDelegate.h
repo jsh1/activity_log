@@ -4,8 +4,10 @@
 
 @class ActWindowController;
 
-@interface ActAppDelegate : NSObject <NSApplicationDelegate>
+@interface ActAppDelegate : NSObject <NSApplicationDelegate, NSMenuDelegate>
 {
+  IBOutlet NSMenu *_viewMenu;
+
   ActWindowController *_windowController;
 }
 

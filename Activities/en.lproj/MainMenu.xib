@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="4510" systemVersion="12F37" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="4510" systemVersion="12F45" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
     <dependencies>
         <deployment defaultVersion="1080" identifier="macosx"/>
         <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="4510"/>
@@ -645,6 +645,25 @@ DQ
                                 </connections>
                             </menuItem>
                             <menuItem isSeparatorItem="YES" id="yeB-Bt-ud4"/>
+                            <menuItem title="Show Pace Chart" keyEquivalent="" id="acT-kd-qDl">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                                <connections>
+                                    <action selector="toggleChartField:" target="-1" id="C1c-wY-Rtg"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem title="Show Heart Rate Chart" tag="1" keyEquivalent="" id="jm2-wK-tS0">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                                <connections>
+                                    <action selector="toggleChartField:" target="-1" id="tzZ-zx-6hf"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem title="Show Altitude Chart" tag="2" keyEquivalent="" id="wGf-MU-TJE">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                                <connections>
+                                    <action selector="toggleChartField:" target="-1" id="910-Ac-pLO"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem isSeparatorItem="YES" id="hDr-rB-4d7"/>
                             <menuItem title="Show Toolbar" keyEquivalent="t" id="297">
                                 <modifierMask key="keyEquivalentModifierMask" option="YES" command="YES"/>
                                 <connections>
@@ -657,6 +676,9 @@ DQ
                                 </connections>
                             </menuItem>
                         </items>
+                        <connections>
+                            <outlet property="delegate" destination="494" id="Toa-64-Emj"/>
+                        </connections>
                     </menu>
                 </menuItem>
                 <menuItem title="Window" id="19">
@@ -702,7 +724,11 @@ DQ
                 </menuItem>
             </items>
         </menu>
-        <customObject id="494" customClass="ActAppDelegate"/>
+        <customObject id="494" customClass="ActAppDelegate">
+            <connections>
+                <outlet property="_viewMenu" destination="296" id="x33-mG-RkA"/>
+            </connections>
+        </customObject>
         <customObject id="420" customClass="NSFontManager"/>
     </objects>
 </document>

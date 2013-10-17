@@ -11,9 +11,6 @@
   ActWindowController *_controller;
 }
 
-+ (NSColor *)textFieldColor:(BOOL)readOnly;
-+ (NSColor *)redTextFieldColor:(BOOL)readOnly;
-
 + (NSString *)viewNibName;
 - (NSString *)identifier;
 

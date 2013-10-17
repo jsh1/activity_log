@@ -2,6 +2,7 @@
 
 #import "ActChartViewController.h"
 
+#import "ActColor.h"
 #import "ActWindowController.h"
 
 #define MIN_WIDTH 500
@@ -69,29 +70,37 @@
   bool draw_hr = [_segmentedControl isSelectedForSegment:1] && gps_a->has_heart_rate();
   bool draw_pace = [_segmentedControl isSelectedForSegment:0] && gps_a->has_speed();
 
-  if (draw_altitude)
+  if (draw_hr)
     {
-      _chart->add_line(&act::gps::activity::point::altitude,
-		       act::gps::chart::value_conversion::DISTANCE_M_FT,
-		       act::gps::chart::line_color::GREEN, true, -0.05, 2);
+      double bot = !draw_pace ? -0.05 : -.55;
+
+      _chart->add_line(&act::gps::activity::point::heart_rate,
+		       act::gps::chart::value_conversion::HEARTRATE_BPM_HRR,
+		       act::gps::chart::line_color::ORANGE,
+		       act::gps::chart::FILL_BG
+		       | act::gps::chart::OPAQUE_BG
+		       | act::gps::chart::TICK_LINES, bot, 1.05);
     }
 
   if (draw_pace)
     {
-      double bot = !draw_hr ? -0.05 : -1;
+      double bot = !draw_altitude ? -0.05 : -.25;
+      double top = !draw_hr ? 1.05 : 1.35;
 
       _chart->add_line(&act::gps::activity::point::speed,
 		       act::gps::chart::value_conversion::SPEED_MS_PACE,
-		       act::gps::chart::line_color::BLUE, true, bot, 1.05);
+		       act::gps::chart::line_color::BLUE,
+		       act::gps::chart::FILL_BG
+		       | act::gps::chart::OPAQUE_BG
+		       | act::gps::chart::TICK_LINES, bot, top);
     }
 
-  if (draw_hr)
+  if (draw_altitude)
     {
-      double top = !draw_pace ? 1.05 : 2;
-
-      _chart->add_line(&act::gps::activity::point::heart_rate,
-		       act::gps::chart::value_conversion::IDENTITY,
-		       act::gps::chart::line_color::ORANGE, true, -0.05, top);
+      _chart->add_line(&act::gps::activity::point::altitude,
+		       act::gps::chart::value_conversion::DISTANCE_M_FT,
+		       act::gps::chart::line_color::GREEN,
+		       act::gps::chart::FILL_BG, -0.05, 2);
     }
 
   _chart->set_chart_rect(NSRectToCGRect([_chartView bounds]));
@@ -139,6 +148,21 @@
     }
 }
 
+- (IBAction)toggleChartField:(id)sender
+{
+  NSInteger field = [sender tag];
+  BOOL state = [_segmentedControl isSelectedForSegment:field];
+
+  [_segmentedControl setSelected:!state forSegment:field];
+
+  [self _updateChart];
+}
+
+- (BOOL)chartFieldIsShown:(NSInteger)field
+{
+  return [_segmentedControl isSelectedForSegment:field];
+}
+
 @end
 
 
@@ -146,18 +170,15 @@
 
 - (void)drawRect:(NSRect)r
 {
-  CGContextRef ctx = (CGContextRef) [[NSGraphicsContext
-				      currentContext] graphicsPort];
-
-  CGRect bounds = NSRectToCGRect([self bounds]);
-
-  CGContextSaveGState(ctx);
-  CGContextSetGrayFillColor(ctx, .98, 1);
-  CGContextFillRect(ctx, bounds);
-  CGContextRestoreGState(ctx);
+  [[ActColor controlBackgroundColor] setFill];
+  [NSBezierPath fillRect:r];
 
   if (act::gps::chart *chart = [_controller chart])
     {
+      CGContextRef ctx = (CGContextRef) [[NSGraphicsContext
+					  currentContext] graphicsPort];
+
+      CGRect bounds = NSRectToCGRect([self bounds]);
       CGRect r = CGRectInset(bounds, 2, 2);
 
       CGContextSaveGState(ctx);
@@ -171,6 +192,11 @@
 
       CGContextRestoreGState(ctx);
     }
+}
+
+- (BOOL)isOpaque
+{
+  return YES;
 }
 
 @end

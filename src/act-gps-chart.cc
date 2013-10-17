@@ -15,6 +15,7 @@
 
 #define MAX_TICKS 4
 #define MIN_TICKS 2
+#define MIN_TICK_GAP 30
 
 #define KEY_TEXT_WIDTH 60
 
@@ -105,26 +106,34 @@ chart::line::update_values(const chart &c)
   if (tick_max < tick_min)
     std::swap(tick_min, tick_max);
 
+  bool scale_ticks = true;
+
   switch (conversion)
     {
     case value_conversion::HEARTRATE_BPM_HRR:
     case value_conversion::HEARTRATE_BPM_PMAX:
       tick_delta = 5;
+      scale_ticks = false;
       break;
     case value_conversion::SPEED_MS_PACE:
-      tick_delta = 30;
+      tick_delta = 15;
+      scale_ticks = false;
       break;
     case value_conversion::DISTANCE_M_FT:
-      tick_delta = 100;
+      tick_delta = 50;
+      scale_ticks = false;
       break;
     default:
       tick_delta = 1;
     }
 
-  while ((tick_max - tick_min) / tick_delta > MAX_TICKS)
-    tick_delta = tick_delta * 2;
-  while ((tick_max - tick_min) / tick_delta < MIN_TICKS)
-    tick_delta = tick_delta * .5;
+  if (scale_ticks)
+    {
+      while ((tick_max - tick_min) / tick_delta > MAX_TICKS)
+	tick_delta = tick_delta * 2;
+      while ((tick_max - tick_min) / tick_delta < MIN_TICKS)
+	tick_delta = tick_delta * .5;
+    }
 
   tick_min = floor(tick_min / tick_delta) * tick_delta;
   tick_max = ceil(tick_max / tick_delta) * tick_delta;
@@ -175,11 +184,10 @@ chart::chart(const activity &a, x_axis_type xa)
 
 void
 chart::add_line(double activity::point:: *field, value_conversion conv,
-		line_color color, bool fill_bg, double min_ratio,
+		line_color color, uint32_t flags, double min_ratio,
 		double max_ratio)
 {
-
-  _lines.push_back(line(field, conv, color, fill_bg, min_ratio, max_ratio));
+  _lines.push_back(line(field, conv, color, flags, min_ratio, max_ratio));
 }
 
 void
@@ -309,29 +317,70 @@ chart::draw_line(CGContextRef ctx, const line &l, CGFloat tx)
   CGContextScaleCTM(ctx, 1, -1);
   CGContextTranslateCTM(ctx, -_chart_rect.origin.x, -_chart_rect.origin.y);
 
+  CGFloat fill_rgb[3], stroke_rgb[3];
+
+  switch (l.color)
+    {
+    case line_color::RED:
+      fill_rgb[0] = 1;
+      fill_rgb[1] = .5;
+      fill_rgb[2] = .5;
+      stroke_rgb[0] = 1;
+      stroke_rgb[1] = 0;
+      stroke_rgb[2] = 0.3;
+      break;
+    case line_color::GREEN:
+      fill_rgb[0] = .75;
+      fill_rgb[1] = 1;
+      fill_rgb[2] = .75;
+      stroke_rgb[0] = 0;
+      stroke_rgb[1] = 0.6;
+      stroke_rgb[2] = 0.2;
+      break;
+    case line_color::BLUE:
+      fill_rgb[0] = .5;
+      fill_rgb[1] = .5;
+      fill_rgb[2] = 1;
+      stroke_rgb[0] = 0;
+      stroke_rgb[1] = 0.2;
+      stroke_rgb[2] = 1;
+      break;
+    case line_color::ORANGE:
+      fill_rgb[0] = 1;
+      fill_rgb[1] = .5;
+      fill_rgb[2] = 0;
+      stroke_rgb[0] = 1;
+      stroke_rgb[1] = 0.5;
+      stroke_rgb[2] = 0;
+      break;
+    case line_color::GRAY:
+      fill_rgb[0] = .75;
+      fill_rgb[1] = .75;
+      fill_rgb[2] = .75;
+      stroke_rgb[0] = 0.6;
+      stroke_rgb[1] = 0.6;
+      stroke_rgb[2] = 0.6;
+      break;
+    }
+
   // Fill gradient under the line
 
-  if (l.fill_bg)
+  if (l.flags & FILL_BG)
     {
       CGContextSaveGState(ctx);
 
-      switch (l.color)
+      if (l.flags & OPAQUE_BG)
 	{
-	case line_color::RED:
-	  CGContextSetRGBFillColor(ctx, 1, .5, .5, .2);
-	  break;
-	case line_color::GREEN:
-	  CGContextSetRGBFillColor(ctx, .75, 1, .75, .2);
-	  break;
-	case line_color::BLUE:
-	  CGContextSetRGBFillColor(ctx, .5, .75, 1, .2);
-	  break;
-	case line_color::ORANGE:
-	  CGContextSetRGBFillColor(ctx, 1, .5, 0, .2);
-	  break;
-	case line_color::GRAY:
-	  CGContextSetRGBFillColor(ctx, .75, .75, .75, .2);
-	  break;
+	  // D = S + D * (1-Sa)
+	  // C' = C*F + (1-F)  [assuming white background]
+
+	  CGContextSetRGBFillColor(ctx, .8+fill_rgb[0]*.2,
+				   .8+fill_rgb[1]*.2, .8+fill_rgb[2]*.2, 1);
+	}
+      else
+	{
+	  CGContextSetRGBFillColor(ctx, fill_rgb[0],
+				   fill_rgb[1], fill_rgb[2], .2);
 	}
 
       CGContextAddPath(ctx, fill_path);
@@ -343,26 +392,7 @@ chart::draw_line(CGContextRef ctx, const line &l, CGFloat tx)
   // Draw data line
 
   CGContextSaveGState(ctx);
-
-  switch (l.color)
-    {
-    case line_color::RED:
-      CGContextSetRGBStrokeColor(ctx, 1, 0, 0.3, 1);
-      break;
-    case line_color::GREEN:
-      CGContextSetRGBStrokeColor(ctx, 0, 0.6, 0.2, 1);
-      break;
-    case line_color::BLUE:
-      CGContextSetRGBStrokeColor(ctx, 0, 0.2, 1, 1);
-      break;
-    case line_color::ORANGE:
-      CGContextSetRGBStrokeColor(ctx, 1, 0.5, 0, 1);
-      break;
-    case line_color::GRAY:
-      CGContextSetRGBStrokeColor(ctx, 0.6, 0.6, 0.6, 1);
-      break;
-    }
-
+  CGContextSetRGBStrokeColor(ctx, stroke_rgb[0], stroke_rgb[1], stroke_rgb[2], 1);
   CGContextAddPath(ctx, path);
   CGContextSetLineWidth(ctx, 1.75);
   CGContextSetLineJoin(ctx, kCGLineJoinBevel);
@@ -375,29 +405,46 @@ chart::draw_line(CGContextRef ctx, const line &l, CGFloat tx)
   CGContextSaveGState(ctx);
 
   CGContextSetLineWidth(ctx, 1);
-  CGContextSetRGBStrokeColor(ctx, 0, 0, 0, 0.1);
+  CGContextSetRGBStrokeColor(ctx, stroke_rgb[0], stroke_rgb[1], stroke_rgb[2], .25);
+  static const CGFloat dash[] = {4, 2};
+  CGContextSetLineDash(ctx, 0, dash, 2);
 
   CGContextSelectFont(ctx, LABEL_FONT, LABEL_SIZE, kCGEncodingMacRoman);
   CGContextSetTextMatrix(ctx, CGAffineTransformIdentity);
   CGContextSetTextDrawingMode(ctx, kCGTextFill);
   CGContextSetGrayFillColor(ctx, 0.1, 1);
+  CGContextSetRGBFillColor(ctx, stroke_rgb[0], stroke_rgb[1], stroke_rgb[2], 1);
+
+  CGFloat lly = _chart_rect.origin.y;
+  CGFloat ury = lly + _chart_rect.size.height;
+  CGFloat ly = HUGE_VAL;
 
   for (double tick = l.tick_min; tick < l.tick_max; tick += l.tick_delta)
     {
       double value = l.convert_to_si(tick);
-      CGFloat y = value;
-      y = y * ym + y0;
-      y = floor(y) + 0.5;
-      CGPoint lines[2];
-      lines[0] = CGPointMake(_chart_rect.origin.x, y);
-      lines[1] = CGPointMake(_chart_rect.origin.x + _chart_rect.size.width, y);
-      CGContextStrokeLineSegments(ctx, lines, 2);
+      CGFloat y = floor(value * ym + y0) + .5;
+
+      if (y < lly || y > ury)
+	continue;
+      if (fabs(y - ly) < MIN_TICK_GAP)
+	continue;
+
+      if (l.flags & TICK_LINES)
+	{
+	  CGPoint lines[2];
+	  lines[0] = CGPointMake(_chart_rect.origin.x, y);
+	  lines[1] = CGPointMake(_chart_rect.origin.x
+				 + _chart_rect.size.width, y);
+	  CGContextStrokeLineSegments(ctx, lines, 2);
+	}
 
       std::string s;
       l.format_tick(s, tick, value);
 
       CGContextShowTextAtPoint(ctx, _chart_rect.origin.x + tx + 2,
 			       y + 2, s.c_str(), s.size());
+
+      ly = y;
     }
 
   CGContextRestoreGState(ctx);
@@ -442,6 +489,8 @@ chart::draw_lap_markers(CGContextRef ctx)
   CGContextSaveGState(ctx);
 
   CGContextSetLineWidth(ctx, 1);
+  static const CGFloat dash[] = {4, 2};
+  CGContextSetLineDash(ctx, 0, dash, 2);
   CGContextSetRGBStrokeColor(ctx, 0, 0, 0, 0.1);
   CGContextStrokeLineSegments(ctx, &lines[2], lines.size() - 4);
 

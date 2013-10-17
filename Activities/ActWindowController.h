@@ -107,4 +107,7 @@ extern NSString *const ActActivityDidChangeBody;
 
 - (IBAction)setListViewAction:(id)sender;
 
+- (IBAction)toggleChartField:(id)sender;
+- (BOOL)chartFieldIsShown:(NSInteger)field;
+
 @end

@@ -3,6 +3,7 @@
 #import "ActNotesListViewController.h"
 
 #import "ActAppDelegate.h"
+#import "ActColor.h"
 #import "ActWindowController.h"
 
 #import "ActFoundationExtensions.h"
@@ -289,7 +290,11 @@
   _activities[row].body.reset();
   _activities[row].body_width = 0;
 
-  [_listView setNeedsDisplayInRect:[self visibleRectForRow:row]];
+  // FIXME: a bit heavy-handed. Ideally find the index of the last
+  // visible item, and if 'row' is not greater than that, invalidate
+  // the view.
+
+  [_listView setNeedsDisplay:YES];
 }
 
 - (void)listBoundsDidChange:(NSNotification *)note
@@ -323,7 +328,7 @@
 {
   NSRect bounds = [self bounds];
 
-  [[NSColor colorWithDeviceWhite:.98 alpha:1] setFill];
+  [[ActColor controlBackgroundColor] setFill];
   [NSBezierPath fillRect:r];
 
   CGFloat y = r.origin.y;
@@ -436,7 +441,7 @@
 
 - (void)drawRect:(NSRect)r
 {
-  [[NSColor colorWithDeviceWhite:.98 alpha:1] setFill];
+  [[ActColor controlBackgroundColor] setFill];
   [NSBezierPath fillRect:r];
 
   if (const ActNotesItem *item = [_controller headerItem])
