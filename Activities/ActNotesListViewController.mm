@@ -17,14 +17,16 @@
 #define Y_SPACING 10
 #define TITLE_HEIGHT 24
 #define TITLE_FONT_SIZE 18
+#define TITLE_LEADING 20
 #define ITEM_INSET 10
 #define TIME_WIDTH 60
 #define TIME_HEIGHT TITLE_HEIGHT
 #define TIME_FONT_SIZE 12
 #define BODY_FONT_SIZE 12
 #define BODY_NIL_HEIGHT 9
-#define STATS_FONT_SIZE 14
-#define STATS_HEIGHT 20
+#define STATS_FONT_SIZE 15
+#define STATS_HEIGHT 24
+#define STATS_LEADING 25
 #define DATE_WIDTH 70
 #define DAY_OF_WEEK_HEIGHT 20
 #define DAY_OF_WEEK_FONT_SIZE 14
@@ -479,9 +481,8 @@ NSDateFormatter *ActNotesItem::time_formatter;
 void
 ActNotesItem::initialize()
 {
-  NSColor *greyColor = [NSColor colorWithDeviceWhite:.2 alpha:1];
-  NSColor *redColor = [NSColor colorWithDeviceRed:197/255.
-		       green:56/255. blue:51/255. alpha:1];
+  NSColor *greyColor = [ActColor controlTextColor];
+  NSColor *redColor = [ActColor controlDetailTextColor];
 
   NSMutableParagraphStyle *rightStyle
     = [[NSParagraphStyle defaultParagraphStyle] mutableCopy];
@@ -499,7 +500,7 @@ ActNotesItem::initialize()
   selected_title_attrs = [[NSDictionary alloc] initWithObjectsAndKeys:
 			  [NSFont fontWithName:@"Helvetica Neue Bold"
 			   size:TITLE_FONT_SIZE], NSFontAttributeName,
-			  [NSColor alternateSelectedControlTextColor],
+			  [ActColor alternateSelectedControlTextColor],
 			  NSForegroundColorAttributeName,
 			  nil];
   body_attrs = [[NSDictionary alloc] initWithObjectsAndKeys:
@@ -634,9 +635,9 @@ ActNotesItem::draw(const NSRect &bounds, uint32_t flags) const
       if (flags & DRAW_SELECTED)
 	{
 	  if (flags & DRAW_FOCUSED)
-	    [[NSColor alternateSelectedControlColor] setFill];
+	    [[ActColor alternateSelectedControlColor] setFill];
 	  else
-	    [[NSColor secondarySelectedControlColor] setFill];
+	    [[ActColor secondarySelectedControlColor] setFill];
 	  [NSBezierPath fillRect:NSInsetRect(ssubR, -4, 0)];
 	}
 
@@ -651,20 +652,7 @@ ActNotesItem::draw(const NSRect &bounds, uint32_t flags) const
 	}
     }
 
-  subR.origin.y += subR.size.height;
-
-  // draw body
-
-  update_body_height(subR.size.width);
-
-  if (body)
-    {
-      subR.size.height = body_height;
-
-      [body.get() drawInRect:subR withAttributes:body_attrs];
-    }
-
-  subR.origin.y += body_height;
+  subR.origin.y += TITLE_LEADING;
 
   // draw stats
 
@@ -692,7 +680,20 @@ ActNotesItem::draw(const NSRect &bounds, uint32_t flags) const
   [[NSString stringWithUTF8String:buf.c_str()]
    drawInRect:subR withAttributes:stats_attrs];
 
-  subR.origin.y += subR.size.height;
+  subR.origin.y += STATS_LEADING;
+
+  // draw body
+
+  update_body_height(subR.size.width);
+
+  if (body)
+    {
+      subR.size.height = body_height;
+
+      [body.get() drawInRect:subR withAttributes:body_attrs];
+    }
+
+  subR.origin.y += body_height;
 
   subR.origin.y += floor(Y_SPACING * .5);
   subR.size.height = 1;
@@ -707,7 +708,7 @@ ActNotesItem::draw(const NSRect &bounds, uint32_t flags) const
   [separator_color setFill];
   [NSBezierPath fillRect:subR];
   subR.origin.y += 1;
-  [[NSColor whiteColor] setFill];
+  [[ActColor whiteColor] setFill];
   [NSBezierPath fillRect:subR];
 }
 
@@ -738,7 +739,7 @@ ActNotesItem::draw_header(const NSRect &bounds, uint32_t flags) const
   subR.size.width = bounds.size.width;
   subR.size.height = 1;
 
-  [[NSColor whiteColor] setFill];
+  [[ActColor whiteColor] setFill];
   [NSBezierPath fillRect:subR];
   subR.origin.y += 1;
   [separator_color setFill];
@@ -852,9 +853,9 @@ ActNotesItem::update_height(CGFloat width) const
 
   if (!valid_height)
     {
-      height = TITLE_HEIGHT;
+      height = TITLE_LEADING;
+      height += STATS_LEADING;
       height += body_height;
-      height += STATS_HEIGHT;
       height += Y_SPACING;
 
       valid_height = true;

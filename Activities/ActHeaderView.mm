@@ -2,7 +2,10 @@
 
 #import "ActHeaderView.h"
 
+#import "ActColor.h"
+#import "ActCollapsibleView.h"
 #import "ActHeaderFieldView.h"
+#import "ActViewLayout.h"
 #import "ActWindowController.h"
 
 #import "ActFoundationExtensions.h"
@@ -10,7 +13,7 @@
 #define FIELD_HEIGHT 12
 #define FIELD_Y_SPACING 2
 #define X_INSET 2
-#define Y_INSET 10
+#define Y_INSET 2
 
 @implementation ActHeaderView
 
@@ -150,7 +153,8 @@
   if (sender == _addFieldButton)
     {
       ActHeaderFieldView *field = [self _ensureField:@""];
-      [self layoutAndResize];
+      [(ActCollapsibleView *)[_controller view] setCollapsed:NO];
+      [[self superview] subviewNeedsLayout:self];
       [[self window] makeFirstResponder:[field nameView]];
       [self scrollRectToVisible:[field convertRect:[field bounds] toView:self]];
     }
@@ -176,7 +180,7 @@
     }
 }
 
-- (CGFloat)preferredHeight
+- (CGFloat)heightForWidth:(CGFloat)width
 {
   CGFloat h = 0;
 
@@ -192,41 +196,27 @@
 
 - (void)layoutSubviews
 {
-  NSRect bounds = [self bounds];
-  NSRect frame = NSInsetRect(bounds, X_INSET, Y_INSET);
+  NSRect bounds = NSInsetRect([self bounds], X_INSET, Y_INSET);
+  CGFloat y = 0;
 
   for (ActHeaderFieldView *field in [self subviews])
     {
-      frame.size.height = [field preferredHeight];
+      NSRect frame;
+      CGFloat h = [field preferredHeight];
+      frame.origin.x = bounds.origin.x;
+      frame.origin.y = bounds.origin.y + bounds.size.height - (y + h);
+      frame.size.width = bounds.size.width;
+      frame.size.height = h;
       [field setFrame:frame];
       [field layoutSubviews];
-      frame.origin.y += frame.size.height + FIELD_Y_SPACING;
+      y += h + FIELD_Y_SPACING;
     }
 }
 
-- (void)layoutAndResize
+- (void)drawRect:(NSRect)r
 {
-  NSRect frame = [self frame];
-  CGFloat height = [self preferredHeight];
-
-  if (frame.size.height != height)
-    {
-      frame.size.height = height;
-      [self setFrame:frame];
-    }
-
-  [self layoutSubviews];
-}
-
-- (void)resizeSubviewsWithOldSize:(NSSize)oldSize
-{
-  [super resizeSubviewsWithOldSize:oldSize];
-  [self layoutSubviews];
-}
-
-- (BOOL)isFlipped
-{
-  return YES;
+  [[ActColor controlBackgroundColor] setFill];
+  [NSBezierPath fillRect:r];
 }
 
 @end

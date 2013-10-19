@@ -65,7 +65,17 @@
   static NSColor *color;
 
   if (color == nil)
-    color = [[NSColor colorWithDeviceWhite:.98 alpha:1] retain];
+    color = [[NSColor colorWithDeviceWhite:.96 alpha:1] retain];
+
+  return color;
+}
+
++ (NSColor *)darkControlBackgroundColor
+{
+  static NSColor *color;
+
+  if (color == nil)
+    color = [[NSColor colorWithDeviceWhite:.90 alpha:1] retain];
 
   return color;
 }
@@ -78,7 +88,7 @@
     {
       colors = [[NSArray alloc] initWithObjects:
 		[self controlBackgroundColor],
-		[NSColor colorWithDeviceWhite:.94 alpha:1],
+		[self colorWithDeviceWhite:.92 alpha:1],
 		nil];
     }
 

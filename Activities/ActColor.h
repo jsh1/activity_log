@@ -13,6 +13,7 @@
 + (NSColor *)controlDetailTextColor:(BOOL)disabled;
 
 + (NSColor *)controlBackgroundColor;
++ (NSColor *)darkControlBackgroundColor;
 + (NSArray *)controlAlternatingRowBackgroundColors;
 
 @end

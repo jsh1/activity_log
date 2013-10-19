@@ -14,6 +14,7 @@
   IBOutlet NSButton *_centerButton;
 
   int _pendingSources;
+  NSString *_defaultSourceName;
 }
 
 - (IBAction)controlAction:(id)sender;

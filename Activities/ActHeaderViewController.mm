@@ -2,8 +2,10 @@
 
 #import "ActHeaderViewController.h"
 
+#import "ActCollapsibleView.h"
 #import "ActHeaderView.h"
 #import "ActHorizontalBoxView.h"
+#import "ActViewLayout.h"
 #import "ActWindowController.h"
 
 #import "act-database.h"
@@ -28,6 +30,10 @@
    name:ActSelectedActivityDidChange object:_controller];
 
   [_headerView viewDidLoad];
+
+  [(ActCollapsibleView *)[self view] setTitle:@"Data Fields"];
+
+  [_boxView setRightToLeft:YES];
 }
 
 - (void)dealloc
@@ -91,7 +97,7 @@
 	}
     }
 
-  [_headerView layoutAndResize];
+  [_containerView subviewNeedsLayout:_headerView];
 }
 
 - (void)selectedActivityDidChange:(NSNotification *)note

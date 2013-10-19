@@ -2,15 +2,36 @@
 
 #import "ActLapViewController.h"
 
+#import "ActCollapsibleView.h"
+#import "ActTableView.h"
 #import "ActWindowController.h"
 
 #import "act-format.h"
+
+#define HEADER_HEIGHT 16
+#define ROW_HEIGHT 20
+#define SEPARATOR_HEIGHT 2
 
 @implementation ActLapViewController
 
 + (NSString *)viewNibName
 {
   return @"ActLapView";
+}
+
+static void
+addTableColumn (NSTableView *tv, NSFont *font, NSString *ident,NSString *title)
+{
+  NSTableColumn *tc = [[NSTableColumn alloc] initWithIdentifier:ident];
+  [tc setEditable:NO];
+  [[tc dataCell] setFont:font];
+  [[tc dataCell] setVerticallyCentered:YES];
+  NSTableHeaderCell *hc = [[NSTableHeaderCell alloc] initTextCell:title];
+  [hc setFont:font];
+  [tc setHeaderCell:hc];
+  [hc release];
+  [tv addTableColumn:tc];
+  [tc release];
 }
 
 - (void)viewDidLoad
@@ -23,8 +44,32 @@
    addObserver:self selector:@selector(selectedLapIndexDidChange:)
    name:ActSelectedActivityDidChange object:_controller];
 
-  for (NSTableColumn *col in [_tableView tableColumns])
-    [[col dataCell] setVerticallyCentered:YES];
+  [(ActCollapsibleView *)[self view] setTitle:@"Laps"];
+
+  _headerView = [[NSTableHeaderView alloc] initWithFrame:NSZeroRect];
+  [_lapView addSubview:_headerView];
+  [_headerView release];
+
+  _tableView = [[ActTableView alloc] initWithFrame:NSZeroRect];
+  [_tableView setDataSource:self];
+  [_tableView setDelegate:self];
+  [_tableView setUsesAlternatingRowBackgroundColors:YES];
+  [_tableView setRowHeight:ROW_HEIGHT];
+
+  NSFont *font = [NSFont systemFontOfSize:[NSFont smallSystemFontSize]];
+  addTableColumn(_tableView, font, @"lap", @"Lap");
+  addTableColumn(_tableView, font, @"distance", @"Distance");
+  addTableColumn(_tableView, font, @"duration", @"Duration");
+  addTableColumn(_tableView, font, @"pace", @"Pace");
+  addTableColumn(_tableView, font, @"max-pace", @"Max Pace");
+  addTableColumn(_tableView, font, @"average-hr", @"Avg HR");
+  addTableColumn(_tableView, font, @"max-hr", @"Max HR");
+  addTableColumn(_tableView, font, @"calories", @"Calories");
+
+  [_lapView addSubview:_tableView];
+  [_tableView release];
+
+  [_headerView setTableView:_tableView];
 }
 
 - (void)dealloc
@@ -53,6 +98,32 @@
 
   if (set != nil)
     [_tableView selectRowIndexes:set byExtendingSelection:NO];
+}
+
+- (CGFloat)lapView_heightForWidth:(CGFloat)width
+{
+  NSInteger rows = [self numberOfRowsInTableView:_tableView];
+  if (rows == 0)
+    return 0;
+
+  return (HEADER_HEIGHT - 1) + (ROW_HEIGHT + SEPARATOR_HEIGHT) * rows;
+}
+
+- (void)lapView_layoutSubviews
+{
+  NSInteger rows = [self numberOfRowsInTableView:_tableView];
+  if (rows == 0)
+    return;
+
+  NSRect r = [_lapView bounds];
+
+  r.size.height = (ROW_HEIGHT + SEPARATOR_HEIGHT) * rows;
+  [_tableView setFrame:r];
+  [_tableView sizeToFit];
+
+  r.origin.y += r.size.height;
+  r.size.height = HEADER_HEIGHT;
+  [_headerView setFrame:r];
 }
 
 // NSTableViewDataSource methods
@@ -123,6 +194,20 @@
 - (void)tableViewSelectionDidChange:(NSNotification *)note
 {
   [_controller setSelectedLapIndex:[_tableView selectedRow]];
+}
+
+@end
+
+@implementation ActLapView
+
+- (CGFloat)heightForWidth:(CGFloat)width
+{
+  return [_controller lapView_heightForWidth:width];
+}
+
+- (void)layoutSubviews
+{
+  [_controller lapView_layoutSubviews];
 }
 
 @end

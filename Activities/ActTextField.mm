@@ -2,8 +2,9 @@
 
 #import "ActTextField.h"
 
-#import "ActWindowController.h"
 #import "ActHorizontalBoxView.h"
+#import "ActViewLayout.h"
+#import "ActWindowController.h"
 
 #import <algorithm>
 
@@ -89,16 +90,14 @@
       [attrs release];
     }
 
-  return width;
+  return ceil(width);
 }
 
 - (void)textDidChange:(NSNotification *)notification
 {
   [super textDidChange:notification];
 
-  ActHorizontalBoxView *box = (id) [self superview];
-  if ([box isKindOfClass:[ActHorizontalBoxView class]])
-    [box layoutSubviews];
+  [[self superview] subviewNeedsLayout:self];
 }
 
 @end

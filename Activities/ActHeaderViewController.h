@@ -3,10 +3,12 @@
 #import "ActViewController.h"
 #import "ActTextField.h"
 
-@class ActHorizontalBoxView, ActHeaderView, ActSplitView;
+@class ActCollapsibleView, ActHorizontalBoxView, ActHeaderView;
 
 @interface ActHeaderViewController : ActViewController
 {
+  IBOutlet ActCollapsibleView *_containerView;
+  IBOutlet ActHorizontalBoxView *_boxView;
   IBOutlet ActHeaderView *_headerView;
 }
 

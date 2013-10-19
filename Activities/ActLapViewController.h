@@ -2,10 +2,20 @@
 
 #import "ActViewController.h"
 
+@class ActLapView;
+
 @interface ActLapViewController : ActViewController
   <NSTableViewDataSource, NSTableViewDelegate>
 {
-  IBOutlet NSTableView *_tableView;
+  IBOutlet ActLapView *_lapView;
+  NSTableView *_tableView;
+  NSTableHeaderView *_headerView;
 }
 
+@end
+
+@interface ActLapView : NSView
+{
+  IBOutlet ActLapViewController *_controller;
+}
 @end

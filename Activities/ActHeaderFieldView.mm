@@ -8,8 +8,9 @@
 
 #import "act-database.h"
 
-#define LABEL_WIDTH 90
+#define LABEL_WIDTH 100
 #define LABEL_HEIGHT 14
+#define SPACING 8
 
 #define CONTROL_HEIGHT LABEL_HEIGHT
 
@@ -37,7 +38,7 @@
   [_labelField release];
 
   _valueField = [[ActTextField alloc] initWithFrame:
-		 NSMakeRect(LABEL_WIDTH, 0, frame.size.width
+		 NSMakeRect(LABEL_WIDTH + SPACING, 0, frame.size.width
 			    - LABEL_WIDTH, CONTROL_HEIGHT)];
   [_valueField setTarget:self];
   [_valueField setAction:@selector(controlAction:)];
@@ -174,7 +175,7 @@
   frame.size.width = LABEL_WIDTH;
   [_labelField setFrame:frame];
 
-  frame.origin.x += frame.size.width;
+  frame.origin.x += frame.size.width + SPACING;
   frame.size.width = bounds.size.width - frame.origin.x;
   [_valueField setFrame:frame];
 }

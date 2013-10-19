@@ -3,15 +3,20 @@
 #import "ActSummaryViewController.h"
 
 #import "ActAppDelegate.h"
+#import "ActCollapsibleView.h"
 #import "ActColor.h"
 #import "ActHorizontalBoxView.h"
+#import "ActViewLayout.h"
 #import "ActWindowController.h"
 
 #import "act-database.h"
 
 #import "ActFoundationExtensions.h"
 
-#define CORNER_RADIUS 6
+#define BODY_X_INSET 6
+#define BODY_Y_INSET 10
+#define BODY_SPACING 8
+#define MIN_BODY_HEIGHT 30
 
 @implementation ActSummaryViewController
 
@@ -36,28 +41,48 @@
    addObserver:self selector:@selector(activityDidChangeBody:)
    name:ActActivityDidChangeBody object:_controller];
 
+  [(ActCollapsibleView *)[self view] setTitle:@"Summary & Notes"];
+  [(ActCollapsibleView *)[self view] setHeaderInset:10];
+
   [_dateBox setRightToLeft:YES];
-  [_dateBox setSpacing:3];
+  [_dateBox setSpacing:1];
   [_typeBox setSpacing:3];
+  [_typeBox setRightToLeft:YES];
   [_statsBox setSpacing:8];
 
+  _bodyTextView = [[NSTextView alloc] initWithFrame:NSZeroRect];
   [_bodyTextView setFont:[NSFont fontWithName:@"Helvetica" size:12]];
+  [_bodyTextView setDrawsBackground:NO];
+  [_bodyTextView setDelegate:self];
+  [_summaryView addSubview:_bodyTextView];
+  [_bodyTextView release];
+
+  _bodyLayoutContainer = [[NSTextContainer alloc]
+			  initWithContainerSize:NSZeroSize];
+  [_bodyLayoutContainer setLineFragmentPadding:0];
+  _bodyLayoutManager = [[NSLayoutManager alloc] init];
+  [_bodyLayoutManager addTextContainer:_bodyLayoutContainer];
+  [[_bodyTextView textStorage] addLayoutManager:_bodyLayoutManager];
 
   [_courseField setCompletesEverything:YES];
-}
-
-- (NSView *)initialFirstResponder
-{
-  return _typeActivityField;
 }
 
 - (void)dealloc
 {
   [[NSNotificationCenter defaultCenter] removeObserver:self];
 
+  [_bodyTextView setDelegate:nil];
+  [_bodyLayoutManager release];
+  [_bodyLayoutContainer release];
+
   [_fieldControls release];
 
   [super dealloc];
+}
+
+- (NSView *)initialFirstResponder
+{
+  return _courseField;
 }
 
 - (NSDictionary *)fieldControls
@@ -77,11 +102,47 @@
   return _fieldControls;
 }
 
-- (void)_reflowFields
+- (CGFloat)heightOfView:(NSView *)view forWidth:(CGFloat)width
 {
-  [_dateBox layoutSubviews];
-  [_typeBox layoutSubviews];
-  [_statsBox layoutSubviews];
+  if (view == _summaryView)
+    {
+      // See https://developer.apple.com/library/mac/documentation/Cocoa/Conceptual/TextLayout/Tasks/StringHeight.html
+ 
+      [_bodyLayoutContainer setContainerSize:
+       NSMakeSize(width - BODY_X_INSET*2, CGFLOAT_MAX)];
+      [_bodyLayoutManager glyphRangeForTextContainer:_bodyLayoutContainer];
+ 
+      CGFloat body_height = [_bodyLayoutManager usedRectForTextContainer:
+			     _bodyLayoutContainer].size.height;
+      body_height = std::max(body_height, (CGFloat)MIN_BODY_HEIGHT);
+
+      NSRect r = NSUnionRect([_statsBox frame], [_courseField frame]);
+      r.size.height += BODY_SPACING + body_height + BODY_Y_INSET;
+
+      return r.size.height;
+    }
+  else
+    return 0;
+}
+
+- (void)layoutSubviewsOfView:(NSView *)view
+{
+  if (view == _summaryView)
+    {
+      [_dateBox layoutSubviews];
+      [_typeBox layoutSubviews];
+      [_statsBox layoutSubviews];
+
+      NSRect bounds = [view bounds];
+      NSRect top = NSUnionRect([_statsBox frame], [_courseField frame]);
+
+      NSRect frame;
+      frame.origin.x = bounds.origin.x + BODY_X_INSET;
+      frame.origin.y = bounds.origin.y + BODY_Y_INSET;
+      frame.size.width = bounds.size.width - BODY_X_INSET*2;
+      frame.size.height = (top.origin.y - BODY_SPACING) - frame.origin.y;
+      [_bodyTextView setFrame:frame];
+    }
 }
 
 - (void)_reloadFields
@@ -147,7 +208,7 @@
       [_bodyTextView setString:@""];
     }
 
-  [self _reflowFields];
+  [self layoutSubviewsOfView:_summaryView];
 }
 
 - (void)selectedActivityDidChange:(NSNotification *)note
@@ -253,6 +314,19 @@
 
 // NSTextViewDelegate methods
 
+- (void)textDidChange:(NSNotification *)note
+{
+  if ([note object] == _bodyTextView)
+    {
+      // FIXME: this might be too slow?
+ 
+      NSRect bounds = [_summaryView bounds];
+      if ([self heightOfView:_summaryView
+	   forWidth:bounds.size.width] != bounds.size.height)
+	[[_summaryView superview] subviewNeedsLayout:_summaryView];
+    }
+}
+
 - (void)textDidEndEditing:(NSNotification *)note
 {
   if ([note object] == _bodyTextView)
@@ -265,26 +339,10 @@
 
 @implementation ActSummaryView
 
-- (CGFloat)minSize
-{
-  return 300;
-}
-
 - (void)drawRect:(NSRect)r
 {
   [[ActColor controlBackgroundColor] setFill];
   [NSBezierPath fillRect:r];
-}
-
-- (void)resizeSubviewsWithOldSize:(NSSize)oldSize
-{
-  [super resizeSubviewsWithOldSize:oldSize];
-  [_controller _reflowFields];
-}
-
-- (BOOL)isOpaque
-{
-  return YES;
 }
 
 @end

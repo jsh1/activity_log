@@ -11,6 +11,7 @@
 
 #define DRAG_THRESH 3
 #define DRAG_MASK (NSLeftMouseDraggedMask | NSLeftMouseUpMask)
+#define MAX_IMPLICIT_ZOOM 15
 
 @interface ActMapImage : NSObject
 {
@@ -156,6 +157,7 @@ convertPointToLocation(CGPoint p)
   double zh = log2(th / ph);
 
   int zoom = floor(std::min(zw, zh));
+  zoom = std::min(zoom, MAX_IMPLICIT_ZOOM);
 
   [self setMapZoom:zoom];
 }

@@ -2,8 +2,10 @@
 
 #import "ActMapViewController.h"
 
+#import "ActCollapsibleView.h"
 #import "ActMapView.h"
 #import "ActTileJSONMapSource.h"
+#import "ActViewLayout.h"
 #import "ActWindowController.h"
 
 #import "act-gps-activity.h"
@@ -76,6 +78,7 @@
 - (void)dealloc
 {
   [[NSNotificationCenter defaultCenter] removeObserver:self];
+  [_defaultSourceName release];
   [super dealloc];
 }
 
@@ -98,9 +101,22 @@
   [_zoomSlider setNumberOfTickMarks:src_max - src_min + 1];
 
   [_mapSrcButton selectItemAtIndex:idx];
+}
 
-  [[NSUserDefaults standardUserDefaults]
-   setObject:[src name] forKey:@"ActDefaultMapSource"];
+- (void)setMapSourceByName:(NSString *)name
+{
+  NSInteger idx = 0;
+
+  for (ActMapSource *src in [[self class] mapSources])
+    {
+      if ([[src name] isEqualToString:name])
+	{
+	  [self setMapSourceAtIndex:idx];
+	  break;
+	}
+	  
+      idx++;
+    }
 }
 
 - (void)mapSourceDidFinishLoading:(NSNotification *)note
@@ -110,21 +126,17 @@
 
   [_mapSrcButton removeAllItems];
 
-  NSString *default_name = [[NSUserDefaults standardUserDefaults]
-			    stringForKey:@"ActDefaultMapSource"];
-  NSInteger default_idx = 0;
-  NSInteger idx = 0;
-
   for (ActMapSource *src in [[self class] mapSources])
-    {
-      NSString *name = [src name];
-      [_mapSrcButton addItemWithTitle:name];
-      if ([name isEqualToString:default_name])
-	default_idx = idx;
-      idx++;
-    }
+    [_mapSrcButton addItemWithTitle:[src name]];
 
-  [self setMapSourceAtIndex:default_idx];
+  if (_defaultSourceName != nil)
+    {
+      [self setMapSourceByName:_defaultSourceName];
+      [_defaultSourceName release];
+      _defaultSourceName = nil;
+    }
+  else
+    [self setMapSourceAtIndex:0];
 }
 
 - (void)viewDidLoad
@@ -154,7 +166,50 @@
   else
     [self mapSourceDidFinishLoading:nil];
 
+  [(ActCollapsibleView *)[self view] setTitle:@"Route"];
+
   [_zoomSlider setIntValue:[_mapView mapZoom]];
+}
+
+- (NSDictionary *)savedViewState
+{
+  return [NSDictionary dictionaryWithObjectsAndKeys:
+	  [[_mapView mapSource] name],
+	  @"mapSourceName",
+	  nil];
+}
+
+- (void)applySavedViewState:(NSDictionary *)state
+{
+  if (NSString *name = [state objectForKey:@"mapSourceName"])
+    {
+      if (_pendingSources > 0)
+	{
+	  [_defaultSourceName release];
+	  _defaultSourceName = [name copy];
+	}
+      else
+	[self setMapSourceByName:name];
+    }
+}
+
+- (CGFloat)heightOfView:(NSView *)view forWidth:(CGFloat)width
+{
+  if (view == _mapView)
+    {
+      const act::activity *a = [_controller selectedActivity];
+
+      if (a != nullptr && a->gps_data() != nullptr)
+	return floor(width * (9./16.));
+      else
+	return 0;
+    }
+  else
+    return [view heightForWidth:width];
+}
+
+- (void)layoutSubviewsOfView:(NSView *)view
+{
 }
 
 - (void)_updateDisplayedRegion

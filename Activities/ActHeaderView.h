@@ -2,8 +2,12 @@
 
 #import <AppKit/AppKit.h>
 
+@class ActHeaderViewController;
+
 @interface ActHeaderView : NSView
 {
+  IBOutlet ActHeaderViewController *_controller;
+
   IBOutlet NSButton *_addFieldButton;
 }
 
@@ -15,9 +19,8 @@
 - (void)addDisplayedField:(NSString *)name;
 - (void)removeDisplayedField:(NSString *)name;
 
-- (CGFloat)preferredHeight;
+- (CGFloat)heightForWidth:(CGFloat)width;
 - (void)layoutSubviews;
-- (void)layoutAndResize;
 
 - (IBAction)controlAction:(id)sender;
 

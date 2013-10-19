@@ -7,7 +7,6 @@
     <objects>
         <customObject id="-2" userLabel="File's Owner" customClass="ActSummaryViewController">
             <connections>
-                <outlet property="_bodyTextView" destination="mr1-ls-ct6" id="fVD-Lx-qu8"/>
                 <outlet property="_courseField" destination="iyj-ON-u1m" id="m1Y-af-ilh"/>
                 <outlet property="_dateBox" destination="Akv-mQ-RuP" id="BXp-Nb-PzD"/>
                 <outlet property="_dateDateField" destination="dev-ec-GNT" id="EOg-e8-BFc"/>
@@ -17,27 +16,159 @@
                 <outlet property="_statsDistanceField" destination="ywV-tc-NU1" id="Vl5-PI-IIz"/>
                 <outlet property="_statsDurationField" destination="lxr-Sc-me7" id="h0k-aj-cId"/>
                 <outlet property="_statsPaceField" destination="3NO-bp-CPD" id="ApP-4m-NSb"/>
+                <outlet property="_summaryView" destination="dDH-Wq-oAN" id="cCg-NE-Wpf"/>
                 <outlet property="_typeActivityField" destination="duM-hT-y3i" id="ZOj-Fq-Gu8"/>
                 <outlet property="_typeBox" destination="8kk-Qv-BlZ" id="Seo-hJ-IXN"/>
                 <outlet property="_typeTypeField" destination="vuc-nE-0C3" id="y0M-Uy-2Qc"/>
-                <outlet property="view" destination="dDH-Wq-oAN" id="ITk-Tf-DmF"/>
+                <outlet property="view" destination="u5J-LC-NOg" id="KBk-Yy-LaP"/>
             </connections>
         </customObject>
         <customObject id="-1" userLabel="First Responder" customClass="FirstResponder"/>
         <customObject id="-3" userLabel="Application"/>
-        <customView id="dDH-Wq-oAN" customClass="ActSummaryView">
-            <rect key="frame" x="0.0" y="0.0" width="580" height="244"/>
+        <customView id="u5J-LC-NOg" customClass="ActCollapsibleView">
+            <rect key="frame" x="0.0" y="0.0" width="587" height="293"/>
             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
             <subviews>
+                <customView id="dDH-Wq-oAN" customClass="ActSummaryView">
+                    <rect key="frame" x="0.0" y="0.0" width="587" height="273"/>
+                    <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                    <subviews>
+                        <textField verticalHuggingPriority="750" id="iyj-ON-u1m" customClass="ActTextField">
+                            <rect key="frame" x="7" y="245" width="380" height="24"/>
+                            <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
+                            <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" placeholderString="Title" id="yaB-of-yrA" customClass="ActTextFieldCell">
+                                <font key="font" size="18" name="HelveticaNeue-Bold"/>
+                                <color key="textColor" white="0.25" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
+                                <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                            </textFieldCell>
+                            <connections>
+                                <action selector="controlAction:" target="-2" id="ecn-gf-uYf"/>
+                                <outlet property="delegate" destination="-2" id="WO9-XI-d0h"/>
+                                <outlet property="nextKeyView" destination="duM-hT-y3i" id="nGO-Zy-YNG"/>
+                            </connections>
+                        </textField>
+                        <customView id="8kk-Qv-BlZ" customClass="ActHorizontalBoxView">
+                            <rect key="frame" x="387" y="245" width="190" height="24"/>
+                            <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES"/>
+                            <subviews>
+                                <textField verticalHuggingPriority="750" id="vuc-nE-0C3" customClass="ActExpandableTextField">
+                                    <rect key="frame" x="136" y="0.0" width="42" height="24"/>
+                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" placeholderString="Type" id="Z9m-vg-oi1" customClass="ActTextFieldCell">
+                                        <font key="font" size="15" name="HelveticaNeue-Bold"/>
+                                        <color key="textColor" white="0.25" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
+                                        <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                    </textFieldCell>
+                                    <connections>
+                                        <action selector="controlAction:" target="-2" id="lSz-UO-kfS"/>
+                                        <outlet property="delegate" destination="-2" id="6ey-h2-Mle"/>
+                                        <outlet property="nextKeyView" destination="duM-hT-y3i" id="KnQ-Uh-KzJ"/>
+                                    </connections>
+                                </textField>
+                                <textField verticalHuggingPriority="750" id="kjt-6f-A0Y">
+                                    <rect key="frame" x="115" y="0.0" width="9" height="24"/>
+                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" state="on" title="/" placeholderString="" id="Bq2-2x-63g">
+                                        <font key="font" size="15" name="HelveticaNeue-Bold"/>
+                                        <color key="textColor" white="0.25" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
+                                        <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                    </textFieldCell>
+                                </textField>
+                                <textField verticalHuggingPriority="750" id="duM-hT-y3i" customClass="ActExpandableTextField">
+                                    <rect key="frame" x="38" y="0.0" width="67" height="24"/>
+                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" placeholderString="Activity" id="TQY-Pa-A5F" customClass="ActTextFieldCell">
+                                        <font key="font" size="15" name="HelveticaNeue-Bold"/>
+                                        <color key="textColor" white="0.25" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
+                                        <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                    </textFieldCell>
+                                    <connections>
+                                        <action selector="controlAction:" target="-2" id="lsR-8x-syq"/>
+                                        <outlet property="delegate" destination="-2" id="Ciy-Y2-H5Z"/>
+                                        <outlet property="nextKeyView" destination="lxr-Sc-me7" id="Y80-7D-Yfu"/>
+                                    </connections>
+                                </textField>
+                            </subviews>
+                        </customView>
+                        <customView id="kjO-Qw-7m2" customClass="ActHorizontalBoxView">
+                            <rect key="frame" x="8" y="223" width="569" height="24"/>
+                            <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
+                            <subviews>
+                                <textField verticalHuggingPriority="750" id="lxr-Sc-me7" customClass="ActExpandableTextField">
+                                    <rect key="frame" x="-6" y="0.0" width="85" height="24"/>
+                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" placeholderString="Duration" id="qFI-eG-CT9" customClass="ActTextFieldCell">
+                                        <font key="font" size="15" name="HelveticaNeue-Bold"/>
+                                        <color key="textColor" white="0.25" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
+                                        <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                    </textFieldCell>
+                                    <connections>
+                                        <action selector="controlAction:" target="-2" id="Wu0-K7-lci"/>
+                                        <outlet property="delegate" destination="-2" id="mr4-8t-B9W"/>
+                                        <outlet property="nextKeyView" destination="ywV-tc-NU1" id="TjF-wi-R1s"/>
+                                    </connections>
+                                </textField>
+                                <textField verticalHuggingPriority="750" id="20t-Z0-12G">
+                                    <rect key="frame" x="81" y="1" width="9" height="24"/>
+                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" state="on" title="/" placeholderString="" id="ZLJ-K0-lSB">
+                                        <font key="font" size="15" name="HelveticaNeue-Bold"/>
+                                        <color key="textColor" white="0.25" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
+                                        <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                    </textFieldCell>
+                                </textField>
+                                <textField verticalHuggingPriority="750" id="ywV-tc-NU1" customClass="ActExpandableTextField">
+                                    <rect key="frame" x="103" y="0.0" width="91" height="24"/>
+                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" placeholderString="Distance" id="HA1-s8-ef8" customClass="ActTextFieldCell">
+                                        <font key="font" size="15" name="HelveticaNeue-Bold"/>
+                                        <color key="textColor" white="0.25" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
+                                        <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                    </textFieldCell>
+                                    <connections>
+                                        <action selector="controlAction:" target="-2" id="Xsh-sc-piP"/>
+                                        <outlet property="delegate" destination="-2" id="7pT-fo-v8l"/>
+                                        <outlet property="nextKeyView" destination="3NO-bp-CPD" id="pin-1m-QTi"/>
+                                    </connections>
+                                </textField>
+                                <textField verticalHuggingPriority="750" id="LZ1-mS-v0m">
+                                    <rect key="frame" x="196" y="1" width="9" height="24"/>
+                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" state="on" title="/" placeholderString="" id="oo8-8E-2Qr">
+                                        <font key="font" size="15" name="HelveticaNeue-Bold"/>
+                                        <color key="textColor" white="0.25" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
+                                        <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                    </textFieldCell>
+                                </textField>
+                                <textField verticalHuggingPriority="750" id="3NO-bp-CPD" customClass="ActExpandableTextField">
+                                    <rect key="frame" x="216" y="0.0" width="92" height="24"/>
+                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" placeholderString="Pace" id="Dux-gA-y6Q" customClass="ActTextFieldCell">
+                                        <font key="font" size="15" name="HelveticaNeue-Bold"/>
+                                        <color key="textColor" white="0.25" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
+                                        <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                    </textFieldCell>
+                                    <connections>
+                                        <action selector="controlAction:" target="-2" id="5b8-w6-K6o"/>
+                                        <outlet property="delegate" destination="-2" id="C5w-AW-gT7"/>
+                                    </connections>
+                                </textField>
+                            </subviews>
+                        </customView>
+                    </subviews>
+                    <connections>
+                        <outlet property="_controller" destination="-2" id="p11-qo-sO8"/>
+                    </connections>
+                </customView>
                 <customView id="Akv-mQ-RuP" customClass="ActHorizontalBoxView">
-                    <rect key="frame" x="289.99999999999994" y="210" width="270" height="22"/>
+                    <rect key="frame" x="276.99999999999994" y="273" width="310" height="20"/>
                     <autoresizingMask key="autoresizingMask" flexibleMinX="YES" widthSizable="YES" flexibleMinY="YES"/>
                     <subviews>
                         <textField verticalHuggingPriority="750" id="dev-ec-GNT" customClass="ActExpandableTextField">
-                            <rect key="frame" x="223" y="0.0" width="49" height="22"/>
+                            <rect key="frame" x="263" y="0.0" width="49" height="20"/>
                             <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES"/>
                             <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" placeholderString="Date" id="ude-cD-qDc" customClass="ActTextFieldCell">
-                                <font key="font" size="18" name="HelveticaNeue"/>
+                                <font key="font" size="11" name="HelveticaNeue-Bold"/>
                                 <color key="textColor" white="0.25" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                                 <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                             </textFieldCell>
@@ -46,19 +177,19 @@
                             </connections>
                         </textField>
                         <textField verticalHuggingPriority="750" id="UAJ-6c-7Hc" customClass="ActExpandableTextField">
-                            <rect key="frame" x="118" y="0.0" width="103" height="22"/>
+                            <rect key="frame" x="158" y="0.0" width="103" height="20"/>
                             <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES"/>
                             <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" sendsActionOnEndEditing="YES" state="on" placeholderString="Day of Week" id="Kcz-nP-NOP" customClass="ActTextFieldCell">
-                                <font key="font" size="18" name="HelveticaNeue"/>
+                                <font key="font" size="11" name="HelveticaNeue-Bold"/>
                                 <color key="textColor" white="0.45000000000000001" alpha="1" colorSpace="calibratedWhite"/>
                                 <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                             </textFieldCell>
                         </textField>
                         <textField verticalHuggingPriority="750" id="fzq-T5-0cP" customClass="ActExpandableTextField">
-                            <rect key="frame" x="75" y="0.0" width="42" height="22"/>
+                            <rect key="frame" x="115" y="0.0" width="42" height="20"/>
                             <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES"/>
                             <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" placeholderString="Time" id="a6u-dv-ppn" customClass="ActTextFieldCell">
-                                <font key="font" size="18" name="HelveticaNeue"/>
+                                <font key="font" size="11" name="HelveticaNeue-Bold"/>
                                 <color key="textColor" white="0.25" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                                 <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                             </textFieldCell>
@@ -68,156 +199,12 @@
                         </textField>
                     </subviews>
                 </customView>
-                <customView id="8kk-Qv-BlZ" customClass="ActHorizontalBoxView">
-                    <rect key="frame" x="20" y="210" width="270" height="22"/>
-                    <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMaxX="YES" flexibleMinY="YES"/>
-                    <subviews>
-                        <textField verticalHuggingPriority="750" id="duM-hT-y3i" customClass="ActExpandableTextField">
-                            <rect key="frame" x="-3" y="0.0" width="67" height="22"/>
-                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                            <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" placeholderString="Activity" id="TQY-Pa-A5F" customClass="ActTextFieldCell">
-                                <font key="font" size="18" name="HelveticaNeue"/>
-                                <color key="textColor" white="0.25" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
-                                <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
-                            </textFieldCell>
-                            <connections>
-                                <action selector="controlAction:" target="-2" id="lsR-8x-syq"/>
-                                <outlet property="delegate" destination="-2" id="Ciy-Y2-H5Z"/>
-                            </connections>
-                        </textField>
-                        <textField verticalHuggingPriority="750" id="kjt-6f-A0Y">
-                            <rect key="frame" x="59" y="0.0" width="9" height="22"/>
-                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                            <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" state="on" title="/" placeholderString="" id="Bq2-2x-63g">
-                                <font key="font" size="18" name="HelveticaNeue"/>
-                                <color key="textColor" white="0.25" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
-                                <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
-                            </textFieldCell>
-                        </textField>
-                        <textField verticalHuggingPriority="750" id="vuc-nE-0C3" customClass="ActExpandableTextField">
-                            <rect key="frame" x="70" y="0.0" width="42" height="22"/>
-                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                            <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" placeholderString="Type" id="Z9m-vg-oi1" customClass="ActTextFieldCell">
-                                <font key="font" size="18" name="HelveticaNeue"/>
-                                <color key="textColor" white="0.25" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
-                                <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
-                            </textFieldCell>
-                            <connections>
-                                <action selector="controlAction:" target="-2" id="lSz-UO-kfS"/>
-                                <outlet property="delegate" destination="-2" id="6ey-h2-Mle"/>
-                            </connections>
-                        </textField>
-                    </subviews>
-                </customView>
-                <customView id="kjO-Qw-7m2" customClass="ActHorizontalBoxView">
-                    <rect key="frame" x="20" y="138" width="540" height="30"/>
-                    <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
-                    <subviews>
-                        <textField verticalHuggingPriority="750" id="lxr-Sc-me7" customClass="ActExpandableTextField">
-                            <rect key="frame" x="-3" y="0.0" width="92" height="30"/>
-                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                            <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" placeholderString="Duration" id="qFI-eG-CT9" customClass="ActTextFieldCell">
-                                <font key="font" size="24" name="HelveticaNeue-Medium"/>
-                                <color key="textColor" white="0.25" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
-                                <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
-                            </textFieldCell>
-                            <connections>
-                                <action selector="controlAction:" target="-2" id="Wu0-K7-lci"/>
-                                <outlet property="delegate" destination="-2" id="mr4-8t-B9W"/>
-                            </connections>
-                        </textField>
-                        <textField verticalHuggingPriority="750" id="20t-Z0-12G">
-                            <rect key="frame" x="84" y="0.0" width="12" height="30"/>
-                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                            <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" state="on" title="/" placeholderString="" id="ZLJ-K0-lSB">
-                                <font key="font" size="24" name="HelveticaNeue-Medium"/>
-                                <color key="textColor" white="0.25" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
-                                <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
-                            </textFieldCell>
-                        </textField>
-                        <textField verticalHuggingPriority="750" id="ywV-tc-NU1" customClass="ActExpandableTextField">
-                            <rect key="frame" x="106" y="0.0" width="100" height="30"/>
-                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                            <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" placeholderString="Distance" id="HA1-s8-ef8" customClass="ActTextFieldCell">
-                                <font key="font" size="24" name="HelveticaNeue-Medium"/>
-                                <color key="textColor" white="0.25" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
-                                <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
-                            </textFieldCell>
-                            <connections>
-                                <action selector="controlAction:" target="-2" id="Xsh-sc-piP"/>
-                                <outlet property="delegate" destination="-2" id="7pT-fo-v8l"/>
-                            </connections>
-                        </textField>
-                        <textField verticalHuggingPriority="750" id="LZ1-mS-v0m">
-                            <rect key="frame" x="199" y="0.0" width="12" height="30"/>
-                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                            <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" state="on" title="/" placeholderString="" id="oo8-8E-2Qr">
-                                <font key="font" size="24" name="HelveticaNeue-Medium"/>
-                                <color key="textColor" white="0.25" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
-                                <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
-                            </textFieldCell>
-                        </textField>
-                        <textField verticalHuggingPriority="750" id="3NO-bp-CPD" customClass="ActExpandableTextField">
-                            <rect key="frame" x="219" y="0.0" width="92" height="30"/>
-                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                            <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" placeholderString="Pace" id="Dux-gA-y6Q" customClass="ActTextFieldCell">
-                                <font key="font" size="24" name="HelveticaNeue-Medium"/>
-                                <color key="textColor" white="0.25" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
-                                <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
-                            </textFieldCell>
-                            <connections>
-                                <action selector="controlAction:" target="-2" id="5b8-w6-K6o"/>
-                                <outlet property="delegate" destination="-2" id="C5w-AW-gT7"/>
-                            </connections>
-                        </textField>
-                    </subviews>
-                </customView>
-                <textField verticalHuggingPriority="750" id="iyj-ON-u1m" customClass="ActTextField">
-                    <rect key="frame" x="17" y="171" width="546" height="39"/>
-                    <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
-                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" placeholderString="Title" id="yaB-of-yrA" customClass="ActTextFieldCell">
-                        <font key="font" size="32" name="HelveticaNeue-Bold"/>
-                        <color key="textColor" white="0.25" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
-                        <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
-                    </textFieldCell>
-                    <connections>
-                        <action selector="controlAction:" target="-2" id="ecn-gf-uYf"/>
-                        <outlet property="delegate" destination="-2" id="WO9-XI-d0h"/>
-                    </connections>
-                </textField>
-                <scrollView borderType="none" autohidesScrollers="YES" horizontalLineScroll="10" horizontalPageScroll="10" verticalLineScroll="10" verticalPageScroll="10" hasHorizontalScroller="NO" usesPredominantAxisScrolling="NO" id="75L-G9-sA6">
-                    <rect key="frame" x="16" y="12" width="544" height="116"/>
-                    <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                    <clipView key="contentView" drawsBackground="NO" copiesOnScroll="NO" id="Xlq-a0-eE9">
-                        <rect key="frame" x="0.0" y="0.0" width="544" height="116"/>
-                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <subviews>
-                            <textView drawsBackground="NO" importsGraphics="NO" richText="NO" findStyle="panel" continuousSpellChecking="YES" allowsUndo="YES" usesRuler="YES" verticallyResizable="YES" smartInsertDelete="YES" id="mr1-ls-ct6">
-                                <rect key="frame" x="0.0" y="0.0" width="544" height="116"/>
-                                <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                                <size key="minSize" width="544" height="116"/>
-                                <size key="maxSize" width="550" height="10000000"/>
-                                <color key="insertionPointColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
-                                <size key="minSize" width="544" height="116"/>
-                                <size key="maxSize" width="550" height="10000000"/>
-                                <connections>
-                                    <outlet property="delegate" destination="-2" id="tGY-Pt-B8w"/>
-                                </connections>
-                            </textView>
-                        </subviews>
-                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                    </clipView>
-                    <scroller key="horizontalScroller" hidden="YES" verticalHuggingPriority="750" doubleValue="1" id="l8d-x2-LyM">
-                        <rect key="frame" x="-100" y="-100" width="87" height="18"/>
-                        <autoresizingMask key="autoresizingMask"/>
-                    </scroller>
-                    <scroller key="verticalScroller" hidden="YES" verticalHuggingPriority="750" doubleValue="1" id="g1o-JW-Xyv">
-                        <rect key="frame" x="529" y="0.0" width="15" height="116"/>
-                        <autoresizingMask key="autoresizingMask"/>
-                    </scroller>
-                </scrollView>
             </subviews>
+            <connections>
+                <outlet property="_contentView" destination="dDH-Wq-oAN" id="Pnu-tc-anu"/>
+                <outlet property="_delegate" destination="-2" id="h43-Ki-5Fb"/>
+                <outlet property="_headerView" destination="Akv-mQ-RuP" id="PKF-hZ-lmm"/>
+            </connections>
         </customView>
     </objects>
 </document>

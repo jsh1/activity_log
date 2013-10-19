@@ -7,14 +7,8 @@
     <objects>
         <customObject id="-2" userLabel="File's Owner" customClass="ActActivityViewController">
             <connections>
-                <outlet property="_bottomContainer" destination="5Ng-yb-Vd5" id="n4I-GI-EbI"/>
-                <outlet property="_mainSplitView" destination="ahf-b7-hwG" id="aVx-V6-43d"/>
-                <outlet property="_middleLeftContainer" destination="1YD-cD-i9B" id="cPq-ax-SEd"/>
-                <outlet property="_middleRightContainer" destination="Mdi-19-sJj" id="NGp-ji-nbg"/>
-                <outlet property="_middleSplitView" destination="7Z4-GY-URd" id="OWx-7H-fc5"/>
-                <outlet property="_topLeftContainer" destination="CmT-7Q-2A3" id="XQ1-1r-QcM"/>
-                <outlet property="_topRightContainer" destination="wEd-T7-8ap" id="VU5-cD-90a"/>
-                <outlet property="_topSplitView" destination="ynT-Cw-GcO" id="fkv-QO-5Va"/>
+                <outlet property="_activityView" destination="oJj-1j-T42" id="SzY-e0-BZD"/>
+                <outlet property="_scrollView" destination="jmx-8p-hzm" id="rdq-Qo-Vr6"/>
                 <outlet property="view" destination="48L-d6-5bv" id="1SR-Mg-AXT"/>
             </connections>
         </customObject>
@@ -24,57 +18,32 @@
             <rect key="frame" x="0.0" y="0.0" width="447" height="665"/>
             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
             <subviews>
-                <splitView autosaveName="" dividerStyle="thin" id="ahf-b7-hwG" customClass="ActSplitView">
-                    <rect key="frame" x="1" y="0.0" width="446" height="665"/>
+                <scrollView borderType="none" horizontalLineScroll="10" horizontalPageScroll="10" verticalLineScroll="10" verticalPageScroll="10" hasHorizontalScroller="NO" usesPredominantAxisScrolling="NO" horizontalScrollElasticity="none" id="jmx-8p-hzm">
+                    <rect key="frame" x="0.0" y="0.0" width="447" height="665"/>
                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                    <subviews>
-                        <splitView autosaveName="" dividerStyle="thin" vertical="YES" id="ynT-Cw-GcO" customClass="ActSplitView">
-                            <rect key="frame" x="0.0" y="0.0" width="446" height="241"/>
-                            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                            <subviews>
-                                <customView id="CmT-7Q-2A3">
-                                    <rect key="frame" x="0.0" y="0.0" width="303" height="241"/>
-                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                </customView>
-                                <customView id="wEd-T7-8ap">
-                                    <rect key="frame" x="304" y="0.0" width="142" height="241"/>
-                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                </customView>
-                            </subviews>
-                            <holdingPriorities>
-                                <real value="250"/>
-                                <real value="250"/>
-                            </holdingPriorities>
-                        </splitView>
-                        <splitView autosaveName="" dividerStyle="thin" vertical="YES" id="7Z4-GY-URd" customClass="ActSplitView">
-                            <rect key="frame" x="0.0" y="242" width="446" height="256"/>
-                            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                            <subviews>
-                                <customView id="1YD-cD-i9B">
-                                    <rect key="frame" x="0.0" y="0.0" width="303" height="256"/>
-                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                </customView>
-                                <customView id="Mdi-19-sJj">
-                                    <rect key="frame" x="304" y="0.0" width="142" height="256"/>
-                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                </customView>
-                            </subviews>
-                            <holdingPriorities>
-                                <real value="250"/>
-                                <real value="250"/>
-                            </holdingPriorities>
-                        </splitView>
-                        <customView id="5Ng-yb-Vd5">
-                            <rect key="frame" x="0.0" y="499" width="446" height="166"/>
-                            <autoresizingMask key="autoresizingMask"/>
-                        </customView>
-                    </subviews>
-                    <holdingPriorities>
-                        <real value="250"/>
-                        <real value="250"/>
-                        <real value="250"/>
-                    </holdingPriorities>
-                </splitView>
+                    <clipView key="contentView" drawsBackground="NO" copiesOnScroll="NO" id="aL9-y0-0Bu">
+                        <rect key="frame" x="0.0" y="0.0" width="447" height="665"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <customView id="oJj-1j-T42" customClass="ActActivityView">
+                                <rect key="frame" x="0.0" y="0.0" width="447" height="665"/>
+                                <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                <connections>
+                                    <outlet property="_controller" destination="-2" id="VWM-lk-LZQ"/>
+                                </connections>
+                            </customView>
+                        </subviews>
+                        <color key="backgroundColor" white="0.96999999999999997" alpha="1" colorSpace="deviceWhite"/>
+                    </clipView>
+                    <scroller key="horizontalScroller" hidden="YES" verticalHuggingPriority="750" id="dD2-5c-fLy">
+                        <rect key="frame" x="-100" y="-100" width="447" height="16"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </scroller>
+                    <scroller key="verticalScroller" verticalHuggingPriority="750" doubleValue="1" id="zUP-tR-GyI">
+                        <rect key="frame" x="431" y="0.0" width="16" height="665"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </scroller>
+                </scrollView>
             </subviews>
         </customView>
     </objects>

@@ -2,12 +2,33 @@
 
 #import "ActChartViewController.h"
 
+#import "ActCollapsibleView.h"
 #import "ActColor.h"
+#import "ActViewLayout.h"
 #import "ActWindowController.h"
 
 #define MIN_WIDTH 500
 #define MIN_HEIGHT 200
 #define SMOOTHING 5
+
+@interface ActChartViewController ()
+- (void)_updateTitle;
+@end
+
+enum ChartFields
+{
+  CHART_PACE,
+  CHART_HR,
+  CHART_ALT,
+  CHART_FIELD_COUNT,
+};
+
+enum ChartFieldMasks
+{
+  CHART_PACE_MASK = 1U << CHART_PACE,
+  CHART_HR_MASK = 1U << CHART_HR,
+  CHART_ALT_MASK = 1U << CHART_ALT,
+};
 
 @implementation ActChartViewController
 
@@ -25,6 +46,12 @@
   [[NSNotificationCenter defaultCenter]
    addObserver:self selector:@selector(selectedLapIndexDidChange:)
    name:ActSelectedLapIndexDidChange object:_controller];
+
+  [_configMenu setFont:[NSFont systemFontOfSize:[NSFont smallSystemFontSize]]];
+
+  _fieldMask = CHART_PACE_MASK;
+
+  [self _updateTitle];
 }
 
 - (void)dealloc
@@ -38,7 +65,7 @@
   return _chart.get();
 }
 
-- (void)_updateChart
+- (void)__updateChart
 {
   if (_chart)
     {
@@ -63,12 +90,15 @@
       _smoothed_data->smooth(*gps_a, SMOOTHING);
     }
 
+  bool draw_pace = (_fieldMask & CHART_PACE_MASK) && gps_a->has_speed();
+  bool draw_hr = (_fieldMask & CHART_HR_MASK) && gps_a->has_heart_rate();
+  bool draw_altitude = (_fieldMask & CHART_ALT_MASK) && gps_a->has_altitude();
+
+  if (!(draw_pace || draw_hr || draw_altitude))
+    return;
+
   _chart.reset(new act::gps::chart(*_smoothed_data.get(),
 				   act::gps::chart::x_axis_type::DISTANCE));
-
-  bool draw_altitude = [_segmentedControl isSelectedForSegment:2] && gps_a->has_altitude();
-  bool draw_hr = [_segmentedControl isSelectedForSegment:1] && gps_a->has_heart_rate();
-  bool draw_pace = [_segmentedControl isSelectedForSegment:0] && gps_a->has_speed();
 
   if (draw_hr)
     {
@@ -110,24 +140,50 @@
   [_chartView setNeedsDisplay:YES];
 }
 
-- (void)selectedActivityDidChange:(NSNotification *)note
+- (void)_updateChart
 {
-  bool has_pace = false, has_hr = false, has_altitude = false;
+  bool had_chart = (bool)_chart;
 
-  if (const act::activity *a = [_controller selectedActivity])
+  [self __updateChart];
+
+  bool has_chart = (bool)_chart;
+
+  if (had_chart != has_chart)
+    [[_chartView superview] subviewNeedsLayout:_chartView];
+}
+
+- (void)_updateTitle
+{
+  NSMutableString *str = nil;
+
+  for (NSInteger i = 0; i < CHART_FIELD_COUNT; i++)
     {
-      if (const act::gps::activity *gps_a = a->gps_data())
+      if (_fieldMask & (1U << i))
 	{
-	  has_pace = gps_a->has_speed();
-	  has_hr = gps_a->has_heart_rate();
-	  has_altitude = gps_a->has_altitude();
+	  if (str == nil)
+	    str = [[NSMutableString alloc] init];
+	  else
+	    [str appendString:@" + "];
+
+	  NSString *type = nil;
+	  if (i == 0)
+	    type = @"Pace";
+	  else if (i == 1)
+	    type = @"Heart Rate";
+	  else if (i == 2)
+	    type = @"Altitude";
+	  if (type != nil)
+	    [str appendString:type];
 	}
     }
 
-  [_segmentedControl setEnabled:has_pace forSegment:0];
-  [_segmentedControl setEnabled:has_hr forSegment:1];
-  [_segmentedControl setEnabled:has_altitude forSegment:2];
+  [(ActCollapsibleView *)[self view] setTitle:str != nil ? str : @"Chart"];
 
+  [str release];
+}
+
+- (void)selectedActivityDidChange:(NSNotification *)note
+{
   [self _updateChart];
 }
 
@@ -142,25 +198,111 @@
 
 - (IBAction)controlAction:(id)sender
 {
-  if (sender == _segmentedControl)
+  if (sender == _configButton)
     {
-      [self _updateChart];
     }
+}
+
+- (IBAction)configMenuAction:(id)sender
+{
+  uint32_t mask = 1U << [sender tag];
+
+  if ([sender state])
+    _fieldMask &= ~mask;
+  else
+    _fieldMask |= mask;
+
+  [self _updateChart];
+  [self _updateTitle];
+}
+
+- (void)popUpConfigMenuForView:(NSView *)view
+{
+  [_configMenu popUpMenuPositioningItem:[_configMenu itemAtIndex:0]
+   atLocation:[view bounds].origin inView:view];
 }
 
 - (IBAction)toggleChartField:(id)sender
 {
-  NSInteger field = [sender tag];
-  BOOL state = [_segmentedControl isSelectedForSegment:field];
-
-  [_segmentedControl setSelected:!state forSegment:field];
+  _fieldMask ^= 1U << [sender tag];
 
   [self _updateChart];
+  [self _updateTitle];
 }
 
 - (BOOL)chartFieldIsShown:(NSInteger)field
 {
-  return [_segmentedControl isSelectedForSegment:field];
+  return (_fieldMask & (1U << field)) != 0;
+}
+
+- (NSDictionary *)savedViewState
+{
+  return [NSDictionary dictionaryWithObjectsAndKeys:
+	  [NSNumber numberWithUnsignedInt:_fieldMask],
+	  @"fieldMask",
+	  nil];
+}
+
+- (void)applySavedViewState:(NSDictionary *)state
+{
+  if (NSNumber *obj = [state objectForKey:@"fieldMask"])
+    {
+      _fieldMask = [obj unsignedIntValue];
+      [self _updateChart];
+      [self _updateTitle];
+    }
+}
+
+// ActLayoutDelegate methods
+
+- (CGFloat)heightOfView:(NSView *)view forWidth:(CGFloat)width
+{
+  if (view == _chartView)
+    {
+      if ([self chart])
+	return 160;
+      else
+	return 0;
+    }
+  else
+    return [view heightForWidth:width];
+}
+
+- (void)layoutSubviewsOfView:(NSView *)view
+{
+}
+
+// NSMenuDelegate methods
+
+- (void)menuNeedsUpdate:(NSMenu*)menu
+{
+  if (menu == _configMenu)
+    {
+      uint32_t enableMask = 0;
+
+      if (const act::activity *a = [_controller selectedActivity])
+	{
+	  if (const act::gps::activity *gps_a = a->gps_data())
+	    {
+	      if (gps_a->has_speed())
+		enableMask |= CHART_PACE_MASK;
+	      if (gps_a->has_heart_rate())
+		enableMask |= CHART_HR_MASK;
+	      if (gps_a->has_altitude())
+		enableMask |= CHART_ALT_MASK;
+	    }
+	}
+
+      for (NSMenuItem *item in [menu itemArray])
+	{
+	  if ([item action] == @selector(configMenuAction:))
+	    {
+	      uint32_t bit = 1U << [item tag];
+	      [item setState:(_fieldMask & bit) ? NSOnState : NSOffState];
+	      [item setEnabled:(_fieldMask & bit) ? YES : NO];
+	    }
+	}	      
+    }
 }
 
 @end
@@ -179,15 +321,13 @@
 					  currentContext] graphicsPort];
 
       CGRect bounds = NSRectToCGRect([self bounds]);
-      CGRect r = CGRectInset(bounds, 2, 2);
 
       CGContextSaveGState(ctx);
-      CGContextClipToRect(ctx, r);
 
-      CGContextTranslateCTM(ctx, 0, r.size.height);
+      CGContextTranslateCTM(ctx, 0, bounds.size.height);
       CGContextScaleCTM(ctx, 1, -1);
 
-      chart->set_chart_rect(r);
+      chart->set_chart_rect(bounds);
       chart->draw(ctx);
 
       CGContextRestoreGState(ctx);
@@ -197,6 +337,16 @@
 - (BOOL)isOpaque
 {
   return YES;
+}
+
+@end
+
+
+@implementation ActChartViewConfigLabel
+
+- (void)mouseDown:(NSEvent *)e
+{
+  [_controller popUpConfigMenuForView:self];
 }
 
 @end
