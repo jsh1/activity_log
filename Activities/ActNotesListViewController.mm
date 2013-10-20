@@ -443,11 +443,21 @@
 
 - (void)drawRect:(NSRect)r
 {
-  [[ActColor controlBackgroundColor] setFill];
-  [NSBezierPath fillRect:r];
+  static NSGradient *grad;
+
+  if (grad == nil)
+    {
+      grad = [[NSGradient alloc] initWithStartingColor:
+	      [ActColor controlBackgroundColor] endingColor:
+	      [ActColor darkControlBackgroundColor]];
+    }
+
+  NSRect bounds = [self bounds];
+
+  [grad drawInRect:bounds angle:90];
 
   if (const ActNotesItem *item = [_controller headerItem])
-    item->draw_header([self bounds], 0);
+    item->draw_header(bounds, 0);
 }
 
 - (BOOL)isFlipped
@@ -739,10 +749,10 @@ ActNotesItem::draw_header(const NSRect &bounds, uint32_t flags) const
   subR.size.width = bounds.size.width;
   subR.size.height = 1;
 
-  [[ActColor whiteColor] setFill];
+  [separator_color setFill];
   [NSBezierPath fillRect:subR];
   subR.origin.y += 1;
-  [separator_color setFill];
+  [[ActColor whiteColor] setFill];
   [NSBezierPath fillRect:subR];
 }
 

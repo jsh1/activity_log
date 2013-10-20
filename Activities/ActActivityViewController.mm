@@ -59,14 +59,6 @@
     }
 
   if (ActViewController *obj
-      = [[ActLapViewController alloc] initWithController:_controller])
-    {
-      [_viewControllers addObject:obj];
-      [_activityView addSubview:[obj view]];
-      [obj release];
-    }
-
-  if (ActViewController *obj
       = [[ActMapViewController alloc] initWithController:_controller])
     {
       [_viewControllers addObject:obj];
@@ -76,6 +68,14 @@
 
   if (ActViewController *obj
       = [[ActChartViewController alloc] initWithController:_controller])
+    {
+      [_viewControllers addObject:obj];
+      [_activityView addSubview:[obj view]];
+      [obj release];
+    }
+
+  if (ActViewController *obj
+      = [[ActLapViewController alloc] initWithController:_controller])
     {
       [_viewControllers addObject:obj];
       [_activityView addSubview:[obj view]];

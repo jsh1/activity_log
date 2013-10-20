@@ -207,6 +207,9 @@ convertPointToLocation(CGPoint p)
 
       for (int tx = tx0; tx < tx1; tx++)
 	{
+	  if (tx < 0 || tx >= n_tiles)
+	    continue;
+
 	  CGFloat px = bounds.origin.x + (tx - origin.x) * tw;
 
 	  ActMapTileIndex tile(tx & (n_tiles - 1), ty, zoom);
