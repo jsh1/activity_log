@@ -3,7 +3,9 @@
 #include "act-util.h"
 
 #include <errno.h>
+#include <fcntl.h>
 #include <sys/stat.h>
+#include <signal.h>
 #include <string.h>
 #include <unistd.h>
 #include <xlocale.h>
@@ -239,6 +241,97 @@ tilde_expand_file_name(std::string &dest, const char *src)
     }
 
   dest.append(src);
+}
+
+output_pipe::output_pipe(const char *program_path,
+			 const char *const program_argv[])
+: _program_path(program_path),
+  _program_argv(program_argv),
+  _child_pid(0),
+  _output_fd(-1)
+{
+}
+
+output_pipe::~output_pipe()
+{
+  // reap the zombie
+  finish();
+
+  if (_output_fd >= 0)
+    close(_output_fd);
+}
+
+bool
+output_pipe::start()
+{
+  if (_child_pid == 0)
+    {
+      int fds[2];
+
+      if (pipe(fds) < 0)
+	return false;
+
+      pid_t pid = vfork();
+      switch (pid)
+	{
+	case -1:			// error
+	  close(fds[0]);
+	  close(fds[1]);
+	  break;
+
+	case 0:				// child
+	  if (dup2(fds[1], 1) != 1)
+	    _exit(1);
+	  close(fds[0]);
+	  close(fds[1]);
+	  execvp(_program_path, (char *const *)_program_argv);
+	  _exit(1);
+
+	default:			// parent
+	  _child_pid = pid;
+	  _output_fd = fds[0];
+	  close(fds[1]);
+	}
+    }
+
+  return _child_pid != 0;
+}
+
+bool
+output_pipe::finish()
+{
+  if (_child_pid == 0)
+    return true;
+
+  kill(_child_pid, SIGTERM);
+
+  int stat = 0, ret;
+
+  while ((ret = waitpid(_child_pid, &stat, 0)) < 0 && errno == EINTR)
+    {
+    }
+
+  _child_pid = 0;
+
+  if (ret > 0)
+    return WIFEXITED(stat) && WEXITSTATUS(stat) == 0;
+  else
+    return false;
+}
+
+FILE *
+output_pipe::open_output(const char *mode)
+{
+  if (_output_fd >= 0)
+    {
+      if (FILE *fh = fdopen(_output_fd, mode))
+	{
+	  _output_fd = -1;
+	  return fh;
+	}
+    }
+
+  return nullptr;
 }
 
 } // namespace act

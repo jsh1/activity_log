@@ -79,6 +79,23 @@ public:
   DIR *get() const {return dir;}
 };
 
+class output_pipe
+{
+  const char *_program_path;
+  const char *const *_program_argv;
+  pid_t _child_pid;
+  int _output_fd;
+
+public:
+  output_pipe(const char *program_path, const char *const program_argv[]);
+  ~output_pipe();
+
+  bool start();
+  bool finish();
+
+  FILE *open_output(const char *mode);
+};
+
 // misc functions
 
 bool string_has_suffix(const std::string &str, const char *suffix);
