@@ -218,11 +218,10 @@ make_path(const char *path)
 bool
 path_has_extension(const char *path, const char *ext)
 {
-  path = strrchr(path, '.');
-  if (!path)
+  if (const char *ptr = strcasestr(path, ext))
+    return strlen(ptr) == strlen(ext);
+  else
     return false;
-
-  return strcasecmp(path + 1, ext) == 0;
 }
 
 void
