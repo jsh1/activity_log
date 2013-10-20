@@ -132,6 +132,7 @@ public:
 
   bool read_fit_file(const char *path);
   bool read_tcx_file(const char *path);
+  bool read_compressed_tcx_file(const char *file_path, const char *prog_path);
 
   void update_summary();
 

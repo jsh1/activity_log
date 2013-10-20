@@ -48,27 +48,21 @@ fit_parser::fit_parser(activity &dest)
 
 fit_parser::~fit_parser()
 {
-  if (_file)
-    fclose(_file);
-
   for (size_t i = 0; i < MAX_MESSAGE_TYPES; i++)
     delete _message_types[i];
 }
 
 void
-fit_parser::parse_file(const char *path)
+fit_parser::parse_file(FILE *fh)
 {
-  _file = fopen(path, "rb");
+  _file = fh;
 
-  if (_file)
-    {
-      read_header ();
-      read_data_records ();
+  read_header ();
+  read_data_records ();
 
-      /* FIXME: ignoring CRC. */
-    }
-  else
-    set_error();
+  _file = nullptr;
+
+  /* FIXME: ignoring CRC. */
 
   if (!had_error())
     destination().update_region();

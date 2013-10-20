@@ -43,23 +43,18 @@ tcx_parser::~tcx_parser()
 }
 
 void
-tcx_parser::parse_file(const char *path)
+tcx_parser::parse_file(FILE *fh)
 {
   if (had_error())
     return;
 
-  if (FILE *fh = fopen(path, "r"))
-    {
-      char buffer[BUFSIZ];
-      while (size_t size = fread(buffer, 1, BUFSIZ, fh))
-	xmlParseChunk(_ctx, buffer, size, false);
+  char buffer[BUFSIZ];
+  while (size_t size = fread(buffer, 1, BUFSIZ, fh))
+    xmlParseChunk(_ctx, buffer, size, false);
 
-      xmlParseChunk(_ctx, "", 0, true);
+  xmlParseChunk(_ctx, "", 0, true);
 
-      destination().update_summary();
-
-      fclose (fh);
-    }
+  destination().update_summary();
 
   if (!had_error())
     destination().update_region();

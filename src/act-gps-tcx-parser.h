@@ -55,7 +55,7 @@ public:
   tcx_parser(activity &dest);
   ~tcx_parser();
 
-  virtual void parse_file(const char *path);
+  virtual void parse_file(FILE *fh);
 
 private:
   void push_state(state x) {_state.push_back(x);}

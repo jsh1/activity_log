@@ -33,7 +33,7 @@ public:
   fit_parser(activity &dest);
   ~fit_parser();
 
-  virtual void parse_file(const char *path);
+  virtual void parse_file(FILE *fh);
 
 private:
   bool read_bytes(void *buf, size_t size);

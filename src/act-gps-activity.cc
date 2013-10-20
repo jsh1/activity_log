@@ -36,6 +36,11 @@ activity::read_file(const char *path)
     return read_fit_file(path);
   else if (path_has_extension(path, "tcx"))
     return read_tcx_file(path);
+  else if (path_has_extension(path, "tcx.gz")
+	   || path_has_extension(path, "tcx.Z"))
+    return read_compressed_tcx_file(path, "/usr/bin/zcat");
+  else if (path_has_extension(path, "tcx.bz2"))
+    return read_compressed_tcx_file(path, "/usr/bin/bzcat");
   else
     return false;
 }
@@ -43,17 +48,53 @@ activity::read_file(const char *path)
 bool
 activity::read_fit_file(const char *path)
 {
-  fit_parser parser(*this);
-  parser.parse_file(path);
-  return !parser.had_error();
+  FILE_ptr fh(fopen(path, "rb"));
+
+  if (fh)
+    {
+      fit_parser parser(*this);
+      parser.parse_file(fh.get());
+      return !parser.had_error();
+    }
+  else
+    return false;
 }
 
 bool
 activity::read_tcx_file(const char *path)
 {
-  tcx_parser parser(*this);
-  parser.parse_file(path);
-  return !parser.had_error();
+  FILE_ptr fh(fopen(path, "r"));
+
+  if (fh)
+    {
+      tcx_parser parser(*this);
+      parser.parse_file(fh.get());
+      return !parser.had_error();
+    }
+  else
+    return false;
+}
+
+bool
+activity::read_compressed_tcx_file(const char *path, const char *prog)
+{
+  const char *argv[] = {prog, path, nullptr};
+
+  output_pipe pipe(prog, argv);
+  if (!pipe.start())
+    return false;
+
+  FILE_ptr fh(pipe.open_output("r"));
+
+  if (fh)
+    {
+      tcx_parser parser(*this);
+      parser.parse_file(fh.get());
+
+      return !parser.had_error() && pipe.finish();
+    }
+  else
+    return false;
 }
 
 void

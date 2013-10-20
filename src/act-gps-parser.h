@@ -17,7 +17,7 @@ public:
   parser(activity &dest);
   virtual ~parser();
 
-  virtual void parse_file(const char *path) = 0;
+  virtual void parse_file(FILE *fh) = 0;
 
   void set_error() {_had_error = true;}
   bool had_error() const {return _had_error;}
