@@ -80,7 +80,7 @@
    addObserver:self selector:@selector(listBoundsDidChange:)
    name:NSViewBoundsDidChangeNotification object:[_scrollView contentView]];
 
-  _headerItemIndex = 0;
+  _headerItemIndex = -1;
 }
 
 - (void)dealloc
@@ -232,6 +232,21 @@
     }
 }
 
+- (void)updateHeaderItemIndex
+{
+  NSInteger idx = [self rowForYPosition:
+		   [[_scrollView contentView] bounds].origin.y
+		   startPosition:nullptr];
+
+  // FIXME: only if week/month changed?
+
+  if (idx != _headerItemIndex)
+    {
+      _headerItemIndex = idx;
+      [_headerView setNeedsDisplay:YES];
+    }
+}
+
 - (void)activityListDidChange:(NSNotification *)note
 {
   const std::vector<act::activity_storage_ref> &activities
@@ -243,6 +258,7 @@
     _activities.emplace_back(it);
 
   [self updateListViewBounds];
+  [self updateHeaderItemIndex];
 
   [_listView setNeedsDisplay:YES];
   [_headerView setNeedsDisplay:YES];
@@ -301,17 +317,7 @@
 
 - (void)listBoundsDidChange:(NSNotification *)note
 {
-  NSView *view = [note object];
-  NSInteger idx = [self rowForYPosition:[view bounds].origin.y
-		   startPosition:nullptr];
-
-  // FIXME: only if week/month changed?
-
-  if (idx != _headerItemIndex)
-    {
-      _headerItemIndex = idx;
-      [_headerView setNeedsDisplay:YES];
-    }
+  [self updateHeaderItemIndex];
 }
 
 - (const ActNotesItem *)headerItem

@@ -2,6 +2,8 @@
 
 #import "ActColor.h"
 
+#define BG_HUE (202./360.)
+
 @implementation ActColor
 
 + (NSColor *)controlTextColor
@@ -65,7 +67,7 @@
   static NSColor *color;
 
   if (color == nil)
-    color = [[NSColor colorWithDeviceWhite:.96 alpha:1] retain];
+    color = [[NSColor colorWithCalibratedHue:BG_HUE saturation:.01 brightness:.96 alpha:1] retain];
 
   return color;
 }
@@ -75,7 +77,7 @@
   static NSColor *color;
 
   if (color == nil)
-    color = [[NSColor colorWithDeviceWhite:.90 alpha:1] retain];
+    color = [[NSColor colorWithCalibratedHue:BG_HUE saturation:.03 brightness:.91 alpha:1] retain];
 
   return color;
 }
@@ -88,7 +90,7 @@
     {
       colors = [[NSArray alloc] initWithObjects:
 		[self controlBackgroundColor],
-		[self colorWithDeviceWhite:.92 alpha:1],
+		[self darkControlBackgroundColor],
 		nil];
     }
 

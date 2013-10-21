@@ -16,7 +16,7 @@
 #define BODY_X_INSET 6
 #define BODY_Y_INSET 10
 #define BODY_SPACING 8
-#define MIN_BODY_HEIGHT 30
+#define MIN_BODY_HEIGHT 42
 
 @implementation ActSummaryViewController
 
@@ -50,9 +50,14 @@
   [_typeBox setRightToLeft:YES];
   [_statsBox setSpacing:8];
 
-  _bodyTextView = [[NSTextView alloc] initWithFrame:NSZeroRect];
-  [_bodyTextView setFont:[NSFont fontWithName:@"Helvetica" size:12]];
+  _bodyTextView = [[NSTextView alloc] initWithFrame:NSMakeRect(0, 0, 500, 32)];
+  [_bodyTextView setAllowsUndo:YES];
+  [_bodyTextView setRichText:NO];
+  [_bodyTextView setUsesFontPanel:NO];
+  [_bodyTextView setImportsGraphics:NO];
   [_bodyTextView setDrawsBackground:NO];
+  [_bodyTextView setFont:[NSFont fontWithName:@"Helvetica" size:12]];
+  [_bodyTextView setTextColor:[ActColor controlTextColor]];
   [_bodyTextView setDelegate:self];
   [_summaryView addSubview:_bodyTextView];
   [_bodyTextView release];
@@ -114,7 +119,7 @@
  
       CGFloat body_height = [_bodyLayoutManager usedRectForTextContainer:
 			     _bodyLayoutContainer].size.height;
-      body_height = std::max(body_height, (CGFloat)MIN_BODY_HEIGHT);
+      body_height = std::max(ceil(body_height), (CGFloat)MIN_BODY_HEIGHT);
 
       NSRect r = NSUnionRect([_statsBox frame], [_courseField frame]);
       r.size.height += BODY_SPACING + body_height + BODY_Y_INSET;
@@ -122,7 +127,7 @@
       return r.size.height;
     }
   else
-    return 0;
+    return [view heightForWidth:width];
 }
 
 - (void)layoutSubviewsOfView:(NSView *)view
@@ -218,6 +223,9 @@
 
 - (void)activityDidChangeField:(NSNotification *)note
 {
+  if (_ignoreChanges != 0)
+    return;
+
   void *ptr = [[[note userInfo] objectForKey:@"activity"] pointerValue];
   const auto &a = *reinterpret_cast<const act::activity_storage_ref *> (ptr);
 
@@ -227,6 +235,9 @@
 
 - (void)activityDidChangeBody:(NSNotification *)note
 {
+  if (_ignoreChanges != 0)
+    return;
+
   void *ptr = [[[note userInfo] objectForKey:@"activity"] pointerValue];
   const auto &a = *reinterpret_cast<const act::activity_storage_ref *> (ptr);
 
@@ -324,6 +335,10 @@
       if ([self heightOfView:_summaryView
 	   forWidth:bounds.size.width] != bounds.size.height)
 	[[_summaryView superview] subviewNeedsLayout:_summaryView];
+
+      _ignoreChanges++;
+      [_controller setBodyString:[_bodyTextView string]];
+      _ignoreChanges--;
     }
 }
 

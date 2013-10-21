@@ -30,6 +30,8 @@
   NSTextContainer *_bodyLayoutContainer;
 
   NSDictionary *_fieldControls;		// FIELD-NAME -> CONTROL
+
+  int _ignoreChanges;
 }
 
 - (IBAction)controlAction:(id)sender;

@@ -194,7 +194,7 @@ callLayoutSubviews(id delegate, NSView *view)
   else
     [_contentView setHidden:YES];
 
-  /* for -drawRect: */
+  // for -drawRect:
 
   _headerHeight = header_height;
   _contentHeight = content_height;
@@ -213,7 +213,6 @@ callLayoutSubviews(id delegate, NSView *view)
 				    bounds.origin.y + bounds.size.height
 				    - _headerHeight, bounds.size.width - 2,
 				    _headerHeight - 2)];
-//  [NSBezierPath fillRect:NSInsetRect(bounds, 1, 1)];
 
   [light setFill];
   [NSBezierPath fillRect:NSMakeRect(bounds.origin.x + 1,
