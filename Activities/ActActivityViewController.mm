@@ -11,6 +11,8 @@
 #import "ActViewLayout.h"
 #import "ActWindowController.h"
 
+#define MARGIN 10
+
 @implementation ActActivityViewController
 
 - (NSString *)viewNibName
@@ -152,7 +154,7 @@ layoutSubviews(ActActivityView *self, CGFloat width,
   CGFloat y = 0;
 
   if (width < 0)
-    width = bounds.size.width;
+    width = bounds.size.width - MARGIN*2;
 
   self->_ignoreLayout++;
 
@@ -160,12 +162,15 @@ layoutSubviews(ActActivityView *self, CGFloat width,
     {
       CGFloat height = [view heightForWidth:width];
 
+      if (y == 0)
+	y += MARGIN;
+
       if (modifySubviews)
 	{
 	  NSRect frame;
-	  frame.origin.x = bounds.origin.x;
+	  frame.origin.x = bounds.origin.x + MARGIN;
 	  frame.origin.y = bounds.origin.y + y;
-	  frame.size.width = bounds.size.width;
+	  frame.size.width = width;
 	  frame.size.height = height;
 
 	  if (!NSEqualRects(frame, [view frame]))
@@ -175,7 +180,7 @@ layoutSubviews(ActActivityView *self, CGFloat width,
 	    }
 	}
 
-      y += height;
+      y += height + MARGIN;
     }
 
   if (updateHeight && bounds.size.height != y)

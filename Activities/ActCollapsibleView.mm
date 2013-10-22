@@ -5,7 +5,6 @@
 #import "ActColor.h"
 #import "ActViewLayout.h"
 
-#define INSET 6
 #define SPACING 3
 #define DIS_SIZE 20
 #define MIN_HEIGHT 20
@@ -117,7 +116,7 @@ callLayoutSubviews(id delegate, NSView *view)
 
 - (CGFloat)heightForWidth:(CGFloat)width
 {
-  CGFloat content_width = width - INSET*2 - 2;
+  CGFloat content_width = width - 2;
 
   CGFloat header_width = content_width - (DIS_SIZE + SPACING) - _headerInset;
   if (_titleSize.width > 0)
@@ -130,17 +129,17 @@ callLayoutSubviews(id delegate, NSView *view)
     header_height = MIN_HEIGHT;
 
   if (![_disclosureButton state])
-    return header_height + INSET*2;
+    return header_height;
 
   CGFloat content_height;
   content_height = callHeightForWidth(_delegate, _contentView, content_width);
 
-  return header_height + SPACING + content_height + INSET*2;
+  return header_height + SPACING + content_height;
 }
 
 - (void)layoutSubviews
 {
-  NSRect bounds = NSInsetRect([self bounds], INSET, INSET);
+  NSRect bounds = [self bounds];
 
   NSPoint p = NSMakePoint(bounds.origin.x, bounds.origin.y
 			  + bounds.size.height - DIS_SIZE);
@@ -202,7 +201,7 @@ callLayoutSubviews(id delegate, NSView *view)
 
 - (void)drawRect:(NSRect)rect
 {
-  NSRect bounds = NSInsetRect([self bounds], INSET, INSET);
+  NSRect bounds = [self bounds];
 
   NSColor *bg = [ActColor darkControlBackgroundColor];
   NSColor *dark = [NSColor colorWithDeviceWhite:.66 alpha:1];
@@ -243,7 +242,7 @@ callLayoutSubviews(id delegate, NSView *view)
 
 - (void)mouseDown:(NSEvent *)e
 {
-  NSRect bounds = NSInsetRect([self bounds], INSET, INSET);
+  NSRect bounds = [self bounds];
   NSPoint p = [self convertPoint:[e locationInWindow] fromView:nil];
 
   if (p.y > bounds.origin.y + bounds.size.height - _headerHeight
