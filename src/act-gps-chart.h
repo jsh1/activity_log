@@ -30,7 +30,10 @@ public:
       IDENTITY,
       HEARTRATE_BPM_HRR,
       HEARTRATE_BPM_PMAX,
-      SPEED_MS_PACE,
+      SPEED_MS_PACE_MI,
+      SPEED_MS_PACE_KM,
+      SPEED_MS_MPH,
+      SPEED_MS_KPH,
       DISTANCE_M_MI,
       DISTANCE_M_FT,
     };

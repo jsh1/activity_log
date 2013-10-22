@@ -8,13 +8,17 @@
 #include <math.h>
 
 #define MILES_PER_METER 0.000621371192
+#define KM_PER_METER 1e-3
 #define FEET_PER_METER 3.2808399
 
 #define SECS_PER_MILE(x) ((1. /  (x)) * (1. / MILES_PER_METER))
 #define MILES_PER_SEC(x) (1. / ((x) * MILES_PER_METER))
 
-#define MAX_TICKS 4
-#define MIN_TICKS 2
+#define SECS_PER_KM(x) ((1. /  (x)) * (1. / KM_PER_METER))
+#define KM_PER_SEC(x) (1. / ((x) * KM_PER_METER))
+
+#define MAX_TICKS 50
+#define MIN_TICKS 5
 #define MIN_TICK_GAP 30
 
 #define KEY_TEXT_WIDTH 60
@@ -38,8 +42,14 @@ chart::line::convert_from_si(double x) const
     case value_conversion::HEARTRATE_BPM_PMAX: {
       const config &cfg = shared_config();
       return x / cfg.max_hr() * 100.; }
-    case value_conversion::SPEED_MS_PACE:
+    case value_conversion::SPEED_MS_PACE_MI:
       return x > 0 ? SECS_PER_MILE(x) : 0;
+    case value_conversion::SPEED_MS_PACE_KM:
+      return x > 0 ? SECS_PER_KM(x) : 0;
+    case value_conversion::SPEED_MS_MPH:
+      return x * (MILES_PER_METER * 3600);
+    case value_conversion::SPEED_MS_KPH:
+      return x * (KM_PER_METER * 3600);
     case value_conversion::DISTANCE_M_MI:
       return x * MILES_PER_METER;
     case value_conversion::DISTANCE_M_FT:
@@ -62,8 +72,14 @@ chart::line::convert_to_si(double x) const
     case value_conversion::HEARTRATE_BPM_PMAX: {
       const config &cfg = shared_config();
       return x * (1./100) * cfg.max_hr(); }
-    case value_conversion::SPEED_MS_PACE:
+    case value_conversion::SPEED_MS_PACE_MI:
       return x > 0 ? MILES_PER_SEC(x) : 0;
+    case value_conversion::SPEED_MS_PACE_KM:
+      return x > 0 ? KM_PER_SEC(x) : 0;
+    case value_conversion::SPEED_MS_MPH:
+      return x * (1. / (MILES_PER_METER * 3600));
+    case value_conversion::SPEED_MS_KPH:
+      return x * (1. / (KM_PER_METER * 3600));
     case value_conversion::DISTANCE_M_MI:
       return x * (1. / MILES_PER_METER);
     case value_conversion::DISTANCE_M_FT:
@@ -115,16 +131,21 @@ chart::line::update_values(const chart &c)
       tick_delta = 5;
       scale_ticks = false;
       break;
-    case value_conversion::SPEED_MS_PACE:
+    case value_conversion::SPEED_MS_PACE_MI:
+    case value_conversion::SPEED_MS_PACE_KM:
       tick_delta = 15;
       scale_ticks = false;
+      break;
+    case value_conversion::SPEED_MS_MPH:
+    case value_conversion::SPEED_MS_KPH:
+      tick_delta = 1;
       break;
     case value_conversion::DISTANCE_M_FT:
       tick_delta = 50;
       scale_ticks = false;
       break;
     default:
-      tick_delta = 1;
+      tick_delta = 5;
     }
 
   if (scale_ticks)
@@ -149,10 +170,14 @@ chart::line::format_tick(std::string &s, double tick, double value) const
     }
   else if (field == &activity::point::speed)
     {
-      if (conversion == value_conversion::SPEED_MS_PACE)
+      if (conversion == value_conversion::SPEED_MS_PACE_MI)
 	format_pace(s, value, unit_type::seconds_per_mile);
-      else
+      else if (conversion == value_conversion::SPEED_MS_PACE_KM)
+	format_pace(s, value, unit_type::seconds_per_kilometre);
+      else if (conversion == value_conversion::SPEED_MS_MPH)
 	format_speed(s, value, unit_type::miles_per_hour);
+      else if (conversion == value_conversion::SPEED_MS_KPH)
+	format_speed(s, value, unit_type::kilometres_per_hour);
     }
   else if (field == &activity::point::heart_rate)
     {

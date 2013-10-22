@@ -17,17 +17,41 @@
 
 enum ChartFields
 {
-  CHART_PACE,
-  CHART_HR,
-  CHART_ALT,
+  CHART_PACE_MI,
+  CHART_PACE_KM,
+  CHART_SPEED_MI,
+  CHART_SPEED_KM,
+  CHART_HR_BPM,
+  CHART_HR_HRR,
+  CHART_HR_MAX,
+  CHART_ALT_FT,
+  CHART_ALT_M,
   CHART_FIELD_COUNT,
 };
 
 enum ChartFieldMasks
 {
-  CHART_PACE_MASK = 1U << CHART_PACE,
-  CHART_HR_MASK = 1U << CHART_HR,
-  CHART_ALT_MASK = 1U << CHART_ALT,
+  CHART_PACE_MI_MASK = 1U << CHART_PACE_MI,
+  CHART_PACE_KM_MASK = 1U << CHART_PACE_KM,
+  CHART_SPEED_MI_MASK = 1U << CHART_SPEED_MI,
+  CHART_SPEED_KM_MASK = 1U << CHART_SPEED_KM,
+
+  CHART_HR_BPM_MASK = 1U << CHART_HR_BPM,
+  CHART_HR_HRR_MASK = 1U << CHART_HR_HRR,
+  CHART_HR_MAX_MASK = 1U << CHART_HR_MAX,
+
+  CHART_ALT_FT_MASK = 1U << CHART_ALT_FT,
+  CHART_ALT_M_MASK = 1U << CHART_ALT_M,
+
+  CHART_SPEED_ANY_MASK = CHART_PACE_MI_MASK
+			 | CHART_PACE_KM_MASK
+			 | CHART_SPEED_MI_MASK
+			 | CHART_SPEED_KM_MASK,
+  CHART_HR_ANY_MASK = CHART_HR_BPM_MASK
+		      | CHART_HR_HRR_MASK
+		      | CHART_HR_MAX_MASK,
+  CHART_ALT_ANY_MASK = CHART_ALT_FT_MASK
+		       | CHART_ALT_M_MASK,
 };
 
 @implementation ActChartViewController
@@ -49,7 +73,7 @@ enum ChartFieldMasks
 
   [_configMenu setFont:[NSFont systemFontOfSize:[NSFont smallSystemFontSize]]];
 
-  _fieldMask = CHART_PACE_MASK;
+  _fieldMask = CHART_PACE_MI_MASK;
 
   [self _updateTitle];
 }
@@ -90,9 +114,9 @@ enum ChartFieldMasks
       _smoothed_data->smooth(*gps_a, SMOOTHING);
     }
 
-  bool draw_pace = (_fieldMask & CHART_PACE_MASK) && gps_a->has_speed();
-  bool draw_hr = (_fieldMask & CHART_HR_MASK) && gps_a->has_heart_rate();
-  bool draw_altitude = (_fieldMask & CHART_ALT_MASK) && gps_a->has_altitude();
+  bool draw_pace = (_fieldMask & CHART_SPEED_ANY_MASK) && gps_a->has_speed();
+  bool draw_hr = (_fieldMask & CHART_HR_ANY_MASK) && gps_a->has_heart_rate();
+  bool draw_altitude = (_fieldMask & CHART_ALT_ANY_MASK) && gps_a->has_altitude();
 
   if (!(draw_pace || draw_hr || draw_altitude))
     return;
@@ -104,8 +128,13 @@ enum ChartFieldMasks
     {
       double bot = !draw_pace ? -0.05 : -.55;
 
-      _chart->add_line(&act::gps::activity::point::heart_rate,
-		       act::gps::chart::value_conversion::HEARTRATE_BPM_HRR,
+      auto conv = act::gps::chart::value_conversion::IDENTITY;
+      if (_fieldMask & CHART_HR_HRR_MASK)
+	conv = act::gps::chart::value_conversion::HEARTRATE_BPM_HRR;
+      else if (_fieldMask & CHART_HR_MAX_MASK)
+	conv = act::gps::chart::value_conversion::HEARTRATE_BPM_PMAX;
+
+      _chart->add_line(&act::gps::activity::point::heart_rate, conv,
 		       act::gps::chart::line_color::ORANGE,
 		       act::gps::chart::FILL_BG
 		       | act::gps::chart::OPAQUE_BG
@@ -117,8 +146,17 @@ enum ChartFieldMasks
       double bot = !draw_altitude ? -0.05 : -.25;
       double top = !draw_hr ? 1.05 : 1.35;
 
-      _chart->add_line(&act::gps::activity::point::speed,
-		       act::gps::chart::value_conversion::SPEED_MS_PACE,
+      auto conv = act::gps::chart::value_conversion::IDENTITY;
+      if (_fieldMask & CHART_PACE_MI_MASK)
+	conv = act::gps::chart::value_conversion::SPEED_MS_PACE_MI;
+      else if (_fieldMask & CHART_PACE_KM_MASK)
+	conv = act::gps::chart::value_conversion::SPEED_MS_PACE_KM;
+      else if (_fieldMask & CHART_SPEED_MI_MASK)
+	conv = act::gps::chart::value_conversion::SPEED_MS_MPH;
+      else if (_fieldMask & CHART_SPEED_KM_MASK)
+	conv = act::gps::chart::value_conversion::SPEED_MS_KPH;
+
+      _chart->add_line(&act::gps::activity::point::speed, conv,
 		       act::gps::chart::line_color::BLUE,
 		       act::gps::chart::FILL_BG
 		       | act::gps::chart::OPAQUE_BG
@@ -127,8 +165,12 @@ enum ChartFieldMasks
 
   if (draw_altitude)
     {
-      _chart->add_line(&act::gps::activity::point::altitude,
-		       act::gps::chart::value_conversion::DISTANCE_M_FT,
+
+      auto conv = act::gps::chart::value_conversion::IDENTITY;
+      if (_fieldMask & CHART_ALT_FT_MASK)
+	conv = act::gps::chart::value_conversion::DISTANCE_M_FT;
+
+      _chart->add_line(&act::gps::activity::point::altitude, conv,
 		       act::gps::chart::line_color::GREEN,
 		       act::gps::chart::FILL_BG, -0.05, 2);
     }
@@ -166,12 +208,36 @@ enum ChartFieldMasks
 	    [str appendString:@" + "];
 
 	  NSString *type = nil;
-	  if (i == 0)
-	    type = @"Pace";
-	  else if (i == 1)
-	    type = @"Heart Rate";
-	  else if (i == 2)
-	    type = @"Altitude";
+	  switch (i)
+	    {
+	    case CHART_PACE_MI:
+	      type = @"Pace (min/mi)";
+	      break;
+	    case CHART_PACE_KM:
+	      type = @"Pace (min/km)";
+	      break;
+	    case CHART_SPEED_MI:
+	      type = @"Speed (mph)";
+	      break;
+	    case CHART_SPEED_KM:
+	      type = @"Speed (km/h)";
+	      break;
+	    case CHART_HR_BPM:
+	      type = @"Heart Rate (BPM)";
+	      break;
+	    case CHART_HR_HRR:
+	      type = @"Heart Rate (%HRR)";
+	      break;
+	    case CHART_HR_MAX:
+	      type = @"Heart Rate (%MAX)";
+	      break;
+	    case CHART_ALT_FT:
+	      type = @"Altitude (ft)";
+	      break;
+	    case CHART_ALT_M:
+	      type = @"Altitude (m)";
+	      break;
+	    }
 	  if (type != nil)
 	    [str appendString:type];
 	}
@@ -205,12 +271,20 @@ enum ChartFieldMasks
 
 - (IBAction)configMenuAction:(id)sender
 {
-  uint32_t mask = 1U << [sender tag];
+  uint32_t bit = 1U << [sender tag];
+  uint32_t mask = bit;
 
-  if ([sender state])
-    _fieldMask &= ~mask;
-  else
-    _fieldMask |= mask;
+  if (mask & CHART_SPEED_ANY_MASK)
+    mask |= CHART_SPEED_ANY_MASK;
+  else if (mask & CHART_HR_ANY_MASK)
+    mask |= CHART_HR_ANY_MASK;
+  else if (mask & CHART_ALT_ANY_MASK)
+    mask |= CHART_ALT_ANY_MASK;
+
+  _fieldMask = _fieldMask & ~mask;
+
+  if (![sender state])
+    _fieldMask |= bit;
 
   [self _updateChart];
   [self _updateTitle];
@@ -285,11 +359,11 @@ enum ChartFieldMasks
 	  if (const act::gps::activity *gps_a = a->gps_data())
 	    {
 	      if (gps_a->has_speed())
-		enableMask |= CHART_PACE_MASK;
+		enableMask |= CHART_SPEED_ANY_MASK;
 	      if (gps_a->has_heart_rate())
-		enableMask |= CHART_HR_MASK;
+		enableMask |= CHART_HR_ANY_MASK;
 	      if (gps_a->has_altitude())
-		enableMask |= CHART_ALT_MASK;
+		enableMask |= CHART_ALT_ANY_MASK;
 	    }
 	}
 

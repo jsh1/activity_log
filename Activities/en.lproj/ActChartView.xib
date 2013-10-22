@@ -53,22 +53,60 @@
         </customView>
         <menu title="Chart Types" id="TRA-fz-MhK">
             <items>
-                <menuItem title="Pace" id="jR4-Oc-Hle">
+                <menuItem title="Pace (min/mi)" id="jR4-Oc-Hle">
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <connections>
                         <action selector="configMenuAction:" target="-2" id="70e-FX-x5d"/>
                     </connections>
                 </menuItem>
-                <menuItem title="Heart Rate" tag="1" id="FNw-sq-sUm">
+                <menuItem title="Pace (min/km)" tag="1" id="qlG-5r-2WF">
+                    <modifierMask key="keyEquivalentModifierMask"/>
+                    <connections>
+                        <action selector="configMenuAction:" target="-2" id="H4Q-tl-tdo"/>
+                    </connections>
+                </menuItem>
+                <menuItem title="Speed (mph)" tag="2" id="Ja8-7z-B9m">
+                    <modifierMask key="keyEquivalentModifierMask"/>
+                    <connections>
+                        <action selector="configMenuAction:" target="-2" id="jd4-Nw-tCe"/>
+                    </connections>
+                </menuItem>
+                <menuItem title="Speed (km/h)" tag="3" id="ECm-6f-QSR">
+                    <modifierMask key="keyEquivalentModifierMask"/>
+                    <connections>
+                        <action selector="configMenuAction:" target="-2" id="L2E-IM-hBI"/>
+                    </connections>
+                </menuItem>
+                <menuItem isSeparatorItem="YES" id="PEM-Ng-FaB"/>
+                <menuItem title="Heart Rate (BPM)" tag="4" id="FNw-sq-sUm">
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <connections>
                         <action selector="configMenuAction:" target="-2" id="4Fb-rX-Ke6"/>
                     </connections>
                 </menuItem>
-                <menuItem title="Altitude" tag="2" id="od5-rE-SSn">
+                <menuItem title="Heart Rate (%HRR)" tag="5" id="3BB-80-Xid">
+                    <modifierMask key="keyEquivalentModifierMask"/>
+                    <connections>
+                        <action selector="configMenuAction:" target="-2" id="3jB-9Z-Wve"/>
+                    </connections>
+                </menuItem>
+                <menuItem title="Heart Rate (%Max)" tag="6" id="kTh-k4-Jxt">
+                    <modifierMask key="keyEquivalentModifierMask"/>
+                    <connections>
+                        <action selector="configMenuAction:" target="-2" id="SWq-j7-5Fa"/>
+                    </connections>
+                </menuItem>
+                <menuItem isSeparatorItem="YES" id="F0w-gP-7Ov"/>
+                <menuItem title="Altitude (ft)" tag="7" id="od5-rE-SSn">
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <connections>
                         <action selector="configMenuAction:" target="-2" id="hYx-kv-VCL"/>
+                    </connections>
+                </menuItem>
+                <menuItem title="Altitude (m)" tag="8" id="Fpe-nN-Cq7">
+                    <modifierMask key="keyEquivalentModifierMask"/>
+                    <connections>
+                        <action selector="configMenuAction:" target="-2" id="yyU-Gw-GTm"/>
                     </connections>
                 </menuItem>
             </items>
