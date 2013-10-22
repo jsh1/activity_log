@@ -2,7 +2,7 @@
 
 #import <AppKit/AppKit.h>
 
-@class ActHeaderViewController;
+@class ActHeaderViewController, ActHeaderFieldView;
 
 @interface ActHeaderView : NSView
 {
@@ -23,5 +23,7 @@
 - (void)layoutSubviews;
 
 - (IBAction)controlAction:(id)sender;
+
+- (void)selectFieldFollowing:(ActHeaderFieldView *)view;
 
 @end

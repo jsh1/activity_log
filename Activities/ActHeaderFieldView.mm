@@ -186,6 +186,16 @@
     [self renameField:[sender stringValue]];
   else if (sender == _valueField)
     [self setFieldString:[sender stringValue]];
+
+  NSEvent *e = [[self window] currentEvent];
+  if ([e type] == NSKeyDown
+      && [[e charactersIgnoringModifiers] isEqualToString:@"\r"])
+    {
+      if (sender == _labelField)
+	[[self window] makeFirstResponder:_valueField];
+      else
+	[_headerView selectFieldFollowing:self];
+    }
 }
 
 // NSControlTextEditingDelegate methods

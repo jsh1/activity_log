@@ -12,8 +12,8 @@
 
 #define FIELD_HEIGHT 12
 #define FIELD_Y_SPACING 2
-#define X_INSET 2
-#define Y_INSET 2
+#define X_INSET 8
+#define Y_INSET 8
 
 @implementation ActHeaderView
 
@@ -157,6 +157,27 @@
       [[self superview] subviewNeedsLayout:self];
       [[self window] makeFirstResponder:[field nameView]];
       [self scrollRectToVisible:[field convertRect:[field bounds] toView:self]];
+    }
+}
+
+- (void)selectFieldFollowing:(ActHeaderFieldView *)view
+{
+  BOOL previous = NO;
+
+  for (ActHeaderFieldView *subview in [self subviews])
+    {
+      if (previous)
+	{
+	  [[self window] makeFirstResponder:[subview valueView]];
+	  return;
+	}
+      else if (subview == view)
+	previous = YES;
+    }
+
+  if (previous)
+    {
+      [self controlAction:_addFieldButton];
     }
 }
 
