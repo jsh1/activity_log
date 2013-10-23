@@ -8,6 +8,7 @@
 
 #import "ActFoundationExtensions.h"
 
+#import "act-config.h"
 #import "act-format.h"
 
 #import <algorithm>
@@ -24,9 +25,9 @@
 #define TIME_FONT_SIZE 12
 #define BODY_FONT_SIZE 12
 #define BODY_NIL_HEIGHT 9
-#define STATS_FONT_SIZE 15
+#define STATS_FONT_SIZE 14
 #define STATS_HEIGHT 24
-#define STATS_LEADING 25
+#define STATS_LEADING 23
 #define DATE_WIDTH 70
 #define DAY_OF_WEEK_HEIGHT 20
 #define DAY_OF_WEEK_FONT_SIZE 14
@@ -34,14 +35,15 @@
 #define DAY_OF_MONTH_FONT_SIZE 32
 
 // header view constants
-#define HEADER_INSET 20
+#define HEADER_LEFT_INSET 20
+#define HEADER_RIGHT_INSET 10
 #define MONTH_FONT_SIZE 22
 #define MONTH_HEIGHT 26
-#define WEEK_FONT_SIZE 16
-#define WEEK_HEIGHT 20
-#define HEADER_STATS_FONT_SIZE 16
-#define HEADER_STATS_WIDTH 200
-#define HEADER_STATS_HEIGHT 20
+#define WEEK_FONT_SIZE 15
+#define WEEK_HEIGHT 24
+#define HEADER_STATS_FONT_SIZE 14
+#define HEADER_STATS_WIDTH 150
+#define HEADER_STATS_HEIGHT 24
 
 #define DRAW_DATE 1U
 #define DRAW_SEPARATOR 2U
@@ -242,6 +244,50 @@
 
   if (idx != _headerItemIndex)
     {
+      if (idx >= 0 && idx < _activities.size())
+	{
+	  const ActNotesItem &item = _activities[idx];
+
+	  item.update_date();
+
+	  _headerStats.month_distance
+	    = _headerStats.week_distance = item.distance();
+	  _headerStats.month_duration
+	    = _headerStats.week_duration = item.duration();
+
+	  for (ssize_t i = idx-1; i >= 0; i--)
+	    {
+	      const ActNotesItem &it = _activities[i];
+	      it.update_date();
+	      if (it.month != item.month && it.week != item.week)
+		break;
+	      double dist = it.distance();
+	      double dur = it.duration();
+	      if (it.month == item.month)
+		_headerStats.month_distance += dist,
+		_headerStats.month_duration += dur;
+	      if (it.week == item.week)
+		_headerStats.week_distance += dist,
+		_headerStats.week_duration += dur;
+	    }
+
+	  for (size_t i = idx+1; i < _activities.size(); i++)
+	    {
+	      const ActNotesItem &it = _activities[i];
+	      it.update_date();
+	      if (it.month != item.month && it.week != item.week)
+		break;
+	      double dist = it.distance();
+	      double dur = it.duration();
+	      if (it.month == item.month)
+		_headerStats.month_distance += dist,
+		_headerStats.month_duration += dur;
+	      if (it.week == item.week)
+		_headerStats.week_distance += dist,
+		_headerStats.week_duration += dur;
+	    }
+	}
+
       _headerItemIndex = idx;
       [_headerView setNeedsDisplay:YES];
     }
@@ -326,6 +372,11 @@
     return &_activities[_headerItemIndex];
   else
     return nullptr;
+}
+
+- (const ActNotesItem::header_stats &)headerStats
+{
+  return _headerStats;
 }
 
 @end
@@ -463,7 +514,7 @@
   [grad drawInRect:bounds angle:90];
 
   if (const ActNotesItem *item = [_controller headerItem])
-    item->draw_header(bounds, 0);
+    item->draw_header(bounds, 0, [_controller headerStats]);
 }
 
 - (BOOL)isFlipped
@@ -491,6 +542,7 @@ NSDictionary *ActNotesItem::dow_attrs;
 NSDictionary *ActNotesItem::dom_attrs;
 NSDictionary *ActNotesItem::month_attrs;
 NSDictionary *ActNotesItem::week_attrs;
+NSDictionary *ActNotesItem::header_stats_attrs;
 NSColor *ActNotesItem::separator_color;
 NSDateFormatter *ActNotesItem::time_formatter;
 
@@ -557,6 +609,12 @@ ActNotesItem::initialize()
 		 size:WEEK_FONT_SIZE], NSFontAttributeName,
 		greyColor, NSForegroundColorAttributeName,
 		nil];
+  header_stats_attrs = [[NSDictionary alloc] initWithObjectsAndKeys:
+			[NSFont fontWithName:@"Helvetica Neue Bold"
+			 size:HEADER_STATS_FONT_SIZE], NSFontAttributeName,
+			redColor, NSForegroundColorAttributeName,
+			rightStyle, NSParagraphStyleAttributeName,
+			nil];
 
   separator_color = [[NSColor colorWithDeviceWhite:.80 alpha:1] retain];
 
@@ -729,12 +787,17 @@ ActNotesItem::draw(const NSRect &bounds, uint32_t flags) const
 }
 
 void
-ActNotesItem::draw_header(const NSRect &bounds, uint32_t flags) const
+ActNotesItem::draw_header(const NSRect &bounds, uint32_t flags,
+			  const header_stats &stats) const
 {
-  NSRect subR = NSInsetRect(bounds, HEADER_INSET, 0);
+  NSRect subR = bounds;
+  subR.origin.x += HEADER_LEFT_INSET;
+  subR.size.width -= HEADER_LEFT_INSET + HEADER_RIGHT_INSET;
   subR.size.width -= HEADER_STATS_WIDTH;
 
   update_date();
+
+  // draw month name
 
   subR.size.height = MONTH_HEIGHT;
 
@@ -742,13 +805,44 @@ ActNotesItem::draw_header(const NSRect &bounds, uint32_t flags) const
     [[time_formatter monthSymbols] objectAtIndex:month], year]
    drawInRect:subR withAttributes:month_attrs];
 
+  // draw week index
+
   subR.origin.y += subR.size.height;
   subR.size.height = WEEK_HEIGHT;
 
   [[NSString stringWithFormat:@"Week %d", week + 1]
    drawInRect:subR withAttributes:week_attrs];
 
-  subR.origin.y += subR.size.height;
+  // draw month stats
+
+  subR.origin.x += subR.size.width;
+  subR.origin.y = bounds.origin.y + (MONTH_HEIGHT - HEADER_STATS_HEIGHT) + 3;
+  subR.size.width = HEADER_STATS_WIDTH;
+  subR.size.height = HEADER_STATS_HEIGHT;
+
+  {
+    std::string dist, dur;
+    act::format_distance(dist, stats.month_distance, act::unit_type::unknown);
+    act::format_duration(dur, stats.month_duration);
+
+    [[NSString stringWithFormat:@"%s, %s", dist.c_str(), dur.c_str()]
+     drawInRect:subR withAttributes:header_stats_attrs];
+  }
+
+  // draw week stats
+
+  subR.origin.y += subR.size.height + (WEEK_HEIGHT - HEADER_STATS_HEIGHT) - 1;
+
+  {
+    std::string dist, dur;
+    act::format_distance(dist, stats.week_distance, act::unit_type::unknown);
+    act::format_duration(dur, stats.week_duration);
+
+    [[NSString stringWithFormat:@"%s, %s", dist.c_str(), dur.c_str()]
+     drawInRect:subR withAttributes:header_stats_attrs];
+  }
+
+  // draw separator
 
   subR.origin.x = bounds.origin.x;
   subR.origin.y = bounds.origin.y + bounds.size.height - 2;
@@ -777,12 +871,35 @@ ActNotesItem::update_date() const
 
       year = 1900 + tm.tm_year;
       month = tm.tm_mon;
-      week = tm.tm_yday / 7;		// FIXME: incorrect
       day_of_week = tm.tm_wday;
       day_of_month = tm.tm_mday;
 
+      // days since Jan 1, 1970 (a thursday); adjust, and into weeks:
+      // (date / (24 * 60 * 60) + 4 - start_of_week) / 7, equiv. to:
+
+      int start_of_week = act::shared_config().start_of_week();
+      week = (date + 345600 + start_of_week * -86400) / 604800;
+
       valid_date = true;
     }
+}
+
+double
+ActNotesItem::distance() const
+{
+  if (!activity)
+    activity.reset(new act::activity(storage));
+
+  return activity->distance();
+}
+
+double
+ActNotesItem::duration() const
+{
+  if (!activity)
+    activity.reset(new act::activity(storage));
+
+  return activity->duration();
 }
 
 void

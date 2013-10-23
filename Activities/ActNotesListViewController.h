@@ -35,13 +35,23 @@ struct ActNotesItem
   explicit ActNotesItem(act::activity_storage_ref storage);
   explicit ActNotesItem(const ActNotesItem &rhs);
 
+  struct header_stats
+    {
+      double month_distance, month_duration;
+      double week_duration, week_distance;
+    };
+
   void draw(const NSRect &bounds, uint32_t flags) const;
-  void draw_header(const NSRect &bounds, uint32_t flags) const;
+  void draw_header(const NSRect &bounds, uint32_t flags,
+    const header_stats &stats) const;
 
   void update_date() const;
   void update_body() const;
   void update_body_height(CGFloat width) const;
   void update_height(CGFloat width) const;
+
+  double distance() const;
+  double duration() const;
 
   bool date_equal_p(const ActNotesItem &other) const;
 
@@ -56,6 +66,7 @@ private:
   static NSDictionary *dom_attrs;
   static NSDictionary *month_attrs;
   static NSDictionary *week_attrs;
+  static NSDictionary *header_stats_attrs;
   static NSColor *separator_color;
   static NSDateFormatter *time_formatter;
 
@@ -71,6 +82,7 @@ private:
   std::vector<ActNotesItem> _activities;
 
   NSInteger _headerItemIndex;
+  struct ActNotesItem::header_stats _headerStats;
 }
 
 @property(nonatomic, readonly) const std::vector<ActNotesItem> &activities;
