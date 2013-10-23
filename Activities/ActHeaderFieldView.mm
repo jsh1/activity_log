@@ -189,7 +189,8 @@
 
   NSEvent *e = [[self window] currentEvent];
   if ([e type] == NSKeyDown
-      && [[e charactersIgnoringModifiers] isEqualToString:@"\r"])
+      && [[e charactersIgnoringModifiers] isEqualToString:@"\r"]
+      && _depth == 0)
     {
       if (sender == _labelField)
 	[[self window] makeFirstResponder:_valueField];
@@ -203,7 +204,9 @@
 - (BOOL)control:(NSControl *)control
     textShouldEndEditing:(NSText *)fieldEditor
 {
+  _depth++;
   [self controlAction:control];
+  _depth--;
   return YES;
 }
 

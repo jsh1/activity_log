@@ -12,6 +12,8 @@
   ActTextField *_valueField;
 
   NSString *_fieldName;
+
+  int _depth;
 }
 
 @property(nonatomic, assign) ActHeaderView *headerView;
