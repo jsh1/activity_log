@@ -15,6 +15,15 @@ activity_storage::activity_storage()
 {
 }
 
+activity_storage::activity_storage(const activity_storage &rhs)
+: _seed(rhs._seed),
+  _path(rhs._path),
+  _path_seed(rhs._path_seed),
+  _header(rhs._header),
+  _body(rhs._body)
+{
+}
+
 void
 activity_storage::set_path(const char *path)
 {

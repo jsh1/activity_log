@@ -30,6 +30,7 @@ class activity_storage : public uncopyable
 
 public:
   activity_storage();
+  activity_storage(const activity_storage &rhs);
 
   void set_path(const char *path);
   const char *path() const;

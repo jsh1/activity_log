@@ -18,6 +18,11 @@ database::database()
   reload();
 }
 
+database::database(const database &rhs)
+: _items(rhs._items)
+{
+}
+
 void
 database::reload()
 {

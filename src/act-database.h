@@ -16,6 +16,7 @@ class database : public uncopyable
 {
 public:
   database();
+  database(const database &rhs);
 
   void reload();
   void synchronize() const;
@@ -33,6 +34,9 @@ public:
       activity_storage_ref _storage;
 
     public:
+      item();
+      item(const item &rhs);
+
       time_t date() const {return _date;}
 
       activity_storage_ref storage() {return _storage;}
@@ -189,6 +193,21 @@ private:
 
   static void reload_callback(const char *path, void *ctx);
 };
+
+// implementation details
+
+inline
+database::item::item()
+: _date(0)
+{
+}
+
+inline
+database::item::item(const item &rhs)
+: _date(rhs._date),
+  _storage(new act::activity_storage(*rhs._storage.get()))
+{
+}
 
 } // namespace act
 
