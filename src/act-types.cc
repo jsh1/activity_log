@@ -190,10 +190,7 @@ lookup_field_data_type(const field_id id)
     case field_id::type:
     case field_id::custom:
       return field_data_type::string;
-    case field_id::average_hr:
     case field_id::calories:
-    case field_id::max_hr:
-    case field_id::resting_hr:
     case field_id::vdot:
     case field_id::points:
       return field_data_type::number;
@@ -221,6 +218,10 @@ lookup_field_data_type(const field_id id)
       return field_data_type::temperature;
     case field_id::weight:
       return field_data_type::weight;
+    case field_id::average_hr:
+    case field_id::max_hr:
+    case field_id::resting_hr:
+      return field_data_type::heart_rate;
     }
 }
 
@@ -313,6 +314,17 @@ canonicalize_field_string(field_data_type type, std::string &str)
 	{
 	  str.clear();
 	  format_weight(str, temp, unit);
+	  return true;
+	}
+      break; }
+
+    case field_data_type::heart_rate: {
+      double value;
+      unit_type unit;
+      if (parse_heart_rate(str, &value, &unit))
+	{
+	  str.clear();
+	  format_heart_rate(str, value, unit_type::beats_per_minute);
 	  return true;
 	}
       break; }

@@ -133,8 +133,8 @@ format_distance(std::string &str, double dist, unit_type unit)
       break;
 
     case unit_type::kilometres:
-      format = "%.2f km";
       dist = dist * 1e-3;
+      format = dist < 10 ? "%.2f km" : "%.1f km";
       break;
 
     case unit_type::inches:
@@ -154,8 +154,8 @@ format_distance(std::string &str, double dist, unit_type unit)
 
     case unit_type::miles:
     default:
-      format = "%.2f mi";
       dist = dist * MILES_PER_METER;
+      format = dist < 10 ? "%.2f mi" : "%.1f mi";
       break;
     }
 
@@ -288,6 +288,42 @@ format_weight(std::string &str, double weight, unit_type unit)
 }
 
 void
+format_heart_rate(std::string &str, double value, unit_type unit)
+{
+  const char *format = "%g bpm";
+
+  const config &c = shared_config();
+
+  switch (unit)
+    {
+    case unit_type::percent_hr_reserve:
+      if (c.resting_hr() != 0 && c.max_hr() != 0)
+	{
+	  format = "%g %%hrr";
+	  value = (value - c.resting_hr()) / (c.max_hr() - c.resting_hr()) * 100;
+	}
+      break;
+
+    case unit_type::percent_hr_max:
+      if (c.max_hr() != 0)
+	{
+	  format = "%g %%max";
+	  value = value / c.max_hr() * 100;
+	}
+      break;
+
+    default:
+      break;
+    }
+
+  char buf[64];
+
+  snprintf_l(buf, sizeof(buf), nullptr, format, value);
+
+  str.append(buf);
+}
+
+void
 format_fraction(std::string &str, double frac)
 {
   char buf[32];
@@ -334,6 +370,10 @@ format_value(std::string &str, field_data_type type,
 
     case field_data_type::weight:
       format_weight(str, value, unit);
+      break;
+
+    case field_data_type::heart_rate:
+      format_heart_rate(str, value, unit);
       break;
 
     case field_data_type::date:
@@ -606,7 +646,8 @@ parse_unit(const parsable_unit *units, const std::string &str,
   char buf[128];
 
   size_t i = idx;
-  while (i < str.size() && (isalpha_l(str[i], nullptr) || str[i] == '/'))
+  while (i < str.size() && (isalpha_l(str[i], nullptr)
+			    || str[i] == '/' || str[i] == '%'))
     i++;
 
   size_t len = i - idx;
@@ -1368,6 +1409,61 @@ parse_weight(const std::string &str, double *weight_ptr, unit_type *unit_ptr)
 }
 
 bool
+parse_heart_rate(const std::string &str,
+		 double *value_ptr, unit_type *unit_ptr)
+{
+  size_t idx = skip_whitespace(str, 0);
+
+  double value;
+  if (!parse_number(str, idx, value))
+    return false;
+
+  idx = skip_whitespace(str, idx);
+
+  unit_type unit = unit_type::beats_per_minute;
+
+  const config &c = shared_config();
+
+  parsable_unit hr_units[4];
+
+  hr_units[0].word_list = "bpm\0";
+  hr_units[0].unit = unit_type::beats_per_minute;
+  hr_units[0].multiplier = 1;
+  hr_units[0].offset = 0;
+
+  if (c.max_hr() != 0)
+    {
+      hr_units[1].word_list = "%max\0";
+      hr_units[1].unit = unit_type::percent_hr_reserve;
+      hr_units[1].multiplier = .01 * c.max_hr();
+      hr_units[1].offset = 0;
+
+      if (c.resting_hr() != 0)
+	{
+	  hr_units[2].word_list = "%hrr\0";
+	  hr_units[2].unit = unit_type::percent_hr_reserve;
+	  hr_units[2].multiplier = .01 * (c.max_hr() - c.resting_hr());
+	  hr_units[2].offset = c.resting_hr();
+
+	  hr_units[3].word_list = 0;
+	}
+      else
+	hr_units[2].word_list = 0;
+    }
+  else
+    hr_units[1].word_list = 0;
+
+  parse_unit(hr_units, str, idx, value, unit);
+
+  *value_ptr = value;
+
+  if (unit_ptr)
+    *unit_ptr = unit;
+
+  return check_trailer(str, idx);
+}
+
+bool
 parse_fraction(const std::string &str, double *frac_ptr)
 {
   double value;
@@ -1459,6 +1555,9 @@ parse_value(const std::string &str, field_data_type type,
 
     case field_data_type::weight:
       return parse_weight(str, value_ptr, unit_ptr);
+
+    case field_data_type::heart_rate:
+      return parse_heart_rate(str, value_ptr, unit_ptr);
 
     case field_data_type::date: {
       time_t time = 0;

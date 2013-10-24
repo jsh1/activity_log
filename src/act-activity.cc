@@ -104,11 +104,11 @@ activity::validate_cached_values(unsigned int groups) const
       if (groups & group_physiological)
 	{
 	  if (const std::string *s = field_ptr("resting-hr"))
-	    parse_number(*s, &_resting_hr);
+	    parse_heart_rate(*s, &_resting_hr, nullptr);
 	  if (const std::string *s = field_ptr("average-hr"))
-	    parse_number(*s, &_average_hr);
+	    parse_heart_rate(*s, &_average_hr, nullptr);
 	  if (const std::string *s = field_ptr("max-hr"))
-	    parse_number(*s, &_max_hr);
+	    parse_heart_rate(*s, &_max_hr, nullptr);
 
 	  if (const std::string *s = field_ptr("calories"))
 	    parse_number(*s, &_calories);
@@ -667,7 +667,8 @@ activity::print_expansion(FILE *fh, const char *name,
 	case field_data_type::speed:
 	case field_data_type::temperature:
 	case field_data_type::fraction:
-	case field_data_type::weight: {
+	case field_data_type::weight:
+	case field_data_type::heart_rate: {
 	  double value = field_value(id);
 	  unit_type unit = field_unit(id);
 	  format_value(tem, type, value, unit);

@@ -333,6 +333,7 @@ activity_accum::print_expansion(const char *name, const char *arg,
 	case field_data_type::temperature:
 	case field_data_type::fraction:
 	case field_data_type::weight:
+	case field_data_type::heart_rate:
 	  format_value(str, type, value, unit_type::unknown);
 	  break;
 	}

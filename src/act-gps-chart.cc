@@ -181,13 +181,12 @@ chart::line::format_tick(std::string &s, double tick, double value) const
     }
   else if (field == &activity::point::heart_rate)
     {
-      format_number(s, tick);
+      unit_type unit = unit_type::beats_per_minute;
       if (conversion == value_conversion::HEARTRATE_BPM_HRR)
-	s.append(" %HRR");
+	unit = unit_type::percent_hr_reserve;
       else if (conversion == value_conversion::HEARTRATE_BPM_PMAX)
-	s.append(" % max");
-      else
-	s.append(" bpm");
+	unit = unit_type::percent_hr_max;
+      format_heart_rate(s, value, unit);
     }
   else
     {

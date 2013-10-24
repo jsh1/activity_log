@@ -26,6 +26,7 @@ void format_pace(std::string &str, double pace, unit_type unit);
 void format_speed(std::string &str, double speed, unit_type unit);
 void format_temperature(std::string &str, double temp, unit_type unit);
 void format_weight(std::string &str, double weight, unit_type unit);
+void format_heart_rate(std::string &str, double value, unit_type unit);
 void format_fraction(std::string &str, double frac);
 void format_keywords(std::string &str, const std::vector<std::string> &keys);
 
@@ -48,6 +49,8 @@ bool parse_speed(const std::string &str, double *speed_ptr,
 bool parse_temperature(const std::string &str, double *temp_ptr,
   unit_type *unit_ptr);
 bool parse_weight(const std::string &str, double *weight_ptr,
+  unit_type *unit_ptr);
+bool parse_heart_rate(const std::string &str, double *value_ptr,
   unit_type *unit_ptr);
 bool parse_fraction(const std::string &str, double *frac_ptr);
 bool parse_keywords(const std::string &str,

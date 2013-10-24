@@ -53,6 +53,7 @@ enum class field_data_type
   temperature,
   fraction,
   weight,
+  heart_rate,
   keywords,
   unknown = string,
 };
@@ -98,6 +99,11 @@ enum class unit_type
   // mass units
   kilogrammes,
   pounds,
+
+  // heart-rate units
+  beats_per_minute,
+  percent_hr_reserve,
+  percent_hr_max,
 };
 
 struct date_range
