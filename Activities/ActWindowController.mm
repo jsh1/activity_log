@@ -525,9 +525,7 @@ NSString *const ActActivityDidChangeBody = @"ActActivityDidChangeBody";
 	  ptr = eol + 1;
 	  if (eol[1] == '\n')
 	    [str appendString:@"\n\n"], ptr++;
-	  else if (eol[1] == 0)
-	    [str appendString:@"\n"];
-	  else
+	  else if (eol[1] != 0)
 	    [str appendString:@" "];
 	}
 

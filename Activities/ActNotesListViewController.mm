@@ -18,7 +18,7 @@
 #define Y_SPACING 10
 #define TITLE_HEIGHT 24
 #define TITLE_FONT_SIZE 18
-#define TITLE_LEADING 20
+#define TITLE_LEADING 22
 #define ITEM_INSET 10
 #define TIME_WIDTH 60
 #define TIME_HEIGHT TITLE_HEIGHT
@@ -26,7 +26,7 @@
 #define BODY_FONT_SIZE 12
 #define BODY_NIL_HEIGHT 9
 #define STATS_FONT_SIZE 14
-#define STATS_HEIGHT 24
+#define STATS_HEIGHT 25
 #define STATS_LEADING 23
 #define DATE_WIDTH 70
 #define DAY_OF_WEEK_HEIGHT 20
@@ -42,7 +42,7 @@
 #define WEEK_FONT_SIZE 15
 #define WEEK_HEIGHT 24
 #define HEADER_STATS_FONT_SIZE 14
-#define HEADER_STATS_WIDTH 150
+#define HEADER_STATS_WIDTH 100
 #define HEADER_STATS_HEIGHT 24
 
 #define DRAW_DATE 1U
@@ -252,8 +252,6 @@
 
 	  _headerStats.month_distance
 	    = _headerStats.week_distance = item.distance();
-	  _headerStats.month_duration
-	    = _headerStats.week_duration = item.duration();
 
 	  for (ssize_t i = idx-1; i >= 0; i--)
 	    {
@@ -262,13 +260,10 @@
 	      if (it.month != item.month && it.week != item.week)
 		break;
 	      double dist = it.distance();
-	      double dur = it.duration();
 	      if (it.month == item.month)
-		_headerStats.month_distance += dist,
-		_headerStats.month_duration += dur;
+		_headerStats.month_distance += dist;
 	      if (it.week == item.week)
-		_headerStats.week_distance += dist,
-		_headerStats.week_duration += dur;
+		_headerStats.week_distance += dist;
 	    }
 
 	  for (size_t i = idx+1; i < _activities.size(); i++)
@@ -278,13 +273,10 @@
 	      if (it.month != item.month && it.week != item.week)
 		break;
 	      double dist = it.distance();
-	      double dur = it.duration();
 	      if (it.month == item.month)
-		_headerStats.month_distance += dist,
-		_headerStats.month_duration += dur;
+		_headerStats.month_distance += dist;
 	      if (it.week == item.week)
-		_headerStats.week_distance += dist,
-		_headerStats.week_duration += dur;
+		_headerStats.week_distance += dist;
 	    }
 	}
 
@@ -820,27 +812,25 @@ ActNotesItem::draw_header(const NSRect &bounds, uint32_t flags,
   subR.size.width = HEADER_STATS_WIDTH;
   subR.size.height = HEADER_STATS_HEIGHT;
 
-  {
-    std::string dist, dur;
-    act::format_distance(dist, stats.month_distance, act::unit_type::unknown);
-    act::format_duration(dur, stats.month_duration);
-
-    [[NSString stringWithFormat:@"%s, %s", dist.c_str(), dur.c_str()]
-     drawInRect:subR withAttributes:header_stats_attrs];
-  }
+  if (stats.month_distance != 0)
+    {
+      std::string buf;
+      act::format_distance(buf, stats.month_distance, act::unit_type::unknown);
+      [[NSString stringWithUTF8String:buf.c_str()]
+       drawInRect:subR withAttributes:header_stats_attrs];
+    }
 
   // draw week stats
 
   subR.origin.y += subR.size.height + (WEEK_HEIGHT - HEADER_STATS_HEIGHT) - 1;
 
-  {
-    std::string dist, dur;
-    act::format_distance(dist, stats.week_distance, act::unit_type::unknown);
-    act::format_duration(dur, stats.week_duration);
-
-    [[NSString stringWithFormat:@"%s, %s", dist.c_str(), dur.c_str()]
-     drawInRect:subR withAttributes:header_stats_attrs];
-  }
+  if (stats.week_distance != 0)
+    {
+      std::string buf;
+      act::format_distance(buf, stats.week_distance, act::unit_type::unknown);
+      [[NSString stringWithUTF8String:buf.c_str()]
+       drawInRect:subR withAttributes:header_stats_attrs];
+    }
 
   // draw separator
 
@@ -900,6 +890,15 @@ ActNotesItem::duration() const
     activity.reset(new act::activity(storage));
 
   return activity->duration();
+}
+
+double
+ActNotesItem::points() const
+{
+  if (!activity)
+    activity.reset(new act::activity(storage));
+
+  return activity->points();
 }
 
 void

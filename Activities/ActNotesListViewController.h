@@ -37,8 +37,8 @@ struct ActNotesItem
 
   struct header_stats
     {
-      double month_distance, month_duration;
-      double week_duration, week_distance;
+      double month_distance;
+      double week_distance;
     };
 
   void draw(const NSRect &bounds, uint32_t flags) const;
@@ -52,6 +52,7 @@ struct ActNotesItem
 
   double distance() const;
   double duration() const;
+  double points() const;
 
   bool date_equal_p(const ActNotesItem &other) const;
 

@@ -8,7 +8,7 @@
 
 #import "act-database.h"
 
-#define LABEL_WIDTH 100
+#define LABEL_WIDTH 90
 #define LABEL_HEIGHT 14
 #define SPACING 8
 
@@ -23,6 +23,7 @@
     return nil;
 
   NSFont *font = [NSFont systemFontOfSize:[NSFont smallSystemFontSize]];
+  NSFont *font1 = [NSFont boldSystemFontOfSize:[NSFont smallSystemFontSize]];
 
   _labelField = [[ActTextField alloc] initWithFrame:
 		 NSMakeRect(0, 0, LABEL_WIDTH, LABEL_HEIGHT)];
@@ -30,10 +31,9 @@
   [_labelField setAction:@selector(controlAction:)];
   [_labelField setDelegate:self];
   [_labelField setDrawsBackground:NO];
-  [[_labelField cell] setAlignment:NSRightTextAlignment];
   [[_labelField cell] setBordered:NO];
   [[_labelField cell] setFont:font];
-  [[_labelField cell] setTextColor:[NSColor colorWithDeviceWhite:.25 alpha:1]];
+  [[_labelField cell] setTextColor:[ActColor controlTextColor]];
   [self addSubview:_labelField];
   [_labelField release];
 
@@ -45,8 +45,8 @@
   [_valueField setDelegate:self];
   [_valueField setDrawsBackground:NO];
   [[_valueField cell] setBordered:NO];
-  [[_valueField cell] setFont:font];
-  [[_valueField cell] setTextColor:[NSColor colorWithDeviceWhite:.1 alpha:1]];
+  [[_valueField cell] setFont:font1];
+  [[_valueField cell] setTextColor:[ActColor controlTextColor]];
   [self addSubview:_valueField];
   [_valueField release];
 

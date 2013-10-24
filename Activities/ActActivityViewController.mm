@@ -174,10 +174,9 @@ layoutSubviews(ActActivityView *self, CGFloat width,
 	  frame.size.height = height;
 
 	  if (!NSEqualRects(frame, [view frame]))
-	    {
-	      [view setFrame:frame];
-	      [view layoutSubviews];
-	    }
+	    [view setFrame:frame];
+
+	  [view layoutSubviews];
 	}
 
       y += height + MARGIN;

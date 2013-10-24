@@ -16,6 +16,7 @@
 #define BODY_X_INSET 6
 #define BODY_Y_INSET 10
 #define BODY_SPACING 8
+#define BODY_BOTTOM_BORDER 14
 #define MIN_BODY_HEIGHT 42
 
 @implementation ActSummaryViewController
@@ -117,12 +118,13 @@
        NSMakeSize(width - BODY_X_INSET*2, CGFLOAT_MAX)];
       [_bodyLayoutManager glyphRangeForTextContainer:_bodyLayoutContainer];
  
-      CGFloat body_height = [_bodyLayoutManager usedRectForTextContainer:
-			     _bodyLayoutContainer].size.height;
+      CGFloat body_height = ([_bodyLayoutManager usedRectForTextContainer:
+			      _bodyLayoutContainer].size.height
+			     + BODY_BOTTOM_BORDER);
       body_height = std::max(ceil(body_height), (CGFloat)MIN_BODY_HEIGHT);
 
       NSRect r = NSUnionRect([_statsBox frame], [_courseField frame]);
-      r.size.height += BODY_SPACING + body_height + BODY_Y_INSET;
+      r.size.height += BODY_SPACING + body_height;
 
       return r.size.height;
     }
