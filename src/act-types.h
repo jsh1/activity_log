@@ -143,6 +143,8 @@ struct location
   location(double lat, double lng);
 };
 
+void mix(location &a, const location &b, const location &c, double f);
+
 struct location_size
 {
   double latitude;
@@ -229,6 +231,13 @@ location_region::location_region(const location &cen,
 : center(cen),
   size(sz)
 {
+}
+
+inline void
+mix(location &a, const location &b, const location &c, double f)
+{
+  mix(a.latitude, b.latitude, c.latitude, f);
+  mix(a.longitude, b.longitude, c.longitude, f);
 }
 
 } // namespace act

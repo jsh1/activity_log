@@ -41,6 +41,18 @@ struct uncopyable
   uncopyable &operator=(const uncopyable &rhs) = delete;
 };
 
+inline void
+mix(double &a, const double &b, const double &c, double f)
+{
+  a = b + (c - b) * f;
+}
+
+inline void
+mix(float &a, const float &b, const float &c, double f)
+{
+  a = b + (c - b) * f;
+}
+
 } // namespace act
 
 #endif /* __cplusplus */
