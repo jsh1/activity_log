@@ -54,6 +54,31 @@ public:
       TICK_LINES = 1U << 2,
     };
 
+  chart(const activity &a, x_axis_type x_axis);
+
+  const activity &get_activity() const;
+  x_axis_type x_axis() const;
+
+  void add_line(double activity::point:: *field, value_conversion conv,
+    line_color color, uint32_t fill_bg, double min_ratio, double max_ratio);
+
+  void set_selected_lap(int idx);
+  int selected_lap() const;
+
+  void set_current_time(double t);
+  double current_time() const;
+
+  bool point_at_x(CGFloat x, x_axis_type type, activity::point &ret_p) const;
+
+  void remove_all_lines();
+
+  void update_values();
+
+  void set_chart_rect(const CGRect &r);		/* calls update_values() */
+  const CGRect &chart_rect() const;
+
+  void draw(CGContextRef ctx);
+
 private:
   struct line
     {
@@ -82,40 +107,52 @@ private:
       void format_tick(std::string &s, double tick, double value) const;
     };
 
-  friend struct chart::line;
+  friend struct line;
 
   const activity &_activity;
   x_axis_type _x_axis;
-  double activity::point:: *_x_axis_field;
-  double _min_x_value, _max_x_value;
+  double _min_time, _max_time;
+  double _min_distance, _max_distance;
   std::vector<line> _lines;
   CGRect _chart_rect;
   int _selected_lap;
+  double _current_time;
 
-  void draw_background(CGContextRef ctx);
-  void draw_line(CGContextRef ctx, const line &l, CGFloat tx);
-  void draw_lap_markers(CGContextRef ctx);
+  struct x_axis_state
+    {
+      double activity::point:: *field;
 
-public:
-  chart(const activity &a, x_axis_type x_axis);
+      double min_value;
+      double max_value;
 
-  void add_line(double activity::point:: *field, value_conversion conv,
-    line_color color, uint32_t fill_bg, double min_ratio, double max_ratio);
+      CGFloat xm, xc;
 
-  void set_selected_lap(int idx);
-  int selected_lap() const;
+      x_axis_state(const chart &chart, x_axis_type type);
+    };
 
-  void remove_all_lines();
+  friend struct x_axis_state;
 
-  void update_values();
+  void draw_line(CGContextRef ctx, const line &l,
+    const x_axis_state &x_axis, CGFloat tx);
 
-  void set_chart_rect(const CGRect &r);		/* calls update_values() */
-  const CGRect &chart_rect() const;
+  void draw_lap_markers(CGContextRef ctx, const x_axis_state &x_axis);
 
-  void draw(CGContextRef ctx);
+  void draw_current_time(CGContextRef ctx);
 };
 
 // implementation details
+
+inline const activity &
+chart::get_activity() const
+{
+  return _activity;
+}
+
+inline chart::x_axis_type
+chart::x_axis() const
+{
+  return _x_axis;
+}
 
 inline
 chart::line::line()
@@ -135,16 +172,40 @@ chart::line::line(double activity::point:: *field_, value_conversion
 {
 }
 
+inline void
+chart::set_chart_rect(const CGRect &r)
+{
+  _chart_rect = r;
+}
+
 inline const CGRect &
 chart::chart_rect() const
 {
   return _chart_rect;
 }
 
+inline void
+chart::set_selected_lap(int idx)
+{
+  _selected_lap = idx;
+}
+
 inline int
 chart::selected_lap() const
 {
   return _selected_lap;
+}
+
+inline void
+chart::set_current_time(double t)
+{
+  _current_time = t;
+}
+
+inline double
+chart::current_time() const
+{
+  return _current_time;
 }
 
 } // namespace gps

@@ -71,6 +71,10 @@ enum ChartFieldMasks
    addObserver:self selector:@selector(selectedLapIndexDidChange:)
    name:ActSelectedLapIndexDidChange object:_controller];
 
+  [[NSNotificationCenter defaultCenter]
+   addObserver:self selector:@selector(currentTimeDidChange:)
+   name:ActCurrentTimeDidChange object:_controller];
+
   [_configMenu setFont:[NSFont systemFontOfSize:[NSFont smallSystemFontSize]]];
 
   _fieldMask = CHART_PACE_MI_MASK;
@@ -262,10 +266,14 @@ enum ChartFieldMasks
     }
 }
 
-- (IBAction)controlAction:(id)sender
+- (void)currentTimeDidChange:(NSNotification *)note
 {
-  if (sender == _configButton)
+  if (_chart)
     {
+      _chart->set_current_time([_controller currentTime]);
+
+      // FIXME: only invalidate dirty rect
+      [_chartView setNeedsDisplay:YES];
     }
 }
 
@@ -379,10 +387,54 @@ enum ChartFieldMasks
     }
 }
 
+- (void)mouseExited:(NSEvent *)e
+{
+  if (_chart && _chart->current_time() >= 0)
+    {
+      _chart->set_current_time(-1);
+
+      // FIXME: only invalidate dirty rect
+      [_chartView setNeedsDisplay:YES];
+    }
+}
+
+- (void)mouseMoved:(NSEvent *)e
+{
+  if (_chart)
+    {
+      NSPoint p = [_chartView convertPoint:[e locationInWindow] fromView:nil];
+
+      act::gps::activity::point pt;
+      if (_chart->point_at_x(p.x, act::gps::chart::x_axis_type::DURATION, pt))
+	{
+	  double t = pt.time - _chart->get_activity().time();
+	  [_controller setCurrentTime:t];
+	}
+    }
+}
+
 @end
 
 
 @implementation ActChartView
+
+- (void)updateTrackingAreas
+{
+  NSRect bounds = [self bounds];
+
+  if (_trackingArea == nil
+      || !NSEqualRects(bounds, [_trackingArea rect]))
+    {
+      [self removeTrackingArea:_trackingArea];
+      _trackingArea = [[NSTrackingArea alloc] initWithRect:bounds
+		       options:(NSTrackingMouseEnteredAndExited
+				| NSTrackingMouseMoved
+				| NSTrackingActiveInKeyWindow)
+		       owner:_controller userInfo:nil];
+      [self addTrackingArea:_trackingArea];
+      [_trackingArea release];
+    }
+}
 
 - (void)drawRect:(NSRect)r
 {

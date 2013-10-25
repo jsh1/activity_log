@@ -20,7 +20,6 @@
   std::unique_ptr<act::gps::activity> _smoothed_data;
 }
 
-- (IBAction)controlAction:(id)sender;
 - (IBAction)configMenuAction:(id)sender;
 
 - (IBAction)toggleChartField:(id)sender;
@@ -32,6 +31,8 @@
 @interface ActChartView : NSView
 {
   IBOutlet ActChartViewController *_controller;
+
+  NSTrackingArea *_trackingArea;
 }
 @end
 

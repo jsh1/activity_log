@@ -19,8 +19,13 @@
 NSString *const ActActivityListDidChange = @"ActActivityListDidChange";
 NSString *const ActSelectedActivityDidChange = @"ActSelectedActivityDidChange";
 NSString *const ActSelectedLapIndexDidChange = @"ActSelectedLapIndexDidChange";
+NSString *const ActCurrentTimeDidChange = @"ActCurrentTimeDidChange";
 NSString *const ActActivityDidChangeField = @"ActActivityDidChangeField";
 NSString *const ActActivityDidChangeBody = @"ActActivityDidChangeBody";
+
+@interface ActWindowController ()
+- (void)selectedActivityDidChange;
+@end
 
 @implementation ActWindowController
 
@@ -55,6 +60,7 @@ NSString *const ActActivityDidChangeBody = @"ActActivityDidChangeBody";
   _undoManager = [[NSUndoManager alloc] init];
 
   _selectedLapIndex = -1;
+  _currentTime = -1;
 
   return self;
 }
@@ -280,7 +286,24 @@ NSString *const ActActivityDidChangeBody = @"ActActivityDidChangeBody";
     {
       _selectedLapIndex = idx;
 
-      [self selectedLapDidChange];
+      [[NSNotificationCenter defaultCenter]
+       postNotificationName:ActSelectedLapIndexDidChange object:self];
+    }
+}
+
+- (double)currentTime
+{
+  return _currentTime;
+}
+
+- (void)setCurrentTime:(double)t
+{
+  if (_currentTime != t)
+    {
+      _currentTime = t;
+
+      [[NSNotificationCenter defaultCenter]
+       postNotificationName:ActCurrentTimeDidChange object:self];
     }
 }
 
@@ -325,12 +348,6 @@ NSString *const ActActivityDidChangeBody = @"ActActivityDidChangeBody";
 
   [[NSNotificationCenter defaultCenter]
    postNotificationName:ActSelectedActivityDidChange object:self];
-}
-
-- (void)selectedLapDidChange
-{
-  [[NSNotificationCenter defaultCenter]
-   postNotificationName:ActSelectedLapIndexDidChange object:self];
 }
 
 - (void)activity:(const act::activity_storage_ref)a

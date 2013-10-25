@@ -29,6 +29,32 @@
 namespace act {
 namespace gps {
 
+chart::x_axis_state::x_axis_state(const chart &chart, x_axis_type type)
+{
+  if (type == x_axis_type::DISTANCE)
+    {
+      field = &activity::point::distance;
+      min_value = chart._min_distance;
+      max_value = chart._max_distance;
+    }
+  else // if (type == x_axis_type::DURATION)
+    {
+      field = &activity::point::time;
+      min_value = chart._min_time;
+      max_value = chart._max_time;
+    }
+
+  CGFloat x_scale = 1. / (max_value - min_value);
+
+  /* x' = (x - min_v) * v_scale * chart_w + chart_x
+        = x * v_scale * chart_w - min_v * v_scale * chart_w + chart_x
+	v_scale = 1 / (max_v - min_v). */
+
+  xm = x_scale * chart._chart_rect.size.width;
+  xc = (chart._chart_rect.origin.x
+	- min_value * x_scale * chart._chart_rect.size.width);
+}
+
 double
 chart::line::convert_from_si(double x) const
 {
@@ -197,13 +223,14 @@ chart::line::format_tick(std::string &s, double tick, double value) const
 chart::chart(const activity &a, x_axis_type xa)
 : _activity(a),
   _x_axis(xa),
-  _x_axis_field(_x_axis == x_axis_type::DISTANCE
-		? &activity::point::distance : &activity::point::time),
   _chart_rect(CGRectNull),
-  _selected_lap(-1)
+  _selected_lap(-1),
+  _current_time(-1)
 {
   double mean, sdev;
-  a.get_range(_x_axis_field, _min_x_value, _max_x_value, mean, sdev);
+  a.get_range(&activity::point::time, _min_time, _max_time, mean, sdev);
+  a.get_range(&activity::point::distance, _min_distance,
+	      _max_distance, mean, sdev);
 }
 
 void
@@ -212,6 +239,52 @@ chart::add_line(double activity::point:: *field, value_conversion conv,
 		double max_ratio)
 {
   _lines.push_back(line(field, conv, color, flags, min_ratio, max_ratio));
+}
+
+bool
+chart::point_at_x(CGFloat x, x_axis_type type, activity::point &ret_p) const
+{
+  x_axis_state x_axis(*this, type);
+
+  for (const auto &lap : _activity.laps())
+    {
+      double lt0 = lap.time * x_axis.xm + x_axis.xc;
+      double lt1 = lt0 + lap.duration * x_axis.xm;
+
+      if (lt1 < x)
+	continue;
+      if (!(lt0 < x))
+	return false;
+
+      const activity::point *last_p = nullptr;
+      CGFloat last_x = 0;
+
+      for (const auto &it : lap.track)
+	{
+	  double it_value = it.*x_axis.field;
+	  if (it_value == 0)
+	    continue;
+
+	  CGFloat it_x = it_value * x_axis.xm + x_axis.xc;
+
+	  if (it_x > x)
+	    {
+	      if (last_p != nullptr)
+		{
+		  double f = (it_x - x) / (it_x - last_x);
+		  mix(ret_p, *last_p, it, 1-f);
+		  return true;
+		}
+	      else
+		return false;
+	    }
+      
+	  last_p = &it;
+	  last_x = it_x;
+	}
+    }
+
+  return false;
 }
 
 void
@@ -228,53 +301,25 @@ chart::update_values()
 }
 
 void
-chart::set_chart_rect(const CGRect &r)
-{
-  _chart_rect = r;
-}
-
-void
-chart::set_selected_lap(int idx)
-{
-  _selected_lap = idx;
-}
-
-void
 chart::draw(CGContextRef ctx)
 {
-  draw_background(ctx);
+  x_axis_state x_axis(*this, _x_axis);
 
   for (size_t i = 0; i < _lines.size(); i++)
-    draw_line(ctx, _lines[i], i * KEY_TEXT_WIDTH);
+    draw_line(ctx, _lines[i], x_axis, i * KEY_TEXT_WIDTH);
 
-  draw_lap_markers(ctx);
+  draw_lap_markers(ctx, x_axis);
+
+  draw_current_time(ctx);
 }
 
 void
-chart::draw_background(CGContextRef ctx)
-{
-#if 0
-  CGContextSaveGState(ctx);
-  CGContextSetLineWidth(ctx, 1);
-  CGContextSetGrayFillColor(ctx, .98, 1);
-  CGContextFillRect(ctx, _chart_rect);
-//  CGContextSetRGBStrokeColor(ctx, 0, 0, 0, 0.2);
-//  CGContextStrokeRect(ctx, CGRectInset(_chart_rect, .5, .5));
-  CGContextRestoreGState(ctx);
-#endif
-}
-
-void
-chart::draw_line(CGContextRef ctx, const line &l, CGFloat tx)
+chart::draw_line(CGContextRef ctx, const line &l,
+		 const x_axis_state &x_axis, CGFloat tx)
 {
   /* x' = (x - min_v) * v_scale * chart_w + chart_x
         = x * v_scale * chart_w - min_v * v_scale * chart_w + chart_x
 	v_scale = 1 / (max_v - min_v). */
-
-  CGFloat x_scale = 1. / (_max_x_value - _min_x_value);
-  CGFloat x0 = (_chart_rect.origin.x
-		- _min_x_value * x_scale * _chart_rect.size.width);
-  CGFloat xm = x_scale * _chart_rect.size.width;
 
   CGFloat y_scale = 1. / (l.scaled_max_value - l.scaled_min_value);
   CGFloat y0 = (_chart_rect.origin.y
@@ -299,11 +344,11 @@ chart::draw_line(CGContextRef ctx, const line &l, CGFloat tx)
       for (size_t ti = 0; ti < lap.track.size(); ti++)
 	{
 	  const activity::point &p = track[ti];
-	  double dist = p.*_x_axis_field;
+	  double dist = p.*x_axis.field;
 	  double value = p.*(l.field);
 	  if (dist == 0 || value == 0)
 	    continue;
-	  CGFloat x = dist * xm + x0;
+	  CGFloat x = dist * x_axis.xm + x_axis.xc;
 	  if (first_pt || x - last_x >= 1)
 	    {
 	      if (skipped_count > 0)
@@ -480,21 +525,16 @@ chart::draw_line(CGContextRef ctx, const line &l, CGFloat tx)
 }
 
 void
-chart::draw_lap_markers(CGContextRef ctx)
+chart::draw_lap_markers(CGContextRef ctx, const x_axis_state &x_axis)
 {
   std::vector<CGPoint> lines;
   lines.reserve(2 * (_activity.laps().size() + 1));
-
-  CGFloat x_scale = 1. / (_max_x_value - _min_x_value);
-  CGFloat x0 = (_chart_rect.origin.x
-		- _min_x_value * x_scale * _chart_rect.size.width);
-  CGFloat xm = x_scale * _chart_rect.size.width;
 
   CGFloat total_dist = _x_axis == x_axis_type::DISTANCE ? 0 : _activity.time();
 
   for (size_t i = 0; true; i++)
     {
-      CGFloat x = total_dist * xm + x0;
+      CGFloat x = total_dist * x_axis.xm + x_axis.xc;
       x = floor(x) + 0.5;
 
       lines.push_back(CGPointMake(x, _chart_rect.origin.y));
@@ -530,6 +570,28 @@ chart::draw_lap_markers(CGContextRef ctx)
     }
 
   CGContextRestoreGState(ctx);
+}
+
+void
+chart::draw_current_time(CGContextRef ctx)
+{
+  if (_current_time < 0)
+    return;
+
+  // always need time axis calibration for this.
+
+  x_axis_state x_axis(*this, x_axis_type::DURATION);
+
+  double t = _activity.time() + _current_time;
+
+  if (t < x_axis.min_value || t > x_axis.max_value)
+    return;
+
+  CGFloat x = round(t * x_axis.xm + x_axis.xc);
+
+  CGContextSetGrayFillColor(ctx, 0.25, 1);
+  CGContextFillRect(ctx, CGRectMake(x, _chart_rect.origin.y,
+				    1, _chart_rect.size.height));
 }
 
 } // namespace gps

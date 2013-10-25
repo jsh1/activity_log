@@ -444,4 +444,18 @@ activity::smooth(const activity &src, int width)
 }
 
 } // namespace gps
+
+
+void
+mix(gps::activity::point &a, const gps::activity::point &b,
+  const gps::activity::point &c, double f)
+{
+  mix(a.time, b.time, c.time, f);
+  mix(a.location, b.location, c.location, f);
+  mix(a.altitude, b.altitude, c.altitude, f);
+  mix(a.distance, b.distance, c.distance, f);
+  mix(a.speed, b.speed, c.speed, f);
+  mix(a.heart_rate, b.heart_rate, c.heart_rate, f);
+}
+
 } // namespace act

@@ -376,6 +376,10 @@ activity::cend() const
 }
 
 } // namespace gps
+
+void mix(gps::activity::point &a, const gps::activity::point &b,
+  const gps::activity::point &c, double f);
+
 } // namespace act
 
 #endif /* ACT_GPS_ACTIVITY_H */

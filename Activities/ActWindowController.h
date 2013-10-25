@@ -10,6 +10,7 @@
 extern NSString *const ActActivityListDidChange;
 extern NSString *const ActSelectedActivityDidChange;
 extern NSString *const ActSelectedLapIndexDidChange;
+extern NSString *const ActCurrentTimeDidChange;
 extern NSString *const ActActivityDidChangeField;
 extern NSString *const ActActivityDidChangeBody;
 
@@ -36,6 +37,7 @@ extern NSString *const ActActivityDidChangeBody;
   act::activity_storage_ref _selectedActivityStorage;
   std::unique_ptr<act::activity> _selectedActivity;
   NSInteger _selectedLapIndex;
+  double _currentTime;
 }
 
 @property(nonatomic, readonly) act::database *database;
@@ -44,6 +46,7 @@ extern NSString *const ActActivityDidChangeBody;
 @property(nonatomic) act::activity_storage_ref selectedActivityStorage;
 @property(nonatomic, readonly) act::activity *selectedActivity;
 @property(nonatomic) NSInteger selectedLapIndex;
+@property(nonatomic) double currentTime;
 
 @property(nonatomic, readonly) ActFieldEditor *fieldEditor;
 @property(nonatomic, readonly) NSUndoManager *undoManager;
@@ -62,9 +65,6 @@ extern NSString *const ActActivityDidChangeBody;
 
 - (void)synchronize;
 - (void)synchronizeIfNeeded;
-
-- (void)selectedActivityDidChange;
-- (void)selectedLapDidChange;
 
 - (void)activity:(const act::activity_storage_ref)storage
     didChangeField:(NSString *)name;
