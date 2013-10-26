@@ -290,7 +290,7 @@ format_weight(std::string &str, double weight, unit_type unit)
 void
 format_heart_rate(std::string &str, double value, unit_type unit)
 {
-  const char *format = "%g bpm";
+  const char *format = "%.3g bpm";
 
   const config &c = shared_config();
 
@@ -299,7 +299,7 @@ format_heart_rate(std::string &str, double value, unit_type unit)
     case unit_type::percent_hr_reserve:
       if (c.resting_hr() != 0 && c.max_hr() != 0)
 	{
-	  format = "%g %%hrr";
+	  format = "%.3g %%hrr";
 	  value = (value - c.resting_hr()) / (c.max_hr() - c.resting_hr()) * 100;
 	}
       break;
@@ -307,7 +307,7 @@ format_heart_rate(std::string &str, double value, unit_type unit)
     case unit_type::percent_hr_max:
       if (c.max_hr() != 0)
 	{
-	  format = "%g %%max";
+	  format = "%.3g %%max";
 	  value = value / c.max_hr() * 100;
 	}
       break;
