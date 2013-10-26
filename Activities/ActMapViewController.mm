@@ -12,6 +12,8 @@
 
 #import <algorithm>
 
+#define SPOT_RADIUS 7
+
 @implementation ActMapViewController
 
 + (NSString *)viewNibName
@@ -151,6 +153,13 @@
    addObserver:self selector:@selector(selectedLapIndexDidChange:)
    name:ActSelectedLapIndexDidChange object:_controller];
 
+  [[NSNotificationCenter defaultCenter]
+   addObserver:self selector:@selector(currentTimeWillChange:)
+   name:ActCurrentTimeWillChange object:_controller];
+  [[NSNotificationCenter defaultCenter]
+   addObserver:self selector:@selector(currentTimeDidChange:)
+   name:ActCurrentTimeDidChange object:_controller];
+
   for (ActMapSource *src in [[self class] mapSources])
     {
       if ([src isLoading])
@@ -246,6 +255,53 @@
 
   if (a != nullptr && a->gps_data() != nullptr)
     [_mapView setNeedsDisplay:YES];
+}
+
+- (void)updateCurrentLocation
+{
+  _hasCurrentLocation = NO;
+
+  double t = [_controller currentTime];
+  if (!(t >= 0))
+    return;
+
+  const act::activity *a = [_controller selectedActivity];
+  if (a == nullptr)
+    return;
+
+  const act::gps::activity *gps_a = a->gps_data();
+  if (gps_a == nullptr)
+    return;
+
+  act::gps::activity::point p;
+  if (gps_a->point_at_time(gps_a->time() + t, p))
+    {
+      _currentLocation = p.location;
+      _hasCurrentLocation = YES;
+    }
+}
+
+- (void)setNeedsDisplayForCurrentLocation
+{
+  if (_hasCurrentLocation)
+    {
+      NSPoint p = [_mapView pointAtLocation:_currentLocation];
+      CGFloat radius = SPOT_RADIUS + 2;
+      NSRect r = NSMakeRect(p.x - radius, p.y - radius,
+			    radius * 2, radius * 2);
+      [_mapView setNeedsDisplayInRect:r];
+    }
+}
+
+- (void)currentTimeWillChange:(NSNotification *)note
+{
+  [self setNeedsDisplayForCurrentLocation];
+}
+
+- (void)currentTimeDidChange:(NSNotification *)note
+{
+  [self updateCurrentLocation];
+  [self setNeedsDisplayForCurrentLocation];
 }
 
 - (IBAction)controlAction:(id)sender
@@ -365,6 +421,20 @@
 
       if (in_subpath)
 	CGContextStrokePath(ctx);
+    }
+
+  if (_hasCurrentLocation)
+    {
+      CGFloat px = round(_currentLocation.longitude * xa + xb);
+      CGFloat py = round(_currentLocation.latitude * ya + yb);
+
+      CGContextSetLineWidth(ctx, 3);
+      CGContextSetRGBFillColor(ctx, .2, .6, 8, 1);
+      CGContextSetRGBStrokeColor(ctx, 1, 1, 1, 1);
+      CGContextBeginPath(ctx);
+      CGContextAddEllipseInRect(ctx, CGRectMake(px - SPOT_RADIUS,
+		py - SPOT_RADIUS, SPOT_RADIUS*2, SPOT_RADIUS*2));
+      CGContextDrawPath(ctx, kCGPathFillStroke);
     }
 
   CGContextRestoreGState(ctx);

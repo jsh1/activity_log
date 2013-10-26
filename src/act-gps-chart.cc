@@ -253,7 +253,7 @@ chart::point_at_x(CGFloat x, x_axis_type type, activity::point &ret_p) const
 
       if (lt1 < x)
 	continue;
-      if (!(lt0 < x))
+      if (lt0 > x)
 	return false;
 
       const activity::point *last_p = nullptr;
@@ -305,8 +305,19 @@ chart::draw(CGContextRef ctx)
 {
   x_axis_state x_axis(*this, _x_axis);
 
+  CGFloat tl = _chart_rect.origin.x;
+  CGFloat tr = tl + _chart_rect.size.width;
+
   for (size_t i = 0; i < _lines.size(); i++)
-    draw_line(ctx, _lines[i], x_axis, i * KEY_TEXT_WIDTH);
+    {
+      CGFloat tx;
+      if (!(_lines[i].flags & RIGHT_TICKS))
+	tx = tl, tl += KEY_TEXT_WIDTH;
+      else
+	tr -= KEY_TEXT_WIDTH, tx = tr;
+
+      draw_line(ctx, _lines[i], x_axis, tx);
+    }
 
   draw_lap_markers(ctx, x_axis);
 
@@ -423,9 +434,9 @@ chart::draw_line(CGContextRef ctx, const line &l,
       stroke_rgb[2] = 0;
       break;
     case line_color::GRAY:
-      fill_rgb[0] = .75;
-      fill_rgb[1] = .75;
-      fill_rgb[2] = .75;
+      fill_rgb[0] = .6;
+      fill_rgb[1] = .6;
+      fill_rgb[2] = .6;
       stroke_rgb[0] = 0.6;
       stroke_rgb[1] = 0.6;
       stroke_rgb[2] = 0.6;
@@ -460,14 +471,17 @@ chart::draw_line(CGContextRef ctx, const line &l,
 
   // Draw data line
 
-  CGContextSaveGState(ctx);
-  CGContextSetRGBStrokeColor(ctx, stroke_rgb[0], stroke_rgb[1], stroke_rgb[2], 1);
-  CGContextAddPath(ctx, path);
-  CGContextSetLineWidth(ctx, 1.75);
-  CGContextSetLineJoin(ctx, kCGLineJoinBevel);
-  CGContextStrokePath(ctx);
-
-  CGContextRestoreGState(ctx);
+  if (!(l.flags & NO_STROKE))
+    {
+      CGContextSaveGState(ctx);
+      CGContextSetRGBStrokeColor(ctx, stroke_rgb[0], stroke_rgb[1],
+				 stroke_rgb[2], 1);
+      CGContextAddPath(ctx, path);
+      CGContextSetLineWidth(ctx, 1.75);
+      CGContextSetLineJoin(ctx, kCGLineJoinBevel);
+      CGContextStrokePath(ctx);
+      CGContextRestoreGState(ctx);
+    }
 
   // Draw 'tick' lines at sensible points around the value's range.
 
@@ -510,8 +524,7 @@ chart::draw_line(CGContextRef ctx, const line &l,
       std::string s;
       l.format_tick(s, tick, value);
 
-      CGContextShowTextAtPoint(ctx, _chart_rect.origin.x + tx + 2,
-			       y + 2, s.c_str(), s.size());
+      CGContextShowTextAtPoint(ctx, tx + 2, y + 2, s.c_str(), s.size());
 
       ly = y;
     }
@@ -592,6 +605,25 @@ chart::draw_current_time(CGContextRef ctx)
   CGContextSetGrayFillColor(ctx, 0.25, 1);
   CGContextFillRect(ctx, CGRectMake(x, _chart_rect.origin.y,
 				    1, _chart_rect.size.height));
+}
+
+CGRect
+chart::current_time_rect() const
+{
+  if (_current_time < 0)
+    return CGRectNull;
+
+  x_axis_state x_axis(*this, x_axis_type::DURATION);
+
+  double t = _activity.time() + _current_time;
+
+  if (t < x_axis.min_value || t > x_axis.max_value)
+    return CGRectNull;
+
+  CGFloat x = round(t * x_axis.xm + x_axis.xc);
+
+  return CGRectMake(x, _chart_rect.origin.y,
+		    1, _chart_rect.size.height);
 }
 
 } // namespace gps

@@ -20,6 +20,7 @@ NSString *const ActActivityListDidChange = @"ActActivityListDidChange";
 NSString *const ActSelectedActivityDidChange = @"ActSelectedActivityDidChange";
 NSString *const ActSelectedLapIndexDidChange = @"ActSelectedLapIndexDidChange";
 NSString *const ActCurrentTimeDidChange = @"ActCurrentTimeDidChange";
+NSString *const ActCurrentTimeWillChange = @"ActCurrentTimeWillChange";
 NSString *const ActActivityDidChangeField = @"ActActivityDidChangeField";
 NSString *const ActActivityDidChangeBody = @"ActActivityDidChangeBody";
 
@@ -300,6 +301,9 @@ NSString *const ActActivityDidChangeBody = @"ActActivityDidChangeBody";
 {
   if (_currentTime != t)
     {
+      [[NSNotificationCenter defaultCenter]
+       postNotificationName:ActCurrentTimeWillChange object:self];
+
       _currentTime = t;
 
       [[NSNotificationCenter defaultCenter]

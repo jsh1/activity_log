@@ -162,6 +162,36 @@ convertPointToLocation(CGPoint p)
   [self setMapZoom:zoom];
 }
 
+- (NSPoint)pointAtLocation:(const act::location &)loc
+{
+  ActMapSource *src = [self mapSource];
+  if (src == nil)
+    return CGPointZero;
+
+  int zoom = [self mapZoom];
+  zoom = std::min(zoom, [src maxZoom]);
+  zoom = std::max(zoom, [src minZoom]);
+
+  int n_tiles = 1U << zoom;
+
+  double tw = [src tileWidth];
+  double th = [src tileHeight];
+
+  NSRect bounds = [self bounds];
+
+  CGPoint pl = convertLocationToPoint(loc);
+  CGPoint origin = convertLocationToPoint([self mapCenter]);
+  origin.x *= n_tiles * tw;
+  origin.y *= n_tiles * th;
+  origin.x -= bounds.size.width * (CGFloat).5;
+  origin.y -= bounds.size.height * (CGFloat).5;
+  origin.x = round(origin.x);
+  origin.y = round(origin.y);
+
+  return CGPointMake(pl.x * tw * n_tiles - origin.x,
+		     pl.y * th * n_tiles - origin.y);
+}
+
 - (void)drawRect:(NSRect)r
 {
   ActMapSource *src = [self mapSource];
@@ -170,12 +200,9 @@ convertPointToLocation(CGPoint p)
 
   _seed++;
 
-  int zoom_min = [src minZoom];
-  int zoom_max = [src maxZoom];
-
   int zoom = [self mapZoom];
-  zoom = std::min(zoom, zoom_max);
-  zoom = std::max(zoom, zoom_min);
+  zoom = std::min(zoom, [src maxZoom]);
+  zoom = std::max(zoom, [src minZoom]);
 
   int n_tiles = 1 << zoom;
 

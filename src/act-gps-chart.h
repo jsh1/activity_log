@@ -51,7 +51,9 @@ public:
     {
       FILL_BG = 1U << 0,
       OPAQUE_BG = 1U << 1,
-      TICK_LINES = 1U << 2,
+      NO_STROKE = 1U << 2,
+      TICK_LINES = 1U << 3,
+      RIGHT_TICKS = 1U << 4,
     };
 
   chart(const activity &a, x_axis_type x_axis);
@@ -67,6 +69,8 @@ public:
 
   void set_current_time(double t);
   double current_time() const;
+
+  CGRect current_time_rect() const;
 
   bool point_at_x(CGFloat x, x_axis_type type, activity::point &ret_p) const;
 

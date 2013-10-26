@@ -10,6 +10,7 @@
 extern NSString *const ActActivityListDidChange;
 extern NSString *const ActSelectedActivityDidChange;
 extern NSString *const ActSelectedLapIndexDidChange;
+extern NSString *const ActCurrentTimeWillChange;
 extern NSString *const ActCurrentTimeDidChange;
 extern NSString *const ActActivityDidChangeField;
 extern NSString *const ActActivityDidChangeBody;

@@ -443,6 +443,42 @@ activity::smooth(const activity &src, int width)
     }
 }
 
+bool
+activity::point_at_time(double t, point &ret_p) const
+{
+  for (const auto &lap : laps())
+    {
+      if (lap.time + lap.duration < t)
+	continue;
+      if (lap.time > t)
+	return false;
+
+      const activity::point *last_p = nullptr;
+
+      for (const auto &pt : lap.track)
+	{
+	  if (pt.time == 0)
+	    continue;
+
+	  if (pt.time > t)
+	    {
+	      if (last_p != nullptr)
+		{
+		  double f = (pt.time - t) / (pt.time - last_p->time);
+		  mix(ret_p, *last_p, pt, 1-f);
+		  return true;
+		}
+	      else
+		return false;
+	    }
+      
+	  last_p = &pt;
+	}
+    }
+
+  return false;
+}
+
 } // namespace gps
 
 

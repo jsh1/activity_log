@@ -2,6 +2,8 @@
 
 #import "ActViewController.h"
 
+#import "act-types.h"
+
 @class ActMapView;
 
 @interface ActMapViewController : ActViewController
@@ -15,6 +17,9 @@
 
   int _pendingSources;
   NSString *_defaultSourceName;
+
+  BOOL _hasCurrentLocation;
+  act::location _currentLocation;
 }
 
 - (IBAction)controlAction:(id)sender;

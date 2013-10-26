@@ -72,6 +72,9 @@ enum ChartFieldMasks
    name:ActSelectedLapIndexDidChange object:_controller];
 
   [[NSNotificationCenter defaultCenter]
+   addObserver:self selector:@selector(currentTimeWillChange:)
+   name:ActCurrentTimeWillChange object:_controller];
+  [[NSNotificationCenter defaultCenter]
    addObserver:self selector:@selector(currentTimeDidChange:)
    name:ActCurrentTimeDidChange object:_controller];
 
@@ -147,7 +150,6 @@ enum ChartFieldMasks
 
   if (draw_pace)
     {
-      double bot = !draw_altitude ? -0.05 : -.25;
       double top = !draw_hr ? 1.05 : 1.35;
 
       auto conv = act::gps::chart::value_conversion::IDENTITY;
@@ -164,19 +166,20 @@ enum ChartFieldMasks
 		       act::gps::chart::line_color::BLUE,
 		       act::gps::chart::FILL_BG
 		       | act::gps::chart::OPAQUE_BG
-		       | act::gps::chart::TICK_LINES, bot, top);
+		       | act::gps::chart::TICK_LINES, -0.05, top);
     }
 
   if (draw_altitude)
     {
-
       auto conv = act::gps::chart::value_conversion::IDENTITY;
       if (_fieldMask & CHART_ALT_FT_MASK)
 	conv = act::gps::chart::value_conversion::DISTANCE_M_FT;
 
       _chart->add_line(&act::gps::activity::point::altitude, conv,
-		       act::gps::chart::line_color::GREEN,
-		       act::gps::chart::FILL_BG, -0.05, 2);
+		       act::gps::chart::line_color::GRAY,
+		       act::gps::chart::FILL_BG
+		       | act::gps::chart::NO_STROKE
+		       | act::gps::chart::RIGHT_TICKS, -0.05, 1.05);
     }
 
   _chart->set_chart_rect(NSRectToCGRect([_chartView bounds]));
@@ -266,14 +269,23 @@ enum ChartFieldMasks
     }
 }
 
+- (void)currentTimeWillChange:(NSNotification *)note
+{
+  if (_chart)
+    {
+      CGRect dirtyR = _chart->current_time_rect();
+      [_chartView setNeedsDisplayInRect:NSRectFromCGRect(dirtyR)];
+    }
+}
+
 - (void)currentTimeDidChange:(NSNotification *)note
 {
   if (_chart)
     {
       _chart->set_current_time([_controller currentTime]);
 
-      // FIXME: only invalidate dirty rect
-      [_chartView setNeedsDisplay:YES];
+      CGRect dirtyR = _chart->current_time_rect();
+      [_chartView setNeedsDisplayInRect:NSRectFromCGRect(dirtyR)];
     }
 }
 
@@ -389,13 +401,7 @@ enum ChartFieldMasks
 
 - (void)mouseExited:(NSEvent *)e
 {
-  if (_chart && _chart->current_time() >= 0)
-    {
-      _chart->set_current_time(-1);
-
-      // FIXME: only invalidate dirty rect
-      [_chartView setNeedsDisplay:YES];
-    }
+  [_controller setCurrentTime:-1];
 }
 
 - (void)mouseMoved:(NSEvent *)e

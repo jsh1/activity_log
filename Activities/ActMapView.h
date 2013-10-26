@@ -33,6 +33,8 @@
 
 - (void)invalidate;
 
+- (NSPoint)pointAtLocation:(const act::location &)loc;
+
 @end
 
 @protocol ActMapViewDelegate <NSObject>

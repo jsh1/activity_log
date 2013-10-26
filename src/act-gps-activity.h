@@ -195,6 +195,8 @@ public:
   void update_region();
 
   void smooth(const activity &src, int width);
+
+  bool point_at_time(double t, point &ret_p) const;
 };
 
 // implementation details
