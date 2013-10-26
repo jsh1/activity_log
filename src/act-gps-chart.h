@@ -70,8 +70,6 @@ public:
   void set_current_time(double t);
   double current_time() const;
 
-  CGRect current_time_rect() const;
-
   bool point_at_x(CGFloat x, x_axis_type type, activity::point &ret_p) const;
 
   void remove_all_lines();
@@ -81,9 +79,11 @@ public:
   void set_chart_rect(const CGRect &r);		/* calls update_values() */
   const CGRect &chart_rect() const;
 
-  void draw(CGContextRef ctx);
+  virtual void draw() = 0;
 
-private:
+  virtual CGRect current_time_rect() const = 0;
+
+protected:
   struct line
     {
       double activity::point:: *field;
@@ -113,15 +113,6 @@ private:
 
   friend struct line;
 
-  const activity &_activity;
-  x_axis_type _x_axis;
-  double _min_time, _max_time;
-  double _min_distance, _max_distance;
-  std::vector<line> _lines;
-  CGRect _chart_rect;
-  int _selected_lap;
-  double _current_time;
-
   struct x_axis_state
     {
       double activity::point:: *field;
@@ -136,12 +127,14 @@ private:
 
   friend struct x_axis_state;
 
-  void draw_line(CGContextRef ctx, const line &l,
-    const x_axis_state &x_axis, CGFloat tx);
-
-  void draw_lap_markers(CGContextRef ctx, const x_axis_state &x_axis);
-
-  void draw_current_time(CGContextRef ctx);
+  const activity &_activity;
+  x_axis_type _x_axis;
+  double _min_time, _max_time;
+  double _min_distance, _max_distance;
+  std::vector<line> _lines;
+  CGRect _chart_rect;
+  int _selected_lap;
+  double _current_time;
 };
 
 // implementation details

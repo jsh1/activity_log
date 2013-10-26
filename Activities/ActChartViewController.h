@@ -8,6 +8,10 @@
 
 @class ActChartView, ActChartViewConfigLabel;
 
+namespace chart_view {
+  class chart;
+}
+
 @interface ActChartViewController : ActViewController
 {
   IBOutlet ActChartView *_chartView;
@@ -16,7 +20,7 @@
 
   uint32_t _fieldMask;
 
-  std::unique_ptr<act::gps::chart> _chart;
+  std::unique_ptr<chart_view::chart> _chart;
   std::unique_ptr<act::gps::activity> _smoothed_data;
 }
 
