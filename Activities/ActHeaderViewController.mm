@@ -51,15 +51,23 @@
 
   if (a != nullptr)
     {
+      if (a->vdot() != 0)
+	[_headerView addDisplayedField:@"VDOT"];
+      if (a->points() != 0)
+	[_headerView addDisplayedField:@"Points"];
+
       if (a->average_hr() != 0)
 	[_headerView addDisplayedField:@"Average-HR"];
       if (a->max_hr() != 0)
 	[_headerView addDisplayedField:@"Max-HR"];
 
-      if (a->vdot() != 0)
-	[_headerView addDisplayedField:@"VDOT"];
-      if (a->points() != 0)
-	[_headerView addDisplayedField:@"Points"];
+      if (a->elapsed_time() != 0)
+	[_headerView addDisplayedField:@"Elapsed-Time"];
+
+      if (a->ascent() != 0)
+	[_headerView addDisplayedField:@"Ascent"];
+      if (a->descent() != 0)
+	[_headerView addDisplayedField:@"Descent"];
 
       if (a->effort() != 0)
 	[_headerView addDisplayedField:@"Effort"];

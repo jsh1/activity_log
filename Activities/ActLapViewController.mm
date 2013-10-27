@@ -168,6 +168,12 @@ addTableColumn (NSTableView *tv, NSFont *font, NSString *ident,NSString *title)
     act::format_distance(str, lap.total_distance, act::unit_type::unknown);
   else if ([ident isEqualToString:@"duration"])
     act::format_duration(str, lap.total_duration);
+  else if ([ident isEqualToString:@"elapsed_time"])
+    act::format_duration(str, lap.total_elapsed_time);
+  else if ([ident isEqualToString:@"ascent"])
+    act::format_duration(str, lap.total_ascent);
+  else if ([ident isEqualToString:@"descent"])
+    act::format_duration(str, lap.total_descent);
   else if ([ident isEqualToString:@"pace"] && lap.avg_speed != 0)
     act::format_pace(str, lap.avg_speed, act::unit_type::unknown);
   else if ([ident isEqualToString:@"max-pace"] && lap.max_speed != 0)
