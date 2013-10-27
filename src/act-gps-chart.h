@@ -21,30 +21,30 @@ class chart
 public:
   enum class x_axis_type
     {
-      DISTANCE,
-      DURATION,
+      distance,
+      elapsed_time,
     };
 
   enum class value_conversion
     {
-      IDENTITY,
-      HEARTRATE_BPM_HRR,
-      HEARTRATE_BPM_PMAX,
-      SPEED_MS_PACE_MI,
-      SPEED_MS_PACE_KM,
-      SPEED_MS_MPH,
-      SPEED_MS_KPH,
-      DISTANCE_M_MI,
-      DISTANCE_M_FT,
+      identity,
+      heartrate_bpm_hrr,
+      heartrate_bpm_pmax,
+      speed_ms_pace_mi,
+      speed_ms_pace_km,
+      speed_ms_mph,
+      speed_ms_kph,
+      distance_m_mi,
+      distance_m_ft,
     };
 
   enum class line_color
     {
-      RED,
-      GREEN,
-      BLUE,
-      ORANGE,
-      GRAY
+      red,
+      green,
+      blue,
+      orange,
+      gray
     };
 
   enum line_flags

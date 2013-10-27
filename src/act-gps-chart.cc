@@ -25,17 +25,19 @@ namespace gps {
 
 chart::x_axis_state::x_axis_state(const chart &chart, x_axis_type type)
 {
-  if (type == x_axis_type::DISTANCE)
+  switch (type)
     {
+    case x_axis_type::distance:
       field = &activity::point::distance;
       min_value = chart._min_distance;
       max_value = chart._max_distance;
-    }
-  else // if (type == x_axis_type::DURATION)
-    {
+      break;
+
+    case x_axis_type::elapsed_time:
       field = &activity::point::timestamp;
       min_value = chart._min_time;
       max_value = chart._max_time;
+      break;
     }
 
   CGFloat x_scale = 1. / (max_value - min_value);
@@ -54,25 +56,25 @@ chart::line::convert_from_si(double x) const
 {
   switch (conversion)
     {
-    case value_conversion::IDENTITY:
+    case value_conversion::identity:
       return x;
-    case value_conversion::HEARTRATE_BPM_HRR: {
+    case value_conversion::heartrate_bpm_hrr: {
       const config &cfg = shared_config();
       return (x - cfg.resting_hr()) / (cfg.max_hr() - cfg.resting_hr()) * 100.; }
-    case value_conversion::HEARTRATE_BPM_PMAX: {
+    case value_conversion::heartrate_bpm_pmax: {
       const config &cfg = shared_config();
       return x / cfg.max_hr() * 100.; }
-    case value_conversion::SPEED_MS_PACE_MI:
+    case value_conversion::speed_ms_pace_mi:
       return x > 0 ? SECS_PER_MILE(x) : 0;
-    case value_conversion::SPEED_MS_PACE_KM:
+    case value_conversion::speed_ms_pace_km:
       return x > 0 ? SECS_PER_KM(x) : 0;
-    case value_conversion::SPEED_MS_MPH:
+    case value_conversion::speed_ms_mph:
       return x * (MILES_PER_METER * 3600);
-    case value_conversion::SPEED_MS_KPH:
+    case value_conversion::speed_ms_kph:
       return x * (KM_PER_METER * 3600);
-    case value_conversion::DISTANCE_M_MI:
+    case value_conversion::distance_m_mi:
       return x * MILES_PER_METER;
-    case value_conversion::DISTANCE_M_FT:
+    case value_conversion::distance_m_ft:
       return x * FEET_PER_METER;
     default:
       return x;
@@ -84,25 +86,25 @@ chart::line::convert_to_si(double x) const
 {
   switch (conversion)
     {
-    case value_conversion::IDENTITY:
+    case value_conversion::identity:
       return x;
-    case value_conversion::HEARTRATE_BPM_HRR: {
+    case value_conversion::heartrate_bpm_hrr: {
       const config &cfg = shared_config();
       return x * (1./100) * (cfg.max_hr() - cfg.resting_hr()) + cfg.resting_hr(); }
-    case value_conversion::HEARTRATE_BPM_PMAX: {
+    case value_conversion::heartrate_bpm_pmax: {
       const config &cfg = shared_config();
       return x * (1./100) * cfg.max_hr(); }
-    case value_conversion::SPEED_MS_PACE_MI:
+    case value_conversion::speed_ms_pace_mi:
       return x > 0 ? MILES_PER_SEC(x) : 0;
-    case value_conversion::SPEED_MS_PACE_KM:
+    case value_conversion::speed_ms_pace_km:
       return x > 0 ? KM_PER_SEC(x) : 0;
-    case value_conversion::SPEED_MS_MPH:
+    case value_conversion::speed_ms_mph:
       return x * (1. / (MILES_PER_METER * 3600));
-    case value_conversion::SPEED_MS_KPH:
+    case value_conversion::speed_ms_kph:
       return x * (1. / (KM_PER_METER * 3600));
-    case value_conversion::DISTANCE_M_MI:
+    case value_conversion::distance_m_mi:
       return x * (1. / MILES_PER_METER);
-    case value_conversion::DISTANCE_M_FT:
+    case value_conversion::distance_m_ft:
       return x * (1. / FEET_PER_METER);
     default:
       return x;
@@ -146,21 +148,21 @@ chart::line::update_values(const chart &c)
 
   switch (conversion)
     {
-    case value_conversion::HEARTRATE_BPM_HRR:
-    case value_conversion::HEARTRATE_BPM_PMAX:
+    case value_conversion::heartrate_bpm_hrr:
+    case value_conversion::heartrate_bpm_pmax:
       tick_delta = 5;
       scale_ticks = false;
       break;
-    case value_conversion::SPEED_MS_PACE_MI:
-    case value_conversion::SPEED_MS_PACE_KM:
+    case value_conversion::speed_ms_pace_mi:
+    case value_conversion::speed_ms_pace_km:
       tick_delta = 15;
       scale_ticks = false;
       break;
-    case value_conversion::SPEED_MS_MPH:
-    case value_conversion::SPEED_MS_KPH:
+    case value_conversion::speed_ms_mph:
+    case value_conversion::speed_ms_kph:
       tick_delta = 1;
       break;
-    case value_conversion::DISTANCE_M_FT:
+    case value_conversion::distance_m_ft:
       tick_delta = 50;
       scale_ticks = false;
       break;
@@ -185,26 +187,26 @@ chart::line::format_tick(std::string &s, double tick, double value) const
 {
   if (field == &activity::point::altitude)
     {
-      format_distance(s, value, conversion == value_conversion::DISTANCE_M_FT
+      format_distance(s, value, conversion == value_conversion::distance_m_ft
 		      ? unit_type::feet : unit_type::metres);
     }
   else if (field == &activity::point::speed)
     {
-      if (conversion == value_conversion::SPEED_MS_PACE_MI)
+      if (conversion == value_conversion::speed_ms_pace_mi)
 	format_pace(s, value, unit_type::seconds_per_mile);
-      else if (conversion == value_conversion::SPEED_MS_PACE_KM)
+      else if (conversion == value_conversion::speed_ms_pace_km)
 	format_pace(s, value, unit_type::seconds_per_kilometre);
-      else if (conversion == value_conversion::SPEED_MS_MPH)
+      else if (conversion == value_conversion::speed_ms_mph)
 	format_speed(s, value, unit_type::miles_per_hour);
-      else if (conversion == value_conversion::SPEED_MS_KPH)
+      else if (conversion == value_conversion::speed_ms_kph)
 	format_speed(s, value, unit_type::kilometres_per_hour);
     }
   else if (field == &activity::point::heart_rate)
     {
       unit_type unit = unit_type::beats_per_minute;
-      if (conversion == value_conversion::HEARTRATE_BPM_HRR)
+      if (conversion == value_conversion::heartrate_bpm_hrr)
 	unit = unit_type::percent_hr_reserve;
-      else if (conversion == value_conversion::HEARTRATE_BPM_PMAX)
+      else if (conversion == value_conversion::heartrate_bpm_pmax)
 	unit = unit_type::percent_hr_max;
       format_heart_rate(s, value, unit);
     }

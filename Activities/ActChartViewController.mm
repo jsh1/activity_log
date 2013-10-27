@@ -135,7 +135,7 @@ chart::draw_line(const line &l, const x_axis_state &xs, CGFloat tx)
 
   switch (l.color)
     {
-    case line_color::RED:
+    case line_color::red:
       fill_rgb[0] = 1;
       fill_rgb[1] = .5;
       fill_rgb[2] = .5;
@@ -143,7 +143,7 @@ chart::draw_line(const line &l, const x_axis_state &xs, CGFloat tx)
       stroke_rgb[1] = 0;
       stroke_rgb[2] = 0.3;
       break;
-    case line_color::GREEN:
+    case line_color::green:
       fill_rgb[0] = .75;
       fill_rgb[1] = 1;
       fill_rgb[2] = .75;
@@ -151,7 +151,7 @@ chart::draw_line(const line &l, const x_axis_state &xs, CGFloat tx)
       stroke_rgb[1] = 0.6;
       stroke_rgb[2] = 0.2;
       break;
-    case line_color::BLUE:
+    case line_color::blue:
       fill_rgb[0] = .5;
       fill_rgb[1] = .5;
       fill_rgb[2] = 1;
@@ -159,7 +159,7 @@ chart::draw_line(const line &l, const x_axis_state &xs, CGFloat tx)
       stroke_rgb[1] = 0.2;
       stroke_rgb[2] = 1;
       break;
-    case line_color::ORANGE:
+    case line_color::orange:
       fill_rgb[0] = 1;
       fill_rgb[1] = .5;
       fill_rgb[2] = 0;
@@ -167,7 +167,7 @@ chart::draw_line(const line &l, const x_axis_state &xs, CGFloat tx)
       stroke_rgb[1] = 0.5;
       stroke_rgb[2] = 0;
       break;
-    case line_color::GRAY:
+    case line_color::gray:
       fill_rgb[0] = .6;
       fill_rgb[1] = .6;
       fill_rgb[2] = .6;
@@ -350,7 +350,8 @@ chart::draw_lap_markers(const x_axis_state &xs)
 {
   NSBezierPath *path = [NSBezierPath bezierPath];
 
-  double total_dist = x_axis() == x_axis_type::DISTANCE ? 0 : _activity.start_time();
+  double total_dist = (x_axis() == x_axis_type::distance
+		       ? 0 : _activity.start_time());
 
   CGFloat lly = _chart_rect.origin.y;
   CGFloat ury = lly + _chart_rect.size.height;
@@ -375,7 +376,7 @@ chart::draw_lap_markers(const x_axis_state &xs)
       if (!(i < _activity.laps().size()))
 	break;
 
-      if (x_axis() == x_axis_type::DISTANCE)
+      if (x_axis() == x_axis_type::distance)
 	total_dist += _activity.laps()[i].total_distance;
       else
 	total_dist = (_activity.laps()[i].start_time
@@ -404,7 +405,7 @@ chart::draw_current_time()
 
   // always need time axis calibration for this.
 
-  x_axis_state xs(*this, x_axis_type::DURATION);
+  x_axis_state xs(*this, x_axis_type::elapsed_time);
 
   double t = _activity.start_time() + _current_time;
 
@@ -458,10 +459,10 @@ chart::draw_current_time()
 	{
 	  act::unit_type unit = act::unit_type::beats_per_minute;
 	  if (it.conversion
-	      == act::gps::chart::value_conversion::HEARTRATE_BPM_PMAX)
+	      == act::gps::chart::value_conversion::heartrate_bpm_pmax)
 	    unit = act::unit_type::percent_hr_max;
 	  else if (it.conversion
-		   == act::gps::chart::value_conversion::HEARTRATE_BPM_HRR)
+		   == act::gps::chart::value_conversion::heartrate_bpm_hrr)
 	    unit = act::unit_type::percent_hr_reserve;
 	    act::format_heart_rate(buf, pt.heart_rate, unit);
 	}
@@ -469,7 +470,7 @@ chart::draw_current_time()
 	{
 	  act::unit_type unit = act::unit_type::metres;
 	  if (it.conversion
-	      == act::gps::chart::value_conversion::DISTANCE_M_FT)
+	      == act::gps::chart::value_conversion::distance_m_ft)
 	    unit = act::unit_type::feet;
 	  act::format_distance(buf, pt.altitude, unit);
 	}
@@ -488,7 +489,7 @@ chart::current_time_rect() const
   if (_current_time < 0)
     return CGRectNull;
 
-  x_axis_state xs(*this, x_axis_type::DURATION);
+  x_axis_state xs(*this, x_axis_type::elapsed_time);
 
   double t = _activity.start_time() + _current_time;
 
@@ -588,20 +589,20 @@ chart::current_time_rect() const
     return;
 
   _chart.reset(new chart_view::chart(*_smoothed_data.get(),
-				   act::gps::chart::x_axis_type::DISTANCE));
+				   act::gps::chart::x_axis_type::distance));
 
   if (draw_hr)
     {
       double bot = !draw_pace ? -0.05 : -.55;
 
-      auto conv = act::gps::chart::value_conversion::IDENTITY;
+      auto conv = act::gps::chart::value_conversion::identity;
       if (_fieldMask & CHART_HR_HRR_MASK)
-	conv = act::gps::chart::value_conversion::HEARTRATE_BPM_HRR;
+	conv = act::gps::chart::value_conversion::heartrate_bpm_hrr;
       else if (_fieldMask & CHART_HR_MAX_MASK)
-	conv = act::gps::chart::value_conversion::HEARTRATE_BPM_PMAX;
+	conv = act::gps::chart::value_conversion::heartrate_bpm_pmax;
 
       _chart->add_line(&act::gps::activity::point::heart_rate, conv,
-		       act::gps::chart::line_color::ORANGE,
+		       act::gps::chart::line_color::orange,
 		       act::gps::chart::FILL_BG
 		       | act::gps::chart::OPAQUE_BG
 		       | act::gps::chart::TICK_LINES, bot, 1.05);
@@ -611,18 +612,18 @@ chart::current_time_rect() const
     {
       double top = !draw_hr ? 1.05 : 1.35;
 
-      auto conv = act::gps::chart::value_conversion::IDENTITY;
+      auto conv = act::gps::chart::value_conversion::identity;
       if (_fieldMask & CHART_PACE_MI_MASK)
-	conv = act::gps::chart::value_conversion::SPEED_MS_PACE_MI;
+	conv = act::gps::chart::value_conversion::speed_ms_pace_mi;
       else if (_fieldMask & CHART_PACE_KM_MASK)
-	conv = act::gps::chart::value_conversion::SPEED_MS_PACE_KM;
+	conv = act::gps::chart::value_conversion::speed_ms_pace_km;
       else if (_fieldMask & CHART_SPEED_MI_MASK)
-	conv = act::gps::chart::value_conversion::SPEED_MS_MPH;
+	conv = act::gps::chart::value_conversion::speed_ms_mph;
       else if (_fieldMask & CHART_SPEED_KM_MASK)
-	conv = act::gps::chart::value_conversion::SPEED_MS_KPH;
+	conv = act::gps::chart::value_conversion::speed_ms_kph;
 
       _chart->add_line(&act::gps::activity::point::speed, conv,
-		       act::gps::chart::line_color::BLUE,
+		       act::gps::chart::line_color::blue,
 		       act::gps::chart::FILL_BG
 		       | act::gps::chart::OPAQUE_BG
 		       | act::gps::chart::TICK_LINES, -0.05, top);
@@ -630,12 +631,12 @@ chart::current_time_rect() const
 
   if (draw_altitude)
     {
-      auto conv = act::gps::chart::value_conversion::IDENTITY;
+      auto conv = act::gps::chart::value_conversion::identity;
       if (_fieldMask & CHART_ALT_FT_MASK)
-	conv = act::gps::chart::value_conversion::DISTANCE_M_FT;
+	conv = act::gps::chart::value_conversion::distance_m_ft;
 
       _chart->add_line(&act::gps::activity::point::altitude, conv,
-		       act::gps::chart::line_color::GRAY,
+		       act::gps::chart::line_color::gray,
 		       act::gps::chart::FILL_BG
 		       | act::gps::chart::NO_STROKE
 		       | act::gps::chart::RIGHT_TICKS, -0.05, 1.05);
@@ -870,7 +871,7 @@ chart::current_time_rect() const
       NSPoint p = [_chartView convertPoint:[e locationInWindow] fromView:nil];
 
       act::gps::activity::point pt;
-      if (_chart->point_at_x(p.x, act::gps::chart::x_axis_type::DURATION, pt))
+      if (_chart->point_at_x(p.x, act::gps::chart::x_axis_type::elapsed_time, pt))
 	{
 	  double t = pt.timestamp - _chart->get_activity().start_time();
 	  [_controller setCurrentTime:t];
