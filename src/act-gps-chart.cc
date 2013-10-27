@@ -33,7 +33,7 @@ chart::x_axis_state::x_axis_state(const chart &chart, x_axis_type type)
     }
   else // if (type == x_axis_type::DURATION)
     {
-      field = &activity::point::time;
+      field = &activity::point::timestamp;
       min_value = chart._min_time;
       max_value = chart._max_time;
     }
@@ -222,9 +222,10 @@ chart::chart(const activity &a, x_axis_type xa)
   _current_time(-1)
 {
   double mean, sdev;
-  a.get_range(&activity::point::time, _min_time, _max_time, mean, sdev);
-  a.get_range(&activity::point::distance, _min_distance,
-	      _max_distance, mean, sdev);
+  a.get_range(&activity::point::timestamp,
+	      _min_time, _max_time, mean, sdev);
+  a.get_range(&activity::point::distance,
+	      _min_distance, _max_distance, mean, sdev);
 }
 
 void
@@ -242,8 +243,8 @@ chart::point_at_x(CGFloat x, x_axis_type type, activity::point &ret_p) const
 
   for (const auto &lap : _activity.laps())
     {
-      double lt0 = lap.time * x_axis.xm + x_axis.xc;
-      double lt1 = lt0 + lap.duration * x_axis.xm;
+      double lt0 = lap.start_time * x_axis.xm + x_axis.xc;
+      double lt1 = lt0 + lap.total_duration * x_axis.xm;
 
       if (lt1 < x)
 	continue;

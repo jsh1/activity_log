@@ -274,7 +274,7 @@
     return;
 
   act::gps::activity::point p;
-  if (gps_a->point_at_time(gps_a->time() + t, p))
+  if (gps_a->point_at_time(gps_a->start_time() + t, p))
     {
       _currentLocation = p.location;
       _hasCurrentLocation = YES;

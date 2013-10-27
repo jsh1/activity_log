@@ -163,7 +163,7 @@ tcx_parser::sax_start_element(void *ctx, const xmlChar *name,
 	      p->destination().laps().push_back(activity::lap());
 	      std::string s;
 	      if (find_attr(s, n_attr, attr, "StartTime"))
-		p->current_lap().time = parse_time(s);
+		p->current_lap().start_time = parse_time(s);
 	    }
 	  break;
 	case state::LAP:
@@ -298,10 +298,10 @@ tcx_parser::sax_end_element(void *ctx, const xmlChar *name,
 	  p->destination().set_activity_id(*p->_characters);
 	  break;
 	case state::LAP_TOTAL_TIME:
-	  p->current_lap().duration = parse_double(*p->_characters);
+	  p->current_lap().total_duration = parse_double(*p->_characters);
 	  break;
 	case state::LAP_DISTANCE:
-	  p->current_lap().distance = parse_double(*p->_characters);
+	  p->current_lap().total_distance = parse_double(*p->_characters);
 	  break;
 	case state::LAP_AVG_SPEED:
 	  p->current_lap().avg_speed = parse_double(*p->_characters);
@@ -310,10 +310,10 @@ tcx_parser::sax_end_element(void *ctx, const xmlChar *name,
 	  p->current_lap().max_speed = parse_double(*p->_characters);
 	  break;
 	case state::LAP_CALORIES:
-	  p->current_lap().calories = parse_double(*p->_characters);
+	  p->current_lap().total_calories = parse_double(*p->_characters);
 	  break;
 	case state::TP_TIME:
-	  p->current_point().time = parse_time(*p->_characters);
+	  p->current_point().timestamp = parse_time(*p->_characters);
 	  break;
 	case state::TP_LAT:
 	  p->current_point().location.latitude = parse_double(*p->_characters);

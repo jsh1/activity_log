@@ -450,7 +450,7 @@ fit_parser::read_record_message(const message_type &def, uint32_t timestamp)
 {
   activity::point p;
 
-  p.time = make_time(timestamp);
+  p.timestamp = make_time(timestamp);
 
   for (const auto &it : def.fields)
     {
@@ -515,15 +515,15 @@ fit_parser::read_lap_message(const message_type &def, uint32_t timestamp)
       switch (it.field_type)
 	{
 	case 2:				/* start_time */
-	  lap.time = make_time(read_field(def, it));
+	  lap.start_time = make_time(read_field(def, it));
 	  break;
 
 	case 8:				/* total_timer_time */
-	  lap.duration = make_duration(read_field(def, it));
+	  lap.total_duration = make_duration(read_field(def, it));
 	  break;
 
-	case 9:				/* distance */
-	  lap.distance = make_distance(read_field(def, it));
+	case 9:				/* total_distance */
+	  lap.total_distance = make_distance(read_field(def, it));
 	  break;
 
 	case 13:			/* avg_speed */
@@ -535,7 +535,7 @@ fit_parser::read_lap_message(const message_type &def, uint32_t timestamp)
 	  break;
 
 	case 11:			/* total_calories */
-	  lap.calories = read_field(def, it);
+	  lap.total_calories = read_field(def, it);
 	  break;
 
 	case 15:			/* avg_heart_rate */
@@ -569,7 +569,7 @@ fit_parser::read_session_message(const message_type &def, uint32_t timestamp)
       switch (it.field_type)
 	{
 	case 2:				/* start_time */
-	  d.set_time(make_time(read_field(def, it)));
+	  d.set_start_time(make_time(read_field(def, it)));
 	  break;
 
 	case 5:				/* sport */
@@ -577,11 +577,15 @@ fit_parser::read_session_message(const message_type &def, uint32_t timestamp)
 	  break;
 
 	case 8:				/* total_timer_time */
-	  d.set_duration(make_duration(read_field(def, it)));
+	  d.set_total_duration(make_duration(read_field(def, it)));
 	  break;
 
 	case 9:				/* total_distance */
-	  d.set_distance(make_distance(read_field(def, it)));
+	  d.set_total_distance(make_distance(read_field(def, it)));
+	  break;
+
+	case 11:			/* total_calories */
+	  d.set_total_calories(read_field(def, it));
 	  break;
 
 	case 14:			/* avg_speed */
@@ -590,10 +594,6 @@ fit_parser::read_session_message(const message_type &def, uint32_t timestamp)
 
 	case 15:			/* max_speed */
 	  d.set_max_speed(make_speed(read_field(def, it)));
-	  break;
-
-	case 11:			/* total_calories */
-	  d.set_calories(read_field(def, it));
 	  break;
 
 	case 16:			/* avg_heart_rate */

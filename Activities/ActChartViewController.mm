@@ -350,7 +350,7 @@ chart::draw_lap_markers(const x_axis_state &xs)
 {
   NSBezierPath *path = [NSBezierPath bezierPath];
 
-  CGFloat total_dist = x_axis() == x_axis_type::DISTANCE ? 0 : _activity.time();
+  double total_dist = x_axis() == x_axis_type::DISTANCE ? 0 : _activity.start_time();
 
   CGFloat lly = _chart_rect.origin.y;
   CGFloat ury = lly + _chart_rect.size.height;
@@ -376,9 +376,10 @@ chart::draw_lap_markers(const x_axis_state &xs)
 	break;
 
       if (x_axis() == x_axis_type::DISTANCE)
-	total_dist += _activity.laps()[i].distance;
+	total_dist += _activity.laps()[i].total_distance;
       else
-	total_dist = _activity.laps()[i].time + _activity.laps()[i].duration;
+	total_dist = (_activity.laps()[i].start_time
+		      + _activity.laps()[i].total_duration);
     }
 
   static const CGFloat dash[] = {4, 2};
@@ -405,7 +406,7 @@ chart::draw_current_time()
 
   x_axis_state xs(*this, x_axis_type::DURATION);
 
-  double t = _activity.time() + _current_time;
+  double t = _activity.start_time() + _current_time;
 
   if (t < xs.min_value || t > xs.max_value)
     return;
@@ -444,7 +445,7 @@ chart::draw_current_time()
 			 nil];
 
   std::string buf;
-  act::format_duration(buf, round(pt.time - _activity.time()));
+  act::format_duration(buf, round(pt.timestamp - _activity.start_time()));
   buf.append("\n");
   act::format_distance(buf, pt.distance, act::unit_type::unknown);
   buf.append("\n");
@@ -489,7 +490,7 @@ chart::current_time_rect() const
 
   x_axis_state xs(*this, x_axis_type::DURATION);
 
-  double t = _activity.time() + _current_time;
+  double t = _activity.start_time() + _current_time;
 
   if (t < xs.min_value || t > xs.max_value)
     return CGRectNull;
@@ -571,9 +572,9 @@ chart::current_time_rect() const
     return;
 
   if (!_smoothed_data
-      || _smoothed_data->time() != gps_a->time()
-      || _smoothed_data->distance() != gps_a->distance()
-      || _smoothed_data->duration() != gps_a->duration())
+      || _smoothed_data->start_time() != gps_a->start_time()
+      || _smoothed_data->total_distance() != gps_a->total_distance()
+      || _smoothed_data->total_duration() != gps_a->total_duration())
     {
       _smoothed_data.reset(new act::gps::activity);
       _smoothed_data->smooth(*gps_a, SMOOTHING);
@@ -871,7 +872,7 @@ chart::current_time_rect() const
       act::gps::activity::point pt;
       if (_chart->point_at_x(p.x, act::gps::chart::x_axis_type::DURATION, pt))
 	{
-	  double t = pt.time - _chart->get_activity().time();
+	  double t = pt.timestamp - _chart->get_activity().start_time();
 	  [_controller setCurrentTime:t];
 	}
     }

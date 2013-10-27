@@ -14,12 +14,12 @@ namespace gps {
 
 activity::activity()
 : _sport(sport_type::unknown),
-  _time(0),
-  _duration(0),
-  _distance(0),
+  _start_time(0),
+  _total_duration(0),
+  _total_distance(0),
+  _total_calories(0),
   _avg_speed(0),
   _max_speed(0),
-  _calories(0),
   _avg_heart_rate(0),
   _max_heart_rate(0),
   _has_location(false),
@@ -100,32 +100,32 @@ activity::read_compressed_tcx_file(const char *path, const char *prog)
 void
 activity::update_summary()
 {
-  _time = 0;
-  _duration = 0;
-  _distance = 0;
+  _start_time = 0;
+  _total_duration = 0;
+  _total_distance = 0;
+  _total_calories = 0;
   _avg_speed = 0;
   _max_speed = 0;
-  _calories = 0;
   _avg_heart_rate = 0;
   _max_heart_rate = 0;
 
   if (laps().size() < 1)
     return;
 
-  _time = laps()[0].time;
+  _start_time = laps()[0].start_time;
 
   for (const auto &it : laps())
     {
-      _duration += it.duration;
-      _distance += it.distance;
+      _total_duration += it.total_duration;
+      _total_distance += it.total_distance;
+      _total_calories += it.total_calories;
       _max_speed = fmax(_max_speed, it.max_speed);
-      _calories += it.calories;
-      _avg_heart_rate += it.avg_heart_rate * it.duration;
+      _avg_heart_rate += it.avg_heart_rate * it.total_duration;
       _max_heart_rate = fmax(_max_heart_rate, it.max_heart_rate);
     }
 
-  _avg_speed = _distance / _duration;
-  _avg_heart_rate = _avg_heart_rate / _duration;
+  _avg_speed = _total_distance / _total_duration;
+  _avg_heart_rate = _avg_heart_rate / _total_duration;
 }
 
 void
@@ -133,15 +133,15 @@ activity::print_summary(FILE *fh) const
 {
   std::string tem;
 
-  format_date_time(tem, (time_t) time());
+  format_date_time(tem, (time_t) start_time());
   fprintf(fh, "Date: %s\n", tem.c_str());
   tem.clear();
 
-  format_duration(tem, duration());
+  format_duration(tem, total_duration());
   fprintf(fh, "Duration: %s\n", tem.c_str());
   tem.clear();
 
-  format_distance(tem, distance(), unit_type::miles);
+  format_distance(tem, total_distance(), unit_type::miles);
   fprintf(fh, "Distance: %s\n", tem.c_str());
   tem.clear();
 
@@ -158,8 +158,8 @@ activity::print_summary(FILE *fh) const
   if (max_heart_rate() != 0)
     fprintf(fh, "Max-HR: %d\n", (int) max_heart_rate());
 
-  if (calories() != 0)
-    fprintf(fh, "Calories: %g\n", calories());
+  if (total_calories() != 0)
+    fprintf(fh, "Calories: %g\n", total_calories());
 }
 
 void
@@ -188,7 +188,7 @@ activity::print_laps(FILE *fh) const
   for (const auto &it : laps())
     {
       std::string dur;
-      format_time(dur, it.duration, true, "");
+      format_time(dur, it.total_duration, true, "");
 
       std::string pace, max_pace;
       format_time(pace, 1/(it.avg_speed * miles_per_meter), false, "");
@@ -202,20 +202,22 @@ activity::print_laps(FILE *fh) const
 	}
 
       std::string cal;
-      if (it.calories != 0)
-	format_number(cal, it.calories);
+      if (it.total_calories != 0)
+	format_number(cal, it.total_calories);
 
       if (has_hr)
 	{
 	  fprintf(fh, "    %-3d  %8s  %6.2f  %5s %5s  %3s %3s  %4s\n",
-		  lap_idx + 1, dur.c_str(), it.distance * miles_per_meter,
+		  lap_idx + 1, dur.c_str(),
+		  it.total_distance * miles_per_meter,
 		  pace.c_str(), max_pace.c_str(), avg_hr.c_str(),
 		  max_hr.c_str(), cal.c_str());
 	}
       else
 	{
 	  fprintf(fh, "    %-3d  %8s  %6.2f  %5s %5s  %4s\n",
-		  lap_idx + 1, dur.c_str(), it.distance * miles_per_meter,
+		  lap_idx + 1, dur.c_str(),
+		  it.total_distance * miles_per_meter,
 		  pace.c_str(), max_pace.c_str(), cal.c_str());
 	}
 
@@ -357,12 +359,12 @@ activity::smooth(const activity &src, int width)
   _sport = src._sport;
   _device = src._device;
 
-  _time = src._time;
-  _duration = src._duration;
-  _distance = src._distance;
+  _start_time = src._start_time;
+  _total_duration = src._total_duration;
+  _total_distance = src._total_distance;
+  _total_calories = src._total_calories;
   _avg_speed = src._avg_speed;
   _max_speed = src._max_speed;
-  _calories = src._calories;
   _avg_heart_rate = src._avg_heart_rate;
   _max_heart_rate = src._max_heart_rate;
 
@@ -376,12 +378,12 @@ activity::smooth(const activity &src, int width)
       _laps.push_back(lap());
       lap &l = _laps.back();
 
-      l.time = it.time;
-      l.duration = it.duration;
-      l.distance = it.distance;
+      l.start_time = it.start_time;
+      l.total_duration = it.total_duration;
+      l.total_distance = it.total_distance;
+      l.total_calories = it.total_calories;
       l.avg_speed = it.avg_speed;
       l.max_speed = it.max_speed;
-      l.calories = it.calories;
       l.avg_heart_rate = it.avg_heart_rate;
       l.max_heart_rate = it.max_heart_rate;
       l.region = it.region;
@@ -427,7 +429,7 @@ activity::smooth(const activity &src, int width)
       if (sum_n > 0)
 	{
 	  double mul = 1. / sum_n;
-	  d.time = s.time;
+	  d.timestamp = s.timestamp;
 	  d.location = s.location;
 	  d.altitude = sum.altitude * mul;
 	  d.distance = s.distance;
@@ -448,23 +450,23 @@ activity::point_at_time(double t, point &ret_p) const
 {
   for (const auto &lap : laps())
     {
-      if (lap.time + lap.duration < t)
+      if (lap.start_time + lap.total_duration < t)
 	continue;
-      if (lap.time > t)
+      if (lap.start_time > t)
 	return false;
 
       const activity::point *last_p = nullptr;
 
       for (const auto &pt : lap.track)
 	{
-	  if (pt.time == 0)
+	  if (pt.timestamp == 0)
 	    continue;
 
-	  if (pt.time > t)
+	  if (pt.timestamp > t)
 	    {
 	      if (last_p != nullptr)
 		{
-		  double f = (pt.time - t) / (pt.time - last_p->time);
+		  double f = (pt.timestamp - t) / (pt.timestamp - last_p->timestamp);
 		  mix(ret_p, *last_p, pt, 1-f);
 		  return true;
 		}
@@ -486,7 +488,7 @@ void
 mix(gps::activity::point &a, const gps::activity::point &b,
   const gps::activity::point &c, double f)
 {
-  mix(a.time, b.time, c.time, f);
+  mix(a.timestamp, b.timestamp, c.timestamp, f);
   mix(a.location, b.location, c.location, f);
   mix(a.altitude, b.altitude, c.altitude, f);
   mix(a.distance, b.distance, c.distance, f);

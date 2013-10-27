@@ -152,11 +152,11 @@ activity::validate_cached_values(unsigned int groups) const
 	      if (groups & group_timing)
 		{
 		  if (_date == 0)
-		    _date = (time_t) data->time();
+		    _date = (time_t) data->start_time();
 		  if (_duration == 0)
-		    _duration = data->duration();
+		    _duration = data->total_duration();
 		  if (_distance == 0)
-		    _distance = data->distance();
+		    _distance = data->total_distance();
 		  if (_speed == 0)
 		    {
 		      _speed = data->avg_speed();
@@ -177,7 +177,7 @@ activity::validate_cached_values(unsigned int groups) const
 		  if (_max_hr == 0)
 		    _max_hr = data->max_heart_rate();
 		  if (_calories == 0)
-		    _calories = data->calories();
+		    _calories = data->total_calories();
 		}
 	    }
 	}

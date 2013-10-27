@@ -24,7 +24,7 @@ public:
 
   struct point
     {
-      double time;
+      double timestamp;
       location location;
       double altitude;
       double distance;
@@ -32,26 +32,26 @@ public:
       double heart_rate;
 
       point()
-      : time(0), altitude(0), distance(0), speed(0), heart_rate(0) {}
+      : timestamp(0), altitude(0), distance(0), speed(0), heart_rate(0) {}
     };
 
   struct lap
     {
-      double time;
-      double duration;
-      double distance;
+      double start_time;
+      double total_duration;
+      double total_distance;
+      double total_calories;
       double avg_speed;
       double max_speed;
-      double calories;
       double avg_heart_rate;
       double max_heart_rate;
       std::vector<point> track;
       location_region region;
 
       lap()
-      : time(0), duration(0), distance(0), avg_speed(0),
-        max_speed(0), calories(0), avg_heart_rate(0),
-	max_heart_rate(0) {}
+      : start_time(0), total_duration(0), total_distance(0),
+	total_calories(0), avg_speed(0), max_speed(0),
+	avg_heart_rate(0), max_heart_rate(0) {}
 
       void update_region();
     };
@@ -97,12 +97,12 @@ private:
   sport_type _sport;
   std::string _device;
 
-  double _time;
-  double _duration;
-  double _distance;
+  double _start_time;
+  double _total_duration;
+  double _total_distance;
+  double _total_calories;
   double _avg_speed;
   double _max_speed;
-  double _calories;
   double _avg_heart_rate;
   double _max_heart_rate;
 
@@ -151,23 +151,23 @@ public:
   void set_device(const std::string &s) {_device = s;}
   const std::string &device() const {return _device;}
 
-  void set_time(double x) {_time = x;}
-  double time() const {return _time;}
+  void set_start_time(double x) {_start_time = x;}
+  double start_time() const {return _start_time;}
 
-  void set_duration(double x) {_duration = x;}
-  double duration() const {return _duration;}
+  void set_total_duration(double x) {_total_duration = x;}
+  double total_duration() const {return _total_duration;}
 
-  void set_distance(double x) {_distance = x;}
-  double distance() const {return _distance;}
+  void set_total_distance(double x) {_total_distance = x;}
+  double total_distance() const {return _total_distance;}
+
+  void set_total_calories(double x) {_total_calories = x;}
+  double total_calories() const {return _total_calories;}
 
   void set_avg_speed(double x) {_avg_speed = x;}
   double avg_speed() const {return _avg_speed;}
 
   void set_max_speed(double x) {_max_speed = x;}
   double max_speed() const {return _max_speed;}
-
-  void set_calories(double x) {_calories = x;}
-  double calories() const {return _calories;}
 
   void set_avg_heart_rate(double x) {_avg_heart_rate = x;}
   double avg_heart_rate() const {return _avg_heart_rate;}

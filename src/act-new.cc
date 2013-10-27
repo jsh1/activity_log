@@ -166,7 +166,7 @@ copy_gps_fields(activity_storage &a, const gps::activity &gps_data)
 
   if (a.field_ptr("Date") == nullptr)
     {
-      format_date_time(a["Date"], (time_t) gps_data.time());
+      format_date_time(a["Date"], (time_t) gps_data.start_time());
       changed = true;
     }
 
@@ -188,18 +188,19 @@ copy_gps_fields(activity_storage &a, const gps::activity &gps_data)
 	}
     }
 
-  if (gps_data.duration() > 0
+  if (gps_data.total_duration() > 0
       && a.field_ptr("Duration") == nullptr)
     {
       // rounding to seconds, don't need fractional precision
-      format_duration(a["Duration"], round(gps_data.duration()));
+      format_duration(a["Duration"], round(gps_data.total_duration()));
       changed = true;
     }
 
-  if (gps_data.distance() > 0
+  if (gps_data.total_distance() > 0
       && a.field_ptr("Distance") == nullptr)
     {
-      format_distance(a["Distance"], gps_data.distance(), unit_type::miles);
+      format_distance(a["Distance"],
+		      gps_data.total_distance(), unit_type::miles);
       changed = true;
     }
 

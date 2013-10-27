@@ -57,7 +57,7 @@ calculate_points(const gps::activity &track)
 
   for (const auto &it : track.laps())
     {
-      total += points(vmax, it.avg_speed, it.duration);
+      total += points(vmax, it.avg_speed, it.total_duration);
     }
 
   return total;

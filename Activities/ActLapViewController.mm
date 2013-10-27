@@ -163,11 +163,11 @@ addTableColumn (NSTableView *tv, NSFont *font, NSString *ident,NSString *title)
   if ([ident isEqualToString:@"lap"])
     return [NSString stringWithFormat:@"%d", (int) row + 1];
   else if ([ident isEqualToString:@"date"])
-    act::format_date_time(str, (time_t) lap.time, "%F %-l%p");
+    act::format_date_time(str, (time_t) lap.start_time, "%F %-l%p");
   else if ([ident isEqualToString:@"distance"])
-    act::format_distance(str, lap.distance, act::unit_type::unknown);
+    act::format_distance(str, lap.total_distance, act::unit_type::unknown);
   else if ([ident isEqualToString:@"duration"])
-    act::format_duration(str, lap.duration);
+    act::format_duration(str, lap.total_duration);
   else if ([ident isEqualToString:@"pace"] && lap.avg_speed != 0)
     act::format_pace(str, lap.avg_speed, act::unit_type::unknown);
   else if ([ident isEqualToString:@"max-pace"] && lap.max_speed != 0)
@@ -180,8 +180,8 @@ addTableColumn (NSTableView *tv, NSFont *font, NSString *ident,NSString *title)
     act::format_number(str, lap.avg_heart_rate);
   else if ([ident isEqualToString:@"max-hr"] && lap.max_heart_rate != 0)
     act::format_number(str, lap.max_heart_rate);
-  else if ([ident isEqualToString:@"calories"] && lap.calories != 0)
-    act::format_number(str, lap.calories);
+  else if ([ident isEqualToString:@"calories"] && lap.total_calories != 0)
+    act::format_number(str, lap.total_calories);
 
   if (str.size() != 0)
     return [NSString stringWithUTF8String:str.c_str()];
