@@ -33,16 +33,18 @@ activity::validate_cached_values(unsigned int groups) const
 
       _invalid_groups &= ~groups;
 
+      const config &cfg = shared_config();
+
       if (groups & group_timing)
 	{
 	  _date = 0;
 	  _duration = 0;
 	  _distance = 0;
-	  _distance_unit = unit_type::miles;
+	  _distance_unit = cfg.default_distance_unit();
 	  _speed = 0;
-	  _speed_unit = unit_type::seconds_per_mile;
+	  _speed_unit = cfg.default_pace_unit();
 	  _max_speed = 0;
-	  _max_speed_unit = unit_type::seconds_per_mile;
+	  _max_speed_unit = cfg.default_pace_unit();
 	}
 
       if (groups & group_physiological)
@@ -61,9 +63,9 @@ activity::validate_cached_values(unsigned int groups) const
 	  _quality = 0;
 	  _points = 0;
 	  _temperature = 0;
-	  _temperature_unit = unit_type::celsius;
+	  _temperature_unit = cfg.default_temperature_unit();
 	  _dew_point = 0;
-	  _dew_point_unit = unit_type::celsius;
+	  _dew_point_unit = cfg.default_temperature_unit();
 	  _equipment.clear();
 	  _weather.clear();
 	  _keywords.clear();
