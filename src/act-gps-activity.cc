@@ -15,8 +15,11 @@ namespace gps {
 activity::activity()
 : _sport(sport_type::unknown),
   _start_time(0),
+  _total_elapsed_time(0),
   _total_duration(0),
   _total_distance(0),
+  _total_ascent(0),
+  _total_descent(0),
   _total_calories(0),
   _avg_speed(0),
   _max_speed(0),
@@ -101,8 +104,11 @@ void
 activity::update_summary()
 {
   _start_time = 0;
+  _total_elapsed_time = 0;
   _total_duration = 0;
   _total_distance = 0;
+  _total_ascent = 0;
+  _total_descent = 0;
   _total_calories = 0;
   _avg_speed = 0;
   _max_speed = 0;
@@ -114,10 +120,19 @@ activity::update_summary()
 
   _start_time = laps()[0].start_time;
 
-  for (const auto &it : laps())
+  for (auto &it : laps())
     {
+      if (it.total_elapsed_time == 0 && it.track.size() >= 2)
+	{
+	  it.total_elapsed_time = (it.track.back().timestamp
+				   - it.track.front().timestamp);
+	}
+
+      _total_elapsed_time += it.total_elapsed_time;
       _total_duration += it.total_duration;
       _total_distance += it.total_distance;
+      _total_ascent += it.total_ascent;
+      _total_descent += it.total_descent;
       _total_calories += it.total_calories;
       _max_speed = fmax(_max_speed, it.max_speed);
       _avg_heart_rate += it.avg_heart_rate * it.total_duration;
@@ -141,8 +156,20 @@ activity::print_summary(FILE *fh) const
   fprintf(fh, "Duration: %s\n", tem.c_str());
   tem.clear();
 
+  format_duration(tem, total_elapsed_time());
+  fprintf(fh, "Elapsed Time: %s\n", tem.c_str());
+  tem.clear();
+
   format_distance(tem, total_distance(), unit_type::miles);
   fprintf(fh, "Distance: %s\n", tem.c_str());
+  tem.clear();
+
+  format_distance(tem, total_ascent(), unit_type::feet);
+  fprintf(fh, "Ascent: %s\n", tem.c_str());
+  tem.clear();
+
+  format_distance(tem, total_descent(), unit_type::feet);
+  fprintf(fh, "Descent: %s\n", tem.c_str());
   tem.clear();
 
   format_pace(tem, avg_speed(), unit_type::seconds_per_mile);
@@ -360,8 +387,11 @@ activity::smooth(const activity &src, int width)
   _device = src._device;
 
   _start_time = src._start_time;
+  _total_elapsed_time = src._total_elapsed_time;
   _total_duration = src._total_duration;
   _total_distance = src._total_distance;
+  _total_ascent = src._total_ascent;
+  _total_descent = src._total_descent;
   _total_calories = src._total_calories;
   _avg_speed = src._avg_speed;
   _max_speed = src._max_speed;
@@ -379,8 +409,11 @@ activity::smooth(const activity &src, int width)
       lap &l = _laps.back();
 
       l.start_time = it.start_time;
+      l.total_elapsed_time = it.total_elapsed_time;
       l.total_duration = it.total_duration;
       l.total_distance = it.total_distance;
+      l.total_ascent = it.total_ascent;
+      l.total_descent = it.total_descent;
       l.total_calories = it.total_calories;
       l.avg_speed = it.avg_speed;
       l.max_speed = it.max_speed;
@@ -450,7 +483,7 @@ activity::point_at_time(double t, point &ret_p) const
 {
   for (const auto &lap : laps())
     {
-      if (lap.start_time + lap.total_duration < t)
+      if (lap.start_time + lap.total_elapsed_time < t)
 	continue;
       if (lap.start_time > t)
 	return false;

@@ -518,6 +518,10 @@ fit_parser::read_lap_message(const message_type &def, uint32_t timestamp)
 	  lap.start_time = make_time(read_field(def, it));
 	  break;
 
+	case 7:				/* total_elapsed_time */
+	  lap.total_elapsed_time = make_duration(read_field(def, it));
+	  break;
+
 	case 8:				/* total_timer_time */
 	  lap.total_duration = make_duration(read_field(def, it));
 	  break;
@@ -544,6 +548,14 @@ fit_parser::read_lap_message(const message_type &def, uint32_t timestamp)
 
 	case 16:			/* max_heart_rate */
 	  lap.max_heart_rate = read_field(def, it);
+	  break;
+
+	case 21:			/* total_ascent */
+	  lap.total_ascent = read_field(def, it);
+	  break;
+
+	case 22:			/* total_descent */
+	  lap.total_descent = read_field(def, it);
 	  break;
 
 	default:
@@ -576,6 +588,10 @@ fit_parser::read_session_message(const message_type &def, uint32_t timestamp)
 	  d.set_sport(make_sport(read_field(def, it)));
 	  break;
 
+	case 7:				/* total_elapsed_time */
+	  d.set_total_elapsed_time(make_duration(read_field(def, it)));
+	  break;
+
 	case 8:				/* total_timer_time */
 	  d.set_total_duration(make_duration(read_field(def, it)));
 	  break;
@@ -602,6 +618,14 @@ fit_parser::read_session_message(const message_type &def, uint32_t timestamp)
 
 	case 17:			/* max_heart_rate */
 	  d.set_max_heart_rate(read_field(def, it));
+	  break;
+
+	case 22:			/* total_ascent */
+	  d.set_total_ascent(read_field(def, it));
+	  break;
+
+	case 23:			/* total_descent */
+	  d.set_total_descent(read_field(def, it));
 	  break;
 
 	default:

@@ -38,8 +38,11 @@ public:
   struct lap
     {
       double start_time;
+      double total_elapsed_time;
       double total_duration;
       double total_distance;
+      double total_ascent;
+      double total_descent;
       double total_calories;
       double avg_speed;
       double max_speed;
@@ -49,7 +52,8 @@ public:
       location_region region;
 
       lap()
-      : start_time(0), total_duration(0), total_distance(0),
+      : start_time(0), total_elapsed_time(0), total_duration(0),
+	total_distance(0), total_ascent(0), total_descent(0),
 	total_calories(0), avg_speed(0), max_speed(0),
 	avg_heart_rate(0), max_heart_rate(0) {}
 
@@ -98,8 +102,11 @@ private:
   std::string _device;
 
   double _start_time;
+  double _total_elapsed_time;
   double _total_duration;
   double _total_distance;
+  double _total_ascent;
+  double _total_descent;
   double _total_calories;
   double _avg_speed;
   double _max_speed;
@@ -154,8 +161,17 @@ public:
   void set_start_time(double x) {_start_time = x;}
   double start_time() const {return _start_time;}
 
+  void set_total_elapsed_time(double x) {_total_elapsed_time = x;}
+  double total_elapsed_time() const {return _total_elapsed_time;}
+
   void set_total_duration(double x) {_total_duration = x;}
   double total_duration() const {return _total_duration;}
+
+  void set_total_ascent(double x) {_total_ascent = x;}
+  double total_ascent() const {return _total_ascent;}
+
+  void set_total_descent(double x) {_total_descent = x;}
+  double total_descent() const {return _total_descent;}
 
   void set_total_distance(double x) {_total_distance = x;}
   double total_distance() const {return _total_distance;}
