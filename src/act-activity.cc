@@ -43,8 +43,6 @@ activity::validate_cached_values(unsigned int groups) const
 	  _distance_unit = cfg.default_distance_unit();
 	  _speed = 0;
 	  _speed_unit = cfg.default_pace_unit();
-	  _max_speed = 0;
-	  _max_speed_unit = cfg.default_pace_unit();
 	}
 
       if (groups & group_physiological)
@@ -55,6 +53,17 @@ activity::validate_cached_values(unsigned int groups) const
 	  _calories = 0;
 	  _weight = 0;
 	  _weight_unit = unit_type::kilogrammes;
+	}
+
+      if (groups & group_gps_extended)
+	{
+	  _elapsed_time = 0;
+	  _ascent = 0;
+	  _ascent_unit = cfg.default_height_unit();
+	  _descent = 0;
+	  _descent_unit = cfg.default_height_unit();
+	  _max_speed = 0;
+	  _max_speed_unit = cfg.default_pace_unit();
 	}
 
       if (groups & group_other)
@@ -91,11 +100,6 @@ activity::validate_cached_values(unsigned int groups) const
 	  else if (const std::string *s = field_ptr("speed"))
 	    parse_speed(*s, &_speed, &_speed_unit);
 
-	  if (const std::string *s = field_ptr("max-pace"))
-	    parse_pace(*s, &_max_speed, &_max_speed_unit);
-	  else if (const std::string *s = field_ptr("max-speed"))
-	    parse_speed(*s, &_max_speed, &_max_speed_unit);
-
 	  if (_date == 0)
 	    use_gps = true;
 
@@ -119,6 +123,24 @@ activity::validate_cached_values(unsigned int groups) const
 
 	  if (_resting_hr == 0 || _average_hr == 0
 	      || _max_hr == 0 || _calories == 0)
+	    use_gps = true;
+	}
+
+      if (groups & group_gps_extended)
+	{
+	  if (const std::string *s = field_ptr("elapsed_time"))
+	    parse_duration(*s, &_elapsed_time);
+	  if (const std::string *s = field_ptr("ascent"))
+	    parse_distance(*s, &_ascent, &_ascent_unit);
+	  if (const std::string *s = field_ptr("descent"))
+	    parse_distance(*s, &_descent, &_descent_unit);
+	  if (const std::string *s = field_ptr("max-pace"))
+	    parse_pace(*s, &_max_speed, &_max_speed_unit);
+	  else if (const std::string *s = field_ptr("max-speed"))
+	    parse_speed(*s, &_max_speed, &_max_speed_unit);
+
+	  if (_elapsed_time == 0 || _ascent == 0
+	      || _descent == 0 || _max_speed == 0)
 	    use_gps = true;
 	}
 
@@ -163,12 +185,7 @@ activity::validate_cached_values(unsigned int groups) const
 		    {
 		      _speed = data->avg_speed();
 		      if (data->sport() == gps::activity::sport_type::cycling)
-			_speed_unit = unit_type::miles_per_hour;
-		    }
-		  if (_max_speed == 0)
-		    {
-		      _max_speed = data->max_speed();
-		      _max_speed_unit = _speed_unit;
+			_speed_unit = shared_config().default_speed_unit();
 		    }
 		}
 
@@ -180,6 +197,22 @@ activity::validate_cached_values(unsigned int groups) const
 		    _max_hr = data->max_heart_rate();
 		  if (_calories == 0)
 		    _calories = data->total_calories();
+		}
+
+	      if (groups & group_gps_extended)
+		{
+		  if (_elapsed_time == 0)
+		    _elapsed_time = data->total_elapsed_time();
+		  if (_ascent == 0)
+		    _ascent = data->total_ascent();
+		  if (_descent == 0)
+		    _descent = data->total_descent();
+		  if (_max_speed == 0)
+		    {
+		      _max_speed = data->max_speed();
+		      if (data->sport() == gps::activity::sport_type::cycling)
+			_max_speed_unit = shared_config().default_speed_unit();
+		    }
 		}
 	    }
 	}
@@ -195,8 +228,14 @@ activity::field_value(field_id id) const
       return date();
     case field_id::duration:
       return duration();
+    case field_id::elapsed_time:
+      return elapsed_time();
     case field_id::distance:
       return distance();
+    case field_id::ascent:
+      return ascent();
+    case field_id::descent:
+      return descent();
     case field_id::speed:
     case field_id::pace:
       return speed();
@@ -255,6 +294,10 @@ activity::field_unit(field_id id) const
       return unit_type::seconds;
     case field_id::distance:
       return distance_unit();
+    case field_id::ascent:
+      return ascent_unit();
+    case field_id::descent:
+      return descent_unit();
     case field_id::speed:
     case field_id::pace:
       return speed_unit();
@@ -293,6 +336,13 @@ activity::duration() const
 }
 
 double
+activity::elapsed_time() const
+{
+  validate_cached_values(group_gps_extended);
+  return _elapsed_time;
+}
+
+double
 activity::distance() const
 {
   validate_cached_values(group_timing);
@@ -310,6 +360,34 @@ activity::distance_unit() const
 {
   validate_cached_values(group_timing);
   return _distance_unit;
+}
+
+double
+activity::ascent() const
+{
+  validate_cached_values(group_gps_extended);
+  return _ascent;
+}
+
+unit_type
+activity::ascent_unit() const
+{
+  validate_cached_values(group_gps_extended);
+  return _ascent_unit;
+}
+
+double
+activity::descent() const
+{
+  validate_cached_values(group_gps_extended);
+  return _descent;
+}
+
+unit_type
+activity::descent_unit() const
+{
+  validate_cached_values(group_gps_extended);
+  return _descent_unit;
 }
 
 double

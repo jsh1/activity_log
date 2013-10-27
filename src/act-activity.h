@@ -40,9 +40,16 @@ public:
 
   time_t date() const;
   double duration() const;
+  double elapsed_time() const;
 
   double distance() const;
   unit_type distance_unit() const;
+
+  double ascent() const;
+  unit_type ascent_unit() const;
+
+  double descent() const;
+  unit_type descent_unit() const;
 
   double speed() const;
   unit_type speed_unit() const;
@@ -89,7 +96,8 @@ private:
     {
       group_timing = 1U << 0,
       group_physiological = 1U << 1,
-      group_other = 1U << 2,
+      group_gps_extended = 1U << 2,
+      group_other = 1U << 3,
       group_all = 0xffU,
     };
 
@@ -101,8 +109,6 @@ private:
   mutable unit_type _distance_unit;
   mutable double _speed;
   mutable unit_type _speed_unit;
-  mutable double _max_speed;
-  mutable unit_type _max_speed_unit;
 
   // group_physiological
 
@@ -112,6 +118,16 @@ private:
   mutable double _calories;
   mutable double _weight;
   mutable unit_type _weight_unit;
+
+  // group_gps_extended
+
+  mutable double _elapsed_time;
+  mutable double _ascent;
+  mutable unit_type _ascent_unit;
+  mutable double _descent;
+  mutable unit_type _descent_unit;
+  mutable double _max_speed;
+  mutable unit_type _max_speed_unit;
 
   // group_other
 
