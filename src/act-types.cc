@@ -18,6 +18,8 @@ lookup_field_id(const char *str)
     case 'a':
       if (strcasecmp(str, "activity") == 0)
 	return field_id::activity;
+      else if (strcasecmp(str, "ascent") == 0)
+	return field_id::ascent;
       else if (strcasecmp(str, "average-hr") == 0)
 	return field_id::average_hr;
       break;
@@ -32,6 +34,8 @@ lookup_field_id(const char *str)
     case 'd':
       if (strcasecmp(str, "date") == 0)
 	return field_id::date;
+      else if (strcasecmp(str, "descent") == 0)
+	return field_id::descent;
       else if (strcasecmp(str, "dew-point") == 0)
 	return field_id::dew_point;
       else if (strcasecmp(str, "distance") == 0)
@@ -43,6 +47,8 @@ lookup_field_id(const char *str)
     case 'e':
       if (strcasecmp(str, "effort") == 0)
 	return field_id::effort;
+      else if (strcasecmp(str, "elapsed-time") == 0)
+	return field_id::elapsed_time;
       else if (strcasecmp(str, "equipment") == 0)
 	return field_id::equipment;
       break;
@@ -113,6 +119,8 @@ canonical_field_name(field_id id)
     {
     case field_id::activity:
       return "Activity";
+    case field_id::ascent:
+      return "Ascent";
     case field_id::average_hr:
       return "Average-HR";
     case field_id::calories:
@@ -123,6 +131,8 @@ canonical_field_name(field_id id)
       return 0;
     case field_id::date:
       return "Date";
+    case field_id::descent:
+      return "Descent";
     case field_id::dew_point:
       return "Dew-Point";
     case field_id::distance:
@@ -131,6 +141,8 @@ canonical_field_name(field_id id)
       return "Duration";
     case field_id::effort:
       return "Effort";
+    case field_id::elapsed_time:
+      return "Elapsed-Time";
     case field_id::equipment:
       return "Equipment";
     case field_id::gps_file:
@@ -196,9 +208,12 @@ lookup_field_data_type(const field_id id)
       return field_data_type::number;
     case field_id::date:
       return field_data_type::date;
+    case field_id::ascent:
     case field_id::distance:
+    case field_id::descent:
       return field_data_type::distance;
     case field_id::duration:
+    case field_id::elapsed_time:
       return field_data_type::duration;
     case field_id::effort:
     case field_id::quality:
