@@ -244,7 +244,7 @@ chart::point_at_x(CGFloat x, x_axis_type type, activity::point &ret_p) const
   for (const auto &lap : _activity.laps())
     {
       double lt0 = lap.start_time * x_axis.xm + x_axis.xc;
-      double lt1 = lt0 + lap.total_duration * x_axis.xm;
+      double lt1 = lt0 + lap.total_elapsed_time * x_axis.xm;
 
       if (lt1 < x)
 	continue;
