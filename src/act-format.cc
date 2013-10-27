@@ -143,7 +143,7 @@ format_distance(std::string &str, double dist, unit_type unit)
       break;
 
     case unit_type::feet:
-      format = "%.0f feet";
+      format = "%.0f ft";
       dist = dist * FEET_PER_METER;
       break;
 
