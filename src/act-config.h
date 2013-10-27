@@ -17,6 +17,7 @@ class config
   std::string _gps_file_dir;
 
   unit_type _default_distance_unit;
+  unit_type _default_height_unit;
   unit_type _default_pace_unit;
   unit_type _default_speed_unit;
   unit_type _default_temperature_unit;
@@ -40,6 +41,7 @@ public:
   const char *gps_file_dir() const;
 
   unit_type default_distance_unit() const;
+  unit_type default_height_unit() const;
   unit_type default_pace_unit() const;
   unit_type default_speed_unit() const;
   unit_type default_temperature_unit() const;
@@ -87,6 +89,12 @@ inline unit_type
 config::default_distance_unit() const
 {
   return _default_distance_unit;
+}
+
+inline unit_type
+config::default_height_unit() const
+{
+  return _default_height_unit;
 }
 
 inline unit_type

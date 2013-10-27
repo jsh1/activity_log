@@ -11,6 +11,7 @@ namespace act {
 
 config::config()
 : _default_distance_unit(unit_type::miles),
+  _default_height_unit(unit_type::metres),
   _default_pace_unit(unit_type::seconds_per_mile),
   _default_speed_unit(unit_type::miles_per_hour),
   _default_temperature_unit(unit_type::celsius),
@@ -176,6 +177,11 @@ config::read_config_file(const char *path)
 	    {
 	      parse_unit(std::string(value), field_data_type::distance,
 			 _default_distance_unit);
+	    }
+	  if (strcmp(name, "default-height-unit") == 0)
+	    {
+	      parse_unit(std::string(value), field_data_type::distance,
+			 _default_height_unit);
 	    }
 	  else if (strcmp(name, "default-pace-unit") == 0)
 	    {
