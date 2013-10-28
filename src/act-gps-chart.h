@@ -34,6 +34,7 @@ public:
       speed_ms_pace_km,
       speed_ms_mph,
       speed_ms_kph,
+      speed_ms_vvo2max,
       distance_m_mi,
       distance_m_ft,
     };

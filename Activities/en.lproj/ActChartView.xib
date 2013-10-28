@@ -77,33 +77,39 @@
                         <action selector="configMenuAction:" target="-2" id="L2E-IM-hBI"/>
                     </connections>
                 </menuItem>
+                <menuItem title="Speed (% vVO₂max)" tag="4" id="dcB-IH-xCS">
+                    <modifierMask key="keyEquivalentModifierMask"/>
+                    <connections>
+                        <action selector="configMenuAction:" target="-2" id="1nk-Af-UNA"/>
+                    </connections>
+                </menuItem>
                 <menuItem isSeparatorItem="YES" id="PEM-Ng-FaB"/>
-                <menuItem title="Heart Rate (BPM)" tag="4" id="FNw-sq-sUm">
+                <menuItem title="Heart Rate (bpm)" tag="5" id="FNw-sq-sUm">
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <connections>
                         <action selector="configMenuAction:" target="-2" id="4Fb-rX-Ke6"/>
                     </connections>
                 </menuItem>
-                <menuItem title="Heart Rate (%HRR)" tag="5" id="3BB-80-Xid">
+                <menuItem title="Heart Rate (% reserve)" tag="6" id="3BB-80-Xid">
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <connections>
                         <action selector="configMenuAction:" target="-2" id="3jB-9Z-Wve"/>
                     </connections>
                 </menuItem>
-                <menuItem title="Heart Rate (%Max)" tag="6" id="kTh-k4-Jxt">
+                <menuItem title="Heart Rate (% max)" tag="7" id="kTh-k4-Jxt">
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <connections>
                         <action selector="configMenuAction:" target="-2" id="SWq-j7-5Fa"/>
                     </connections>
                 </menuItem>
                 <menuItem isSeparatorItem="YES" id="F0w-gP-7Ov"/>
-                <menuItem title="Altitude (ft)" tag="7" id="od5-rE-SSn">
+                <menuItem title="Altitude (ft)" tag="8" id="od5-rE-SSn">
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <connections>
                         <action selector="configMenuAction:" target="-2" id="hYx-kv-VCL"/>
                     </connections>
                 </menuItem>
-                <menuItem title="Altitude (m)" tag="8" id="Fpe-nN-Cq7">
+                <menuItem title="Altitude (m)" tag="9" id="Fpe-nN-Cq7">
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <connections>
                         <action selector="configMenuAction:" target="-2" id="yyU-Gw-GTm"/>

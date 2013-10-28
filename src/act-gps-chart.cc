@@ -4,6 +4,7 @@
 
 #include "act-config.h"
 #include "act-format.h"
+#include "act-intensity-points.h"
 
 #include <math.h>
 
@@ -72,6 +73,12 @@ chart::line::convert_from_si(double x) const
       return x * (MILES_PER_METER * 3600);
     case value_conversion::speed_ms_kph:
       return x * (KM_PER_METER * 3600);
+    case value_conversion::speed_ms_vvo2max: {
+      const config &cfg = shared_config();
+      if (cfg.vdot() != 0)
+	return x > 0 ? (x / vvo2_max(cfg.vdot())) * 100 : 0;
+      else
+	return 0; }
     case value_conversion::distance_m_mi:
       return x * MILES_PER_METER;
     case value_conversion::distance_m_ft:
@@ -102,6 +109,12 @@ chart::line::convert_to_si(double x) const
       return x * (1. / (MILES_PER_METER * 3600));
     case value_conversion::speed_ms_kph:
       return x * (1. / (KM_PER_METER * 3600));
+    case value_conversion::speed_ms_vvo2max: {
+      const config &cfg = shared_config();
+      if (cfg.vdot() != 0)
+	return x * .01 * vvo2_max(cfg.vdot());
+      else
+	return 0; }
     case value_conversion::distance_m_mi:
       return x * (1. / MILES_PER_METER);
     case value_conversion::distance_m_ft:
@@ -200,6 +213,12 @@ chart::line::format_tick(std::string &s, double tick, double value) const
 	format_speed(s, value, unit_type::miles_per_hour);
       else if (conversion == value_conversion::speed_ms_kph)
 	format_speed(s, value, unit_type::kilometres_per_hour);
+      else if (conversion == value_conversion::speed_ms_vvo2max)
+	{
+	  char buf[32];
+	  snprintf(buf, sizeof(buf), "%d%% vVO2", (int) tick);
+	  s.append(buf);
+	}
     }
   else if (field == &activity::point::heart_rate)
     {

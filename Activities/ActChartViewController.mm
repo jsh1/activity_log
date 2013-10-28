@@ -34,6 +34,7 @@ enum ChartFields
   CHART_PACE_KM,
   CHART_SPEED_MI,
   CHART_SPEED_KM,
+  CHART_SPEED_VVO2MAX,
   CHART_HR_BPM,
   CHART_HR_HRR,
   CHART_HR_MAX,
@@ -48,6 +49,7 @@ enum ChartFieldMasks
   CHART_PACE_KM_MASK = 1U << CHART_PACE_KM,
   CHART_SPEED_MI_MASK = 1U << CHART_SPEED_MI,
   CHART_SPEED_KM_MASK = 1U << CHART_SPEED_KM,
+  CHART_SPEED_VVO2MAX_MASK = 1U << CHART_SPEED_VVO2MAX,
 
   CHART_HR_BPM_MASK = 1U << CHART_HR_BPM,
   CHART_HR_HRR_MASK = 1U << CHART_HR_HRR,
@@ -59,7 +61,8 @@ enum ChartFieldMasks
   CHART_SPEED_ANY_MASK = CHART_PACE_MI_MASK
 			 | CHART_PACE_KM_MASK
 			 | CHART_SPEED_MI_MASK
-			 | CHART_SPEED_KM_MASK,
+			 | CHART_SPEED_KM_MASK
+			 | CHART_SPEED_VVO2MAX_MASK,
   CHART_HR_ANY_MASK = CHART_HR_BPM_MASK
 		      | CHART_HR_HRR_MASK
 		      | CHART_HR_MAX_MASK,
@@ -325,7 +328,7 @@ chart::draw_line(const line &l, const x_axis_state &xs, CGFloat tx)
 	l.format_tick(s, tick, value);
 
 	[[NSString stringWithUTF8String:s.c_str()]
-	 drawInRect:NSMakeRect(tx, y + 2, KEY_TEXT_WIDTH, LABEL_HEIGHT)
+	 drawInRect:NSMakeRect(tx, y - (LABEL_HEIGHT + 2), KEY_TEXT_WIDTH, LABEL_HEIGHT)
 	 withAttributes:!(l.flags & RIGHT_TICKS) ? left_attrs : right_attrs];
 
 	ly = y;
@@ -621,6 +624,8 @@ chart::current_time_rect() const
 	conv = act::gps::chart::value_conversion::speed_ms_mph;
       else if (_fieldMask & CHART_SPEED_KM_MASK)
 	conv = act::gps::chart::value_conversion::speed_ms_kph;
+      else if (_fieldMask & CHART_SPEED_VVO2MAX_MASK)
+	conv = act::gps::chart::value_conversion::speed_ms_vvo2max;
 
       _chart->add_line(&act::gps::activity::point::speed, conv,
 		       act::gps::chart::line_color::blue,
@@ -635,11 +640,19 @@ chart::current_time_rect() const
       if (_fieldMask & CHART_ALT_FT_MASK)
 	conv = act::gps::chart::value_conversion::distance_m_ft;
 
+      uint32_t flags = act::gps::chart::FILL_BG;
+      auto color = act::gps::chart::line_color::green;
+
+      if (draw_pace || draw_hr)
+	{
+	  flags |= act::gps::chart::NO_STROKE | act::gps::chart::RIGHT_TICKS;
+	  color = act::gps::chart::line_color::gray;
+	}
+      else
+	flags |= act::gps::chart::TICK_LINES;
+
       _chart->add_line(&act::gps::activity::point::altitude, conv,
-		       act::gps::chart::line_color::gray,
-		       act::gps::chart::FILL_BG
-		       | act::gps::chart::NO_STROKE
-		       | act::gps::chart::RIGHT_TICKS, -0.05, 1.05);
+		       color, flags, -0.05, 1.05);
     }
 
   _chart->set_chart_rect(NSRectToCGRect([_chartView bounds]));
@@ -688,6 +701,9 @@ chart::current_time_rect() const
 	      break;
 	    case CHART_SPEED_KM:
 	      type = @"Speed (km/h)";
+	      break;
+	    case CHART_SPEED_VVO2MAX:
+	      type = @"Pace (%vVO2max)";
 	      break;
 	    case CHART_HR_BPM:
 	      type = @"Heart Rate (BPM)";
