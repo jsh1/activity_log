@@ -26,9 +26,6 @@ namespace chart_view {
 
 - (IBAction)configMenuAction:(id)sender;
 
-- (IBAction)toggleChartField:(id)sender;
-- (BOOL)chartFieldIsShown:(NSInteger)field;
-
 @end
 
 

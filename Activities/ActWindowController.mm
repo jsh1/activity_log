@@ -796,23 +796,6 @@ NSString *const ActActivityDidChangeBody = @"ActActivityDidChangeBody";
   [self setListViewType:[sender tag]];
 }
 
-- (IBAction)toggleChartField:(id)sender
-{
-  ActChartViewController *controller
-    = (id)[self viewControllerWithClass:[ActChartViewController class]];
-
-  [controller toggleChartField:sender];
-}
-
-- (BOOL)chartFieldIsShown:(NSInteger)field
-{
-  ActChartViewController *controller
-    = (id)[self viewControllerWithClass:[ActChartViewController class]];
-
-  return [controller chartFieldIsShown:field];
-}
-
-
 - (void)windowWillClose:(NSNotification *)note
 {
   [[NSNotificationCenter defaultCenter] removeObserver:self];

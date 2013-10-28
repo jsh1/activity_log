@@ -776,19 +776,6 @@ chart::current_time_rect() const
    atLocation:[view bounds].origin inView:view];
 }
 
-- (IBAction)toggleChartField:(id)sender
-{
-  _fieldMask ^= 1U << [sender tag];
-
-  [self _updateChart];
-  [self _updateTitle];
-}
-
-- (BOOL)chartFieldIsShown:(NSInteger)field
-{
-  return (_fieldMask & (1U << field)) != 0;
-}
-
 - (NSDictionary *)savedViewState
 {
   return [NSDictionary dictionaryWithObjectsAndKeys:

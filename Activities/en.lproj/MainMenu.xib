@@ -645,25 +645,6 @@ DQ
                                 </connections>
                             </menuItem>
                             <menuItem isSeparatorItem="YES" id="yeB-Bt-ud4"/>
-                            <menuItem title="Show Pace Chart" keyEquivalent="" id="acT-kd-qDl">
-                                <modifierMask key="keyEquivalentModifierMask"/>
-                                <connections>
-                                    <action selector="toggleChartField:" target="-1" id="C1c-wY-Rtg"/>
-                                </connections>
-                            </menuItem>
-                            <menuItem title="Show Heart Rate Chart" tag="1" keyEquivalent="" id="jm2-wK-tS0">
-                                <modifierMask key="keyEquivalentModifierMask"/>
-                                <connections>
-                                    <action selector="toggleChartField:" target="-1" id="tzZ-zx-6hf"/>
-                                </connections>
-                            </menuItem>
-                            <menuItem title="Show Altitude Chart" tag="2" keyEquivalent="" id="wGf-MU-TJE">
-                                <modifierMask key="keyEquivalentModifierMask"/>
-                                <connections>
-                                    <action selector="toggleChartField:" target="-1" id="910-Ac-pLO"/>
-                                </connections>
-                            </menuItem>
-                            <menuItem isSeparatorItem="YES" id="hDr-rB-4d7"/>
                             <menuItem title="Show Toolbar" keyEquivalent="t" id="297">
                                 <modifierMask key="keyEquivalentModifierMask" option="YES" command="YES"/>
                                 <connections>
