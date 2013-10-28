@@ -12,12 +12,6 @@ namespace act {
 namespace {
 
 double
-vvo2_max(double vdot)
-{
-  return 2.8859 + .0686 * (vdot - 29);
-}
-
-double
 points(double v_max, double v, double t)
 {
   // from Daniels' Running Formula, 2nd edition, pp. 39-40. Fitting
@@ -30,6 +24,12 @@ points(double v_max, double v, double t)
 }
 
 } // anonymous namespace
+
+double
+vvo2_max(double vdot)
+{
+  return 2.8859 + .0686 * (vdot - 29);
+}
 
 double
 calculate_points(double v, double t)

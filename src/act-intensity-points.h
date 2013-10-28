@@ -11,6 +11,8 @@ namespace gps {
   class activity;
 }
 
+double vvo2_max(double vdot);
+
 double calculate_points(double velocity, double duration);
 
 double calculate_points(const gps::activity &track);
