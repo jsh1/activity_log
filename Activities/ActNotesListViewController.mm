@@ -802,8 +802,30 @@ ActNotesItem::draw_header(const NSRect &bounds, uint32_t flags,
   subR.origin.y += subR.size.height;
   subR.size.height = WEEK_HEIGHT;
 
-  [[NSString stringWithFormat:@"Week %d", week + 1]
-   drawInRect:subR withAttributes:week_attrs];
+  {
+    // FIXME: not localized, and generally crap
+
+    static NSString *en_dash;
+    if (en_dash == nil)
+      {
+	unichar c = 0x2013;
+	en_dash = [[NSString alloc] initWithCharacters:&c length:1];
+      }
+
+    int offset = 4 - act::shared_config().start_of_week();
+    time_t start_date = (week * 7 - offset) * 24 * 60 * 60;
+    time_t end_date = start_date + 6 * 24 * 60 * 60;
+    struct tm start_tm = {0}, end_tm = {0};
+    localtime_r(&start_date, &start_tm);
+    localtime_r(&end_date, &end_tm);
+    [[NSString stringWithFormat:@"%d %@ %@ %d %@",
+      start_tm.tm_mday,
+      [[time_formatter shortMonthSymbols] objectAtIndex:start_tm.tm_mon],
+      en_dash,
+      end_tm.tm_mday,
+      [[time_formatter shortMonthSymbols] objectAtIndex:end_tm.tm_mon]]
+     drawInRect:subR withAttributes:week_attrs];
+  }
 
   // draw month stats
 
