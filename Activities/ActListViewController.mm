@@ -2,6 +2,7 @@
 
 #import "ActListViewController.h"
 
+#import "ActAppDelegate.h"
 #import "ActWindowController.h"
 
 #import "act-format.h"
@@ -140,9 +141,21 @@
 
   if ([ident isEqualToString:@"date"])
     {
-      std::string str;
-      act::format_date_time(str, a->date(), "%D %-l%p");
-      return [NSString stringWithUTF8String:str.c_str()];
+      static NSDateFormatter *formatter;
+
+      if (formatter == nil)
+	{
+	  NSLocale *locale
+	    = [(ActAppDelegate *)[NSApp delegate] currentLocale];
+	  formatter = [[NSDateFormatter alloc] init];
+	  [formatter setLocale:locale];
+	  [formatter setDateFormat:
+	   [NSDateFormatter dateFormatFromTemplate:@"d/M/yy ha"
+	    options:0 locale:locale]];
+	}
+
+      return [formatter stringFromDate:
+	      [NSDate dateWithTimeIntervalSince1970:(time_t)a->date()]];
     }
   else
     return [_controller stringForField:ident ofActivity:*a];

@@ -406,12 +406,12 @@
 
       uint32_t flags = 0;
       if (i == 0
-	  || !activities[i].date_equal_p(activities[i-1]))
+	  || !activities[i].same_day_p(activities[i-1]))
 	{
 	  flags |= DRAW_DATE;
 	}
       if (i < activities.size() - 1
-	  && !activities[i].date_equal_p(activities[i+1]))
+	  && !activities[i].same_day_p(activities[i+1]))
 	{
 	  flags |= DRAW_SEPARATOR;
 	}
@@ -537,6 +537,8 @@ NSDictionary *ActNotesItem::week_attrs;
 NSDictionary *ActNotesItem::header_stats_attrs;
 NSColor *ActNotesItem::separator_color;
 NSDateFormatter *ActNotesItem::time_formatter;
+NSDateFormatter *ActNotesItem::week_formatter;
+NSDateFormatter *ActNotesItem::month_formatter;
 
 void
 ActNotesItem::initialize()
@@ -610,10 +612,22 @@ ActNotesItem::initialize()
 
   separator_color = [[NSColor colorWithDeviceWhite:.80 alpha:1] retain];
 
+  NSLocale *locale = [(ActAppDelegate *)[NSApp delegate] currentLocale];
+
   time_formatter = [[NSDateFormatter alloc] init];
-  [time_formatter setLocale:[(ActAppDelegate *)[NSApp delegate] currentLocale]];
-  [time_formatter setDateStyle:NSDateFormatterNoStyle];
-  [time_formatter setTimeStyle:NSDateFormatterShortStyle];
+  [time_formatter setLocale:locale];
+  [time_formatter setDateFormat:
+   [NSDateFormatter dateFormatFromTemplate:@"ha" options:0 locale:locale]];
+
+  week_formatter = [[NSDateFormatter alloc] init];
+  [week_formatter setLocale:locale];
+  [week_formatter setDateFormat:
+   [NSDateFormatter dateFormatFromTemplate:@"MMMdd" options:0 locale:locale]];
+
+  month_formatter = [[NSDateFormatter alloc] init];
+  [month_formatter setLocale:locale];
+  [month_formatter setDateFormat:
+   [NSDateFormatter dateFormatFromTemplate:@"MMMMyyyy" options:0 locale:locale]];
 
   initialized = true;
 }
@@ -666,7 +680,8 @@ ActNotesItem::draw(const NSRect &bounds, uint32_t flags) const
       // draw day-of-week
 
       subR.size.height = DAY_OF_WEEK_HEIGHT;
-      [[[[time_formatter shortWeekdaySymbols] objectAtIndex:day_of_week] uppercaseString]
+      [[[[time_formatter shortWeekdaySymbols]
+	 objectAtIndex:day_of_week] uppercaseString]
        drawInRect:subR withAttributes:dow_attrs];
     }
 
@@ -794,8 +809,7 @@ ActNotesItem::draw_header(const NSRect &bounds, uint32_t flags,
 
   subR.size.height = MONTH_HEIGHT;
 
-  [[NSString stringWithFormat:@"%@ %d",
-    [[time_formatter monthSymbols] objectAtIndex:month], year]
+  [[month_formatter stringFromDate:[NSDate dateWithTimeIntervalSince1970:date]]
    drawInRect:subR withAttributes:month_attrs];
 
   // draw week index
@@ -804,8 +818,6 @@ ActNotesItem::draw_header(const NSRect &bounds, uint32_t flags,
   subR.size.height = WEEK_HEIGHT;
 
   {
-    // FIXME: not localized, and generally crap
-
     static NSString *en_dash;
     if (en_dash == nil)
       {
@@ -816,15 +828,13 @@ ActNotesItem::draw_header(const NSRect &bounds, uint32_t flags,
     int offset = 4 - act::shared_config().start_of_week();
     time_t start_date = (week * 7 - offset) * 24 * 60 * 60;
     time_t end_date = start_date + 6 * 24 * 60 * 60;
-    struct tm start_tm = {0}, end_tm = {0};
-    localtime_r(&start_date, &start_tm);
-    localtime_r(&end_date, &end_tm);
-    [[NSString stringWithFormat:@"%d %@ %@ %d %@",
-      start_tm.tm_mday,
-      [[time_formatter shortMonthSymbols] objectAtIndex:start_tm.tm_mon],
+
+    [[NSString stringWithFormat:@"%@ %@ %@",
+      [week_formatter stringFromDate:
+       [NSDate dateWithTimeIntervalSince1970:start_date]],
       en_dash,
-      end_tm.tm_mday,
-      [[time_formatter shortMonthSymbols] objectAtIndex:end_tm.tm_mon]]
+      [week_formatter stringFromDate:
+       [NSDate dateWithTimeIntervalSince1970:end_date]]]
      drawInRect:subR withAttributes:week_attrs];
   }
 
@@ -877,7 +887,7 @@ ActNotesItem::update_date() const
       if (!activity)
 	activity.reset(new act::activity(storage));
       
-      time_t date = (time_t) activity->date();
+      date = (time_t) activity->date();
 
       struct tm tm = {0};
       localtime_r(&date, &tm);
@@ -1018,7 +1028,7 @@ ActNotesItem::update_height(CGFloat width) const
 }
 
 bool
-ActNotesItem::date_equal_p(const ActNotesItem &rhs) const
+ActNotesItem::same_day_p(const ActNotesItem &rhs) const
 {
   update_date();
   rhs.update_date();

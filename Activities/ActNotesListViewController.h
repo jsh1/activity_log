@@ -16,6 +16,7 @@ struct ActNotesItem
 
   mutable std::unique_ptr<act::activity> activity;
 
+  mutable time_t date;
   mutable int year;
   mutable int month;
   mutable int week;
@@ -54,7 +55,7 @@ struct ActNotesItem
   double duration() const;
   double points() const;
 
-  bool date_equal_p(const ActNotesItem &other) const;
+  bool same_day_p(const ActNotesItem &other) const;
 
 private:
   static bool initialized;
@@ -70,6 +71,8 @@ private:
   static NSDictionary *header_stats_attrs;
   static NSColor *separator_color;
   static NSDateFormatter *time_formatter;
+  static NSDateFormatter *week_formatter;
+  static NSDateFormatter *month_formatter;
 
   static void initialize();
 };

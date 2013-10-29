@@ -19,13 +19,13 @@
                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                 <subviews>
                     <tableView focusRingType="none" verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="none" alternatingRowBackgroundColors="YES" columnSelection="YES" multipleSelection="NO" autosaveColumns="NO" rowHeight="20" headerView="K28-lw-ees" id="6O5-fV-qnL" customClass="ActTableView">
-                        <rect key="frame" x="0.0" y="0.0" width="647" height="612"/>
+                        <rect key="frame" x="0.0" y="0.0" width="651" height="612"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <size key="intercellSpacing" width="3" height="2"/>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <color key="gridColor" name="gridColor" catalog="System" colorSpace="catalog"/>
                         <tableColumns>
-                            <tableColumn identifier="date" editable="NO" width="90" minWidth="40" maxWidth="1000" id="SJ7-00-2LF">
+                            <tableColumn identifier="date" editable="NO" width="94" minWidth="40" maxWidth="1000" id="SJ7-00-2LF">
                                 <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left" title="Date">
                                     <font key="font" metaFont="smallSystem"/>
                                     <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
@@ -173,7 +173,7 @@
                 <autoresizingMask key="autoresizingMask"/>
             </scroller>
             <tableHeaderView key="headerView" id="K28-lw-ees">
-                <rect key="frame" x="0.0" y="0.0" width="647" height="17"/>
+                <rect key="frame" x="0.0" y="0.0" width="651" height="17"/>
                 <autoresizingMask key="autoresizingMask"/>
             </tableHeaderView>
         </scrollView>
