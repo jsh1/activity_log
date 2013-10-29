@@ -25,8 +25,8 @@ called act-COMMAND. Some possible commands are:
 	$ act new [--edit] [CREATION-OPTIONS...]
 
 Creates a new activity file. If no --date option, defaults to current
-time. (Date: is only required header.) If --edit option is specified
-launches editor on initial file.
+time. (Date: is the only required header.) If --edit option is
+specified launches editor on initial file.
 
 	$ act import [--edit] [CREATION-OPTIONS...]
 
@@ -70,17 +70,10 @@ forms:
 
 		DATE
 		DATE-ABBREV             -- "today", "this-week", "last-week", etc
-		#10                     -- date of 10th most recent activity
 
 given a single item spec like this we can concatenate to form a range, e.g.
 
 		DATE0..DATE1
-		#10..#20
-
-or ask for N items from that point:
-
-		DATE@20
-		@20                     -- 20 most recent items (gdb syntax!)
 
 note that underspecified dates already form a range, e.g. "2013-07" is
 the entire month of July, and "12pm" is [12:00, 13:00). Combining two
@@ -94,7 +87,7 @@ Similar to set command, but removes fields.
 
 	$ act sed [--multiple] [CREATION-OPTIONS...] [ACTIVITY-RANGE ...]
 
-Similar to set command, but removes fields. Value of each field option
+Similar to set command, but modifies fields. Value of each field option
 is taken as a list of sed comannds.
 
 	$ act edit [ACTIVITY-RANGE ...]
@@ -113,6 +106,7 @@ is printed to be controlled:
 		--compare FIELDxKEYWORD   -- numeric comparison
 		--query QUERY-EXP         -- complex query
 		--format FORMAT-EXP       -- output format
+		--table TABLE-EXP         -- tabular output format
 		--max-count=N
 		--skip=N
 
@@ -152,6 +146,9 @@ special %[FIELD] strings include:
 		%[header]               -- all header fields
 		%[body]                 -- complete body string
 		%[laps]                 -- tabulated laps from GPS file
+
+TABLE-EXP is similar but inserts extra space between fields to tabulate
+the output.
 
 	$ act show [LOG-OPTIONS...] [ACTIVITY-RANGE ...]
 
@@ -194,19 +191,19 @@ records (sum distance, time, etc) and log the results.
 
 	$ act daily [FOLD-OPTIONS] [ACTIVITY-RANGE...]
 
-Alias for "fold --range=day ..."
+Alias for "fold --interval=day ..."
 
 	$ act weekly [FOLD-OPTIONS] [ACTIVITY-RANGE...]
 
-Alias for "fold --range=week ..."
+Alias for "fold --interval=week ..."
 
 	$ act monthly [FOLD-OPTIONS] [ACTIVITY-RANGE...]
 
-Alias for "fold --range=month ..."
+Alias for "fold --interval=month ..."
 
 	$ act yearly [FOLD-OPTIONS] [ACTIVITY-RANGE...]
 
-Alias for "fold --range=year ..."
+Alias for "fold --interval=year ..."
 
 	$ act rm [ACTIVITY-RANGE ...]
 
@@ -223,10 +220,10 @@ Clears the deleted state.
 Removes any deleted activities, and does any other cleanup that might
 be needed.
 
-### Mac GUI Interface
+### Mac UI
 
-The Mac app is still very unfinished, but the image below shows the
-state as of October 2013. It can import TCX and FIT files and edit all
+The Cocoa app is still very unfinished, the image below shows the state
+as of October 2013. It can import TCX and FIT files and edit all
 fields.
 
 ![Screenshot](http://unfactored.org/images/act-screen-1.png)
