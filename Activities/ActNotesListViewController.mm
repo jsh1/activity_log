@@ -707,15 +707,16 @@ ActNotesItem::draw(const NSRect &bounds, uint32_t flags) const
 	  [NSBezierPath fillRect:NSInsetRect(ssubR, -4, 0)];
 	}
 
-      if (const std::string *s = activity->field_ptr("Course"))
-	{
-	  NSDictionary *attrs = title_attrs;
-	  if ((flags & DRAW_SELECTED) && (flags & DRAW_FOCUSED))
-	    attrs = selected_title_attrs;
+      const std::string *s = activity->field_ptr("Course");
 
-	  [[NSString stringWithUTF8String:s->c_str()]
-	   drawInRect:ssubR withAttributes:attrs];
-	}
+      NSDictionary *attrs = title_attrs;
+      if ((flags & DRAW_SELECTED) && (flags & DRAW_FOCUSED))
+	attrs = selected_title_attrs;
+
+      [(s != nullptr
+	? [NSString stringWithUTF8String:s->c_str()]
+	: @"Untitled")
+       drawInRect:ssubR withAttributes:attrs];
     }
 
   subR.origin.y += TITLE_LEADING;
