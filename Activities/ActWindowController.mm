@@ -80,7 +80,15 @@ NSString *const ActActivityDidChangeBody = @"ActActivityDidChangeBody";
   [self addSplitView:_innerSplitView identifier:@"Window.innerSplitView"];
 
   _fieldEditor = [[ActFieldEditor alloc] initWithFrame:NSZeroRect];
+
   [_fieldEditor setFieldEditor:YES];
+  [_fieldEditor setRichText:NO];
+  [_fieldEditor setImportsGraphics:NO];
+  [_fieldEditor setUsesFontPanel:NO];
+  [_fieldEditor setContinuousSpellCheckingEnabled:NO];
+  [_fieldEditor setGrammarCheckingEnabled:NO];
+  [_fieldEditor setAllowsDocumentBackgroundColorChange:NO];
+  [_fieldEditor setAllowsImageEditing:NO];
 
   if (ActViewController *obj
       = [[ActListViewController alloc] initWithController:self])
