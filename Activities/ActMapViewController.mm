@@ -77,11 +77,59 @@
   return array;
 }
 
+- (id)initWithController:(ActWindowController *)controller
+{
+  self = [super initWithController:controller];
+  if (self == nil)
+    return nil;
+
+  [[NSNotificationCenter defaultCenter]
+   addObserver:self selector:@selector(selectedActivityDidChange:)
+   name:ActSelectedActivityDidChange object:_controller];
+
+  [[NSNotificationCenter defaultCenter]
+   addObserver:self selector:@selector(selectedLapIndexDidChange:)
+   name:ActSelectedLapIndexDidChange object:_controller];
+
+  [[NSNotificationCenter defaultCenter]
+   addObserver:self selector:@selector(currentTimeWillChange:)
+   name:ActCurrentTimeWillChange object:_controller];
+  [[NSNotificationCenter defaultCenter]
+   addObserver:self selector:@selector(currentTimeDidChange:)
+   name:ActCurrentTimeDidChange object:_controller];
+
+  for (ActMapSource *src in [[self class] mapSources])
+    {
+      if ([src isLoading])
+	_pendingSources++;
+    }
+
+  return self;
+}
+
 - (void)dealloc
 {
   [[NSNotificationCenter defaultCenter] removeObserver:self];
   [_defaultSourceName release];
   [super dealloc];
+}
+
+- (void)viewDidLoad
+{
+  [super viewDidLoad];
+
+  if (_pendingSources > 0)
+    {
+      [[NSNotificationCenter defaultCenter] addObserver:self
+       selector:@selector(mapSourceDidFinishLoading:)
+       name:ActMapSourceDidFinishLoading object:nil];
+    }
+  else
+    [self mapSourceDidFinishLoading:nil];
+
+  [(ActCollapsibleView *)[self view] setTitle:@"Route"];
+
+  [_zoomSlider setIntValue:[_mapView mapZoom]];
 }
 
 - (void)setMapSourceAtIndex:(int)idx
@@ -141,45 +189,6 @@
     [self setMapSourceAtIndex:0];
 }
 
-- (void)viewDidLoad
-{
-  [super viewDidLoad];
-
-  [[NSNotificationCenter defaultCenter]
-   addObserver:self selector:@selector(selectedActivityDidChange:)
-   name:ActSelectedActivityDidChange object:_controller];
-
-  [[NSNotificationCenter defaultCenter]
-   addObserver:self selector:@selector(selectedLapIndexDidChange:)
-   name:ActSelectedLapIndexDidChange object:_controller];
-
-  [[NSNotificationCenter defaultCenter]
-   addObserver:self selector:@selector(currentTimeWillChange:)
-   name:ActCurrentTimeWillChange object:_controller];
-  [[NSNotificationCenter defaultCenter]
-   addObserver:self selector:@selector(currentTimeDidChange:)
-   name:ActCurrentTimeDidChange object:_controller];
-
-  for (ActMapSource *src in [[self class] mapSources])
-    {
-      if ([src isLoading])
-	_pendingSources++;
-    }
-
-  if (_pendingSources > 0)
-    {
-      [[NSNotificationCenter defaultCenter] addObserver:self
-       selector:@selector(mapSourceDidFinishLoading:)
-       name:ActMapSourceDidFinishLoading object:nil];
-    }
-  else
-    [self mapSourceDidFinishLoading:nil];
-
-  [(ActCollapsibleView *)[self view] setTitle:@"Route"];
-
-  [_zoomSlider setIntValue:[_mapView mapZoom]];
-}
-
 - (NSDictionary *)savedViewState
 {
   return [NSDictionary dictionaryWithObjectsAndKeys:
@@ -192,7 +201,7 @@
 {
   if (NSString *name = [state objectForKey:@"mapSourceName"])
     {
-      if (_pendingSources > 0)
+      if (_pendingSources > 0 || ![self viewHasBeenLoaded])
 	{
 	  [_defaultSourceName release];
 	  _defaultSourceName = [name copy];

@@ -21,13 +21,22 @@
   return @"ActHeaderView";
 }
 
-- (void)viewDidLoad
+- (id)initWithController:(ActWindowController *)controller
 {
-  [super viewDidLoad];
+  self = [super initWithController:controller];
+  if (self == nil)
+    return nil;
 
   [[NSNotificationCenter defaultCenter]
    addObserver:self selector:@selector(selectedActivityDidChange:)
    name:ActSelectedActivityDidChange object:_controller];
+
+  return self;
+}
+
+- (void)viewDidLoad
+{
+  [super viewDidLoad];
 
   [_headerView viewDidLoad];
 
@@ -42,7 +51,6 @@
 - (void)dealloc
 {
   [[NSNotificationCenter defaultCenter] removeObserver:self];
-
   [super dealloc];
 }
 

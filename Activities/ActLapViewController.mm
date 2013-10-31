@@ -34,8 +34,12 @@ addTableColumn (NSTableView *tv, NSFont *font, NSString *ident,NSString *title)
   [tc release];
 }
 
-- (void)viewDidLoad
+- (id)initWithController:(ActWindowController *)controller
 {
+  self = [super initWithController:controller];
+  if (self == nil)
+    return nil;
+
   [[NSNotificationCenter defaultCenter]
    addObserver:self selector:@selector(selectedActivityDidChange:)
    name:ActSelectedActivityDidChange object:_controller];
@@ -44,6 +48,17 @@ addTableColumn (NSTableView *tv, NSFont *font, NSString *ident,NSString *title)
    addObserver:self selector:@selector(selectedLapIndexDidChange:)
    name:ActSelectedActivityDidChange object:_controller];
 
+  return self;
+}
+
+- (void)dealloc
+{
+  [[NSNotificationCenter defaultCenter] removeObserver:self];
+  [super dealloc];
+}
+
+- (void)viewDidLoad
+{
   [(ActCollapsibleView *)[self view] setTitle:@"Laps"];
 
   // creating layers for each subview is not gaining us anything
@@ -73,12 +88,6 @@ addTableColumn (NSTableView *tv, NSFont *font, NSString *ident,NSString *title)
   [_tableView release];
 
   [_headerView setTableView:_tableView];
-}
-
-- (void)dealloc
-{
-  [[NSNotificationCenter defaultCenter] removeObserver:self];
-  [super dealloc];
 }
 
 - (void)selectedActivityDidChange:(NSNotification *)note

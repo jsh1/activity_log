@@ -8,8 +8,6 @@
 {
   IBOutlet NSScrollView *_scrollView;
   IBOutlet ActActivityView *_activityView;
-
-  NSMutableArray *_viewControllers;
 }
 @end
 
@@ -17,6 +15,7 @@
 {
   IBOutlet ActActivityViewController *_controller;
 
+  BOOL _needsLayout;
   int _ignoreLayout;
 }
 @end

@@ -2,11 +2,9 @@
 
 #import "ActWindowController.h"
 
-#import "ActActivityViewController.h"
-#import "ActChartViewController.h"
-#import "ActListViewController.h"
-#import "ActNotesListViewController.h"
+#import "ActImporterViewController.h"
 #import "ActSummaryViewController.h"
+#import "ActViewerViewController.h"
 #import "ActSplitView.h"
 #import "ActTextField.h"
 
@@ -76,8 +74,7 @@ NSString *const ActActivityDidChangeBody = @"ActActivityDidChangeBody";
 
   [[[self window] contentView] setWantsLayer:YES];
 
-  [self addSplitView:_outerSplitView identifier:@"Window.outerSplitView"];
-  [self addSplitView:_innerSplitView identifier:@"Window.innerSplitView"];
+  [self addSplitView:_splitView identifier:@"Window"];
 
   _fieldEditor = [[ActFieldEditor alloc] initWithFrame:NSZeroRect];
 
@@ -91,42 +88,26 @@ NSString *const ActActivityDidChangeBody = @"ActActivityDidChangeBody";
   [_fieldEditor setAllowsImageEditing:NO];
 
   if (ActViewController *obj
-      = [[ActListViewController alloc] initWithController:self])
+      = [[ActViewerViewController alloc] initWithController:self])
     {
       [_viewControllers addObject:obj];
-      [obj addToContainerView:_listContainer];
       [obj release];
     }
 
   if (ActViewController *obj
-      = [[ActNotesListViewController alloc] initWithController:self])
+      = [[ActImporterViewController alloc] initWithController:self])
     {
       [_viewControllers addObject:obj];
-      [obj addToContainerView:_listContainer];
       [obj release];
     }
-
-  if (ActViewController *obj
-      = [[ActActivityViewController alloc] initWithController:self])
-    {
-      [_viewControllers addObject:obj];
-      [obj addToContainerView:_contentContainer];
-      [[obj view] setHidden:_selectedActivityStorage ? NO : YES];
-      [obj release];
-    }
-
-  // FIXME: also some kind of multi-activity summary view
-
-  _listViewType = -1;
 
   [self applySavedWindowState];
-
-  if (_listViewType < 0)
-    [self setListViewType:0];
 
   [[NSNotificationCenter defaultCenter]
    addObserver:self selector:@selector(windowWillClose:)
    name:NSWindowWillCloseNotification object:[self window]];
+
+  [self setWindowMode:ActWindowMode_Viewer];
 
   [self loadActivities];
 }
@@ -162,7 +143,8 @@ NSString *const ActActivityDidChangeBody = @"ActActivityDidChangeBody";
 
   for (ActViewController *controller in _viewControllers)
     {
-      if (NSDictionary *sub = [controller savedViewState])
+      NSDictionary *sub = [controller savedViewState];
+      if ([sub count] != 0)
 	[controllers setObject:sub forKey:[controller identifier]];
     }
 
@@ -171,15 +153,14 @@ NSString *const ActActivityDidChangeBody = @"ActActivityDidChangeBody";
   for (ActSplitView *view in _splitViews)
     {
       NSString *ident = [_splitViews objectForKey:view];
-      if (NSDictionary *sub = [view savedViewState])
+      NSDictionary *sub = [view savedViewState];
+      if ([sub count] != 0)
 	[split setObject:sub forKey:ident];
     }
 
   NSDictionary *dict = [NSDictionary dictionaryWithObjectsAndKeys:
 			controllers, @"ActViewControllers",
 			split, @"ActSplitViews",
-			[NSNumber numberWithInt:_listViewType],
-			@"ActSelectedListView",
 			nil];
 
   [[NSUserDefaults standardUserDefaults]
@@ -211,10 +192,52 @@ NSString *const ActActivityDidChangeBody = @"ActActivityDidChangeBody";
 	    [view applySavedViewState:sub];
 	}
     }
+}
 
-  if (NSNumber *obj = [state objectForKey:@"ActSelectedListView"])
+- (NSInteger)windowMode
+{
+  return _windowMode;
+}
+
+- (void)setWindowMode:(NSInteger)mode
+{
+  if (_windowMode != mode)
     {
-      [self setListViewType:[obj intValue]];
+      Class old_class = nil;
+      if (_windowMode == ActWindowMode_Viewer)
+	old_class = [ActViewerViewController class];
+      else if (_windowMode == ActWindowMode_Importer)
+	old_class = [ActImporterViewController class];
+
+      if (old_class != nil)
+	{
+	  ActViewController *controller
+	    = [self viewControllerWithClass:old_class];
+	  [controller removeFromContainer];
+	}
+
+      NSRect frame = [[self window] frame];
+      _windowModeWidths[_windowMode] = frame.size.width;
+
+      _windowMode = mode;
+
+#if 0
+      frame.size.width = _windowModeWidths[_windowMode];
+      [[self window] setFrame:frame display:YES animate:YES];
+#endif
+
+      Class new_class = nil;
+      if (_windowMode == ActWindowMode_Viewer)
+	new_class = [ActViewerViewController class];
+      else if (_windowMode == ActWindowMode_Importer)
+	new_class = [ActImporterViewController class];
+
+      if (new_class != nil)
+	{
+	  ActViewController *controller
+	    = [self viewControllerWithClass:new_class];
+	  [controller addToContainerView:_contentContainer];
+	}
     }
 }
 
@@ -361,11 +384,6 @@ NSString *const ActActivityDidChangeBody = @"ActActivityDidChangeBody";
 
 - (void)selectedActivityDidChange
 {
-  ActViewController *activityC = [self viewControllerWithClass:
-				  [ActActivityViewController class]];
-
-  [[activityC view] setHidden:_selectedActivityStorage ? NO : YES];
-
   [[NSNotificationCenter defaultCenter]
    postNotificationName:ActSelectedActivityDidChange object:self];
 }
@@ -651,40 +669,6 @@ NSString *const ActActivityDidChangeBody = @"ActActivityDidChangeBody";
     }
 }
 
-- (void)setListViewType:(NSInteger)type
-{
-  if (_listViewType != type)
-    {
-      ActViewController *list = [self viewControllerWithClass:
-				 [ActListViewController class]];
-      ActViewController *notes = [self viewControllerWithClass:
-				  [ActNotesListViewController class]];
-
-      ActViewController *oldC = type == 1 ? list : notes;
-      ActViewController *newC = type == 0 ? list : notes;
-
-      NSResponder *first = [[self window] firstResponder];
-
-      BOOL firstResponder = ([first isKindOfClass:[NSView class]]
-			     && [(NSView *)first isDescendantOf:[oldC view]]);
-
-      _listViewType = type;
-
-      [[newC view] setHidden:NO];
-      [[oldC view] setHidden:YES];
-
-      [[self window] setInitialFirstResponder:[newC initialFirstResponder]];
-
-      if (firstResponder)
-	[[self window] makeFirstResponder:[newC initialFirstResponder]];
-    }
-}
-
-- (NSInteger)listViewType
-{
-  return _listViewType;
-}
-
 - (IBAction)newActivity:(id)sender
 {
   [self synchronizeIfNeeded];
@@ -762,6 +746,8 @@ NSString *const ActActivityDidChangeBody = @"ActActivityDidChangeBody";
 
 - (IBAction)editActivity:(id)sender
 {
+  [self setWindowMode:ActWindowMode_Viewer];
+
   [[self window] makeFirstResponder:
    [[self viewControllerWithClass:[ActSummaryViewController class]]
     initialFirstResponder]];
@@ -769,6 +755,8 @@ NSString *const ActActivityDidChangeBody = @"ActActivityDidChangeBody";
 
 - (IBAction)nextActivity:(id)sender
 {
+  [self setWindowMode:ActWindowMode_Viewer];
+
   if (_selectedActivityStorage == nullptr)
     return [self firstActivity:sender];
 
@@ -783,6 +771,8 @@ NSString *const ActActivityDidChangeBody = @"ActActivityDidChangeBody";
 
 - (IBAction)previousActivity:(id)sender
 {
+  [self setWindowMode:ActWindowMode_Viewer];
+
   if (_selectedActivityStorage == nullptr)
     return [self lastActivity:sender];
 
@@ -797,19 +787,27 @@ NSString *const ActActivityDidChangeBody = @"ActActivityDidChangeBody";
 
 - (IBAction)firstActivity:(id)sender
 {
+  [self setWindowMode:ActWindowMode_Viewer];
+
   if (_activityList.size() > 0)
     [self setSelectedActivityStorage:_activityList.front()];
 }
 
 - (IBAction)lastActivity:(id)sender
 {
+  [self setWindowMode:ActWindowMode_Viewer];
+
   if (_activityList.size() > 0)
     [self setSelectedActivityStorage:_activityList.back()];
 }
 
 - (IBAction)setListViewAction:(id)sender
 {
-  [self setListViewType:[sender tag]];
+  [self setWindowMode:ActWindowMode_Viewer];
+
+  [(ActViewerViewController *)
+   [self viewControllerWithClass:[ActViewerViewController class]]
+   setListViewType:[sender tag]];
 }
 
 - (void)windowWillClose:(NSNotification *)note

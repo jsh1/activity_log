@@ -524,8 +524,12 @@ chart::current_time_rect() const
   return @"ActChartView";
 }
 
-- (void)viewDidLoad
+- (id)initWithController:(ActWindowController *)controller
 {
+  self = [super initWithController:controller];
+  if (self == nil)
+    return nil;
+
   [[NSNotificationCenter defaultCenter]
    addObserver:self selector:@selector(selectedActivityDidChange:)
    name:ActSelectedActivityDidChange object:_controller];
@@ -541,9 +545,14 @@ chart::current_time_rect() const
    addObserver:self selector:@selector(currentTimeDidChange:)
    name:ActCurrentTimeDidChange object:_controller];
 
-  [_configMenu setFont:[NSFont systemFontOfSize:[NSFont smallSystemFontSize]]];
-
   _fieldMask = CHART_PACE_MI_MASK;
+
+  return self;
+}
+
+- (void)viewDidLoad
+{
+  [_configMenu setFont:[NSFont systemFontOfSize:[NSFont smallSystemFontSize]]];
 
   [self _updateTitle];
 }

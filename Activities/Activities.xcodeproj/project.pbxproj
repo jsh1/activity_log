@@ -78,6 +78,10 @@
 		57E44D161822B6AF006A58B4 /* ActDevice.mm in Sources */ = {isa = PBXBuildFile; fileRef = 57E44D111822B6AF006A58B4 /* ActDevice.mm */; };
 		57E44D171822B6AF006A58B4 /* ActDeviceManager.mm in Sources */ = {isa = PBXBuildFile; fileRef = 57E44D131822B6AF006A58B4 /* ActDeviceManager.mm */; };
 		57E44D181822B6AF006A58B4 /* ActGarminDevice.mm in Sources */ = {isa = PBXBuildFile; fileRef = 57E44D151822B6AF006A58B4 /* ActGarminDevice.mm */; };
+		57E44D1D1822D630006A58B4 /* ActImporterViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = 57E44D1A1822D630006A58B4 /* ActImporterViewController.mm */; };
+		57E44D1E1822D630006A58B4 /* ActViewerViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = 57E44D1C1822D630006A58B4 /* ActViewerViewController.mm */; };
+		57E44D211822D70E006A58B4 /* ActImporterView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 57E44D1F1822D70E006A58B4 /* ActImporterView.xib */; };
+		57E44D241822D73A006A58B4 /* ActViewerView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 57E44D221822D73A006A58B4 /* ActViewerView.xib */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -213,6 +217,12 @@
 		57E44D131822B6AF006A58B4 /* ActDeviceManager.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ActDeviceManager.mm; sourceTree = "<group>"; };
 		57E44D141822B6AF006A58B4 /* ActGarminDevice.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActGarminDevice.h; sourceTree = "<group>"; };
 		57E44D151822B6AF006A58B4 /* ActGarminDevice.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ActGarminDevice.mm; sourceTree = "<group>"; };
+		57E44D191822D630006A58B4 /* ActImporterViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActImporterViewController.h; sourceTree = "<group>"; };
+		57E44D1A1822D630006A58B4 /* ActImporterViewController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ActImporterViewController.mm; sourceTree = "<group>"; };
+		57E44D1B1822D630006A58B4 /* ActViewerViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActViewerViewController.h; sourceTree = "<group>"; };
+		57E44D1C1822D630006A58B4 /* ActViewerViewController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ActViewerViewController.mm; sourceTree = "<group>"; };
+		57E44D201822D70E006A58B4 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/ActImporterView.xib; sourceTree = "<group>"; };
+		57E44D231822D73A006A58B4 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/ActViewerView.xib; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -286,6 +296,10 @@
 				57921A5917BEAF48001AD35D /* ActWindowController.mm */,
 				570E6ABC17F4711500A5BB4D /* ActViewController.h */,
 				570E6ABD17F4711500A5BB4D /* ActViewController.mm */,
+				57E44D1B1822D630006A58B4 /* ActViewerViewController.h */,
+				57E44D1C1822D630006A58B4 /* ActViewerViewController.mm */,
+				57E44D191822D630006A58B4 /* ActImporterViewController.h */,
+				57E44D1A1822D630006A58B4 /* ActImporterViewController.mm */,
 				571DB9B117BE66A60001514C /* ActListViewController.h */,
 				571DB9B217BE66A60001514C /* ActListViewController.mm */,
 				57193D4417FDFC9D009634B4 /* ActNotesListViewController.h */,
@@ -410,6 +424,8 @@
 			children = (
 				571DB9A717BE615C0001514C /* MainMenu.xib */,
 				57921A5517BEAEF0001AD35D /* ActWindow.xib */,
+				57E44D221822D73A006A58B4 /* ActViewerView.xib */,
+				57E44D1F1822D70E006A58B4 /* ActImporterView.xib */,
 				57B51B07180DFC18004F1A1D /* ActActivityView.xib */,
 				570E6AC817F4793700A5BB4D /* ActChartView.xib */,
 				57193D501801A514009634B4 /* ActHeaderView.xib */,
@@ -507,6 +523,7 @@
 				571DB99D17BE615C0001514C /* InfoPlist.strings in Resources */,
 				571DB9A917BE615C0001514C /* MainMenu.xib in Resources */,
 				57DCE3FC17F31D7D0072C67B /* app-icon.icns in Resources */,
+				57E44D241822D73A006A58B4 /* ActViewerView.xib in Resources */,
 				570E6ACD17F47A9C00A5BB4D /* ActListView.xib in Resources */,
 				57B51B09180DFC18004F1A1D /* ActActivityView.xib in Resources */,
 				57921A5717BEAEF0001AD35D /* ActWindow.xib in Resources */,
@@ -517,6 +534,7 @@
 				57DB7BB017E0D4790093C735 /* mapquest-map-tiles.json in Resources */,
 				57DB7BB117E0D4790093C735 /* mapquest-sat-tiles.json in Resources */,
 				57DB7BB217E0D4790093C735 /* opencyclemap-tiles.json in Resources */,
+				57E44D211822D70E006A58B4 /* ActImporterView.xib in Resources */,
 				57193D521801A514009634B4 /* ActHeaderView.xib in Resources */,
 				57DB7BB317E0D4790093C735 /* openstreetmap-tiles.json in Resources */,
 				57193D4917FDFCAE009634B4 /* ActNotesListView.xib in Resources */,
@@ -533,6 +551,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				57E44D181822B6AF006A58B4 /* ActGarminDevice.mm in Sources */,
+				57E44D1E1822D630006A58B4 /* ActViewerViewController.mm in Sources */,
 				571DB99F17BE615C0001514C /* main.m in Sources */,
 				5769E6DD1812D52D00E3D801 /* ActViewLayout.mm in Sources */,
 				571DB9A617BE615C0001514C /* ActAppDelegate.mm in Sources */,
@@ -549,6 +568,7 @@
 				57E44D161822B6AF006A58B4 /* ActDevice.mm in Sources */,
 				57B51B0C180DFC63004F1A1D /* ActActivityViewController.mm in Sources */,
 				57A7352817CF8A3B0054E3EB /* ActLapViewController.mm in Sources */,
+				57E44D1D1822D630006A58B4 /* ActImporterViewController.mm in Sources */,
 				57707AE817DFBC4C009BAC5D /* ActMapSource.mm in Sources */,
 				57707AE917DFBC4C009BAC5D /* ActMapView.mm in Sources */,
 				57707AEA17DFBC4C009BAC5D /* ActTileJSONMapSource.mm in Sources */,
@@ -686,6 +706,22 @@
 				57B51B08180DFC18004F1A1D /* en */,
 			);
 			name = ActActivityView.xib;
+			sourceTree = "<group>";
+		};
+		57E44D1F1822D70E006A58B4 /* ActImporterView.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				57E44D201822D70E006A58B4 /* en */,
+			);
+			name = ActImporterView.xib;
+			sourceTree = "<group>";
+		};
+		57E44D221822D73A006A58B4 /* ActViewerView.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				57E44D231822D73A006A58B4 /* en */,
+			);
+			name = ActViewerView.xib;
 			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */

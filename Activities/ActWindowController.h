@@ -15,21 +15,28 @@ extern NSString *const ActCurrentTimeDidChange;
 extern NSString *const ActActivityDidChangeField;
 extern NSString *const ActActivityDidChangeBody;
 
+enum ActWindowMode
+{
+  ActWindowMode_Nil,
+  ActWindowMode_Viewer,
+  ActWindowMode_Importer,
+  ActWindowMode_Count,
+};
+
 @interface ActWindowController : NSWindowController <NSSplitViewDelegate>
 {
-  IBOutlet ActSplitView *_outerSplitView;
-  IBOutlet ActSplitView *_innerSplitView;
+  IBOutlet ActSplitView *_splitView;
 
-  IBOutlet NSView *_listContainer;		// activity list
-  IBOutlet NSView *_contentContainer;		// activity / summary
-
-  NSInteger _listViewType;
+  IBOutlet NSView *_contentContainer;
 
   NSMutableArray *_viewControllers;
   NSMapTable *_splitViews;
 
   ActFieldEditor *_fieldEditor;
   NSUndoManager *_undoManager;
+
+  NSInteger _windowMode;
+  CGFloat _windowModeWidths[ActWindowMode_Count];
 
   std::unique_ptr<act::database> _database;
   BOOL _needsSynchronize;
@@ -40,6 +47,8 @@ extern NSString *const ActActivityDidChangeBody;
   NSInteger _selectedLapIndex;
   double _currentTime;
 }
+
+@property(nonatomic) NSInteger windowMode;
 
 @property(nonatomic, readonly) act::database *database;
 
@@ -53,8 +62,6 @@ extern NSString *const ActActivityDidChangeBody;
 @property(nonatomic, readonly) NSUndoManager *undoManager;
 
 @property(nonatomic) BOOL needsSynchronize;
-
-@property(nonatomic) NSInteger listViewType;
 
 - (ActViewController *)viewControllerWithClass:(Class)cls;
 

@@ -26,27 +26,10 @@
   if (self == nil)
     return nil;
 
-  _viewControllers = [[NSMutableArray alloc] init];
-
-  return self;
-}
-
-- (void)dealloc
-{
-  [_viewControllers release];
-
-  [super dealloc];
-}
-
-- (void)viewDidLoad
-{
-  [super viewDidLoad];
-
   if (ActViewController *obj
       = [[ActSummaryViewController alloc] initWithController:_controller])
     {
-      [_viewControllers addObject:obj];
-      [_activityView addSubview:[obj view]];
+      [self addSubviewController:obj];
       [obj release];
     }
 
@@ -55,86 +38,69 @@
   if (ActViewController *obj
       = [[ActHeaderViewController alloc] initWithController:_controller])
     {
-      [_viewControllers addObject:obj];
-      [_activityView addSubview:[obj view]];
+      [self addSubviewController:obj];
       [obj release];
     }
 
   if (ActViewController *obj
       = [[ActMapViewController alloc] initWithController:_controller])
     {
-      [_viewControllers addObject:obj];
-      [_activityView addSubview:[obj view]];
+      [self addSubviewController:obj];
       [obj release];
     }
 
   if (ActViewController *obj
       = [[ActChartViewController alloc] initWithController:_controller])
     {
-      [_viewControllers addObject:obj];
-      [_activityView addSubview:[obj view]];
+      [self addSubviewController:obj];
       [obj release];
     }
 
   if (ActViewController *obj
       = [[ActLapViewController alloc] initWithController:_controller])
     {
-      [_viewControllers addObject:obj];
-      [_activityView addSubview:[obj view]];
+      [self addSubviewController:obj];
       [obj release];
     }
 
-  [_activityView subviewNeedsLayout:nil];
+  return self;
 }
 
-- (ActViewController *)viewControllerWithClass:(Class)cls
+- (void)viewDidLoad
 {
-  for (ActViewController *obj in _viewControllers)
-    {
-      obj = [obj viewControllerWithClass:cls];
-      if (obj != nil)
-	return obj;
-    }
+  [super viewDidLoad];
 
-  return [super viewControllerWithClass:cls];
+  for (ActViewController *controller in [self subviewControllers])
+    [_activityView addSubview:[controller view]];
 }
 
 - (NSDictionary *)savedViewState
 {
-  NSMutableDictionary *controllers = [NSMutableDictionary dictionary];
+  NSMutableDictionary *state
+    = [NSMutableDictionary dictionaryWithDictionary:[super savedViewState]];
+
   NSMutableDictionary *collapsed = [NSMutableDictionary dictionary];
 
-  for (ActViewController *controller in _viewControllers)
+  for (ActViewController *controller in [self subviewControllers])
     {
-      if (NSDictionary *sub = [controller savedViewState])
-	[controllers setObject:sub forKey:[controller identifier]];
-
       ActCollapsibleView *view = (id)[controller view];
       if ([view isKindOfClass:[ActCollapsibleView class]]
 	  && [view isCollapsed])
 	[collapsed setObject:@YES forKey:[controller identifier]];
     }
 
-  return [NSDictionary dictionaryWithObjectsAndKeys:
-	  controllers, @"ActViewControllers",
-	  collapsed, @"ActViewCollapsed",
-	  nil];
+  [state setObject:collapsed forKey:@"ActViewCollapsed"];
+
+  return state;
 }
 
 - (void)applySavedViewState:(NSDictionary *)state
 {
-  if (NSDictionary *dict = [state objectForKey:@"ActViewControllers"])
-    {
-      for (ActViewController *controller in _viewControllers)
-	{
-	  if (NSDictionary *sub = [dict objectForKey:[controller identifier]])
-	    [controller applySavedViewState:sub];
-	}
-    }
+  [super applySavedViewState:state];
 
   if (NSDictionary *dict = [state objectForKey:@"ActViewCollapsed"])
     {
-      for (ActViewController *controller in _viewControllers)
+      for (ActViewController *controller in [self subviewControllers])
 	{
 	  if (NSNumber *obj = [dict objectForKey:[controller identifier]])
 	    [(ActCollapsibleView *)[controller view] setCollapsed:[obj boolValue]];
@@ -200,7 +166,13 @@ layoutSubviews(ActActivityView *self, CGFloat width,
 
 - (void)subviewNeedsLayout:(NSView *)view
 {
-  layoutSubviews(self, -1, YES, YES);
+  // This view returns YES from -wantsUpdateLayer, so marking it for
+  // redisplay will actually cause -updateLayer to be invoked before
+  // drawing happens. This allows relayout to run once, rather many
+  // times, and doesn't run until after all views have responded to
+  // their notifications.
+
+  [self setNeedsDisplay:YES];
 }
 
 - (void)layoutSubviews
@@ -212,6 +184,16 @@ layoutSubviews(ActActivityView *self, CGFloat width,
 {
   if (_ignoreLayout == 0)
     layoutSubviews(self, -1, YES, YES);
+}
+
+- (BOOL)wantsUpdateLayer
+{
+  return YES;
+}
+
+- (void)updateLayer
+{
+  layoutSubviews(self, -1, YES, YES);
 }
 
 - (BOOL)isFlipped

@@ -7,6 +7,7 @@
 @implementation ActViewController
 
 @synthesize controller = _controller;
+@synthesize viewHasBeenLoaded = _viewHasBeenLoaded;
 
 + (NSString *)viewNibName
 {
@@ -26,7 +27,54 @@
     return nil;
 
   _controller = controller;
+  _subviewControllers = [[NSMutableArray alloc] init];
+
   return self;
+}
+
+- (void)dealloc
+{
+  [_subviewControllers release];
+  [super dealloc];
+}
+
+- (ActViewController *)viewControllerWithClass:(Class)cls
+{
+  if ([self class] == cls)
+    return self;
+
+  for (ActViewController *obj in _subviewControllers)
+    {
+      obj = [obj viewControllerWithClass:cls];
+      if (obj != nil)
+	return obj;
+    }
+
+  return nil;
+}
+
+- (NSArray *)subviewControllers
+{
+  return _subviewControllers;
+}
+
+- (void)setSubviewControllers:(NSArray *)array
+{
+  [_subviewControllers release];
+  _subviewControllers = [array mutableCopy];
+}
+
+- (void)addSubviewController:(ActViewController *)controller
+{
+  [_subviewControllers addObject:controller];
+}
+
+- (void)removeSubviewController:(ActViewController *)controller
+{
+  NSInteger idx = [_subviewControllers indexOfObjectIdenticalTo:controller];
+
+  if (idx != NSNotFound)
+    [_subviewControllers removeObjectAtIndex:idx];
 }
 
 - (NSView *)initialFirstResponder
@@ -42,17 +90,41 @@
 {
   [super loadView];
 
+  _viewHasBeenLoaded = YES;
+
   if ([self view] != nil)
     [self viewDidLoad];
 }
 
 - (NSDictionary *)savedViewState
 {
-  return nil;
+  if ([_subviewControllers count] == 0)
+    return [NSDictionary dictionary];
+
+  NSMutableDictionary *controllers = [NSMutableDictionary dictionary];
+
+  for (ActViewController *controller in _subviewControllers)
+    {
+      NSDictionary *sub = [controller savedViewState];
+      if ([sub count] != 0)
+	[controllers setObject:sub forKey:[controller identifier]];
+    }
+
+  return [NSDictionary dictionaryWithObjectsAndKeys:
+	  controllers, @"ActViewControllers",
+	  nil];
 }
 
-- (void)applySavedViewState:(NSDictionary *)dict
+- (void)applySavedViewState:(NSDictionary *)state
 {
+  if (NSDictionary *dict = [state objectForKey:@"ActViewControllers"])
+    {
+      for (ActViewController *controller in _subviewControllers)
+	{
+	  if (NSDictionary *sub = [dict objectForKey:[controller identifier]])
+	    [controller applySavedViewState:sub];
+	}
+    }
 }
 
 - (void)addToContainerView:(NSView *)superview
@@ -68,14 +140,6 @@
 - (void)removeFromContainer
 {
   [[self view] removeFromSuperview];
-}
-
-- (ActViewController *)viewControllerWithClass:(Class)cls
-{
-  if ([self class] == cls)
-    return self;
-  else
-    return nil;
 }
 
 // ActActivityTextFieldDelegate methods
