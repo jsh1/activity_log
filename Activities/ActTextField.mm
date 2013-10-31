@@ -167,6 +167,27 @@
     return NSMakeRange(NSNotFound, 0);
 }
 
+// FIXME: hack. On 10.9 NSTextView's implementation of this method
+// calls NSSpellChecker method with the same name, which seems to hang
+// when called with a single-character range (times out on an RPC). So
+// override this method to only invoke the delegate that actually
+// generates our completions.
+
+- (NSArray *)completionsForPartialWordRange:(NSRange)range
+    indexOfSelectedItem:(NSInteger *)idx
+{
+  id delegate = [self delegate];
+
+  if ([delegate respondsToSelector:
+       @selector(textView:completions:forPartialWordRange:indexOfSelectedItem:)])
+    {
+      return [delegate textView:self completions:[NSArray array]
+	      forPartialWordRange:range indexOfSelectedItem:idx];
+    }
+  else
+    return [NSArray array];
+}
+
 - (void)didChangeText
 {
   [super didChangeText];
