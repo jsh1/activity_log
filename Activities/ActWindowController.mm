@@ -68,6 +68,14 @@ NSString *const ActActivityDidChangeBody = @"ActActivityDidChangeBody";
 
 - (void)windowDidLoad
 {
+  // 10.9 enables layer-backed views on the scrolling list view
+  // implicitly, so we may as well enable them for the entire window.
+  // Simple subview hierarchies that don't need multiple layers will
+  // use inclusive (single-layer) mode (which also avoids any special
+  // tricks being needed for font-smoothing).
+
+  [[[self window] contentView] setWantsLayer:YES];
+
   [self addSplitView:_outerSplitView identifier:@"Window.outerSplitView"];
   [self addSplitView:_innerSplitView identifier:@"Window.innerSplitView"];
 
