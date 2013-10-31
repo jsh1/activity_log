@@ -46,6 +46,9 @@ addTableColumn (NSTableView *tv, NSFont *font, NSString *ident,NSString *title)
 
   [(ActCollapsibleView *)[self view] setTitle:@"Laps"];
 
+  // creating layers for each subview is not gaining us anything
+  [[self view] setCanDrawSubviewsIntoLayer:YES];
+
   _headerView = [[NSTableHeaderView alloc] initWithFrame:NSZeroRect];
   [_lapView addSubview:_headerView];
   [_headerView release];

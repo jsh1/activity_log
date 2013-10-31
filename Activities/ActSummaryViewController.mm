@@ -45,6 +45,9 @@
   [(ActCollapsibleView *)[self view] setTitle:@"Summary & Notes"];
   [(ActCollapsibleView *)[self view] setHeaderInset:10];
 
+  // creating layers for each subview is not gaining us anything
+  [[self view] setCanDrawSubviewsIntoLayer:YES];
+
   [_dateBox setRightToLeft:YES];
   [_dateBox setSpacing:1];
   [_typeBox setSpacing:3];

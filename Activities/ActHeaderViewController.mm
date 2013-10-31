@@ -33,6 +33,9 @@
 
   [(ActCollapsibleView *)[self view] setTitle:@"Data Fields"];
 
+  // creating layers for each subview is not gaining us anything
+  [[self view] setCanDrawSubviewsIntoLayer:YES];
+
   [_boxView setRightToLeft:YES];
 }
 
