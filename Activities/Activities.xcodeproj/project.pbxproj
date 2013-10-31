@@ -75,6 +75,9 @@
 		57DB7BB217E0D4790093C735 /* opencyclemap-tiles.json in Resources */ = {isa = PBXBuildFile; fileRef = 57DB7BAC17E0D4790093C735 /* opencyclemap-tiles.json */; };
 		57DB7BB317E0D4790093C735 /* openstreetmap-tiles.json in Resources */ = {isa = PBXBuildFile; fileRef = 57DB7BAD17E0D4790093C735 /* openstreetmap-tiles.json */; };
 		57DCE3FC17F31D7D0072C67B /* app-icon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 57DCE3FB17F31D7D0072C67B /* app-icon.icns */; };
+		57E44D161822B6AF006A58B4 /* ActDevice.mm in Sources */ = {isa = PBXBuildFile; fileRef = 57E44D111822B6AF006A58B4 /* ActDevice.mm */; };
+		57E44D171822B6AF006A58B4 /* ActDeviceManager.mm in Sources */ = {isa = PBXBuildFile; fileRef = 57E44D131822B6AF006A58B4 /* ActDeviceManager.mm */; };
+		57E44D181822B6AF006A58B4 /* ActGarminDevice.mm in Sources */ = {isa = PBXBuildFile; fileRef = 57E44D151822B6AF006A58B4 /* ActGarminDevice.mm */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -204,6 +207,12 @@
 		57DB7BAC17E0D4790093C735 /* opencyclemap-tiles.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; name = "opencyclemap-tiles.json"; path = "resources/opencyclemap-tiles.json"; sourceTree = "<group>"; };
 		57DB7BAD17E0D4790093C735 /* openstreetmap-tiles.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; name = "openstreetmap-tiles.json"; path = "resources/openstreetmap-tiles.json"; sourceTree = "<group>"; };
 		57DCE3FB17F31D7D0072C67B /* app-icon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; name = "app-icon.icns"; path = "resources/app-icon.icns"; sourceTree = "<group>"; };
+		57E44D101822B6AF006A58B4 /* ActDevice.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActDevice.h; sourceTree = "<group>"; };
+		57E44D111822B6AF006A58B4 /* ActDevice.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ActDevice.mm; sourceTree = "<group>"; };
+		57E44D121822B6AF006A58B4 /* ActDeviceManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActDeviceManager.h; sourceTree = "<group>"; };
+		57E44D131822B6AF006A58B4 /* ActDeviceManager.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ActDeviceManager.mm; sourceTree = "<group>"; };
+		57E44D141822B6AF006A58B4 /* ActGarminDevice.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActGarminDevice.h; sourceTree = "<group>"; };
+		57E44D151822B6AF006A58B4 /* ActGarminDevice.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ActGarminDevice.mm; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -267,6 +276,12 @@
 			children = (
 				571DB9A417BE615C0001514C /* ActAppDelegate.h */,
 				571DB9A517BE615C0001514C /* ActAppDelegate.mm */,
+				57E44D101822B6AF006A58B4 /* ActDevice.h */,
+				57E44D111822B6AF006A58B4 /* ActDevice.mm */,
+				57E44D121822B6AF006A58B4 /* ActDeviceManager.h */,
+				57E44D131822B6AF006A58B4 /* ActDeviceManager.mm */,
+				57E44D141822B6AF006A58B4 /* ActGarminDevice.h */,
+				57E44D151822B6AF006A58B4 /* ActGarminDevice.mm */,
 				57921A5817BEAF48001AD35D /* ActWindowController.h */,
 				57921A5917BEAF48001AD35D /* ActWindowController.mm */,
 				570E6ABC17F4711500A5BB4D /* ActViewController.h */,
@@ -517,9 +532,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				57E44D181822B6AF006A58B4 /* ActGarminDevice.mm in Sources */,
 				571DB99F17BE615C0001514C /* main.m in Sources */,
 				5769E6DD1812D52D00E3D801 /* ActViewLayout.mm in Sources */,
 				571DB9A617BE615C0001514C /* ActAppDelegate.mm in Sources */,
+				57E44D171822B6AF006A58B4 /* ActDeviceManager.mm in Sources */,
 				57193D4D1801A4C9009634B4 /* ActHeaderViewController.mm in Sources */,
 				571DB9B517BE66A60001514C /* ActListViewController.mm in Sources */,
 				57921A5A17BEAF48001AD35D /* ActWindowController.mm in Sources */,
@@ -529,6 +546,7 @@
 				5730789317C56820002C5B28 /* act-gps-chart.cc in Sources */,
 				5734E18C18103C5D007BDC1B /* ActAppKitExtensions.mm in Sources */,
 				5730789617C56E54002C5B28 /* ActChartViewController.mm in Sources */,
+				57E44D161822B6AF006A58B4 /* ActDevice.mm in Sources */,
 				57B51B0C180DFC63004F1A1D /* ActActivityViewController.mm in Sources */,
 				57A7352817CF8A3B0054E3EB /* ActLapViewController.mm in Sources */,
 				57707AE817DFBC4C009BAC5D /* ActMapSource.mm in Sources */,
