@@ -201,6 +201,16 @@ callLayoutSubviews(id delegate, NSView *view)
 
 - (void)drawRect:(NSRect)rect
 {
+  // FIXME: better way to abstract this? Someone (AppKit or CA?) has
+  // turned off font smoothing before calling -drawRect:, but since
+  // we're drawing into an opaque view that will work fine, so turn
+  // it back on for the length of this method call.
+
+  CGContextRef ctx
+    = (CGContextRef) [[NSGraphicsContext currentContext] graphicsPort];
+  CGContextSaveGState(ctx);
+  CGContextSetShouldSmoothFonts(ctx, true);
+
   NSRect bounds = [self bounds];
 
   NSColor *bg = [ActColor darkControlBackgroundColor];
@@ -238,6 +248,8 @@ callLayoutSubviews(id delegate, NSView *view)
 		  + bounds.size.height - (_headerHeight + (SPACING - 1)),
 		  bounds.size.width - 2, 1)];
     }
+
+  CGContextRestoreGState(ctx);
 }
 
 - (void)mouseDown:(NSEvent *)e
