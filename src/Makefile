@@ -8,6 +8,9 @@ includedir=${prefix}/include
 libdir=${exec_prefix}/lib
 libexecdir=${exec_prefix}/libexec
 
+# fixme: apple only
+sdk_path := $(shell xcrun --show-sdk-path)
+
 # files
 
 library_products = libact.a
@@ -93,7 +96,7 @@ act-yearly_src = act-fold
 CXX = clang++
 CC = clang
 
-includes = -I/usr/include/libxml2
+includes = -I$(sdk_path)/usr/include/libxml2
 cxx_standard_flags = -std=c++11 -stdlib=libc++
 optimization_cflags := -Os
 debug_cflags := -g
