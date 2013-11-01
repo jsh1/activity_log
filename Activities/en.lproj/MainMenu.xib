@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="4510" systemVersion="12F45" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="4514" systemVersion="13A603" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
     <dependencies>
-        <deployment defaultVersion="1080" identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="4510"/>
+        <deployment defaultVersion="1090" identifier="macosx"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="4514"/>
     </dependencies>
     <objects>
         <customObject id="-2" userLabel="File's Owner" customClass="NSApplication">
@@ -634,12 +634,12 @@ DQ
                 <menuItem title="View" id="295">
                     <menu key="submenu" title="View" id="296">
                         <items>
-                            <menuItem title="Show List View" keyEquivalent="1" id="eGp-Xe-Xqf">
+                            <menuItem title="Notes View" keyEquivalent="1" id="MPw-5I-FTR">
                                 <connections>
-                                    <action selector="setListViewAction:" target="-1" id="ScQ-T2-4x9"/>
+                                    <action selector="setListViewAction:" target="-1" id="CQU-D5-KUC"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="Show Notes View" tag="1" keyEquivalent="2" id="KyP-Fn-7v4">
+                            <menuItem title="Data View" tag="1" keyEquivalent="2" id="KyP-Fn-7v4">
                                 <connections>
                                     <action selector="setListViewAction:" target="-1" id="8f3-1O-89n"/>
                                 </connections>

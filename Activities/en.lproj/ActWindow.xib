@@ -8,6 +8,7 @@
         <customObject id="-2" userLabel="File's Owner" customClass="ActWindowController">
             <connections>
                 <outlet property="_contentContainer" destination="7" id="bRB-JS-gKk"/>
+                <outlet property="_sourceListView" destination="fiv-w1-hzZ" id="5W2-F8-CxO"/>
                 <outlet property="_splitView" destination="3" id="ESa-Uw-Q4x"/>
                 <outlet property="window" destination="1" id="17"/>
             </connections>
@@ -28,31 +29,53 @@
                         <rect key="frame" x="0.0" y="0.0" width="905" height="665"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <scrollView borderType="none" autohidesScrollers="YES" horizontalLineScroll="10" horizontalPageScroll="10" verticalLineScroll="10" verticalPageScroll="10" usesPredominantAxisScrolling="NO" id="74">
-                                <rect key="frame" x="0.0" y="0.0" width="164" height="665"/>
-                                <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                                <clipView key="contentView" id="VuC-gS-c1e">
-                                    <rect key="frame" x="0.0" y="0.0" width="164" height="665"/>
+                            <scrollView borderType="none" autohidesScrollers="YES" horizontalLineScroll="14" horizontalPageScroll="10" verticalLineScroll="14" verticalPageScroll="10" usesPredominantAxisScrolling="NO" id="GW1-hl-A0x">
+                                <rect key="frame" x="0.0" y="0.0" width="183" height="665"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <clipView key="contentView" id="9HF-fD-1e8">
+                                    <rect key="frame" x="0.0" y="0.0" width="183" height="665"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
-                                        <view id="75">
-                                            <rect key="frame" x="0.0" y="0.0" width="164" height="665"/>
-                                            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                                        </view>
+                                        <outlineView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" selectionHighlightStyle="sourceList" multipleSelection="NO" emptySelection="NO" autosaveColumns="NO" rowHeight="14" indentationPerLevel="14" outlineTableColumn="Mid-BU-mjk" id="fiv-w1-hzZ" customClass="PXSourceList">
+                                            <rect key="frame" x="0.0" y="0.0" width="183" height="665"/>
+                                            <autoresizingMask key="autoresizingMask"/>
+                                            <size key="intercellSpacing" width="3" height="0.0"/>
+                                            <color key="backgroundColor" name="_sourceListBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                            <color key="gridColor" name="gridColor" catalog="System" colorSpace="catalog"/>
+                                            <tableColumns>
+                                                <tableColumn width="180" minWidth="16" maxWidth="1000" id="Mid-BU-mjk">
+                                                    <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left">
+                                                        <font key="font" metaFont="smallSystem"/>
+                                                        <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
+                                                        <color key="backgroundColor" white="0.33333298560000002" alpha="1" colorSpace="calibratedWhite"/>
+                                                    </tableHeaderCell>
+                                                    <textFieldCell key="dataCell" controlSize="small" lineBreakMode="truncatingTail" selectable="YES" editable="YES" alignment="left" title="Text Cell" id="sSe-m8-kJv">
+                                                        <font key="font" metaFont="smallSystem"/>
+                                                        <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                                        <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                                    </textFieldCell>
+                                                    <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
+                                                </tableColumn>
+                                            </tableColumns>
+                                            <connections>
+                                                <outlet property="dataSource" destination="-2" id="kRp-He-nae"/>
+                                                <outlet property="delegate" destination="-2" id="EXE-qa-Kae"/>
+                                            </connections>
+                                        </outlineView>
                                     </subviews>
-                                    <color key="backgroundColor" red="0.16078431904315948" green="0.18431372940540314" blue="0.20392158627510071" alpha="1" colorSpace="deviceRGB"/>
+                                    <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
                                 </clipView>
-                                <scroller key="horizontalScroller" hidden="YES" verticalHuggingPriority="750" horizontal="YES" id="76">
-                                    <rect key="frame" x="0.0" y="650" width="142" height="15"/>
+                                <scroller key="horizontalScroller" hidden="YES" verticalHuggingPriority="750" horizontal="YES" id="lMm-hd-3Vn">
+                                    <rect key="frame" x="1" y="648" width="0.0" height="16"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                 </scroller>
-                                <scroller key="verticalScroller" hidden="YES" verticalHuggingPriority="750" doubleValue="1" horizontal="NO" id="77">
-                                    <rect key="frame" x="142" y="0.0" width="15" height="650"/>
+                                <scroller key="verticalScroller" hidden="YES" verticalHuggingPriority="750" horizontal="NO" id="lS4-lH-jrp">
+                                    <rect key="frame" x="224" y="17" width="15" height="102"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                 </scroller>
                             </scrollView>
                             <customView focusRingType="none" id="7">
-                                <rect key="frame" x="165" y="0.0" width="740" height="665"/>
+                                <rect key="frame" x="184" y="0.0" width="721" height="665"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <connections>
                                     <outlet property="_controller" destination="-2" id="22"/>

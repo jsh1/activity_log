@@ -78,6 +78,15 @@
   [super dealloc];
 }
 
+- (NSView *)initialFirstResponder
+{
+  Class cls = (_listViewType == 0
+	       ? [ActNotesListViewController class]
+	       : [ActListViewController class]);
+
+  return [[self viewControllerWithClass:cls] initialFirstResponder];
+}
+
 - (void)setListViewType:(NSInteger)type
 {
   if (_listViewType != type)

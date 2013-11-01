@@ -81,6 +81,17 @@
 
 - (void)menuNeedsUpdate:(NSMenu *)menu
 {
+  if (menu == _viewMenu)
+    {
+      for (NSMenuItem *item in [menu itemArray])
+	{
+	  SEL sel = [item action];
+	  if (sel == @selector(setWindowModeAction:))
+	    [item setState:[_windowController windowMode] == [item tag]];
+	  else if (sel == @selector(setListViewAction:))
+	    [item setState:[_windowController listViewType] == [item tag]];
+	}
+    }
 }
 
 @end

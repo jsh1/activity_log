@@ -2,17 +2,30 @@
 
 #import "ActWindowController.h"
 
+#import "ActDevice.h"
+#import "ActDeviceManager.h"
 #import "ActImporterViewController.h"
 #import "ActSummaryViewController.h"
 #import "ActViewerViewController.h"
 #import "ActSplitView.h"
 #import "ActTextField.h"
 
+#import "PXSourceList.h"
+
 #import "act-config.h"
 #import "act-format.h"
 #import "act-new.h"
 
 #define BODY_WRAP_COLUMN 72
+
+enum ActSourceListSections
+{
+  ActSourceList_Devices,
+  ActSourceList_Activities,
+  ActSourceList_Date,
+  ActSourceList_Queries,
+  ActSourceListCount,
+};
 
 NSString *const ActActivityListDidChange = @"ActActivityListDidChange";
 NSString *const ActSelectedActivityDidChange = @"ActSelectedActivityDidChange";
@@ -21,6 +34,7 @@ NSString *const ActCurrentTimeDidChange = @"ActCurrentTimeDidChange";
 NSString *const ActCurrentTimeWillChange = @"ActCurrentTimeWillChange";
 NSString *const ActActivityDidChangeField = @"ActActivityDidChangeField";
 NSString *const ActActivityDidChangeBody = @"ActActivityDidChangeBody";
+NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
 
 @interface ActWindowController ()
 - (void)selectedActivityDidChange;
@@ -66,15 +80,23 @@ NSString *const ActActivityDidChangeBody = @"ActActivityDidChangeBody";
 
 - (void)windowDidLoad
 {
+  NSWindow *window = [self window];
+
   // 10.9 enables layer-backed views on the scrolling list view
   // implicitly, so we may as well enable them for the entire window.
   // Simple subview hierarchies that don't need multiple layers will
   // use inclusive (single-layer) mode (which also avoids any special
   // tricks being needed for font-smoothing).
 
-  [[[self window] contentView] setWantsLayer:YES];
+  [[window contentView] setWantsLayer:YES];
 
   [self addSplitView:_splitView identifier:@"Window"];
+
+  [_sourceListView expandItem:@"DEVICES"];
+  [_sourceListView expandItem:@"ACTIVITIES"];
+  [_sourceListView expandItem:@"DATE"];
+  [_sourceListView expandItem:@"QUERIES"];
+  [_sourceListView selectRowIndexes:[NSIndexSet indexSetWithIndex:[_sourceListView rowForItem:@"ALL"]] byExtendingSelection:NO];
 
   _fieldEditor = [[ActFieldEditor alloc] initWithFrame:NSZeroRect];
 
@@ -105,11 +127,17 @@ NSString *const ActActivityDidChangeBody = @"ActActivityDidChangeBody";
 
   [[NSNotificationCenter defaultCenter]
    addObserver:self selector:@selector(windowWillClose:)
-   name:NSWindowWillCloseNotification object:[self window]];
+   name:NSWindowWillCloseNotification object:window];
 
   [self setWindowMode:ActWindowMode_Viewer];
 
   [self loadActivities];
+
+  [window setInitialFirstResponder:
+   [[self viewControllerWithClass:[ActViewerViewController class]]
+    initialFirstResponder]];
+
+  [window makeFirstResponder:[window initialFirstResponder]];
 }
 
 - (void)dealloc
@@ -118,6 +146,7 @@ NSString *const ActActivityDidChangeBody = @"ActActivityDidChangeBody";
   [_splitViews release];
   [_undoManager release];
   [_fieldEditor release];
+  [_selectedDevice release];
 
   [super dealloc];
 }
@@ -241,6 +270,20 @@ NSString *const ActActivityDidChangeBody = @"ActActivityDidChangeBody";
     }
 }
 
+- (NSInteger)listViewType
+{
+  return [(ActViewerViewController *)
+	  [self viewControllerWithClass:[ActViewerViewController class]]
+	  listViewType];
+}
+
+- (void)setListViewType:(NSInteger)x
+{
+  [(ActViewerViewController *)
+   [self viewControllerWithClass:[ActViewerViewController class]]
+   setListViewType:x];
+}
+
 - (act::database *)database
 {
   if (!_database)
@@ -347,6 +390,23 @@ NSString *const ActActivityDidChangeBody = @"ActActivityDidChangeBody";
 
       [[NSNotificationCenter defaultCenter]
        postNotificationName:ActCurrentTimeDidChange object:self];
+    }
+}
+
+- (ActDevice *)selectedDevice
+{
+  return _selectedDevice;
+}
+
+- (void)setSelectedDevice:(ActDevice *)device
+{
+  if (_selectedDevice != device)
+    {
+      [_selectedDevice release];
+      _selectedDevice = [device retain];
+
+      [[NSNotificationCenter defaultCenter]
+       postNotificationName:ActSelectedDeviceDidChange object:self];
     }
 }
 
@@ -804,10 +864,7 @@ NSString *const ActActivityDidChangeBody = @"ActActivityDidChangeBody";
 - (IBAction)setListViewAction:(id)sender
 {
   [self setWindowMode:ActWindowMode_Viewer];
-
-  [(ActViewerViewController *)
-   [self viewControllerWithClass:[ActViewerViewController class]]
-   setListViewType:[sender tag]];
+  [self setListViewType:[sender tag]];
 }
 
 - (void)windowWillClose:(NSNotification *)note
@@ -862,6 +919,122 @@ NSString *const ActActivityDidChangeBody = @"ActActivityDidChangeBody";
     return [(ActSplitView *)view shouldAdjustSizeOfSubview:subview];
   else
     return YES;
+}
+
+// PXSourceListDataSource methods
+
+- (NSUInteger)sourceList:(PXSourceList *)lst numberOfChildrenOfItem:(id)item
+{
+  if (item == nil)
+    return ActSourceListCount;
+  else if ([item isEqualToString:@"DEVICES"])
+    return [[[ActDeviceManager sharedDeviceManager] devices] count];
+  else if ([item isEqualToString:@"ACTIVITIES"])
+    return 1;
+  else if ([item isEqualToString:@"DATE"])
+    return 0;
+  else if ([item isEqualToString:@"QUERIES"])
+    return 0;
+  else
+    return 0;
+}
+
+- (id)sourceList:(PXSourceList *)lst child:(NSUInteger)idx ofItem:(id)item
+{
+  if (item == nil)
+    {
+      switch (idx)
+	{
+	case ActSourceList_Devices:
+	  return @"DEVICES";
+	case ActSourceList_Activities:
+	  return @"ACTIVITIES";
+	case ActSourceList_Date:
+	  return @"DATE";
+	case ActSourceList_Queries:
+	  return @"QUERIES";
+	default:
+	  return nil;
+	}
+    }
+  else if ([item isKindOfClass:[NSString class]])
+    {
+      if ([item isEqualToString:@"DEVICES"])
+	{
+	}
+      else if ([item isEqualToString:@"ACTIVITIES"])
+	{
+	  if (idx == 0)
+	    return @"ALL";
+
+	  // FIXME: add different types (and subtypes?)
+	}
+      else if ([item isEqualToString:@"DATE"])
+	{
+	}
+      else if ([item isEqualToString:@"QUERIES"])
+	{
+	}
+    }
+
+  return nil;
+}
+
+- (id)sourceList:(PXSourceList *)lst objectValueForItem:(id)item
+{
+  if ([item isKindOfClass:[NSString class]])
+    return item;
+  else if ([item isKindOfClass:[ActDevice class]])
+    return [(ActDevice *)item name];
+  else
+    return nil;
+}
+
+- (BOOL)sourceList:(PXSourceList *)lst isItemExpandable:(id)item
+{
+  if (item == nil)
+    return YES;
+  else if ([item isKindOfClass:[NSString class]])
+    {
+      return ([item isEqualToString:@"DEVICES"]
+	      || [item isEqualToString:@"ACTIVITIES"]
+	      || [item isEqualToString:@"DATE"]
+	      || [item isEqualToString:@"QUERIES"]);
+    }
+  else
+    return NO;
+}
+
+- (BOOL)sourceList:(PXSourceList *)lst itemHasBadge:(id)item
+{
+  return NO;
+}
+
+- (NSInteger)sourceList:(PXSourceList *)lst badgeValueForItem:(id)item
+{
+  return 0;
+}
+
+- (BOOL)sourceList:(PXSourceList *)lst itemHasIcon:(id)item
+{
+  return NO;
+}
+
+- (NSImage*)sourceList:(PXSourceList *)lst iconForItem:(id)item
+{
+  return nil;
+}
+
+// PXSourceListDelegate methods
+
+- (CGFloat)sourceList:(PXSourceList *)lst heightOfRowByItem:(id)item
+{
+  return 24;
+}
+
+- (BOOL)sourceList:(PXSourceList *)lst shouldEditItem:(id)item
+{
+  return NO;
 }
 
 @end

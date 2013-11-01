@@ -47,6 +47,7 @@
 		5730789617C56E54002C5B28 /* ActChartViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = 5730789517C56E54002C5B28 /* ActChartViewController.mm */; };
 		5734E189181007EB007BDC1B /* ActColor.m in Sources */ = {isa = PBXBuildFile; fileRef = 5734E188181007EB007BDC1B /* ActColor.m */; };
 		5734E18C18103C5D007BDC1B /* ActAppKitExtensions.mm in Sources */ = {isa = PBXBuildFile; fileRef = 5734E18B18103C5D007BDC1B /* ActAppKitExtensions.mm */; };
+		573ABAF71823FC05004FAF17 /* PXSourceList.m in Sources */ = {isa = PBXBuildFile; fileRef = 573ABAF41823FC05004FAF17 /* PXSourceList.m */; };
 		57638D5017DB72EA00BE93AC /* act-intensity-points.cc in Sources */ = {isa = PBXBuildFile; fileRef = 57638D4E17DB72EA00BE93AC /* act-intensity-points.cc */; };
 		57638D5117DB72EA00BE93AC /* act-intensity-points.h in Headers */ = {isa = PBXBuildFile; fileRef = 57638D4F17DB72EA00BE93AC /* act-intensity-points.h */; };
 		5769E6DA1812D2DD00E3D801 /* ActCollapsibleView.mm in Sources */ = {isa = PBXBuildFile; fileRef = 5769E6D91812D2DD00E3D801 /* ActCollapsibleView.mm */; };
@@ -166,6 +167,10 @@
 		5734E188181007EB007BDC1B /* ActColor.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ActColor.m; sourceTree = "<group>"; };
 		5734E18A18103C5D007BDC1B /* ActAppKitExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActAppKitExtensions.h; sourceTree = "<group>"; };
 		5734E18B18103C5D007BDC1B /* ActAppKitExtensions.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ActAppKitExtensions.mm; sourceTree = "<group>"; };
+		573ABAF31823FC05004FAF17 /* PXSourceList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PXSourceList.h; path = PXSourceList/PXSourceList.h; sourceTree = "<group>"; };
+		573ABAF41823FC05004FAF17 /* PXSourceList.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = PXSourceList.m; path = PXSourceList/PXSourceList.m; sourceTree = "<group>"; };
+		573ABAF51823FC05004FAF17 /* PXSourceListDataSource.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PXSourceListDataSource.h; path = PXSourceList/PXSourceListDataSource.h; sourceTree = "<group>"; };
+		573ABAF61823FC05004FAF17 /* PXSourceListDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PXSourceListDelegate.h; path = PXSourceList/PXSourceListDelegate.h; sourceTree = "<group>"; };
 		57638D4E17DB72EA00BE93AC /* act-intensity-points.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "act-intensity-points.cc"; path = "../src/act-intensity-points.cc"; sourceTree = "<group>"; };
 		57638D4F17DB72EA00BE93AC /* act-intensity-points.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "act-intensity-points.h"; path = "../src/act-intensity-points.h"; sourceTree = "<group>"; };
 		5769E6D81812D2DD00E3D801 /* ActCollapsibleView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActCollapsibleView.h; sourceTree = "<group>"; };
@@ -253,6 +258,7 @@
 			children = (
 				571DB99817BE615C0001514C /* Source */,
 				571DB9B817BE671A0001514C /* Library */,
+				573ABAF21823FBBF004FAF17 /* PXSourceList */,
 				57DB7BB417E0D5300093C735 /* Nibs */,
 				571DB9B717BE66CC0001514C /* Resources */,
 				571DB99917BE615C0001514C /* Supporting Files */,
@@ -268,7 +274,7 @@
 				571DB9BD17BE67850001514C /* libact.a */,
 			);
 			name = Products;
-			sourceTree = "<group>";
+			sourceTree = SOURCE_ROOT;
 		};
 		571DB99117BE615C0001514C /* Frameworks */ = {
 			isa = PBXGroup;
@@ -279,7 +285,7 @@
 				571DB9FD17BE68090001514C /* libxml2.dylib */,
 			);
 			name = Frameworks;
-			sourceTree = "<group>";
+			sourceTree = SOURCE_ROOT;
 		};
 		571DB99817BE615C0001514C /* Source */ = {
 			isa = PBXGroup;
@@ -359,7 +365,7 @@
 				571DB9A017BE615C0001514C /* Activities-Prefix.pch */,
 			);
 			name = "Supporting Files";
-			sourceTree = "<group>";
+			sourceTree = SOURCE_ROOT;
 		};
 		571DB9B717BE66CC0001514C /* Resources */ = {
 			isa = PBXGroup;
@@ -374,7 +380,7 @@
 				57DB7BAD17E0D4790093C735 /* openstreetmap-tiles.json */,
 			);
 			name = Resources;
-			sourceTree = "<group>";
+			sourceTree = SOURCE_ROOT;
 		};
 		571DB9B817BE671A0001514C /* Library */ = {
 			isa = PBXGroup;
@@ -417,7 +423,18 @@
 				571DB9DE17BE67CD0001514C /* act-util.h */,
 			);
 			name = Library;
-			sourceTree = "<group>";
+			sourceTree = SOURCE_ROOT;
+		};
+		573ABAF21823FBBF004FAF17 /* PXSourceList */ = {
+			isa = PBXGroup;
+			children = (
+				573ABAF31823FC05004FAF17 /* PXSourceList.h */,
+				573ABAF41823FC05004FAF17 /* PXSourceList.m */,
+				573ABAF51823FC05004FAF17 /* PXSourceListDataSource.h */,
+				573ABAF61823FC05004FAF17 /* PXSourceListDelegate.h */,
+			);
+			name = PXSourceList;
+			sourceTree = SOURCE_ROOT;
 		};
 		57DB7BB417E0D5300093C735 /* Nibs */ = {
 			isa = PBXGroup;
@@ -436,7 +453,7 @@
 				570E6AC517F474F700A5BB4D /* ActSummaryView.xib */,
 			);
 			name = Nibs;
-			sourceTree = "<group>";
+			sourceTree = SOURCE_ROOT;
 		};
 /* End PBXGroup section */
 
@@ -581,6 +598,7 @@
 				57193D4617FDFC9D009634B4 /* ActNotesListViewController.mm in Sources */,
 				5711D4A917EA09B6003157AF /* ActSplitView.mm in Sources */,
 				5769E6DA1812D2DD00E3D801 /* ActCollapsibleView.mm in Sources */,
+				573ABAF71823FC05004FAF17 /* PXSourceList.m in Sources */,
 				57C5705C17EB18CB0000AF8D /* ActTableView.mm in Sources */,
 				57C7828617EF2F21003413EA /* act-new.cc in Sources */,
 				57C8663317F096BC00241C7D /* ActTextField.mm in Sources */,

@@ -2,6 +2,9 @@
 
 #import <AppKit/AppKit.h>
 
+#import "PXSourceListDataSource.h"
+#import "PXSourceListDelegate.h"
+
 #import "act-database.h"
 
 @class ActViewController;
@@ -14,6 +17,7 @@ extern NSString *const ActCurrentTimeWillChange;
 extern NSString *const ActCurrentTimeDidChange;
 extern NSString *const ActActivityDidChangeField;
 extern NSString *const ActActivityDidChangeBody;
+extern NSString *const ActSelectedDeviceDidChange;
 
 enum ActWindowMode
 {
@@ -23,10 +27,14 @@ enum ActWindowMode
   ActWindowMode_Count,
 };
 
-@interface ActWindowController : NSWindowController <NSSplitViewDelegate>
+@class ActDevice;
+
+@interface ActWindowController : NSWindowController
+    <NSSplitViewDelegate, PXSourceListDataSource, PXSourceListDelegate>
 {
   IBOutlet ActSplitView *_splitView;
 
+  IBOutlet PXSourceList *_sourceListView;
   IBOutlet NSView *_contentContainer;
 
   NSMutableArray *_viewControllers;
@@ -46,9 +54,12 @@ enum ActWindowMode
   std::unique_ptr<act::activity> _selectedActivity;
   NSInteger _selectedLapIndex;
   double _currentTime;
+
+  ActDevice *_selectedDevice;
 }
 
 @property(nonatomic) NSInteger windowMode;
+@property(nonatomic) NSInteger listViewType;
 
 @property(nonatomic, readonly) act::database *database;
 
@@ -57,6 +68,8 @@ enum ActWindowMode
 @property(nonatomic, readonly) act::activity *selectedActivity;
 @property(nonatomic) NSInteger selectedLapIndex;
 @property(nonatomic) double currentTime;
+
+@property(nonatomic, retain) ActDevice *selectedDevice;
 
 @property(nonatomic, readonly) ActFieldEditor *fieldEditor;
 @property(nonatomic, readonly) NSUndoManager *undoManager;
