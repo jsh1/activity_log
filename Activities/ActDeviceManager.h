@@ -11,6 +11,8 @@
 
 - (NSArray *)devices;
 
+- (void)rescanVolumes;
+
 @end
 
 // notifications

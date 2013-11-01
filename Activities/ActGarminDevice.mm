@@ -6,7 +6,7 @@
 // in the root of the device's filesystem. But that's a lot of work
 // that's not really needed right now.
 
-#define ACTIVITTY_PATH "Garmin/Activities"
+#define ACTIVITTY_PATH "Activities"
 
 @implementation ActGarminDevice
 
@@ -32,7 +32,7 @@
 
 - (NSString *)name
 {
-  return @"Garmin Device";
+  return [_path lastPathComponent];
 }
 
 - (NSArray *)activityURLs
