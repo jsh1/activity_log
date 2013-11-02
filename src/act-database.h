@@ -90,6 +90,17 @@ public:
       virtual bool operator() (const activity &a) const;
     };
 
+  class equal_term : public query_term
+    {
+      std::string field;
+      std::string value;
+
+    public:
+      equal_term(const std::string &field, const std::string &value);
+
+      virtual bool operator() (const activity &a) const;
+    };
+
   class matches_term : public query_term
     {
       std::string field;

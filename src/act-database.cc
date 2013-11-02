@@ -73,19 +73,24 @@ database::execute_query(const query &q, std::vector<item *> &result)
 
   for (auto &it : _items)
     {
-      bool matched = false;
+      // If no date ranges everything matches.
 
-      for (const auto &range : q.date_ranges())
+      if (q.date_ranges().size() != 0)
 	{
-	  if (range.contains(it.date()))
-	    {
-	      matched = true;
-	      break;
-	    }
-	}
+	  bool matched = false;
 
-      if (!matched)
-	continue;
+	  for (const auto &range : q.date_ranges())
+	    {
+	      if (range.contains(it.date()))
+		{
+		  matched = true;
+		  break;
+		}
+	    }
+
+	  if (!matched)
+	    continue;
+	}
 
       if (q.term())
 	{
@@ -257,6 +262,22 @@ database::or_term::operator() (const activity &a) const
       return true;
 
   return false;
+}
+
+database::equal_term::equal_term(const std::string &f,
+				 const std::string &v)
+: field(f),
+  value(v)
+{
+}
+
+bool
+database::equal_term::operator()(const activity &a) const
+{
+  if (const std::string *str = a.storage()->field_ptr(field))
+    return *str == value;
+  else
+    return false;
 }
 
 database::matches_term::matches_term(const std::string &f,
