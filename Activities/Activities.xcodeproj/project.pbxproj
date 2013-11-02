@@ -48,6 +48,9 @@
 		5734E189181007EB007BDC1B /* ActColor.m in Sources */ = {isa = PBXBuildFile; fileRef = 5734E188181007EB007BDC1B /* ActColor.m */; };
 		5734E18C18103C5D007BDC1B /* ActAppKitExtensions.mm in Sources */ = {isa = PBXBuildFile; fileRef = 5734E18B18103C5D007BDC1B /* ActAppKitExtensions.mm */; };
 		573ABAF71823FC05004FAF17 /* PXSourceList.m in Sources */ = {isa = PBXBuildFile; fileRef = 573ABAF41823FC05004FAF17 /* PXSourceList.m */; };
+		5755061E1824721D00A69209 /* ActSourceListDeviceItem.mm in Sources */ = {isa = PBXBuildFile; fileRef = 575506191824721D00A69209 /* ActSourceListDeviceItem.mm */; };
+		5755061F1824721D00A69209 /* ActSourceListItem.mm in Sources */ = {isa = PBXBuildFile; fileRef = 5755061B1824721D00A69209 /* ActSourceListItem.mm */; };
+		575506201824721D00A69209 /* ActSourceListQueryItem.mm in Sources */ = {isa = PBXBuildFile; fileRef = 5755061D1824721D00A69209 /* ActSourceListQueryItem.mm */; };
 		57638D5017DB72EA00BE93AC /* act-intensity-points.cc in Sources */ = {isa = PBXBuildFile; fileRef = 57638D4E17DB72EA00BE93AC /* act-intensity-points.cc */; };
 		57638D5117DB72EA00BE93AC /* act-intensity-points.h in Headers */ = {isa = PBXBuildFile; fileRef = 57638D4F17DB72EA00BE93AC /* act-intensity-points.h */; };
 		5769E6DA1812D2DD00E3D801 /* ActCollapsibleView.mm in Sources */ = {isa = PBXBuildFile; fileRef = 5769E6D91812D2DD00E3D801 /* ActCollapsibleView.mm */; };
@@ -171,6 +174,12 @@
 		573ABAF41823FC05004FAF17 /* PXSourceList.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = PXSourceList.m; path = PXSourceList/PXSourceList.m; sourceTree = "<group>"; };
 		573ABAF51823FC05004FAF17 /* PXSourceListDataSource.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PXSourceListDataSource.h; path = PXSourceList/PXSourceListDataSource.h; sourceTree = "<group>"; };
 		573ABAF61823FC05004FAF17 /* PXSourceListDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PXSourceListDelegate.h; path = PXSourceList/PXSourceListDelegate.h; sourceTree = "<group>"; };
+		575506181824721D00A69209 /* ActSourceListDeviceItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActSourceListDeviceItem.h; sourceTree = "<group>"; };
+		575506191824721D00A69209 /* ActSourceListDeviceItem.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ActSourceListDeviceItem.mm; sourceTree = "<group>"; };
+		5755061A1824721D00A69209 /* ActSourceListItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActSourceListItem.h; sourceTree = "<group>"; };
+		5755061B1824721D00A69209 /* ActSourceListItem.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ActSourceListItem.mm; sourceTree = "<group>"; };
+		5755061C1824721D00A69209 /* ActSourceListQueryItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActSourceListQueryItem.h; sourceTree = "<group>"; };
+		5755061D1824721D00A69209 /* ActSourceListQueryItem.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ActSourceListQueryItem.mm; sourceTree = "<group>"; };
 		57638D4E17DB72EA00BE93AC /* act-intensity-points.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "act-intensity-points.cc"; path = "../src/act-intensity-points.cc"; sourceTree = "<group>"; };
 		57638D4F17DB72EA00BE93AC /* act-intensity-points.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "act-intensity-points.h"; path = "../src/act-intensity-points.h"; sourceTree = "<group>"; };
 		5769E6D81812D2DD00E3D801 /* ActCollapsibleView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActCollapsibleView.h; sourceTree = "<group>"; };
@@ -300,6 +309,12 @@
 				57E44D151822B6AF006A58B4 /* ActGarminDevice.mm */,
 				57921A5817BEAF48001AD35D /* ActWindowController.h */,
 				57921A5917BEAF48001AD35D /* ActWindowController.mm */,
+				5755061A1824721D00A69209 /* ActSourceListItem.h */,
+				5755061B1824721D00A69209 /* ActSourceListItem.mm */,
+				575506181824721D00A69209 /* ActSourceListDeviceItem.h */,
+				575506191824721D00A69209 /* ActSourceListDeviceItem.mm */,
+				5755061C1824721D00A69209 /* ActSourceListQueryItem.h */,
+				5755061D1824721D00A69209 /* ActSourceListQueryItem.mm */,
 				570E6ABC17F4711500A5BB4D /* ActViewController.h */,
 				570E6ABD17F4711500A5BB4D /* ActViewController.mm */,
 				57E44D1B1822D630006A58B4 /* ActViewerViewController.h */,
@@ -577,6 +592,7 @@
 				571DB9B517BE66A60001514C /* ActListViewController.mm in Sources */,
 				57921A5A17BEAF48001AD35D /* ActWindowController.mm in Sources */,
 				579772E517C4F63900AA2E9D /* ActHeaderView.mm in Sources */,
+				5755061E1824721D00A69209 /* ActSourceListDeviceItem.mm in Sources */,
 				579772E817C4FB0A00AA2E9D /* ActHeaderFieldView.mm in Sources */,
 				579772EB17C5015600AA2E9D /* ActFoundationExtensions.mm in Sources */,
 				5730789317C56820002C5B28 /* act-gps-chart.cc in Sources */,
@@ -590,8 +606,10 @@
 				57707AE917DFBC4C009BAC5D /* ActMapView.mm in Sources */,
 				57707AEA17DFBC4C009BAC5D /* ActTileJSONMapSource.mm in Sources */,
 				57707AED17DFBF99009BAC5D /* ActMapViewController.mm in Sources */,
+				5755061F1824721D00A69209 /* ActSourceListItem.mm in Sources */,
 				578D797A17E75DE300E50C29 /* ActSummaryViewController.mm in Sources */,
 				570E6AD017F717FB00A5BB4D /* ActURLCache.m in Sources */,
+				575506201824721D00A69209 /* ActSourceListQueryItem.mm in Sources */,
 				5734E189181007EB007BDC1B /* ActColor.m in Sources */,
 				570E6ABE17F4711500A5BB4D /* ActViewController.mm in Sources */,
 				578D797D17E7671000E50C29 /* ActHorizontalBoxView.mm in Sources */,

@@ -5,6 +5,9 @@
 #import "ActDevice.h"
 #import "ActDeviceManager.h"
 #import "ActImporterViewController.h"
+#import "ActSourceListItem.h"
+#import "ActSourceListDeviceItem.h"
+#import "ActSourceListQueryItem.h"
 #import "ActSummaryViewController.h"
 #import "ActViewerViewController.h"
 #import "ActSplitView.h"
@@ -61,6 +64,78 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
   return nil;
 }
 
+- (ActSourceListItem *)sourceListItemWithPath:(NSString *)path
+{
+  NSArray *items = _sourceListItems;
+
+  while (1)
+    {
+      NSString *rest = nil;
+
+      NSRange range = [path rangeOfString:@"."];
+      if (range.length != 0)
+	{
+	  rest = [path substringFromIndex:range.location+range.length];
+	  path = [path substringToIndex:range.location];
+	}
+
+      BOOL found = NO;
+      for (ActSourceListItem *item in items)
+	{
+	  if ([[item name] isEqualToString:path])
+	    {
+	      if (rest == nil)
+		return item;
+
+	      found = YES;
+	      items = [item subitems];
+	      path = rest;
+	      break;
+	    }
+	}
+      if (!found)
+	return nil;
+    }
+
+  // not reached
+}
+
+- (void)updateSourceList
+{
+  // devices are handled separate by -devicesDidChange:
+
+  if (ActSourceListItem *item = [self sourceListItemWithPath:@"ACTIVITIES"])
+    {
+      [item setSubitems:[NSArray array]];
+      [item addSubitem:[ActSourceListQueryItem itemWithName:@"All"]];
+
+      // FIXME: should be auto-generated
+
+      NSDictionary *dict = @{@"Running": @"run",
+			     @"Cycling": @"bike",
+			     @"Walking": @"hike"};
+
+      for (NSString *name in dict)
+	{
+	  if (ActSourceListQueryItem *sub
+	      = [ActSourceListQueryItem itemWithName:name])
+	    {
+	      std::string type([[dict objectForKey:name] UTF8String]);
+	      act::database::query_term_ref
+	        term (new act::database::equal_term("Activity", type));
+	      [sub query].set_term(term);
+	      [item addSubitem:sub];
+	    }
+	}
+
+      [item foreachItem:^void (ActSourceListItem *it) {[it setController:self];}];
+
+      [_sourceListView reloadItem:item reloadChildren:YES];
+    }
+
+  // FIXME: implement the rest of this.
+}
+
 - (id)init
 {
   self = [super initWithWindow:nil];
@@ -72,6 +147,7 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
    name:ActDeviceManagerDevicesDidChange
    object:[ActDeviceManager sharedDeviceManager]];
 
+  _sourceListItems = [[NSMutableArray alloc] init];
   _viewControllers = [[NSMutableArray alloc] init];
   _splitViews = [[NSMapTable mapTableWithKeyOptions:NSMapTableStrongMemory
 		  valueOptions:NSMapTableWeakMemory] retain];
@@ -79,6 +155,17 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
 
   _selectedLapIndex = -1;
   _currentTime = -1;
+
+  [_sourceListItems addObject:[ActSourceListItem itemWithName:@"DEVICES"]];
+  [_sourceListItems addObject:[ActSourceListItem itemWithName:@"ACTIVITIES"]];
+  [_sourceListItems addObject:[ActSourceListItem itemWithName:@"DATE"]];
+  [_sourceListItems addObject:[ActSourceListItem itemWithName:@"QUERIES"]];
+
+  for (ActSourceListItem *item in _sourceListItems)
+    [item setExpandable:YES];
+
+  [self updateSourceList];
+  [self devicesDidChange:nil];
 
   return self;
 }
@@ -96,11 +183,6 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
   [[window contentView] setWantsLayer:YES];
 
   [self addSplitView:_splitView identifier:@"Window"];
-
-  [_sourceListView expandItem:@"DEVICES"];
-  [_sourceListView expandItem:@"ACTIVITIES"];
-  [_sourceListView expandItem:@"DATE"];
-  [_sourceListView expandItem:@"QUERIES"];
 
   _fieldEditor = [[ActFieldEditor alloc] initWithFrame:NSZeroRect];
 
@@ -133,8 +215,13 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
    addObserver:self selector:@selector(windowWillClose:)
    name:NSWindowWillCloseNotification object:window];
 
+  for (ActSourceListItem *item in _sourceListItems)
+    [_sourceListView expandItem:item];
+
   [_sourceListView selectRowIndexes:
-   [NSIndexSet indexSetWithIndex:[_sourceListView rowForItem:@"ALL"]]
+   [NSIndexSet indexSetWithIndex:
+    [_sourceListView rowForItem:
+     [self sourceListItemWithPath:@"ACTIVITIES.All"]]]
    byExtendingSelection:NO];
 
   [self setWindowMode:ActWindowMode_Viewer];
@@ -150,6 +237,7 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
 {
   [[NSNotificationCenter defaultCenter] removeObserver:self];
 
+  [_sourceListItems release];
   [_viewControllers release];
   [_splitViews release];
   [_undoManager release];
@@ -300,7 +388,7 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
   return _database.get();
 }
 
-- (void)executeQuery:(const act::database::query &)query
+- (void)showQueryResults:(const act::database::query &)query
 {
   std::vector<act::database::item *> items;
   [self database]->execute_query(query, items);
@@ -881,7 +969,16 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
 
 - (void)devicesDidChange:(NSNotification *)note
 {
-  [_sourceListView reloadItem:@"DEVICES" reloadChildren:YES];
+  ActSourceListItem *item = [self sourceListItemWithPath:@"DEVICES"];
+
+  [item setSubitems:[NSArray array]];
+
+  for (ActDevice *device in [[ActDeviceManager sharedDeviceManager] devices])
+    [item addSubitem:[ActSourceListDeviceItem itemWithDevice:device]];
+
+  [item foreachItem:^void (ActSourceListItem *it) {[it setController:self];}];
+
+  [_sourceListView reloadItem:item reloadChildren:YES];
 }
 
 - (void)windowWillClose:(NSNotification *)note
@@ -943,128 +1040,47 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
 - (NSUInteger)sourceList:(PXSourceList *)lst numberOfChildrenOfItem:(id)item
 {
   if (item == nil)
-    return ActSourceListCount;
-  else if ([item isEqualToString:@"DEVICES"])
-    return [[[ActDeviceManager sharedDeviceManager] devices] count];
-  else if ([item isEqualToString:@"ACTIVITIES"])
-    return 1;
-  else if ([item isEqualToString:@"DATE"])
-    return 0;
-  else if ([item isEqualToString:@"QUERIES"])
-    return 0;
-
-  return 0;
+    return [_sourceListItems count];
+  else
+    return [(ActSourceListItem *)item subitemsCount];
 }
 
 - (id)sourceList:(PXSourceList *)lst child:(NSUInteger)idx ofItem:(id)item
 {
   if (item == nil)
-    {
-      switch (idx)
-	{
-	case ActSourceList_Devices:
-	  return @"DEVICES";
-	case ActSourceList_Activities:
-	  return @"ACTIVITIES";
-	case ActSourceList_Date:
-	  return @"DATE";
-	case ActSourceList_Queries:
-	  return @"QUERIES";
-	default:
-	  return nil;
-	}
-    }
-  else if ([item isKindOfClass:[NSString class]])
-    {
-      if ([item isEqualToString:@"DEVICES"])
-	{
-	  NSArray *array = [[ActDeviceManager sharedDeviceManager] devices];
-	  if (idx < [array count])
-	    return [array objectAtIndex:idx];
-	  else
-	    return nil;
-	}
-      else if ([item isEqualToString:@"ACTIVITIES"])
-	{
-	  if (idx == 0)
-	    return @"ALL";
-
-	  // FIXME: add different types (and subtypes?)
-	}
-      else if ([item isEqualToString:@"DATE"])
-	{
-	}
-      else if ([item isEqualToString:@"QUERIES"])
-	{
-	}
-    }
-
-  return nil;
+    return [_sourceListItems objectAtIndex:idx];
+  else
+    return [[(ActSourceListItem *)item subitems] objectAtIndex:idx];
 }
 
 - (id)sourceList:(PXSourceList *)lst objectValueForItem:(id)item
 {
-  if ([item isKindOfClass:[NSString class]])
-    return item;
-  else if ([item isKindOfClass:[ActDevice class]])
-    return [(ActDevice *)item name];
-
-  return nil;
+  return [(ActSourceListItem *)item name];
 }
 
 - (BOOL)sourceList:(PXSourceList *)lst isItemExpandable:(id)item
 {
-  if (item == nil)
-    return YES;
-  else if ([item isKindOfClass:[NSString class]])
-    {
-      return ([item isEqualToString:@"DEVICES"]
-	      || [item isEqualToString:@"ACTIVITIES"]
-	      || [item isEqualToString:@"DATE"]
-	      || [item isEqualToString:@"QUERIES"]);
-    }
-
-  return NO;
+  return [(ActSourceListItem *)item isExpandable];
 }
 
 - (BOOL)sourceList:(PXSourceList *)lst itemHasBadge:(id)item
 {
-  if ([item isKindOfClass:[NSString class]])
-    {
-      if ([item isEqualToString:@"ALL"])
-	return YES;
-    }      
-  else if ([item isKindOfClass:[ActDevice class]])
-    {
-      return YES;
-    }
-
-  return NO;
+  return [(ActSourceListItem *)item hasBadge];
 }
 
 - (NSInteger)sourceList:(PXSourceList *)lst badgeValueForItem:(id)item
 {
-  if ([item isKindOfClass:[NSString class]])
-    {
-      if ([item isEqualToString:@"ALL"])
-	return _activityList.size();
-    }
-  else if ([item isKindOfClass:[ActDevice class]])
-    {
-      return [[(ActDevice *)item activityURLs] count];
-    }
-
-  return 0;
+  return [(ActSourceListItem *)item badgeValue];
 }
 
 - (BOOL)sourceList:(PXSourceList *)lst itemHasIcon:(id)item
 {
-  return NO;
+  return [(ActSourceListItem *)item hasIcon];
 }
 
 - (NSImage*)sourceList:(PXSourceList *)lst iconForItem:(id)item
 {
-  return nil;
+  return [(ActSourceListItem *)item iconImage];
 }
 
 // PXSourceListDelegate methods
@@ -1081,24 +1097,10 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
 
 - (void)sourceListSelectionDidChange:(NSNotification *)note
 {
-  id item = [_sourceListView itemAtRow:[_sourceListView selectedRow]];
+  ActSourceListItem *item = [_sourceListView itemAtRow:
+			     [_sourceListView selectedRow]];
 
-  if ([item isKindOfClass:[NSString class]])
-    {
-      if ([item isEqualToString:@"ALL"])
-	{
-	  act::database::query query;
-	  query.add_date_range(act::date_range(0, time(nullptr)));
-
-	  [self executeQuery:query];
-	  [self setWindowMode:ActWindowMode_Viewer];
-	}
-    }
-  else if ([item isKindOfClass:[ActDevice class]])
-    {
-      [self setSelectedDevice:(ActDevice *)item];
-      [self setWindowMode:ActWindowMode_Importer];
-    }
+  [item select];
 }
 
 @end

@@ -7,7 +7,7 @@
 
 #import "act-database.h"
 
-@class ActViewController;
+@class ActSourceListItem, ActViewController;
 @class ActFieldEditor, ActSplitView;
 
 extern NSString *const ActActivityListDidChange;
@@ -37,6 +37,8 @@ enum ActWindowMode
   IBOutlet PXSourceList *_sourceListView;
   IBOutlet NSView *_contentContainer;
 
+  NSMutableArray *_sourceListItems;
+
   NSMutableArray *_viewControllers;
   NSMapTable *_splitViews;
 
@@ -63,6 +65,11 @@ enum ActWindowMode
 
 @property(nonatomic, readonly) act::database *database;
 
+- (void)showQueryResults:(const act::database::query &)query;
+
+- (void)synchronize;
+- (void)synchronizeIfNeeded;
+
 @property(nonatomic) const std::vector<act::activity_storage_ref> &activityList;
 @property(nonatomic) act::activity_storage_ref selectedActivityStorage;
 @property(nonatomic, readonly) act::activity *selectedActivity;
@@ -83,9 +90,6 @@ enum ActWindowMode
 
 - (void)saveWindowState;
 - (void)applySavedWindowState;
-
-- (void)synchronize;
-- (void)synchronizeIfNeeded;
 
 - (void)activity:(const act::activity_storage_ref)storage
     didChangeField:(NSString *)name;
