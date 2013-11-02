@@ -21,6 +21,9 @@
 #import "act-new.h"
 #import "act-util.h"
 
+#import <map>
+#import <set>
+
 #define BODY_WRAP_COLUMN 72
 
 enum ActSourceListSections
@@ -111,22 +114,42 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
       [item setSubitems:[NSArray array]];
       [item addSubitem:[ActSourceListQueryItem itemWithName:@"All"]];
 
-      // FIXME: should be auto-generated
+      std::map<std::string, std::set<std::string>> map;
 
-      NSDictionary *dict = @{@"Running": @"run",
-			     @"Cycling": @"bike",
-			     @"Walking": @"hike"};
-
-      for (NSString *name in dict)
+      for (const auto &it : [self database]->items())
 	{
-	  if (ActSourceListQueryItem *sub
-	      = [ActSourceListQueryItem itemWithName:name])
+	  if (const std::string *s = it.storage()->field_ptr("activity"))
 	    {
-	      std::string type([[dict objectForKey:name] UTF8String]);
-	      act::database::query_term_ref
-	        term (new act::database::equal_term("Activity", type));
-	      [sub query].set_term(term);
-	      [item addSubitem:sub];
+	      std::set<std::string> &types = map[*s];
+	      if (const std::string *ss = it.storage()->field_ptr("type"))
+		types.insert(*ss);
+	    }
+	}
+
+      for (const auto &it : map)
+	{
+	  act::database::query_term_ref type_term
+	    (new act::database::equal_term("activity", it.first));
+
+	  ActSourceListQueryItem *sub
+	    = [ActSourceListQueryItem itemWithName:
+	       [NSString stringWithUTF8String:it.first.c_str()]];
+	  [sub query].set_term(type_term);
+	  [item addSubitem:sub];
+
+	  for (const auto &type : it.second)
+	    {
+	      act::database::query_term_ref subtype_term
+		(new act::database::equal_term("type", type));
+	      act::database::query_term_ref sub_term
+		(new act::database::and_term(type_term, subtype_term));
+
+	      ActSourceListQueryItem *sub2
+	        = [ActSourceListQueryItem itemWithName:
+		   [NSString stringWithUTF8String:type.c_str()]];
+	      [sub2 query].set_term(sub_term);
+	      [sub addSubitem:sub2];
+	      [sub setExpandable:YES];
 	    }
 	}
 
