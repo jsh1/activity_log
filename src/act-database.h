@@ -44,6 +44,8 @@ public:
 	return std::const_pointer_cast<const activity_storage> (_storage);}
     };
 
+  const std::vector<item> &items() const;
+
   class query_term
     {
     public:
@@ -218,6 +220,12 @@ database::item::item(const item &rhs)
 : _date(rhs._date),
   _storage(new act::activity_storage(*rhs._storage.get()))
 {
+}
+
+inline const std::vector<database::item> &
+database::items() const
+{
+  return _items;
 }
 
 } // namespace act
