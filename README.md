@@ -226,4 +226,4 @@ The Cocoa app is still very unfinished, the image below shows the state
 as of October 2013. It can import TCX and FIT files and edit all
 fields.
 
-![Screenshot](http://unfactored.org/images/act-screen-2013-10-30.png)
+![Screenshot](http://unfactored.org/images/act-screen-2013-11-02.png)
