@@ -2,6 +2,7 @@
 
 #import "ActWindowController.h"
 
+#import "ActAppDelegate.h"
 #import "ActDevice.h"
 #import "ActDeviceManager.h"
 #import "ActImporterViewController.h"
@@ -18,6 +19,7 @@
 #import "act-config.h"
 #import "act-format.h"
 #import "act-new.h"
+#import "act-util.h"
 
 #define BODY_WRAP_COLUMN 72
 
@@ -128,12 +130,108 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
 	    }
 	}
 
-      [item foreachItem:^void (ActSourceListItem *it) {[it setController:self];}];
+      [item foreachItem:
+       ^void (ActSourceListItem *it) {[it setController:self];}];
 
       [_sourceListView reloadItem:item reloadChildren:YES];
     }
 
-  // FIXME: implement the rest of this.
+  if (ActSourceListItem *item = [self sourceListItemWithPath:@"DATE"])
+    {
+      [item setSubitems:[NSArray array]];
+
+      const act::database *db = [self database];
+
+      if (db->items().size() != 0)
+	{
+	  time_t start_date = db->items().back().date();
+	  time_t end_date = db->items().front().date();
+
+	  struct tm start_tm = {0};
+	  localtime_r(&start_date, &start_tm);
+
+	  struct tm end_tm = {0};
+	  localtime_r(&end_date, &end_tm);
+
+	  static NSDateFormatter *year_formatter, *month_formatter;
+
+	  if (year_formatter == nil)
+	    {
+	      NSLocale *locale = [(ActAppDelegate *)
+				  [NSApp delegate] currentLocale];
+
+	      year_formatter = [[NSDateFormatter alloc] init];
+	      [year_formatter setLocale:locale];
+	      [year_formatter setDateFormat:
+	       [NSDateFormatter dateFormatFromTemplate:@"yyyy"
+		options:0 locale:locale]];
+
+	      month_formatter = [[NSDateFormatter alloc] init];
+	      [month_formatter setLocale:locale];
+	      [month_formatter setDateFormat:
+	       [NSDateFormatter dateFormatFromTemplate:@"MMMM"
+		options:0 locale:locale]];
+	    }
+
+	  auto it = db->items().cbegin();
+	  const auto &it_end = db->items().cend();
+
+	  int year = 1900 + end_tm.tm_year;
+	  time_t year_max = act::year_time(year+1);
+
+	  while (year - 1900 >= start_tm.tm_year)
+	    {
+	      time_t year_min = act::year_time(year);
+
+	      if (it != it_end && it->date() >= year_min)
+		{
+		  ActSourceListQueryItem *year_item
+		    = [ActSourceListQueryItem itemWithName:
+		       [year_formatter stringFromDate:
+			[NSDate dateWithTimeIntervalSince1970:year_min]]];
+		  [year_item setExpandable:YES];
+		  act::date_range year_range(year_min, year_max - year_min);
+		  [year_item query].add_date_range(year_range);
+		  [item addSubitem:year_item];
+
+		  int month = 11;
+		  time_t month_max = year_max;
+
+		  while (month >= 0)
+		    {
+		      time_t month_min = act::month_time(year, month);
+
+		      if (it != it_end && it->date() >= month_min)
+			{
+			  ActSourceListQueryItem *month_item
+			    = [ActSourceListQueryItem itemWithName:
+			       [month_formatter stringFromDate:
+				[NSDate dateWithTimeIntervalSince1970:month_min]]];
+			  [month_item setExpandable:YES];
+			  act::date_range month_range(month_min,
+						      month_max - month_min);
+			  [month_item query].add_date_range(month_range);
+			  [year_item addSubitem:month_item];
+
+			  while (it != it_end && it->date() >= month_min)
+			    it++;
+			}
+
+		      month--;
+		      month_max = month_min;
+		    }
+		}
+
+	      year--;
+	      year_max = year_min;
+	    }
+	}
+
+      [item foreachItem:
+       ^void (ActSourceListItem *it) {[it setController:self];}];
+
+      [_sourceListView reloadItem:item reloadChildren:YES];
+    }
 }
 
 - (id)init
@@ -419,6 +517,8 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
   [self database]->reload();
 
   [self sourceListSelectionDidChange:nil];
+
+  [_sourceListView reloadData];
 }
 
 - (const std::vector<act::activity_storage_ref> &)activityList
