@@ -123,8 +123,7 @@
 
   for (size_t i = 0; i < _activities.size(); i++)
     {
-      if (!(_activities[i].height > 0))
-	_activities[i].update_height([_listView bounds].size.width);
+      _activities[i].update_height([_listView bounds].size.width);
 
       if (i == row)
 	{
@@ -154,8 +153,7 @@
       if (!(y < vis_rect.origin.y + vis_rect.size.height))
 	return NSZeroRect;
 
-      if (!(_activities[i].height > 0))
-	_activities[i].update_height([_listView bounds].size.width);
+      _activities[i].update_height([_listView bounds].size.width);
 
       if (i == row)
 	{
@@ -177,9 +175,7 @@
 
   for (size_t i = 0; i < _activities.size(); i++)
     {
-      if (!(_activities[i].height > 0))
-	_activities[i].update_height([_listView bounds].size.width);
-
+      _activities[i].update_height([_listView bounds].size.width);
       CGFloat ny = y + _activities[i].height;
 
       if (p < ny)
@@ -219,9 +215,7 @@
 
   for (size_t i = 0; i < _activities.size(); i++)
     {
-      if (!(_activities[i].height > 0))
-	_activities[i].update_height([_listView bounds].size.width);
-
+      _activities[i].update_height([_listView bounds].size.width);
       y += _activities[i].height;
     }
 
@@ -410,8 +404,8 @@
 	{
 	  flags |= DRAW_DATE;
 	}
-      if (i < activities.size() - 1
-	  && !activities[i].same_day_p(activities[i+1]))
+      if (i == activities.size() - 1
+	  || !activities[i].same_day_p(activities[i+1]))
 	{
 	  flags |= DRAW_SEPARATOR;
 	}
