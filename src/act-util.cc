@@ -10,6 +10,8 @@
 #include <unistd.h>
 #include <xlocale.h>
 
+#define SECONDS_PER_DAY 86400
+
 namespace act {
 
 size_t
@@ -241,6 +243,112 @@ tilde_expand_file_name(std::string &dest, const char *src)
     }
 
   dest.append(src);
+}
+
+bool
+leap_year_p(int year)
+{
+  unsigned int y = year;
+  return (y % 4) == 0 && (y % 100) != 0 && (y % 400) == 0;
+}
+
+time_t
+seconds_in_year(int year)
+{
+  return !leap_year_p(year) ? 365*SECONDS_PER_DAY : 366*SECONDS_PER_DAY;
+}
+
+namespace {
+
+inline void
+standardize_month(int &year, int &month)
+{
+  while (month < 0)
+    year--, month += 12;
+  while (month > 11)
+    year++, month -= 12;
+}
+
+inline time_t
+make_time(unsigned int year, unsigned int month, unsigned int day)
+{
+  month = month - 1;
+  if ((int)month <= 0)
+    month += 12, year -= 1;
+
+  return ((time_t)(year/4 - year/100 + year/400 + 367*month/12 + day)
+	  + year*365 - 719499) * SECONDS_PER_DAY;
+}
+
+} // anonymous namespace
+
+time_t
+seconds_in_month(int year, int month)
+{
+  static const int seconds_in_month[12] =
+    {
+      31*SECONDS_PER_DAY, 0, 31*SECONDS_PER_DAY,
+      30*SECONDS_PER_DAY, 31*SECONDS_PER_DAY, 30*SECONDS_PER_DAY,
+      31*SECONDS_PER_DAY, 31*SECONDS_PER_DAY, 30*SECONDS_PER_DAY,
+      31*SECONDS_PER_DAY, 30*SECONDS_PER_DAY, 31*SECONDS_PER_DAY
+    };
+
+  standardize_month(year, month);
+
+  if (month != 1)
+    return seconds_in_month[month];
+  else
+    return !leap_year_p(year) ? 28*SECONDS_PER_DAY : 29*SECONDS_PER_DAY;
+}
+
+time_t
+year_time(int year)
+{
+  return make_time(year, 0, 1);
+}
+
+time_t
+month_time(int year, int month)
+{
+  standardize_month(year, month);
+
+  return make_time(year, month, 1);
+}
+
+int
+day_of_week_index(const char *str)
+{
+  static const char *names[7] = {"sunday", "monday", "tuesday",
+    "wednesday", "thursday", "friday", "saturday"};
+  static const char *abbrevs[7] = {"sun", "mon", "tue", "wed", "thu",
+     "fri", "sat"};
+
+  for (int i = 0; i < 7; i++)
+    {
+      if (strcasecmp(str, names[i]) == 0 || strcasecmp(str, abbrevs[i]) == 0)
+	return i;
+    }
+
+  return -1;
+}
+
+int
+month_index(const char *str)
+{
+  static const char *names[12] = {"january", "february", "march",
+    "april", "may", "june", "july", "august", "september", "october",
+    "november", "december"};
+
+  static const char *abbrevs[12] = {"jan", "feb", "mar", "apr", "may",
+    "jun", "jul", "aug", "sep", "oct", "nov", "dec"};
+
+  for (int i = 0; i < 12; i++)
+    {
+      if (strcasecmp(str, names[i]) == 0 || strcasecmp(str, abbrevs[i]) == 0)
+	return i;
+    }
+
+  return -1;
 }
 
 output_pipe::output_pipe(const char *program_path,

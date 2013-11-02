@@ -125,6 +125,19 @@ bool path_has_extension(const char *path, const char *ext);
 
 void tilde_expand_file_name(std::string &dest, const char *src);
 
+// misc date utility functions
+
+bool leap_year_p(int year);
+
+time_t seconds_in_year(int year);
+time_t seconds_in_month(int year, int month);
+
+time_t year_time(int year);
+time_t month_time(int year, int month);
+
+int day_of_week_index(const char *str);
+int month_index(const char *str);
+
 // implementation details
 
 inline size_t
