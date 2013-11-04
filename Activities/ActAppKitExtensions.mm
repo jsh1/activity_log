@@ -17,3 +17,17 @@
 }
 
 @end
+
+
+@implementation NSTableView (ActAppKitExtensions)
+
+- (void)reloadDataForRow:(NSInteger)row
+{
+  NSIndexSet *rows = [NSIndexSet indexSetWithIndex:row];
+  NSIndexSet *cols = [NSIndexSet indexSetWithIndexesInRange:
+		      NSMakeRange(0, [[self tableColumns] count])];
+
+  [self reloadDataForRowIndexes:rows columnIndexes:cols];
+}
+
+@end
