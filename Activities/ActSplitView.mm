@@ -4,6 +4,30 @@
 
 @implementation ActSplitView
 
+@synthesize indexOfResizableSubview = _indexOfResizableSubview;
+
+- (id)initWithFrame:(NSRect)frame
+{
+  self = [super initWithFrame:frame];
+  if (self == nil)
+    return nil;
+
+  _indexOfResizableSubview = -1;
+
+  return self;
+}
+
+- (id)initWithCoder:(NSCoder *)coder
+{
+  self = [super initWithCoder:coder];
+  if (self == nil)
+    return nil;
+
+  _indexOfResizableSubview = -1;
+
+  return self;
+}
+
 - (NSDictionary *)savedViewState
 {
   NSArray *subviews = [self subviews];
@@ -76,6 +100,58 @@
       _collapsingSubview = subview;
       [self adjustSubviews];
       _collapsingSubview = nil;
+    }
+}
+
+- (void)resizeSubviewsWithOldSize:(NSSize)sz
+{
+  NSArray *subviews = [self subviews];
+
+  if (_indexOfResizableSubview < 0
+      || _indexOfResizableSubview >= [subviews count])
+    {
+      [self adjustSubviews];
+      return;
+    }
+
+  NSRect bounds = [self bounds];
+  NSInteger count = [subviews count];
+  BOOL vertical = [self isVertical];
+  CGFloat thick = [self dividerThickness];
+  CGFloat p = vertical ? bounds.origin.x : bounds.origin.y;
+
+  for (NSInteger idx = 0; idx < count; idx++)
+    {
+      NSView *view = [subviews objectAtIndex:idx];
+      if ([view isHidden])
+	continue;
+
+      NSRect frame = [view frame];
+
+      if (vertical)
+	frame.origin.y = bounds.origin.y, frame.size.height=bounds.size.height;
+      else
+	frame.origin.x = bounds.origin.x, frame.size.width = bounds.size.width;
+
+      if (vertical)
+	frame.origin.x = p;
+      else
+	frame.origin.y = p;
+
+      if (idx == _indexOfResizableSubview)
+	{
+	  if (vertical)
+	    frame.size.width += bounds.size.width - sz.width;
+	  else
+	    frame.size.height += bounds.size.height - sz.height;
+	}
+
+      [view setFrame:frame];
+
+      if (vertical)
+	p += frame.size.width + thick;
+      else
+	p += frame.size.height + thick;
     }
 }
 

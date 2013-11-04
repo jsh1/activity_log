@@ -5,8 +5,11 @@
 @interface ActSplitView : NSSplitView
 {
 @private
+  NSInteger _indexOfResizableSubview;
   NSView *_collapsingSubview;
 }
+
+@property NSInteger indexOfResizableSubview;
 
 - (NSDictionary *)savedViewState;
 - (void)applySavedViewState:(NSDictionary *)dict;
