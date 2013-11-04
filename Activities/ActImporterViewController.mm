@@ -20,7 +20,6 @@
   BOOL _checked;
   BOOL _exists;
   BOOL _queued;
-  BOOL _failed;
   std::unique_ptr<act::gps::activity> _data;
 }
 
@@ -315,30 +314,27 @@ copyFileToGPSDirectory(std::string &gps_path)
 
 - (const act::gps::activity *)data
 {
-  if (!_data && !_failed)
+  if (!_data && !_queued)
     {
-      if (!_queued)
-	{
-	  dispatch_queue_t q
-	    = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+      dispatch_queue_t q
+	= dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
 
-	  dispatch_async(q, ^{
-	    act::gps::activity *a = new act::gps::activity;
+      dispatch_async(q, ^{
+	act::gps::activity *a = new act::gps::activity;
 
-	    if (a->read_file([[_url path] UTF8String]))
-	      {
-		_data.reset(a);
+	if (a->read_file([[_url path] UTF8String]))
+	  {
+	    _data.reset(a);
 
-		dispatch_async(dispatch_get_main_queue(), ^{
-		  [_controller reloadDataForActivity:self];
-		});
-	      }
-	    else
-	      _failed = YES;
-	  });
+	    dispatch_async(dispatch_get_main_queue(), ^{
+	      [_controller reloadDataForActivity:self];
+	    });
+	  }
+	else
+	  delete a;
+      });
 
-	  _queued = YES;
-	}
+      _queued = YES;
     }
 
   return _data.get();
