@@ -59,7 +59,7 @@
 	{
 	  if (const std::string *s = it.storage()->field_ptr("GPS-File"))
 	    {
-	      const auto &pos = activities.find(*s);
+	      auto pos = activities.find(*s);
 
 	      if (pos != activities.end())
 		{

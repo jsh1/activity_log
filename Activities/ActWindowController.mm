@@ -274,6 +274,11 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
 		  valueOptions:NSMapTableWeakMemory] retain];
   _undoManager = [[NSUndoManager alloc] init];
 
+  _windowMode = ActWindowMode_Nil;
+  _windowModeWidths[ActWindowMode_Nil] = 700;
+  _windowModeWidths[ActWindowMode_Viewer] = 1200;
+  _windowModeWidths[ActWindowMode_Importer] = 700;
+
   _selectedLapIndex = -1;
   _currentTime = -1;
 
@@ -304,6 +309,7 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
   [[window contentView] setWantsLayer:YES];
 
   [self addSplitView:_splitView identifier:@"Window"];
+  [_splitView setIndexOfResizableSubview:1];
 
   _fieldEditor = [[ActFieldEditor alloc] initWithFrame:NSZeroRect];
 
@@ -329,6 +335,10 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
       [_viewControllers addObject:obj];
       [obj release];
     }
+
+  // make sure we're in viewer mode before trying to restore view state
+
+  [self setWindowMode:ActWindowMode_Viewer];
 
   [self applySavedWindowState];
 
@@ -469,7 +479,7 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
 
 #if 0
       frame.size.width = _windowModeWidths[_windowMode];
-      [[self window] setFrame:frame display:YES animate:YES];
+      [[self window] setFrame:frame display:YES];
 #endif
 
       Class new_class = nil;

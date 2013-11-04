@@ -5,6 +5,7 @@
 #import "ActActivityViewController.h"
 #import "ActListViewController.h"
 #import "ActNotesListViewController.h"
+#import "ActSplitView.h"
 #import "ActWindowController.h"
 
 @implementation ActViewerViewController
@@ -43,6 +44,10 @@
 
   _listViewType = -1;
 
+  [[NSNotificationCenter defaultCenter]
+   addObserver:self selector:@selector(selectedActivityDidChange:)
+   name:ActSelectedActivityDidChange object:_controller];
+
   return self;
 }
 
@@ -50,11 +55,8 @@
 {
   [super viewDidLoad];
 
-  [[NSNotificationCenter defaultCenter]
-   addObserver:self selector:@selector(selectedActivityDidChange:)
-   name:ActSelectedActivityDidChange object:_controller];
-
   [_controller addSplitView:_splitView identifier:@"Viewer"];
+  [_splitView setIndexOfResizableSubview:1];
 
   for (ActViewController *controller in [self subviewControllers])
     {

@@ -30,20 +30,20 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <scrollView borderType="none" autohidesScrollers="YES" horizontalLineScroll="14" horizontalPageScroll="10" verticalLineScroll="14" verticalPageScroll="10" usesPredominantAxisScrolling="NO" id="GW1-hl-A0x">
-                                <rect key="frame" x="0.0" y="0.0" width="183" height="665"/>
+                                <rect key="frame" x="0.0" y="0.0" width="120" height="665"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <clipView key="contentView" id="9HF-fD-1e8">
-                                    <rect key="frame" x="0.0" y="0.0" width="183" height="665"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="120" height="665"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
                                         <outlineView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" selectionHighlightStyle="sourceList" multipleSelection="NO" emptySelection="NO" autosaveColumns="NO" rowHeight="14" indentationPerLevel="14" outlineTableColumn="Mid-BU-mjk" id="fiv-w1-hzZ" customClass="PXSourceList">
-                                            <rect key="frame" x="0.0" y="0.0" width="183" height="665"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="120" height="665"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <size key="intercellSpacing" width="3" height="0.0"/>
                                             <color key="backgroundColor" name="_sourceListBackgroundColor" catalog="System" colorSpace="catalog"/>
                                             <color key="gridColor" name="gridColor" catalog="System" colorSpace="catalog"/>
                                             <tableColumns>
-                                                <tableColumn width="180" minWidth="16" maxWidth="1000" id="Mid-BU-mjk">
+                                                <tableColumn width="117" minWidth="16" maxWidth="1000" id="Mid-BU-mjk">
                                                     <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left">
                                                         <font key="font" metaFont="smallSystem"/>
                                                         <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
@@ -75,7 +75,7 @@
                                 </scroller>
                             </scrollView>
                             <customView focusRingType="none" id="7">
-                                <rect key="frame" x="184" y="0.0" width="721" height="665"/>
+                                <rect key="frame" x="121" y="0.0" width="784" height="665"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <connections>
                                     <outlet property="_controller" destination="-2" id="22"/>
@@ -86,6 +86,9 @@
                             <real value="250"/>
                             <real value="250"/>
                         </holdingPriorities>
+                        <connections>
+                            <outlet property="delegate" destination="-2" id="QGv-yj-U6N"/>
+                        </connections>
                     </splitView>
                 </subviews>
             </view>
