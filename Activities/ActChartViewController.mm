@@ -406,17 +406,14 @@ chart::draw_current_time()
   if (_current_time < 0)
     return;
 
-  // always need time axis calibration for this.
-
-  x_axis_state xs(*this, x_axis_type::elapsed_time);
-
-  double t = _activity.start_time() + _current_time;
-
-  if (t < xs.min_value || t > xs.max_value)
+  act::gps::activity::point pt;
+  if (!_activity.point_at_time(_activity.start_time() + _current_time, pt))
     return;
 
-  act::gps::activity::point pt;
-  if (!_activity.point_at_time(t, pt))
+  x_axis_state xs(*this, x_axis());
+
+  double t = pt.*xs.field;
+  if (t < xs.min_value || t > xs.max_value)
     return;
 
   CGFloat x = round(t * xs.xm + xs.xc);
@@ -492,10 +489,13 @@ chart::current_time_rect() const
   if (_current_time < 0)
     return CGRectNull;
 
-  x_axis_state xs(*this, x_axis_type::elapsed_time);
+  act::gps::activity::point pt;
+  if (!_activity.point_at_time(_activity.start_time() + _current_time, pt))
+    return CGRectNull;
 
-  double t = _activity.start_time() + _current_time;
+  x_axis_state xs(*this, x_axis());
 
+  double t = pt.*xs.field;
   if (t < xs.min_value || t > xs.max_value)
     return CGRectNull;
 
@@ -883,7 +883,7 @@ chart::current_time_rect() const
       NSPoint p = [_chartView convertPoint:[e locationInWindow] fromView:nil];
 
       act::gps::activity::point pt;
-      if (_chart->point_at_x(p.x, act::gps::chart::x_axis_type::elapsed_time, pt))
+      if (_chart->point_at_x(p.x, pt))
 	{
 	  double t = pt.timestamp - _chart->get_activity().start_time();
 	  [_controller setCurrentTime:t];

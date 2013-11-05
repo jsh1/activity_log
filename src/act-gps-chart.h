@@ -71,7 +71,7 @@ public:
   void set_current_time(double t);
   double current_time() const;
 
-  bool point_at_x(CGFloat x, x_axis_type type, activity::point &ret_p) const;
+  bool point_at_x(CGFloat x, activity::point &ret_p) const;
 
   void remove_all_lines();
 

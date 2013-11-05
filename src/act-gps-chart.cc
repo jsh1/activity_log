@@ -258,18 +258,32 @@ chart::add_line(double activity::point:: *field, value_conversion conv,
 }
 
 bool
-chart::point_at_x(CGFloat x, x_axis_type type, activity::point &ret_p) const
+chart::point_at_x(CGFloat x, activity::point &ret_p) const
 {
-  x_axis_state x_axis(*this, type);
+  x_axis_state x_axis(*this, _x_axis);
+
+  double total_dist = 0;
 
   for (const auto &lap : _activity.laps())
     {
-      double lt0 = lap.start_time * x_axis.xm + x_axis.xc;
-      double lt1 = lt0 + lap.total_elapsed_time * x_axis.xm;
+      double lx0, lx1;
 
-      if (lt1 < x)
+      if (_x_axis == x_axis_type::elapsed_time)
+	{
+	  lx0 = lap.start_time * x_axis.xm + x_axis.xc;
+	  lx1 = lx0 + lap.total_elapsed_time * x_axis.xm;
+	}
+      else
+	{
+	  lx0 = total_dist * x_axis.xm + x_axis.xc;
+	  lx1 = lx0 + lap.total_distance * x_axis.xm;
+	}
+
+      total_dist += lap.total_distance;
+
+      if (lx1 < x)
 	continue;
-      if (lt0 > x)
+      if (lx0 > x)
 	return false;
 
       const activity::point *last_p = nullptr;
