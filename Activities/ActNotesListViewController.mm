@@ -213,6 +213,11 @@
 {
   CGFloat y = Y_OFFSET;
 
+  // FIXME: calculating the height of all items is expensive, and
+  // unnecessary if we're only displaying the first page. One fix
+  // could be to not add all items to _activities, only those that
+  // may be visible, and add more as the view scrolls.
+
   for (size_t i = 0; i < _activities.size(); i++)
     {
       _activities[i].update_height([_listView bounds].size.width);
@@ -539,6 +544,7 @@ ActNotesItem::initialize()
 {
   NSColor *greyColor = [ActColor controlTextColor];
   NSColor *redColor = [ActColor controlDetailTextColor];
+  NSColor *blueColor = [ActColor colorWithCalibratedRed:72/255. green:122/255. blue:1 alpha:1];
 
   NSMutableParagraphStyle *rightStyle
     = [[NSParagraphStyle defaultParagraphStyle] mutableCopy];
@@ -565,9 +571,9 @@ ActNotesItem::initialize()
 		greyColor, NSForegroundColorAttributeName,
 		nil];
   time_attrs = [[NSDictionary alloc] initWithObjectsAndKeys:
-		[NSFont fontWithName:@"Helvetica Neue Bold"
+		[NSFont fontWithName:@"Helvetica Neue"
 		 size:TIME_FONT_SIZE], NSFontAttributeName,
-		redColor, NSForegroundColorAttributeName,
+		blueColor, NSForegroundColorAttributeName,
 		rightStyle, NSParagraphStyleAttributeName,
 		nil];
   stats_attrs = [[NSDictionary alloc] initWithObjectsAndKeys:
