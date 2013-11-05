@@ -170,6 +170,9 @@ copyFileToGPSDirectory(std::string &gps_path)
 	}
     }
 
+  [_controller performSelector:@selector(reloadActivities)
+   withObject:nil afterDelay:.25];
+
   // FIXME: switch to viewing the earliest activity?
 
   [_tableView reloadData];

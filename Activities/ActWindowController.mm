@@ -367,6 +367,7 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
 - (void)dealloc
 {
   [[NSNotificationCenter defaultCenter] removeObserver:self];
+  [NSRunLoop cancelPreviousPerformRequestsWithTarget:self];
 
   [_sourceListItems release];
   [_viewControllers release];
