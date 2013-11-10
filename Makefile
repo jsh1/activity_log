@@ -8,4 +8,6 @@ clean ::
 	rm -f TAGS *~
 
 tags :
-	etags src/*.cc src/*.h
+	etags src/*.cc src/*.[ch] Activities/*.mm Activities/*.[chm]
+
+.PHONY : tags
