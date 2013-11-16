@@ -38,6 +38,8 @@
 
 @implementation ActHeaderFieldView
 
+@synthesize headerView = _headerView;
+
 - (id)initWithFrame:(NSRect)frame
 {
   self = [super initWithFrame:frame];

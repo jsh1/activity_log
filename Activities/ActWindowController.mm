@@ -73,6 +73,7 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
 @implementation ActWindowController
 
 @synthesize undoManager = _undoManager;
+@synthesize fieldEditor = _fieldEditor;
 
 - (NSString *)windowNibName
 {

@@ -32,11 +32,9 @@
 
 @interface ActTextFieldCell : NSTextFieldCell
 {
-  ActWindowController *_controller;
   BOOL _completesEverything;
 }
 
-@property(nonatomic, assign) ActWindowController *controller;
 @property(nonatomic) BOOL completesEverything;
 
 @end
@@ -126,6 +124,8 @@
 
 
 @implementation ActTextFieldCell
+
+@synthesize completesEverything = _completesEverything;
 
 - (NSTextView *)fieldEditorForView:(NSView *)view
 {

@@ -26,6 +26,9 @@
 
 @implementation ActHorizontalBoxView
 
+@synthesize spacing = _spacing;
+@synthesize rightToLeft = _rightToLeft;
+
 - (CGFloat)heightForWidth:(CGFloat)w
 {
   CGFloat h = 0;
