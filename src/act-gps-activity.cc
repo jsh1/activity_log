@@ -47,9 +47,12 @@ activity::activity()
   _max_speed(0),
   _avg_heart_rate(0),
   _max_heart_rate(0),
+  _avg_cadence(0),
+  _max_cadence(0),
   _has_location(false),
   _has_speed(false),
   _has_heart_rate(false),
+  _has_cadence(false),
   _has_altitude(false)
 {
 }
@@ -136,6 +139,8 @@ activity::update_summary()
   _max_speed = 0;
   _avg_heart_rate = 0;
   _max_heart_rate = 0;
+  _avg_cadence = 0;
+  _max_cadence = 0;
 
   if (laps().size() < 1)
     return;
@@ -159,10 +164,13 @@ activity::update_summary()
       _max_speed = fmax(_max_speed, it.max_speed);
       _avg_heart_rate += it.avg_heart_rate * it.total_duration;
       _max_heart_rate = fmax(_max_heart_rate, it.max_heart_rate);
+      _avg_cadence += it.avg_cadence * it.total_duration;
+      _max_cadence = fmax(_max_cadence, it.max_cadence);
     }
 
   _avg_speed = _total_distance / _total_duration;
   _avg_heart_rate = _avg_heart_rate / _total_duration;
+  _avg_cadence = _avg_cadence / _total_duration;
 }
 
 void
@@ -206,6 +214,11 @@ activity::print_summary(FILE *fh) const
     fprintf(fh, "Avg-HR: %d\n", (int) avg_heart_rate());
   if (max_heart_rate() != 0)
     fprintf(fh, "Max-HR: %d\n", (int) max_heart_rate());
+
+  if (avg_cadence() != 0)
+    fprintf(fh, "Avg-Cadence: %d\n", (int) avg_cadence());
+  if (max_cadence() != 0)
+    fprintf(fh, "Max-Cadence: %d\n", (int) max_cadence());
 
   if (total_calories() != 0)
     fprintf(fh, "Calories: %g\n", total_calories());
@@ -419,10 +432,13 @@ activity::smooth(const activity &src, int width)
   _max_speed = src._max_speed;
   _avg_heart_rate = src._avg_heart_rate;
   _max_heart_rate = src._max_heart_rate;
+  _avg_cadence = src._avg_cadence;
+  _max_cadence = src._max_cadence;
 
   _has_location = src._has_location;
   _has_speed = src._has_speed;
   _has_heart_rate = src._has_heart_rate;
+  _has_cadence = src._has_cadence;
   _has_altitude = src._has_altitude;
 
   for (const auto &it : src.laps())
@@ -441,6 +457,8 @@ activity::smooth(const activity &src, int width)
       l.max_speed = it.max_speed;
       l.avg_heart_rate = it.avg_heart_rate;
       l.max_heart_rate = it.max_heart_rate;
+      l.avg_cadence = it.avg_cadence;
+      l.max_cadence = it.max_cadence;
       l.region = it.region;
 
       l.track.resize(it.track.size());
@@ -464,6 +482,7 @@ activity::smooth(const activity &src, int width)
 	      sum.altitude -= p.altitude;
 	      sum.speed -= p.speed;
 	      sum.heart_rate -= p.heart_rate;
+	      sum.cadence -= p.cadence;
 	      sum_n--;
 	    }
 	  s_out++;
@@ -476,6 +495,7 @@ activity::smooth(const activity &src, int width)
 	  sum.altitude += s.altitude;
 	  sum.speed += s.speed;
 	  sum.heart_rate += s.heart_rate;
+	  sum.cadence += s.cadence;
 	  sum_n++;
 	}
 
@@ -490,6 +510,7 @@ activity::smooth(const activity &src, int width)
 	  d.distance = s.distance;
 	  d.speed = sum.speed * mul;
 	  d.heart_rate = sum.heart_rate * mul;
+	  d.cadence = sum.cadence * mul;
 	}
       else
 	d = s;
@@ -549,6 +570,7 @@ mix(gps::activity::point &a, const gps::activity::point &b,
   mix(a.distance, b.distance, c.distance, f);
   mix(a.speed, b.speed, c.speed, f);
   mix(a.heart_rate, b.heart_rate, c.heart_rate, f);
+  mix(a.cadence, b.cadence, c.cadence, f);
 }
 
 } // namespace act

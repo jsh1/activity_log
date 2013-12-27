@@ -52,9 +52,11 @@ public:
       double distance;
       double speed;
       double heart_rate;
+      double cadence;
 
       point()
-      : timestamp(0), altitude(0), distance(0), speed(0), heart_rate(0) {}
+      : timestamp(0), altitude(0), distance(0), speed(0), heart_rate(0),
+        cadence(0) {}
     };
 
   struct lap
@@ -70,6 +72,8 @@ public:
       double max_speed;
       double avg_heart_rate;
       double max_heart_rate;
+      double avg_cadence;
+      double max_cadence;
       std::vector<point> track;
       location_region region;
 
@@ -77,7 +81,8 @@ public:
       : start_time(0), total_elapsed_time(0), total_duration(0),
 	total_distance(0), total_ascent(0), total_descent(0),
 	total_calories(0), avg_speed(0), max_speed(0),
-	avg_heart_rate(0), max_heart_rate(0) {}
+	avg_heart_rate(0), max_heart_rate(0), avg_cadence(0),
+	max_cadence(0) {}
 
       void update_region();
     };
@@ -134,6 +139,8 @@ private:
   double _max_speed;
   double _avg_heart_rate;
   double _max_heart_rate;
+  double _avg_cadence;
+  double _max_cadence;
 
   std::vector<lap> _laps;
 
@@ -142,6 +149,7 @@ private:
   bool _has_location;
   bool _has_speed;
   bool _has_heart_rate;
+  bool _has_cadence;
   bool _has_altitude;
 
 public:
@@ -213,6 +221,12 @@ public:
   void set_max_heart_rate(double x) {_max_heart_rate = x;}
   double max_heart_rate() const {return _max_heart_rate;}
 
+  void set_avg_cadence(double x) {_avg_cadence = x;}
+  double avg_cadence() const {return _avg_cadence;}
+
+  void set_max_cadence(double x) {_max_cadence = x;}
+  double max_cadence() const {return _max_cadence;}
+
   std::vector<lap> &laps() {return _laps;}
   const std::vector<lap> &laps() const {return _laps;}
 
@@ -229,6 +243,9 @@ public:
 
   void set_has_altitude(bool x) {_has_altitude = x;}
   bool has_altitude() const {return _has_altitude;}
+
+  void set_has_cadence(bool x) {_has_cadence = x;}
+  bool has_cadence() const {return _has_cadence;}
 
   void update_region();
 

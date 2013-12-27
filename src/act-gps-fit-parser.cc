@@ -465,6 +465,12 @@ make_altitude(uint16_t value)
   return value * (1/5.) - 500;
 }
 
+inline double
+make_cadence(uint16_t value)
+{
+  return value * 2;
+}
+
 } // anonymous namespace
 
 void
@@ -499,6 +505,18 @@ fit_parser::read_record_message(const message_type &def, uint32_t timestamp)
 	    destination().set_has_altitude(true);
 	  break;
 
+	case 3:				/* heart_rate */
+	  p.heart_rate = read_field(def, it);
+	  if (p.heart_rate != 0)
+	    destination().set_has_heart_rate(true);
+	  break;
+
+	case 4:				/* cadence */
+	  p.cadence = make_cadence(read_field(def, it));
+	  if (p.cadence != 0)
+	    destination().set_has_cadence(true);
+	  break;
+
 	case 5:				/* distance */
 	  p.distance = make_distance(read_field(def, it));
 	  break;
@@ -507,12 +525,6 @@ fit_parser::read_record_message(const message_type &def, uint32_t timestamp)
 	  p.speed = make_speed(read_field(def, it));
 	  if (p.speed != 0)
 	    destination().set_has_speed(true);
-	  break;
-
-	case 3:				/* heart_rate */
-	  p.heart_rate = read_field(def, it);
-	  if (p.heart_rate != 0)
-	    destination().set_has_heart_rate(true);
 	  break;
 
 	default:
@@ -570,6 +582,14 @@ fit_parser::read_lap_message(const message_type &def, uint32_t timestamp)
 
 	case 16:			/* max_heart_rate */
 	  lap.max_heart_rate = read_field(def, it);
+	  break;
+
+	case 17:			/* avg_cadence */
+	  lap.avg_cadence = make_cadence(read_field(def, it));
+	  break;
+
+	case 18:			/* max_cadence */
+	  lap.max_cadence = make_cadence(read_field(def, it));
 	  break;
 
 	case 21:			/* total_ascent */
@@ -640,6 +660,14 @@ fit_parser::read_session_message(const message_type &def, uint32_t timestamp)
 
 	case 17:			/* max_heart_rate */
 	  d.set_max_heart_rate(read_field(def, it));
+	  break;
+
+	case 18:			/* avg_cadence */
+	  d.set_avg_cadence(make_cadence(read_field(def, it)));
+	  break;
+
+	case 19:			/* max_cadence */
+	  d.set_max_cadence(make_cadence(read_field(def, it)));
 	  break;
 
 	case 22:			/* total_ascent */
