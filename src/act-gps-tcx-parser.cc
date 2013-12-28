@@ -254,6 +254,10 @@ tcx_parser::sax_start_element(void *ctx, const xmlChar *name,
 	case state::LAP_LX:
 	  if (strcmp((const char *)name, "AvgSpeed") == 0)
 	    new_state = state::LAP_AVG_SPEED;
+	  else if (strcmp((const char *)name, "AvgRunCadence") == 0)
+	    new_state = state::LAP_AVG_RUN_CADENCE;
+	  else if (strcmp((const char *)name, "MaxRunCadence") == 0)
+	    new_state = state::LAP_MAX_RUN_CADENCE;
 	  break;
 	case state::TP_EXTENSIONS:
 	  if (strcmp((const char *)name, "TPX") == 0)
@@ -262,6 +266,8 @@ tcx_parser::sax_start_element(void *ctx, const xmlChar *name,
 	case state::TP_TPX:
 	  if (strcmp((const char *)name, "Speed") == 0)
 	    new_state = state::TP_SPEED;
+	  else if (strcmp((const char *)name, "RunCadence") == 0)
+	    new_state = state::TP_RUN_CADENCE;
 	  break;
 	default:
 	  break;
@@ -287,12 +293,15 @@ tcx_parser::sax_characters(void *ctx, const xmlChar *ptr, int size)
     case state::LAP_AVG_SPEED:
     case state::LAP_MAX_SPEED:
     case state::LAP_CALORIES:
+    case state::LAP_AVG_RUN_CADENCE:
+    case state::LAP_MAX_RUN_CADENCE:
     case state::TP_TIME:
     case state::TP_LAT:
     case state::TP_LONG:
     case state::TP_ALTITUDE:
     case state::TP_DISTANCE:
     case state::TP_SPEED:
+    case state::TP_RUN_CADENCE:
     case state::VALUE:
       if (!p->_characters)
 	p->_characters = new std::string((const char *)ptr, size);
@@ -334,6 +343,12 @@ tcx_parser::sax_end_element(void *ctx, const xmlChar *name,
 	case state::LAP_CALORIES:
 	  p->current_lap().total_calories = parse_double(*p->_characters);
 	  break;
+	case state::LAP_AVG_RUN_CADENCE:
+	  p->current_lap().avg_cadence = parse_double(*p->_characters) * 2;
+	  break;
+	case state::LAP_MAX_RUN_CADENCE:
+	  p->current_lap().max_cadence = parse_double(*p->_characters) * 2;
+	  break;
 	case state::TP_TIME:
 	  p->current_point().timestamp = parse_time(*p->_characters);
 	  break;
@@ -355,6 +370,10 @@ tcx_parser::sax_end_element(void *ctx, const xmlChar *name,
 	case state::TP_SPEED:
 	  p->current_point().speed = parse_double(*p->_characters);
 	  p->destination().set_has_speed(true);
+	  break;
+	case state::TP_RUN_CADENCE:
+	  p->current_point().cadence = parse_double(*p->_characters) * 2;
+	  p->destination().set_has_cadence(true);
 	  break;
 	case state::VALUE: {
 	  double x = parse_double(*p->_characters);

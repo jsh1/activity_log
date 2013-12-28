@@ -230,19 +230,15 @@ activity::print_laps(FILE *fh) const
   if (laps().size() == 0)
     return;
 
-  bool has_hr = avg_heart_rate() != 0;
+  fprintf(fh, "    %-3s  %8s  %6s  %5s %5s", "Lap", "Time", "Dist.",
+	  "Pace", "Max");
 
-  if (has_hr)
-    {
-      fprintf(fh, "    %-3s  %8s  %6s  %5s %5s  %3s %3s  %4s\n", "Lap", "Time",
-	      "Dist.", "Pace", "Max", "HR", "Max",
-	      "Cal.");
-    }
-  else
-    {
-      fprintf(fh, "    %-3s  %8s  %6s  %5s %5s  %4s\n", "Lap", "Time",
-	      "Dist.", "Pace", "Max", "Cal.");
-    }
+  if (has_heart_rate())
+    fprintf(fh, "  %3s %3s", "HR", "Max");
+  if (has_cadence())
+    fprintf(fh, "  %3s %3s", "Cad", "Max");
+
+  fprintf(fh, "  %4s\n", "Cal.");
 
   const double miles_per_meter = 0.000621371192;
 
@@ -256,32 +252,33 @@ activity::print_laps(FILE *fh) const
       format_time(pace, 1/(it.avg_speed * miles_per_meter), false, "");
       format_time(max_pace, 1/(it.max_speed * miles_per_meter), false, "");
 
-      std::string avg_hr, max_hr;
-      if (has_hr)
+      fprintf(fh, "    %-3d  %8s  %6.2f  %5s %5s", lap_idx + 1, dur.c_str(),
+	      it.total_distance * miles_per_meter, pace.c_str(),
+	      max_pace.c_str());
+
+      if (has_heart_rate())
 	{
-	  format_number(avg_hr, it.avg_heart_rate);
-	  format_number(max_hr, it.max_heart_rate);
+	  std::string avg_str, max_str;
+	  format_number(avg_str, it.avg_heart_rate);
+	  format_number(max_str, it.max_heart_rate);
+
+	  fprintf(fh, "  %3s %3s", avg_str.c_str(), max_str.c_str());
+	}
+
+      if (has_cadence())
+	{
+	  std::string avg_str, max_str;
+	  format_number(avg_str, it.avg_cadence);
+	  format_number(max_str, it.max_cadence);
+
+	  fprintf(fh, "  %3s %3s", avg_str.c_str(), max_str.c_str());
 	}
 
       std::string cal;
       if (it.total_calories != 0)
 	format_number(cal, it.total_calories);
 
-      if (has_hr)
-	{
-	  fprintf(fh, "    %-3d  %8s  %6.2f  %5s %5s  %3s %3s  %4s\n",
-		  lap_idx + 1, dur.c_str(),
-		  it.total_distance * miles_per_meter,
-		  pace.c_str(), max_pace.c_str(), avg_hr.c_str(),
-		  max_hr.c_str(), cal.c_str());
-	}
-      else
-	{
-	  fprintf(fh, "    %-3d  %8s  %6.2f  %5s %5s  %4s\n",
-		  lap_idx + 1, dur.c_str(),
-		  it.total_distance * miles_per_meter,
-		  pace.c_str(), max_pace.c_str(), cal.c_str());
-	}
+      fprintf(fh, "  %4s\n", cal.c_str());
 
       lap_idx++;
     }
