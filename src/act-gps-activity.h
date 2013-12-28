@@ -53,10 +53,12 @@ public:
       double speed;
       double heart_rate;
       double cadence;
+      double vertical_oscillation;
+      double ground_contact;
 
       point()
       : timestamp(0), altitude(0), distance(0), speed(0), heart_rate(0),
-        cadence(0) {}
+        cadence(0), vertical_oscillation(0), ground_contact(0) {}
     };
 
   struct lap
@@ -74,6 +76,8 @@ public:
       double max_heart_rate;
       double avg_cadence;
       double max_cadence;
+      double vertical_oscillation;
+      double ground_contact;
       std::vector<point> track;
       location_region region;
 
@@ -82,7 +86,7 @@ public:
 	total_distance(0), total_ascent(0), total_descent(0),
 	total_calories(0), avg_speed(0), max_speed(0),
 	avg_heart_rate(0), max_heart_rate(0), avg_cadence(0),
-	max_cadence(0) {}
+	max_cadence(0), vertical_oscillation(0), ground_contact(0) {}
 
       void update_region();
     };
@@ -132,6 +136,7 @@ private:
   double _total_elapsed_time;
   double _total_duration;
   double _total_distance;
+  double _training_effect;
   double _total_ascent;
   double _total_descent;
   double _total_calories;
@@ -141,6 +146,8 @@ private:
   double _max_heart_rate;
   double _avg_cadence;
   double _max_cadence;
+  double _vertical_oscillation;
+  double _ground_contact;
 
   std::vector<lap> _laps;
 
@@ -151,6 +158,7 @@ private:
   bool _has_heart_rate;
   bool _has_cadence;
   bool _has_altitude;
+  bool _has_dynamics;
 
 public:
   activity();
@@ -197,14 +205,17 @@ public:
   void set_total_duration(double x) {_total_duration = x;}
   double total_duration() const {return _total_duration;}
 
+  void set_total_distance(double x) {_total_distance = x;}
+  double total_distance() const {return _total_distance;}
+
+  void set_training_effect(double x) {_training_effect = x;}
+  double training_effect() const {return _training_effect;}
+
   void set_total_ascent(double x) {_total_ascent = x;}
   double total_ascent() const {return _total_ascent;}
 
   void set_total_descent(double x) {_total_descent = x;}
   double total_descent() const {return _total_descent;}
-
-  void set_total_distance(double x) {_total_distance = x;}
-  double total_distance() const {return _total_distance;}
 
   void set_total_calories(double x) {_total_calories = x;}
   double total_calories() const {return _total_calories;}
@@ -227,6 +238,12 @@ public:
   void set_max_cadence(double x) {_max_cadence = x;}
   double max_cadence() const {return _max_cadence;}
 
+  void set_vertical_oscillation(double x) {_vertical_oscillation = x;}
+  double vertical_oscillation() const {return _vertical_oscillation;}
+
+  void set_ground_contact(double x) {_ground_contact = x;}
+  double ground_contact() const {return _ground_contact;}
+
   std::vector<lap> &laps() {return _laps;}
   const std::vector<lap> &laps() const {return _laps;}
 
@@ -246,6 +263,9 @@ public:
 
   void set_has_cadence(bool x) {_has_cadence = x;}
   bool has_cadence() const {return _has_cadence;}
+
+  void set_has_dynamics(bool x) {_has_dynamics = x;}
+  bool has_dynamics() const {return _has_dynamics;}
 
   void update_region();
 

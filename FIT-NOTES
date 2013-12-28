@@ -288,3 +288,115 @@ Local message type: 9 (message name: activity, message number: 34)
   event (3-1-ENUM): activity (26)
   event_type (4-1-ENUM): stop (1)
 CRC: expected=0x40A3, calculated=0x40A3
+
+--
+
+Forerunner 620 output, file from dcrainmaker.com:
+
+Local message type: 6 (message name: record, message number: 20)
+  timestamp (253-1-UINT32): 2013-10-31T16:06:17 (752169977)
+  position_lat (0-1-SINT32): 48.8428392deg (582717770)
+  position_long (1-1-SINT32): 2.3670970deg (28240567)
+  distance (5-1-UINT32): 1623.49m (162349)
+  altitude (2-1-UINT16): 27.4m (2637)
+  speed (6-1-UINT16): 13.774km/h (3826)
+  xxx39 (39-1-UINT16): 945
+  xxx40 (40-1-UINT16): 3525
+  xxx41 (41-1-UINT16): 2400
+  heart_rate (3-1-UINT8): 158bpm (158)
+  cadence (4-1-UINT8): 88rpm (88)
+  xxx42 (42-1-ENUM): 1
+  xxx53 (53-1-UINT8): 0
+
+xxx39 => vertical oscillation, cm*100
+xxx41 => ground contact time, ms*10
+xxx{40,42,53} => unknown
+
+Local message type: 7 (message name: lap, message number: 19)
+  timestamp (253-1-UINT32): 2013-10-31T16:06:14 (752169974)
+  start_time (2-1-UINT32): 2013-10-31T15:58:48 (752169528)
+  start_position_lat (3-1-SINT32): 48.8514513deg (582820516)
+  start_position_long (4-1-SINT32): 2.3504075deg (28041454)
+  end_position_lat (5-1-SINT32): 48.8429135deg (582718656)
+  end_position_long (6-1-SINT32): 2.3669891deg (28239280)
+  total_elapsed_time (7-1-UINT32): 446.358s (446358)
+  total_timer_time (8-1-UINT32): 445.657s (445657)
+  total_distance (9-1-UINT32): 1609.35m (160935)
+  total_strides (10-1-UINT32, orignal name: total_cycles): 637strides (637)
+  nec_lat (27-1-SINT32): 48.8514513deg (582820516)
+  nec_long (28-1-SINT32): 2.3669891deg (28239280)
+  swc_lat (29-1-SINT32): 48.8429135deg (582718656)
+  swc_long (30-1-SINT32): 2.3504015deg (28041382)
+  message_index (254-1-UINT16): selected=0,reserved=0,mask=0 (0)
+  total_calories (11-1-UINT16): 94kcal (94)
+  avg_speed (13-1-UINT16): 13.000km/h (3611)
+  max_speed (14-1-UINT16): 15.250km/h (4236)
+  total_ascent (21-1-UINT16): 27m (27)
+  total_descent (22-1-UINT16): 34m (34)
+  wkt_step_index (71-1-UINT16, INVALID): 65535
+  xxx77 (77-1-UINT16): 896
+  xxx78 (78-1-UINT16): 3543
+  xxx79 (79-1-UINT16): 2407
+  event (0-1-ENUM): lap (9)
+  event_type (1-1-ENUM): stop (1)
+  avg_heart_rate (15-1-UINT8): 144bpm (144)
+  max_heart_rate (16-1-UINT8): 158bpm (158)
+  avg_running_cadence (17-1-UINT8, orignal name: avg_cadence): 85strides/min (85)
+  max_running_cadence (18-1-UINT8, orignal name: max_cadence): 92strides/min (92)
+  intensity (23-1-ENUM, INVALID): 255
+  lap_trigger (24-1-ENUM): distance (2)
+  sport (25-1-ENUM): running (1)
+  event_group (26-1-UINT8, INVALID): 255
+  sub_sport (39-1-ENUM, INVALID): 255
+  xxx72 (72-1-ENUM, INVALID): 255
+  xxx80 (80-1-UINT8): 67
+  xxx81 (81-1-UINT8): 64
+  xxx82 (82-1-UINT8, INVALID): 255
+
+xxx77 => vertical oscillation
+xxx79 => ground contact time
+xxx{78,80,81} => unknown
+
+Local message type: 10 (message name: session, message number: 18)
+  timestamp (253-1-UINT32): 2013-10-31T17:57:43 (752176663)
+  start_time (2-1-UINT32): 2013-10-31T15:58:48 (752169528)
+  start_position_lat (3-1-SINT32): 48.8514513deg (582820516)
+  start_position_long (4-1-SINT32): 2.3504075deg (28041454)
+  total_elapsed_time (7-1-UINT32): 6947.609s (6947609)
+  total_timer_time (8-1-UINT32): 6939.655s (6939655)
+  total_distance (9-1-UINT32): 26049.37m (2604937)
+  total_strides (10-1-UINT32, orignal name: total_cycles): 10135strides (10135)
+  nec_lat (29-1-SINT32): 48.8514513deg (582820516)
+  nec_long (30-1-SINT32): 2.4532311deg (29268187)
+  swc_lat (31-1-SINT32): 48.8166323deg (582405109)
+  swc_long (32-1-SINT32): 2.3504015deg (28041382)
+  message_index (254-1-UINT16): selected=0,reserved=0,mask=0 (0)
+  total_calories (11-1-UINT16): 1614kcal (1614)
+  avg_speed (14-1-UINT16): 13.514km/h (3754)
+  max_speed (15-1-UINT16): 97.949km/h (27208)
+  total_ascent (22-1-UINT16): 550m (550)
+  total_descent (23-1-UINT16): 543m (543)
+  first_lap_index (25-1-UINT16): 0
+  num_laps (26-1-UINT16): 24
+  xxx89 (89-1-UINT16): 954
+  xxx90 (90-1-UINT16): 3534
+  xxx91 (91-1-UINT16): 2406
+  event (0-1-ENUM): lap (9)
+  event_type (1-1-ENUM): stop (1)
+  sport (5-1-ENUM): running (1)
+  sub_sport (6-1-ENUM): generic (0)
+  avg_heart_rate (16-1-UINT8): 161bpm (161)
+  max_heart_rate (17-1-UINT8): 180bpm (180)
+  avg_running_cadence (18-1-UINT8, orignal name: avg_cadence): 87strides/min (87)
+  max_running_cadence (19-1-UINT8, orignal name: max_cadence): 107strides/min (107)
+  total_training_effect (24-1-UINT8): 5.0 (50)
+  event_group (27-1-UINT8, INVALID): 255
+  trigger (28-1-ENUM): activity_end (0)
+  xxx81 (81-1-ENUM): 0
+  xxx92 (92-1-UINT8): 78
+  xxx93 (93-1-UINT8): 0
+  xxx94 (94-1-UINT8, INVALID): 255
+
+xxx89 => vertical oscillation
+xxx91 => ground contact time
+xxx{90,81,92,93,94} => unknown

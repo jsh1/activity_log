@@ -40,6 +40,7 @@ activity::activity()
   _total_elapsed_time(0),
   _total_duration(0),
   _total_distance(0),
+  _training_effect(0),
   _total_ascent(0),
   _total_descent(0),
   _total_calories(0),
@@ -49,11 +50,14 @@ activity::activity()
   _max_heart_rate(0),
   _avg_cadence(0),
   _max_cadence(0),
+  _vertical_oscillation(0),
+  _ground_contact(0),
   _has_location(false),
   _has_speed(false),
   _has_heart_rate(false),
   _has_cadence(false),
-  _has_altitude(false)
+  _has_altitude(false),
+  _has_dynamics(false)
 {
 }
 
@@ -141,6 +145,8 @@ activity::update_summary()
   _max_heart_rate = 0;
   _avg_cadence = 0;
   _max_cadence = 0;
+  _vertical_oscillation = 0;
+  _ground_contact = 0;
 
   if (laps().size() < 1)
     return;
@@ -166,11 +172,15 @@ activity::update_summary()
       _max_heart_rate = fmax(_max_heart_rate, it.max_heart_rate);
       _avg_cadence += it.avg_cadence * it.total_duration;
       _max_cadence = fmax(_max_cadence, it.max_cadence);
+      _vertical_oscillation += it.vertical_oscillation * it.total_duration;
+      _ground_contact += it.ground_contact * it.total_duration;
     }
 
   _avg_speed = _total_distance / _total_duration;
   _avg_heart_rate = _avg_heart_rate / _total_duration;
   _avg_cadence = _avg_cadence / _total_duration;
+  _vertical_oscillation = _vertical_oscillation / _total_duration;
+  _ground_contact = _ground_contact / _total_duration;
 }
 
 void
@@ -194,6 +204,9 @@ activity::print_summary(FILE *fh) const
   fprintf(fh, "Distance: %s\n", tem.c_str());
   tem.clear();
 
+  if (training_effect() != 0)
+    fprintf(fh, "Training Effect: %.1f\n", training_effect());
+
   format_distance(tem, total_ascent(), unit_type::feet);
   fprintf(fh, "Ascent: %s\n", tem.c_str());
   tem.clear();
@@ -210,15 +223,25 @@ activity::print_summary(FILE *fh) const
   fprintf(fh, "Max-Pace: %s\n", tem.c_str());
   tem.clear();
 
-  if (avg_heart_rate() != 0)
-    fprintf(fh, "Avg-HR: %d\n", (int) avg_heart_rate());
-  if (max_heart_rate() != 0)
-    fprintf(fh, "Max-HR: %d\n", (int) max_heart_rate());
+  if (has_heart_rate())
+    {
+      fprintf(fh, "Avg-HR: %d\n", (int) avg_heart_rate());
+      fprintf(fh, "Max-HR: %d\n", (int) max_heart_rate());
+    }
 
-  if (avg_cadence() != 0)
-    fprintf(fh, "Avg-Cadence: %d\n", (int) avg_cadence());
-  if (max_cadence() != 0)
-    fprintf(fh, "Max-Cadence: %d\n", (int) max_cadence());
+  if (has_cadence())
+    {
+      fprintf(fh, "Avg-Cadence: %d\n", (int) avg_cadence());
+      fprintf(fh, "Max-Cadence: %d\n", (int) max_cadence());
+    }
+
+  if (has_dynamics())
+    {
+      fprintf(fh, "Avg-Vertical-Oscillation: %.1f cm\n",
+	      vertical_oscillation() * 100);
+      fprintf(fh, "Avg-Ground-Contact-Time: %d ms\n",
+	      (int) (ground_contact() * 1000));
+    }
 
   if (total_calories() != 0)
     fprintf(fh, "Calories: %g\n", total_calories());
@@ -237,6 +260,8 @@ activity::print_laps(FILE *fh) const
     fprintf(fh, "  %3s %3s", "HR", "Max");
   if (has_cadence())
     fprintf(fh, "  %3s %3s", "Cad", "Max");
+  if (has_dynamics())
+    fprintf(fh, "  %4s  %3s", "Osc", "GCT");
 
   fprintf(fh, "  %4s\n", "Cal.");
 
@@ -272,6 +297,13 @@ activity::print_laps(FILE *fh) const
 	  format_number(max_str, it.max_cadence);
 
 	  fprintf(fh, "  %3s %3s", avg_str.c_str(), max_str.c_str());
+	}
+
+      if (has_dynamics())
+	{
+	  char buf[20];
+	  snprintf(buf, sizeof(buf), "%.1f", it.vertical_oscillation * 100);
+	  fprintf(fh, "  %4s  %3d", buf, (int)(it.ground_contact * 1000));
 	}
 
       std::string cal;

@@ -471,6 +471,24 @@ make_cadence(uint16_t value)
   return value * 2;
 }
 
+inline double
+make_training_effect(uint8_t value)
+{
+  return value * .1;
+}
+
+inline double
+make_ground_contact(uint16_t value)
+{
+  return value * 1e-4;
+}
+
+inline double
+make_vertical_oscillation(uint16_t value)
+{
+  return value * 1e-4;
+}
+
 } // anonymous namespace
 
 void
@@ -525,6 +543,19 @@ fit_parser::read_record_message(const message_type &def, uint32_t timestamp)
 	  p.speed = make_speed(read_field(def, it));
 	  if (p.speed != 0)
 	    destination().set_has_speed(true);
+	  break;
+
+	case 39:			/* vertical_oscillation */
+	  p.vertical_oscillation
+	    = make_vertical_oscillation(read_field(def, it));
+	  if (p.vertical_oscillation != 0)
+	    destination().set_has_dynamics(true);
+	  break;
+
+	case 41:			/* ground_contact_time */
+	  p.ground_contact = make_ground_contact(read_field(def, it));
+	  if (p.ground_contact != 0)
+	    destination().set_has_dynamics(true);
 	  break;
 
 	default:
@@ -598,6 +629,15 @@ fit_parser::read_lap_message(const message_type &def, uint32_t timestamp)
 
 	case 22:			/* total_descent */
 	  lap.total_descent = read_field(def, it);
+	  break;
+
+	case 77:			/* vertical_oscillation */
+	  lap.vertical_oscillation
+	    = make_vertical_oscillation(read_field(def, it));
+	  break;
+
+	case 79:			/* ground_contact_time */
+	  lap.ground_contact = make_ground_contact(read_field(def, it));
 	  break;
 
 	default:
@@ -676,6 +716,18 @@ fit_parser::read_session_message(const message_type &def, uint32_t timestamp)
 
 	case 23:			/* total_descent */
 	  d.set_total_descent(read_field(def, it));
+	  break;
+
+	case 24:			/* total_training_effect */
+	  d.set_training_effect(make_training_effect(read_field(def, it)));
+	  break;
+
+	case 89:			/* vertical_oscillation */
+	  d.set_vertical_oscillation(make_vertical_oscillation(read_field(def, it)));
+	  break;
+
+	case 91:			/* ground_contact_time */
+	  d.set_ground_contact(make_ground_contact(read_field(def, it)));
 	  break;
 
 	default:
