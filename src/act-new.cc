@@ -53,7 +53,7 @@ enum option_id
   opt_max_pace,
   opt_max_speed,
   opt_resting_hr,
-  opt_average_hr,
+  opt_avg_hr,
   opt_max_hr,
   opt_calories,
   opt_weight,
@@ -100,8 +100,8 @@ option_field_id(option_id opt)
       return field_id::max_speed;
     case opt_resting_hr:
       return field_id::resting_hr;
-    case opt_average_hr:
-      return field_id::average_hr;
+    case opt_avg_hr:
+      return field_id::avg_hr;
     case opt_max_hr:
       return field_id::max_hr;
     case opt_calories:
@@ -146,7 +146,7 @@ const arguments::option new_options[] =
   {opt_max_pace, "max-pace", 0, "MAX-PACE"},
   {opt_max_speed, "max-speed", 0, "MAX-SPEED"},
   {opt_resting_hr, "resting-hr", 0, "RESTING-HR"},
-  {opt_average_hr, "average-hr", 0, "AVG-HR"},
+  {opt_avg_hr, "avg-hr", 0, "AVG-HR"},
   {opt_max_hr, "max-hr", 0, "MAX-HR"},
   {opt_calories, "calories", 0, "CALORIES"},
   {opt_weight, "weight", 0, "WEIGHT"},

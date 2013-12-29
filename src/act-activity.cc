@@ -70,9 +70,10 @@ activity::validate_cached_values(unsigned int groups) const
       if (groups & group_physiological)
 	{
 	  _resting_hr = 0;
-	  _average_hr = 0;
+	  _avg_hr = 0;
 	  _max_hr = 0;
 	  _calories = 0;
+	  _training_effect = 0;
 	  _weight = 0;
 	  _weight_unit = unit_type::kilogrammes;
 	}
@@ -86,6 +87,14 @@ activity::validate_cached_values(unsigned int groups) const
 	  _descent_unit = cfg.default_height_unit();
 	  _max_speed = 0;
 	  _max_speed_unit = cfg.default_pace_unit();
+	}
+
+      if (groups & group_dynamics)
+	{
+	  _avg_cadence = 0;
+	  _max_cadence = 0;
+	  _avg_ground_contact = 0;
+	  _avg_vertical_oscillation = 0;
 	}
 
       if (groups & group_other)
@@ -133,24 +142,26 @@ activity::validate_cached_values(unsigned int groups) const
 	{
 	  if (const std::string *s = field_ptr("resting-hr"))
 	    parse_heart_rate(*s, &_resting_hr, nullptr);
-	  if (const std::string *s = field_ptr("average-hr"))
-	    parse_heart_rate(*s, &_average_hr, nullptr);
+	  if (const std::string *s = field_ptr("avg-hr"))
+	    parse_heart_rate(*s, &_avg_hr, nullptr);
 	  if (const std::string *s = field_ptr("max-hr"))
 	    parse_heart_rate(*s, &_max_hr, nullptr);
 
 	  if (const std::string *s = field_ptr("calories"))
 	    parse_number(*s, &_calories);
+	  if (const std::string *s = field_ptr("training-effect"))
+	    parse_number(*s, &_training_effect);
 	  if (const std::string *s = field_ptr("Weight"))
 	    parse_weight(*s, &_weight, &_weight_unit);
 
-	  if (_resting_hr == 0 || _average_hr == 0
-	      || _max_hr == 0 || _calories == 0)
+	  if (_resting_hr == 0 || _avg_hr == 0 || _max_hr == 0
+	      || _calories == 0 || _training_effect == 0)
 	    use_gps = true;
 	}
 
       if (groups & group_gps_extended)
 	{
-	  if (const std::string *s = field_ptr("elapsed_time"))
+	  if (const std::string *s = field_ptr("elapsed-time"))
 	    parse_duration(*s, &_elapsed_time);
 	  if (const std::string *s = field_ptr("ascent"))
 	    parse_distance(*s, &_ascent, &_ascent_unit);
@@ -163,6 +174,22 @@ activity::validate_cached_values(unsigned int groups) const
 
 	  if (_elapsed_time == 0 || _ascent == 0
 	      || _descent == 0 || _max_speed == 0)
+	    use_gps = true;
+	}
+
+      if (groups & group_dynamics)
+	{
+	  if (const std::string *s = field_ptr("avg-cadence"))
+	    parse_cadence(*s, &_avg_cadence, nullptr);
+	  if (const std::string *s = field_ptr("max-cadence"))
+	    parse_cadence(*s, &_max_cadence, nullptr);
+	  if (const std::string *s = field_ptr("avg-ground-contact"))
+	    parse_duration(*s, &_avg_ground_contact);
+	  if (const std::string *s = field_ptr("avg-vertical-oscillation"))
+	    parse_distance(*s, &_avg_vertical_oscillation, nullptr);
+
+	  if (_avg_cadence == 0 || _max_cadence == 0
+	      || _avg_ground_contact == 0 || _avg_vertical_oscillation == 0)
 	    use_gps = true;
 	}
 
@@ -213,12 +240,14 @@ activity::validate_cached_values(unsigned int groups) const
 
 	      if (groups & group_physiological)
 		{
-		  if (_average_hr == 0)
-		    _average_hr = data->avg_heart_rate();
+		  if (_avg_hr == 0)
+		    _avg_hr = data->avg_heart_rate();
 		  if (_max_hr == 0)
 		    _max_hr = data->max_heart_rate();
 		  if (_calories == 0)
 		    _calories = data->total_calories();
+		  if (_training_effect == 0)
+		    _training_effect = data->training_effect();
 		}
 
 	      if (groups & group_gps_extended)
@@ -235,6 +264,18 @@ activity::validate_cached_values(unsigned int groups) const
 		      if (data->sport() == gps::activity::sport_type::cycling)
 			_max_speed_unit = shared_config().default_speed_unit();
 		    }
+		}
+
+	      if (groups & group_dynamics)
+		{
+		  if (_avg_cadence == 0)
+		    _avg_cadence = data->avg_cadence();
+		  if (_max_cadence == 0)
+		    _max_cadence = data->max_cadence();
+		  if (_avg_ground_contact == 0)
+		    _avg_ground_contact = data->ground_contact();
+		  if (_avg_vertical_oscillation == 0)
+		    _avg_vertical_oscillation = data->vertical_oscillation();
 		}
 	    }
 	}
@@ -270,20 +311,32 @@ activity::field_value(field_id id) const
       return quality();
     case field_id::resting_hr:
       return resting_hr();
-    case field_id::average_hr:
-      return average_hr();
+    case field_id::avg_hr:
+      return avg_hr();
     case field_id::max_hr:
       return max_hr();
     case field_id::calories:
       return calories();
+    case field_id::training_effect:
+      return training_effect();
     case field_id::weight:
       return weight();
+    case field_id::avg_cadence:
+      return avg_cadence();
+    case field_id::max_cadence:
+      return max_cadence();
+    case field_id::avg_ground_contact:
+      return avg_ground_contact();
+    case field_id::avg_vertical_oscillation:
+      return avg_vertical_oscillation();
     case field_id::temperature:
       return temperature();
     case field_id::dew_point:
       return dew_point();
     case field_id::vdot:
       return vdot();
+    case field_id::avg_stride_length:
+      return avg_stride_length();
     case field_id::points:
       return points();
     default:
@@ -326,6 +379,10 @@ activity::field_unit(field_id id) const
     case field_id::max_speed:
     case field_id::max_pace:
       return max_speed_unit();
+    case field_id::avg_stride_length:
+      return unit_type::metres;
+    case field_id::avg_vertical_oscillation:
+      return unit_type::centimetres;
     case field_id::weight:
       return weight_unit();
     case field_id::temperature:
@@ -479,10 +536,10 @@ activity::resting_hr() const
 }
 
 double
-activity::average_hr() const
+activity::avg_hr() const
 {
   validate_cached_values(group_physiological);
-  return _average_hr;
+  return _avg_hr;
 }
 
 double
@@ -500,6 +557,13 @@ activity::calories() const
 }
 
 double
+activity::training_effect() const
+{
+  validate_cached_values(group_physiological);
+  return _training_effect;
+}
+
+double
 activity::weight() const
 {
   validate_cached_values(group_physiological);
@@ -511,6 +575,34 @@ activity::weight_unit() const
 {
   validate_cached_values(group_physiological);
   return _weight_unit;
+}
+
+double
+activity::avg_cadence() const
+{
+  validate_cached_values(group_dynamics);
+  return _avg_cadence;
+}
+
+double
+activity::max_cadence() const
+{
+  validate_cached_values(group_dynamics);
+  return _max_cadence;
+}
+
+double
+activity::avg_ground_contact() const
+{
+  validate_cached_values(group_dynamics);
+  return _avg_ground_contact;
+}
+
+double
+activity::avg_vertical_oscillation() const
+{
+  validate_cached_values(group_dynamics);
+  return _avg_vertical_oscillation;
 }
 
 const std::vector<std::string> &
@@ -578,6 +670,29 @@ activity::vdot() const
     }
   else
     return 0;
+}
+
+double
+activity::avg_stride_length() const
+{
+  /* stride_length = distance / steps
+     steps = duration * avg_cadence. */
+
+  double dist = distance();
+  if (dist == 0)
+    return 0;
+
+  double dur = duration();
+  if (dur == 0)
+    return 0;
+
+  double cadence = avg_cadence();
+  if (cadence == 0)
+    return 0;
+
+  double steps = (dur * (1./60)) * cadence;
+
+  return dist / steps;
 }
 
 bool
@@ -770,7 +885,8 @@ activity::print_expansion(FILE *fh, const char *name,
 	case field_data_type::temperature:
 	case field_data_type::fraction:
 	case field_data_type::weight:
-	case field_data_type::heart_rate: {
+	case field_data_type::heart_rate:
+	case field_data_type::cadence: {
 	  double value = field_value(id);
 	  unit_type unit = field_unit(id);
 	  format_value(tem, type, value, unit);

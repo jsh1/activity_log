@@ -42,8 +42,16 @@ lookup_field_id(const char *str)
 	return field_id::activity;
       else if (strcasecmp(str, "ascent") == 0)
 	return field_id::ascent;
-      else if (strcasecmp(str, "average-hr") == 0)
-	return field_id::average_hr;
+      else if (strcasecmp(str, "avg-cadence") == 0)
+	return field_id::avg_cadence;
+      else if (strcasecmp(str, "avg-ground-contact") == 0)
+	return field_id::avg_ground_contact;
+      else if (strcasecmp(str, "avg-hr") == 0)
+	return field_id::avg_hr;
+      else if (strcasecmp(str, "avg-stride-length") == 0)
+	return field_id::avg_stride_length;
+      else if (strcasecmp(str, "avg-vertical-oscillation") == 0)
+	return field_id::avg_vertical_oscillation;
       break;
 
     case 'c':
@@ -86,7 +94,9 @@ lookup_field_id(const char *str)
       break;
 
     case 'm':
-      if (strcasecmp(str, "max-hr") == 0)
+      if (strcasecmp(str, "max-cadence") == 0)
+	return field_id::max_cadence;
+      else if (strcasecmp(str, "max-hr") == 0)
 	return field_id::max_hr;
       else if (strcasecmp(str, "max-pace") == 0)
 	return field_id::max_pace;
@@ -114,6 +124,8 @@ lookup_field_id(const char *str)
     case 't':
       if (strcasecmp(str, "temperature") == 0)
 	return field_id::temperature;
+      else if (strcasecmp(str, "training-effect") == 0)
+	return field_id::training_effect;
       else if (strcasecmp(str, "type") == 0)
 	return field_id::type;
       break;
@@ -143,8 +155,16 @@ canonical_field_name(field_id id)
       return "Activity";
     case field_id::ascent:
       return "Ascent";
-    case field_id::average_hr:
-      return "Average-HR";
+    case field_id::avg_cadence:
+      return "Avg-Cadence";
+    case field_id::avg_ground_contact:
+      return "Avg-Ground-Contact-Time";
+    case field_id::avg_hr:
+      return "Avg-HR";
+    case field_id::avg_stride_length:
+      return "Avg-Stride-Length";
+    case field_id::avg_vertical_oscillation:
+      return "Avg-Vertical-Oscillation";
     case field_id::calories:
       return "Calories";
     case field_id::course:
@@ -171,6 +191,8 @@ canonical_field_name(field_id id)
       return "GPS-File";
     case field_id::keywords:
       return "Keywords";
+    case field_id::max_cadence:
+      return "Max-Cadence";
     case field_id::max_hr:
       return "Max-HR";
     case field_id::max_pace:
@@ -189,6 +211,8 @@ canonical_field_name(field_id id)
       return "Speed";
     case field_id::temperature:
       return "Temperature";
+    case field_id::training_effect:
+      return "Training-Effect";
     case field_id::type:
       return "Type";
     case field_id::vdot:
@@ -205,6 +229,7 @@ field_read_only_p(field_id id)
 {
   switch (id)
     {
+    case field_id::avg_stride_length:
     case field_id::vdot:
       return true;
 
@@ -227,13 +252,17 @@ lookup_field_data_type(const field_id id)
     case field_id::calories:
     case field_id::vdot:
     case field_id::points:
+    case field_id::training_effect:
       return field_data_type::number;
     case field_id::date:
       return field_data_type::date;
     case field_id::ascent:
+    case field_id::avg_stride_length:
+    case field_id::avg_vertical_oscillation:
     case field_id::distance:
     case field_id::descent:
       return field_data_type::distance;
+    case field_id::avg_ground_contact:
     case field_id::duration:
     case field_id::elapsed_time:
       return field_data_type::duration;
@@ -255,10 +284,13 @@ lookup_field_data_type(const field_id id)
       return field_data_type::temperature;
     case field_id::weight:
       return field_data_type::weight;
-    case field_id::average_hr:
+    case field_id::avg_hr:
     case field_id::max_hr:
     case field_id::resting_hr:
       return field_data_type::heart_rate;
+    case field_id::avg_cadence:
+    case field_id::max_cadence:
+      return field_data_type::cadence;
     }
 }
 
@@ -362,6 +394,17 @@ canonicalize_field_string(field_data_type type, std::string &str)
 	{
 	  str.clear();
 	  format_heart_rate(str, value, unit_type::beats_per_minute);
+	  return true;
+	}
+      break; }
+
+    case field_data_type::cadence: {
+      double value;
+      unit_type unit;
+      if (parse_cadence(str, &value, &unit))
+	{
+	  str.clear();
+	  format_cadence(str, value, unit);
 	  return true;
 	}
       break; }

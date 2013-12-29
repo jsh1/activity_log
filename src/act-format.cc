@@ -80,7 +80,7 @@ format_time(std::string &str, double dur,
     {
       strcpy(buf, "Inf");
     }
-  else
+  else if (dur > 10)
     {
       if (!include_frac)
 	dur = floor(dur + .5);
@@ -109,6 +109,10 @@ format_time(std::string &str, double dur,
 	  snprintf_l(buf + len, sizeof(buf) - len, nullptr,
 		     ".%02d", (int) floor(frac * 100 + .5));
 	}
+    }
+  else
+    {
+      snprintf_l(buf, sizeof(buf), nullptr, "%d ms", (int) round(dur * 1000));
     }
 
   if (suffix)
@@ -146,12 +150,12 @@ format_distance(std::string &str, double dist, unit_type unit)
   switch (unit)
     {
     case unit_type::centimetres:
-      format = "%.0f cm";
+      format = "%.1f cm";
       dist = dist * 1e2;
       break;
 
     case unit_type::metres:
-      format = "%.1f m";
+      format = dist < 10 ? "%.2f m" : "%.1f m";
       break;
 
     case unit_type::kilometres:
@@ -346,6 +350,16 @@ format_heart_rate(std::string &str, double value, unit_type unit)
 }
 
 void
+format_cadence(std::string &str, double value, unit_type unit)
+{
+  char buf[64];
+
+  snprintf_l(buf, sizeof(buf), nullptr, "%d spm", (int) value);
+
+  str.append(buf);
+}
+
+void
 format_fraction(std::string &str, double frac)
 {
   char buf[32];
@@ -396,6 +410,10 @@ format_value(std::string &str, field_data_type type,
 
     case field_data_type::heart_rate:
       format_heart_rate(str, value, unit);
+      break;
+
+    case field_data_type::cadence:
+      format_cadence(str, value, unit);
       break;
 
     case field_data_type::date:
@@ -550,6 +568,15 @@ struct parsable_unit
   double offset;
 };
 
+static const parsable_unit time_units[] =
+{
+  {"s\0", unit_type::seconds, 1},
+  {"ms\0", unit_type::seconds, 1e-3},
+  {"us\0", unit_type::seconds, 1e-6},
+  {"ns\0", unit_type::seconds, 1e-9},
+  {0}
+};
+
 static const parsable_unit distance_units[] =
 {
   {"cm\0centimetres\0centimetre\0centimeters\0centimeter\0",
@@ -591,6 +618,12 @@ static const parsable_unit weight_units[] =
   {"kg\0kilos\0kilogram\0kilograms\0kilogramme\0kilogrammes\0",
    unit_type::kilogrammes, 1},
   {"lb\0lbs\0pound\0pounds\0", unit_type::pounds, 1/POUNDS_PER_KILO},
+  {0}
+};
+
+static const parsable_unit cadence_units[] =
+{
+  {"spm\0", unit_type::steps_per_minute, 1},
   {0}
 };
 
@@ -1118,6 +1151,8 @@ parse_time(const std::string &str, size_t &idx, double *dur_ptr)
   if (hours < 0)
     return false;
 
+  bool single_value = false;
+
   if (idx < str.size() && str[idx] == ':')
     {
       idx++;
@@ -1138,8 +1173,10 @@ parse_time(const std::string &str, size_t &idx, double *dur_ptr)
 	seconds = minutes, minutes = hours, hours = 0;
     }
   else
-    seconds = hours, hours = 0;
-
+    {
+      seconds = hours, hours = 0;
+      single_value = true;
+    }
   if (str[idx] == '.')
     {
       idx++;
@@ -1147,6 +1184,20 @@ parse_time(const std::string &str, size_t &idx, double *dur_ptr)
       seconds_frac = parse_decimal_fraction(str, idx);
       if (seconds_frac < 0)
 	return false;
+    }
+
+  if (single_value)
+    {
+      /* Check for "INTEGER[.DECIMAL] UNIT" form. */
+
+      double value = seconds + seconds_frac;
+      unit_type unit = unit_type::unknown;
+
+      if (parse_unit(time_units, str, idx, value, unit))
+	{
+	  *dur_ptr = value;
+	  return true;
+	}
     }
 
   *dur_ptr = (hours * 60 + minutes) * 60 + seconds + seconds_frac;
@@ -1419,6 +1470,29 @@ parse_heart_rate(const std::string &str,
 }
 
 bool
+parse_cadence(const std::string &str, double *value_ptr, unit_type *unit_ptr)
+{
+  size_t idx = skip_whitespace(str, 0);
+
+  double value;
+  if (!parse_number(str, idx, value))
+    return false;
+
+  idx = skip_whitespace(str, idx);
+
+  unit_type unit = unit_type::steps_per_minute;
+
+  parse_unit(cadence_units, str, idx, value, unit);
+
+  *value_ptr = value;
+
+  if (unit_ptr)
+    *unit_ptr = unit;
+
+  return check_trailer(str, idx);
+}
+
+bool
 parse_fraction(const std::string &str, double *frac_ptr)
 {
   double value;
@@ -1514,6 +1588,9 @@ parse_value(const std::string &str, field_data_type type,
     case field_data_type::heart_rate:
       return parse_heart_rate(str, value_ptr, unit_ptr);
 
+    case field_data_type::cadence:
+      return parse_cadence(str, value_ptr, unit_ptr);
+
     case field_data_type::date: {
       time_t time = 0;
       if (parse_date_time(str, &time, nullptr))
@@ -1559,6 +1636,11 @@ parse_unit(const std::string &str, field_data_type type, unit_type &unit)
   if ((type == field_data_type::unknown
        || type == field_data_type::weight)
       && parse_unit(weight_units, str, idx, value, unit))
+    return true;
+
+  if ((type == field_data_type::unknown
+       || type == field_data_type::cadence)
+      && parse_unit(cadence_units, str, idx, value, unit))
     return true;
 
   return false;

@@ -62,6 +62,9 @@ enum ChartFields
   CHART_HR_MAX,
   CHART_ALT_FT,
   CHART_ALT_M,
+  CHART_CADENCE,
+  CHART_VERT_OSC,
+  CHART_GROUND_CONTACT,
   CHART_FIELD_COUNT,
 };
 
@@ -79,6 +82,10 @@ enum ChartFieldMasks
 
   CHART_ALT_FT_MASK = 1U << CHART_ALT_FT,
   CHART_ALT_M_MASK = 1U << CHART_ALT_M,
+
+  CHART_CADENCE_MASK = 1U << CHART_CADENCE,
+  CHART_VERT_OSC_MASK = 1U << CHART_VERT_OSC,
+  CHART_GROUND_CONTACT_MASK = 1U << CHART_GROUND_CONTACT,
 
   CHART_SPEED_ANY_MASK = CHART_PACE_MI_MASK
 			 | CHART_PACE_KM_MASK
@@ -185,20 +192,39 @@ chart::draw_line(const line &l, const x_axis_state &xs, CGFloat tx)
       stroke_rgb[2] = 1;
       break;
     case line_color::orange:
-      fill_rgb[0] = 1;
-      fill_rgb[1] = .5;
-      fill_rgb[2] = 0;
-      stroke_rgb[0] = 1;
-      stroke_rgb[1] = 0.5;
-      stroke_rgb[2] = 0;
+      fill_rgb[0] = stroke_rgb[0] = 1;
+      fill_rgb[1] = stroke_rgb[1] = .5;
+      fill_rgb[2] = stroke_rgb[2] = 0;
+      break;
+    case line_color::yellow:
+      fill_rgb[0] = stroke_rgb[0] = 1;
+      fill_rgb[1] = stroke_rgb[1] = 1;
+      fill_rgb[2] = stroke_rgb[2] = 0;
+      break;
+    case line_color::magenta:
+      fill_rgb[0] = stroke_rgb[0] = 1;
+      fill_rgb[1] = stroke_rgb[1] = 0;
+      fill_rgb[2] = stroke_rgb[2] = 1;
+      break;
+    case line_color::teal:
+      fill_rgb[0] = stroke_rgb[0] = 0;
+      fill_rgb[1] = stroke_rgb[1] = .5;
+      fill_rgb[2] = stroke_rgb[2] = .5;
+      break;
+    case line_color::steel_blue:
+      fill_rgb[0] = stroke_rgb[0] = 70/255.;
+      fill_rgb[1] = stroke_rgb[1] = 130/255.;
+      fill_rgb[2] = stroke_rgb[2] = 180/255.;
+      break;
+    case line_color::tomato:
+      fill_rgb[0] = stroke_rgb[0] = 1;
+      fill_rgb[1] = stroke_rgb[1] = 99/255.;
+      fill_rgb[2] = stroke_rgb[2] = 71/255.;
       break;
     case line_color::gray:
-      fill_rgb[0] = .6;
-      fill_rgb[1] = .6;
-      fill_rgb[2] = .6;
-      stroke_rgb[0] = 0.6;
-      stroke_rgb[1] = 0.6;
-      stroke_rgb[2] = 0.6;
+      fill_rgb[0] = stroke_rgb[0] = .6;
+      fill_rgb[1] = stroke_rgb[1] = .6;
+      fill_rgb[2] = stroke_rgb[2] = .6;
       break;
     }
 
@@ -496,6 +522,20 @@ chart::draw_current_time()
 	    unit = act::unit_type::feet;
 	  act::format_distance(buf, pt.altitude, unit);
 	}
+      else if (it.field == &act::gps::activity::point::cadence)
+	{
+	  act::format_cadence(buf, pt.cadence,
+			      act::unit_type::steps_per_minute);
+	}
+      else if (it.field == &act::gps::activity::point::vertical_oscillation)
+	{
+	  act::format_distance(buf, pt.vertical_oscillation,
+			       act::unit_type::centimetres);
+	}
+      else if (it.field == &act::gps::activity::point::ground_contact)
+	{
+	  act::format_duration(buf, pt.ground_contact);
+	}
       else
 	continue;
       buf.append("\n");
@@ -618,8 +658,12 @@ chart::current_time_rect() const
   bool draw_pace = (_fieldMask & CHART_SPEED_ANY_MASK) && gps_a->has_speed();
   bool draw_hr = (_fieldMask & CHART_HR_ANY_MASK) && gps_a->has_heart_rate();
   bool draw_altitude = (_fieldMask & CHART_ALT_ANY_MASK) && gps_a->has_altitude();
+  bool draw_cadence = (_fieldMask & CHART_CADENCE_MASK) && gps_a->has_cadence();
+  bool draw_vert_osc = (_fieldMask & CHART_VERT_OSC_MASK) && gps_a->has_dynamics();
+  bool draw_grnd_con = (_fieldMask & CHART_GROUND_CONTACT_MASK) && gps_a->has_dynamics();
 
-  if (!(draw_pace || draw_hr || draw_altitude))
+  if (!(draw_pace || draw_hr || draw_altitude
+	|| draw_cadence || draw_vert_osc || draw_grnd_con))
     return;
 
   _chart.reset(new chart_view::chart(*_smoothed_data.get(),
@@ -686,6 +730,30 @@ chart::current_time_rect() const
 		       color, flags, -0.05, 1.05);
     }
 
+  if (draw_cadence)
+    {
+      _chart->add_line(&act::gps::activity::point::cadence,
+		       act::gps::chart::value_conversion::identity,
+		       act::gps::chart::line_color::tomato,
+		       act::gps::chart::TICK_LINES, -0.05, 1.05);
+    }
+
+  if (draw_vert_osc)
+    {
+      _chart->add_line(&act::gps::activity::point::vertical_oscillation,
+		       act::gps::chart::value_conversion::distance_m_cm,
+		       act::gps::chart::line_color::teal,
+		       act::gps::chart::TICK_LINES, -0.05, 1.05);
+    }
+
+  if (draw_grnd_con)
+    {
+      _chart->add_line(&act::gps::activity::point::ground_contact,
+		       act::gps::chart::value_conversion::time_s_ms,
+		       act::gps::chart::line_color::magenta,
+		       act::gps::chart::TICK_LINES, -0.05, 1.05);
+    }
+
   _chart->set_chart_rect(NSRectToCGRect([_chartView bounds]));
   _chart->set_selected_lap([_controller selectedLapIndex]);
   _chart->update_values();
@@ -750,6 +818,15 @@ chart::current_time_rect() const
 	      break;
 	    case CHART_ALT_M:
 	      type = @"Altitude (m)";
+	      break;
+	    case CHART_CADENCE:
+	      type = @"Cadence (spm)";
+	      break;
+	    case CHART_VERT_OSC:
+	      type = @"Vertical Oscillation (cm)";
+	      break;
+	    case CHART_GROUND_CONTACT:
+	      type = @"Ground Contact (ms)";
 	      break;
 	    }
 	  if (type != nil)
@@ -878,6 +955,10 @@ chart::current_time_rect() const
 		enableMask |= CHART_HR_ANY_MASK;
 	      if (gps_a->has_altitude())
 		enableMask |= CHART_ALT_ANY_MASK;
+	      if (gps_a->has_cadence())
+		enableMask |= CHART_CADENCE_MASK;
+	      if (gps_a->has_dynamics())
+		enableMask |= CHART_VERT_OSC_MASK | CHART_GROUND_CONTACT_MASK;
 	    }
 	}
 

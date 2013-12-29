@@ -97,47 +97,65 @@ activity_accum::add(const activity &a)
 {
   _count++;
 
-  if (a.distance() != 0)
-    _accum[static_cast<int>(accum_id::distance)].add(a.distance());
+  if (double x = a.distance())
+    _accum[static_cast<int>(accum_id::distance)].add(x);
 
-  if (a.duration() != 0)
-    _accum[static_cast<int>(accum_id::duration)].add(a.duration());
+  if (double x = a.duration())
+    _accum[static_cast<int>(accum_id::duration)].add(x);
 
-  if (a.speed() != 0)
-    _accum[static_cast<int>(accum_id::speed)].add(a.speed());
+  if (double x = a.speed())
+    _accum[static_cast<int>(accum_id::speed)].add(x);
 
-  if (a.max_speed() != 0)
-    _accum[static_cast<int>(accum_id::max_speed)].add(a.max_speed());
+  if (double x = a.max_speed())
+    _accum[static_cast<int>(accum_id::max_speed)].add(x);
 
-  if (a.average_hr() != 0)
-    _accum[static_cast<int>(accum_id::average_hr)].add(a.average_hr());
+  if (double x = a.avg_hr())
+    _accum[static_cast<int>(accum_id::avg_hr)].add(x);
 
-  if (a.max_hr() != 0)
-    _accum[static_cast<int>(accum_id::max_hr)].add(a.max_hr());
+  if (double x = a.max_hr())
+    _accum[static_cast<int>(accum_id::max_hr)].add(x);
 
-  if (a.resting_hr() != 0)
-    _accum[static_cast<int>(accum_id::resting_hr)].add(a.resting_hr());
+  if (double x = a.resting_hr())
+    _accum[static_cast<int>(accum_id::resting_hr)].add(x);
 
-  if (a.calories() != 0)
-    _accum[static_cast<int>(accum_id::calories)].add(a.calories());
+  if (double x = a.avg_cadence())
+    _accum[static_cast<int>(accum_id::avg_cadence)].add(x);
 
-  if (a.weight() != 0)
-    _accum[static_cast<int>(accum_id::weight)].add(a.weight());
+  if (double x = a.max_cadence())
+    _accum[static_cast<int>(accum_id::max_cadence)].add(x);
 
-  if (a.effort() != 0)
-    _accum[static_cast<int>(accum_id::effort)].add(a.effort());
+  if (double x = a.avg_ground_contact())
+    _accum[static_cast<int>(accum_id::avg_ground_contact)].add(x);
 
-  if (a.quality() != 0)
-    _accum[static_cast<int>(accum_id::quality)].add(a.quality());
+  if (double x = a.avg_vertical_oscillation())
+    _accum[static_cast<int>(accum_id::avg_vertical_oscillation)].add(x);
 
-  if (a.points() != 0)
-    _accum[static_cast<int>(accum_id::points)].add(a.points());
+  if (double x = a.avg_stride_length())
+    _accum[static_cast<int>(accum_id::avg_stride_length)].add(x);
 
-  if (a.temperature() != 0)
-    _accum[static_cast<int>(accum_id::temperature)].add(a.temperature());
+  if (double x = a.calories())
+    _accum[static_cast<int>(accum_id::calories)].add(x);
 
-  if (a.dew_point() != 0)
-    _accum[static_cast<int>(accum_id::dew_point)].add(a.dew_point());
+  if (double x = a.training_effect())
+    _accum[static_cast<int>(accum_id::training_effect)].add(x);
+
+  if (double x = a.weight())
+    _accum[static_cast<int>(accum_id::weight)].add(x);
+
+  if (double x = a.effort())
+    _accum[static_cast<int>(accum_id::effort)].add(x);
+
+  if (double x = a.quality())
+    _accum[static_cast<int>(accum_id::quality)].add(x);
+
+  if (double x = a.points())
+    _accum[static_cast<int>(accum_id::points)].add(x);
+
+  if (double x = a.temperature())
+    _accum[static_cast<int>(accum_id::temperature)].add(x);
+
+  if (double x = a.dew_point())
+    _accum[static_cast<int>(accum_id::dew_point)].add(x);
 }
 
 void
@@ -244,8 +262,8 @@ activity_accum::get_field_value(const char *name, const char *arg,
       if (!arg)
 	arg = "max";
       break;
-    case field_id::average_hr:
-      a_id = accum_id::average_hr;
+    case field_id::avg_hr:
+      a_id = accum_id::avg_hr;
       if (!arg)
 	arg = "average";
       break;
@@ -259,10 +277,40 @@ activity_accum::get_field_value(const char *name, const char *arg,
       if (!arg)
 	arg = "min";
       break;
+    case field_id::avg_cadence:
+      a_id = accum_id::avg_cadence;
+      if (!arg)
+	arg = "average";
+      break;
+    case field_id::max_cadence:
+      a_id = accum_id::max_cadence;
+      if (!arg)
+	arg = "max";
+      break;
+    case field_id::avg_ground_contact:
+      a_id = accum_id::avg_ground_contact;
+      if (!arg)
+	arg = "average";
+      break;
+    case field_id::avg_stride_length:
+      a_id = accum_id::avg_stride_length;
+      if (!arg)
+	arg = "average";
+      break;
+    case field_id::avg_vertical_oscillation:
+      a_id = accum_id::avg_vertical_oscillation;
+      if (!arg)
+	arg = "average";
+      break;
     case field_id::calories:
       a_id = accum_id::calories;
       if (!arg)
 	arg = "total";
+      break;
+    case field_id::training_effect:
+      a_id = accum_id::training_effect;
+      if (!arg)
+	arg = "average";
       break;
     case field_id::weight:
       a_id = accum_id::weight;
@@ -356,6 +404,7 @@ activity_accum::print_expansion(const char *name, const char *arg,
 	case field_data_type::fraction:
 	case field_data_type::weight:
 	case field_data_type::heart_rate:
+	case field_data_type::cadence:
 	  format_value(str, type, value, unit_type::unknown);
 	  break;
 	}

@@ -59,6 +59,8 @@ public:
       speed_ms_vvo2max,
       distance_m_mi,
       distance_m_ft,
+      distance_m_cm,
+      time_s_ms,
     };
 
   enum class line_color
@@ -67,6 +69,11 @@ public:
       green,
       blue,
       orange,
+      yellow,
+      magenta,
+      teal,
+      steel_blue,
+      tomato,
       gray
     };
 

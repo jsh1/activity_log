@@ -84,13 +84,20 @@ public:
   double points() const;
 
   double resting_hr() const;
-  double average_hr() const;
+  double avg_hr() const;
   double max_hr() const;
 
   double calories() const;
+  double training_effect() const;
 
   double weight() const;
   unit_type weight_unit() const;
+
+  double avg_cadence() const;
+  double max_cadence() const;
+  double avg_ground_contact() const;
+  double avg_vertical_oscillation() const;
+  double avg_stride_length() const;
 
   const std::vector<std::string> &equipment() const;
 
@@ -119,7 +126,8 @@ private:
       group_timing = 1U << 0,
       group_physiological = 1U << 1,
       group_gps_extended = 1U << 2,
-      group_other = 1U << 3,
+      group_dynamics = 1U << 3,
+      group_other = 1U << 4,
       group_all = 0xffU,
     };
 
@@ -135,10 +143,11 @@ private:
   // group_physiological
 
   mutable double _resting_hr;
-  mutable double _average_hr;
+  mutable double _avg_hr;
   mutable double _max_hr;
-  mutable double _calories;
   mutable double _weight;
+  mutable double _calories;
+  mutable double _training_effect;
   mutable unit_type _weight_unit;
 
   // group_gps_extended
@@ -150,6 +159,13 @@ private:
   mutable unit_type _descent_unit;
   mutable double _max_speed;
   mutable unit_type _max_speed_unit;
+
+  // group_dynamics
+
+  mutable double _avg_cadence;
+  mutable double _max_cadence;
+  mutable double _avg_ground_contact;
+  mutable double _avg_vertical_oscillation;
 
   // group_other
 

@@ -52,9 +52,15 @@ enum class field_id
   effort,
   quality,
   resting_hr,
-  average_hr,
+  avg_hr,
   max_hr,
+  avg_cadence,
+  max_cadence,
+  avg_vertical_oscillation,
+  avg_ground_contact,
+  avg_stride_length,
   calories,
+  training_effect,
   equipment,
   temperature,
   dew_point,
@@ -79,6 +85,7 @@ enum class field_data_type
   fraction,
   weight,
   heart_rate,
+  cadence,
   keywords,
   unknown = string,
 };
@@ -129,6 +136,9 @@ enum class unit_type
   beats_per_minute,
   percent_hr_reserve,
   percent_hr_max,
+
+  // cadence units
+  steps_per_minute,
 };
 
 struct date_range
