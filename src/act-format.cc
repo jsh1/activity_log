@@ -154,6 +154,11 @@ format_distance(std::string &str, double dist, unit_type unit)
       dist = dist * 1e2;
       break;
 
+    case unit_type::millimetres:
+      format = "%.0f mm";
+      dist = dist * 1e3;
+      break;
+
     case unit_type::metres:
       format = dist < 10 ? "%.2f m" : "%.1f m";
       break;
@@ -354,7 +359,10 @@ format_cadence(std::string &str, double value, unit_type unit)
 {
   char buf[64];
 
-  snprintf_l(buf, sizeof(buf), nullptr, "%d spm", (int) value);
+  if (floor(value) == value)
+    snprintf_l(buf, sizeof(buf), nullptr, "%d spm", (int) value);
+  else
+    snprintf_l(buf, sizeof(buf), nullptr, "%.1f spm", value);
 
   str.append(buf);
 }
@@ -580,10 +588,12 @@ static const parsable_unit time_units[] =
 static const parsable_unit distance_units[] =
 {
   {"cm\0centimetres\0centimetre\0centimeters\0centimeter\0",
-   unit_type::centimetres, .01},
+   unit_type::centimetres, 1e-2},
+  {"mm\0millmetres\0milliimetre\0millimeters\0millimeter\0",
+   unit_type::millimetres, 1e-3},
   {"m\0metres\0metre\0meters\0meter\0", unit_type::metres, 1},
   {"km\0kilometres\0kilometre\0kilometers\0kilometer\0",
-   unit_type::kilometres, 1000},
+   unit_type::kilometres, 1e3},
   {"in\0inches\0inch\0", unit_type::inches, 1/INCHES_PER_METER},
   {"ft\0feet\0foot\0", unit_type::feet, 1/FEET_PER_METER},
   {"yd\0yards\0yard\0", unit_type::yards, 1/YARDS_PER_METER},

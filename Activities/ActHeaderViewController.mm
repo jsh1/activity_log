@@ -101,8 +101,8 @@
       if (a->max_cadence() != 0)
 	[_headerView addDisplayedField:@"Max-Cadence"];
 
-      if (a->avg_ground_contact() != 0)
-	[_headerView addDisplayedField:@"Avg-Ground-Contact"];
+      if (a->avg_stance_time() != 0)
+	[_headerView addDisplayedField:@"Avg-Stance-Time"];
       if (a->avg_vertical_oscillation() != 0)
 	[_headerView addDisplayedField:@"Avg-Vertical-Oscillation"];
       if (a->avg_stride_length() != 0)

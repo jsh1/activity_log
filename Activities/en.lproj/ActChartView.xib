@@ -128,7 +128,7 @@
                         <action selector="configMenuAction:" target="-2" id="aT4-Ry-lLg"/>
                     </connections>
                 </menuItem>
-                <menuItem title="Ground Contact Time" tag="12" id="q2h-e9-IRD">
+                <menuItem title="Stance Time" tag="12" id="q2h-e9-IRD">
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <connections>
                         <action selector="configMenuAction:" target="-2" id="w8p-y4-eWI"/>

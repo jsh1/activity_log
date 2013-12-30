@@ -64,7 +64,7 @@ enum ChartFields
   CHART_ALT_M,
   CHART_CADENCE,
   CHART_VERT_OSC,
-  CHART_GROUND_CONTACT,
+  CHART_STANCE_TIME,
   CHART_FIELD_COUNT,
 };
 
@@ -85,7 +85,7 @@ enum ChartFieldMasks
 
   CHART_CADENCE_MASK = 1U << CHART_CADENCE,
   CHART_VERT_OSC_MASK = 1U << CHART_VERT_OSC,
-  CHART_GROUND_CONTACT_MASK = 1U << CHART_GROUND_CONTACT,
+  CHART_STANCE_TIME_MASK = 1U << CHART_STANCE_TIME,
 
   CHART_SPEED_ANY_MASK = CHART_PACE_MI_MASK
 			 | CHART_PACE_KM_MASK
@@ -530,11 +530,11 @@ chart::draw_current_time()
       else if (it.field == &act::gps::activity::point::vertical_oscillation)
 	{
 	  act::format_distance(buf, pt.vertical_oscillation,
-			       act::unit_type::centimetres);
+			       act::unit_type::millimetres);
 	}
-      else if (it.field == &act::gps::activity::point::ground_contact)
+      else if (it.field == &act::gps::activity::point::stance_time)
 	{
-	  act::format_duration(buf, pt.ground_contact);
+	  act::format_duration(buf, pt.stance_time);
 	}
       else
 	continue;
@@ -660,7 +660,7 @@ chart::current_time_rect() const
   bool draw_altitude = (_fieldMask & CHART_ALT_ANY_MASK) && gps_a->has_altitude();
   bool draw_cadence = (_fieldMask & CHART_CADENCE_MASK) && gps_a->has_cadence();
   bool draw_vert_osc = (_fieldMask & CHART_VERT_OSC_MASK) && gps_a->has_dynamics();
-  bool draw_grnd_con = (_fieldMask & CHART_GROUND_CONTACT_MASK) && gps_a->has_dynamics();
+  bool draw_grnd_con = (_fieldMask & CHART_STANCE_TIME_MASK) && gps_a->has_dynamics();
 
   if (!(draw_pace || draw_hr || draw_altitude
 	|| draw_cadence || draw_vert_osc || draw_grnd_con))
@@ -748,7 +748,7 @@ chart::current_time_rect() const
 
   if (draw_grnd_con)
     {
-      _chart->add_line(&act::gps::activity::point::ground_contact,
+      _chart->add_line(&act::gps::activity::point::stance_time,
 		       act::gps::chart::value_conversion::time_s_ms,
 		       act::gps::chart::line_color::magenta,
 		       act::gps::chart::TICK_LINES, -0.05, 1.05);
@@ -825,8 +825,8 @@ chart::current_time_rect() const
 	    case CHART_VERT_OSC:
 	      type = @"Vertical Oscillation (cm)";
 	      break;
-	    case CHART_GROUND_CONTACT:
-	      type = @"Ground Contact (ms)";
+	    case CHART_STANCE_TIME:
+	      type = @"Stance Time (ms)";
 	      break;
 	    }
 	  if (type != nil)
@@ -925,7 +925,7 @@ chart::current_time_rect() const
   if (view == _chartView)
     {
       if ([self chart])
-	return 160;
+	return 180;
       else
 	return 0;
     }
@@ -958,7 +958,7 @@ chart::current_time_rect() const
 	      if (gps_a->has_cadence())
 		enableMask |= CHART_CADENCE_MASK;
 	      if (gps_a->has_dynamics())
-		enableMask |= CHART_VERT_OSC_MASK | CHART_GROUND_CONTACT_MASK;
+		enableMask |= CHART_VERT_OSC_MASK | CHART_STANCE_TIME_MASK;
 	    }
 	}
 

@@ -54,11 +54,11 @@ public:
       double heart_rate;
       double cadence;
       double vertical_oscillation;
-      double ground_contact;
+      double stance_time;		/* aka ground contact time */
 
       point()
       : timestamp(0), altitude(0), distance(0), speed(0), heart_rate(0),
-        cadence(0), vertical_oscillation(0), ground_contact(0) {}
+        cadence(0), vertical_oscillation(0), stance_time(0) {}
     };
 
   struct lap
@@ -76,17 +76,17 @@ public:
       double max_heart_rate;
       double avg_cadence;
       double max_cadence;
-      double vertical_oscillation;
-      double ground_contact;
+      double avg_vertical_oscillation;
+      double avg_stance_time;
       std::vector<point> track;
       location_region region;
 
       lap()
       : start_time(0), total_elapsed_time(0), total_duration(0),
 	total_distance(0), total_ascent(0), total_descent(0),
-	total_calories(0), avg_speed(0), max_speed(0),
-	avg_heart_rate(0), max_heart_rate(0), avg_cadence(0),
-	max_cadence(0), vertical_oscillation(0), ground_contact(0) {}
+	total_calories(0), avg_speed(0), max_speed(0), avg_heart_rate(0),
+	max_heart_rate(0), avg_cadence(0), max_cadence(0),
+	avg_vertical_oscillation(0), avg_stance_time(0) {}
 
       void update_region();
     };
@@ -146,8 +146,8 @@ private:
   double _max_heart_rate;
   double _avg_cadence;
   double _max_cadence;
-  double _vertical_oscillation;
-  double _ground_contact;
+  double _avg_vertical_oscillation;
+  double _avg_stance_time;
 
   std::vector<lap> _laps;
 
@@ -238,11 +238,11 @@ public:
   void set_max_cadence(double x) {_max_cadence = x;}
   double max_cadence() const {return _max_cadence;}
 
-  void set_vertical_oscillation(double x) {_vertical_oscillation = x;}
-  double vertical_oscillation() const {return _vertical_oscillation;}
+  void set_avg_vertical_oscillation(double x) {_avg_vertical_oscillation = x;}
+  double avg_vertical_oscillation() const {return _avg_vertical_oscillation;}
 
-  void set_ground_contact(double x) {_ground_contact = x;}
-  double ground_contact() const {return _ground_contact;}
+  void set_avg_stance_time(double x) {_avg_stance_time = x;}
+  double avg_stance_time() const {return _avg_stance_time;}
 
   std::vector<lap> &laps() {return _laps;}
   const std::vector<lap> &laps() const {return _laps;}

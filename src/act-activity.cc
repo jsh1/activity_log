@@ -93,7 +93,7 @@ activity::validate_cached_values(unsigned int groups) const
 	{
 	  _avg_cadence = 0;
 	  _max_cadence = 0;
-	  _avg_ground_contact = 0;
+	  _avg_stance_time = 0;
 	  _avg_vertical_oscillation = 0;
 	}
 
@@ -183,13 +183,13 @@ activity::validate_cached_values(unsigned int groups) const
 	    parse_cadence(*s, &_avg_cadence, nullptr);
 	  if (const std::string *s = field_ptr("max-cadence"))
 	    parse_cadence(*s, &_max_cadence, nullptr);
-	  if (const std::string *s = field_ptr("avg-ground-contact"))
-	    parse_duration(*s, &_avg_ground_contact);
+	  if (const std::string *s = field_ptr("avg-stance-time"))
+	    parse_duration(*s, &_avg_stance_time);
 	  if (const std::string *s = field_ptr("avg-vertical-oscillation"))
 	    parse_distance(*s, &_avg_vertical_oscillation, nullptr);
 
 	  if (_avg_cadence == 0 || _max_cadence == 0
-	      || _avg_ground_contact == 0 || _avg_vertical_oscillation == 0)
+	      || _avg_stance_time == 0 || _avg_vertical_oscillation == 0)
 	    use_gps = true;
 	}
 
@@ -272,10 +272,10 @@ activity::validate_cached_values(unsigned int groups) const
 		    _avg_cadence = data->avg_cadence();
 		  if (_max_cadence == 0)
 		    _max_cadence = data->max_cadence();
-		  if (_avg_ground_contact == 0)
-		    _avg_ground_contact = data->ground_contact();
+		  if (_avg_stance_time == 0)
+		    _avg_stance_time = data->avg_stance_time();
 		  if (_avg_vertical_oscillation == 0)
-		    _avg_vertical_oscillation = data->vertical_oscillation();
+		    _avg_vertical_oscillation = data->avg_vertical_oscillation();
 		}
 	    }
 	}
@@ -325,8 +325,8 @@ activity::field_value(field_id id) const
       return avg_cadence();
     case field_id::max_cadence:
       return max_cadence();
-    case field_id::avg_ground_contact:
-      return avg_ground_contact();
+    case field_id::avg_stance_time:
+      return avg_stance_time();
     case field_id::avg_vertical_oscillation:
       return avg_vertical_oscillation();
     case field_id::temperature:
@@ -592,10 +592,10 @@ activity::max_cadence() const
 }
 
 double
-activity::avg_ground_contact() const
+activity::avg_stance_time() const
 {
   validate_cached_values(group_dynamics);
-  return _avg_ground_contact;
+  return _avg_stance_time;
 }
 
 double

@@ -50,8 +50,8 @@ activity::activity()
   _max_heart_rate(0),
   _avg_cadence(0),
   _max_cadence(0),
-  _vertical_oscillation(0),
-  _ground_contact(0),
+  _avg_vertical_oscillation(0),
+  _avg_stance_time(0),
   _has_location(false),
   _has_speed(false),
   _has_heart_rate(false),
@@ -145,8 +145,8 @@ activity::update_summary()
   _max_heart_rate = 0;
   _avg_cadence = 0;
   _max_cadence = 0;
-  _vertical_oscillation = 0;
-  _ground_contact = 0;
+  _avg_vertical_oscillation = 0;
+  _avg_stance_time = 0;
 
   if (laps().size() < 1)
     return;
@@ -172,15 +172,15 @@ activity::update_summary()
       _max_heart_rate = fmax(_max_heart_rate, it.max_heart_rate);
       _avg_cadence += it.avg_cadence * it.total_duration;
       _max_cadence = fmax(_max_cadence, it.max_cadence);
-      _vertical_oscillation += it.vertical_oscillation * it.total_duration;
-      _ground_contact += it.ground_contact * it.total_duration;
+      _avg_vertical_oscillation += it.avg_vertical_oscillation * it.total_duration;
+      _avg_stance_time += it.avg_stance_time * it.total_duration;
     }
 
   _avg_speed = _total_distance / _total_duration;
   _avg_heart_rate = _avg_heart_rate / _total_duration;
   _avg_cadence = _avg_cadence / _total_duration;
-  _vertical_oscillation = _vertical_oscillation / _total_duration;
-  _ground_contact = _ground_contact / _total_duration;
+  _avg_vertical_oscillation = _avg_vertical_oscillation / _total_duration;
+  _avg_stance_time = _avg_stance_time / _total_duration;
 }
 
 void
@@ -247,12 +247,12 @@ activity::print_summary(FILE *fh) const
 
   if (has_dynamics())
     {
-      format_distance(tem, vertical_oscillation(), unit_type::centimetres);
+      format_distance(tem, avg_vertical_oscillation(), unit_type::millimetres);
       fprintf(fh, "Avg-Vertical-Oscillation: %s\n", tem.c_str());
       tem.clear();
 
-      format_duration(tem, ground_contact());
-      fprintf(fh, "Avg-Ground-Contact: %s\n", tem.c_str());
+      format_duration(tem, avg_stance_time());
+      fprintf(fh, "Avg-Stance-Time: %s\n", tem.c_str());
       tem.clear();
     }
 
@@ -272,7 +272,7 @@ activity::print_laps(FILE *fh) const
   if (has_heart_rate())
     fprintf(fh, "  %3s %3s", "HR", "Max");
   if (has_cadence())
-    fprintf(fh, "  %3s %3s", "Cad", "Max");
+    fprintf(fh, "  %6s %6s", "Avg Cad", "Max Cad");
   if (has_dynamics())
     fprintf(fh, "  %4s  %3s", "Osc", "GCT");
 
@@ -306,25 +306,24 @@ activity::print_laps(FILE *fh) const
       if (has_cadence())
 	{
 	  std::string avg_str, max_str;
-	  format_number(avg_str, it.avg_cadence);
-	  format_number(max_str, it.max_cadence);
+	  format_number(avg_str, round(it.avg_cadence*10)*.1);
+	  format_number(max_str, round(it.max_cadence*10)*.1);
 
-	  fprintf(fh, "  %3s %3s", avg_str.c_str(), max_str.c_str());
+	  fprintf(fh, "  %6s %6s", avg_str.c_str(), max_str.c_str());
 	}
 
       if (has_dynamics())
 	{
 	  char buf[20];
-	  snprintf(buf, sizeof(buf), "%.1f", it.vertical_oscillation * 100);
-	  fprintf(fh, "  %4s  %3d", buf, (int)(it.ground_contact * 1000));
+	  snprintf(buf, sizeof(buf), "%.1f", it.avg_vertical_oscillation * 100);
+	  fprintf(fh, "  %4s  %3d", buf, (int)(it.avg_stance_time * 1000));
 	}
 
       std::string cal;
       if (it.total_calories != 0)
 	format_number(cal, it.total_calories);
 
-      fprintf(fh, "  %4s\n", cal.c_str());
-
+      fputc('\n', fh);
       lap_idx++;
     }
 
@@ -502,8 +501,8 @@ activity::smooth(const activity &src, int width)
       l.max_heart_rate = it.max_heart_rate;
       l.avg_cadence = it.avg_cadence;
       l.max_cadence = it.max_cadence;
-      l.vertical_oscillation = it.vertical_oscillation;
-      l.ground_contact = it.ground_contact;
+      l.avg_vertical_oscillation = it.avg_vertical_oscillation;
+      l.avg_stance_time = it.avg_stance_time;
       l.region = it.region;
 
       l.track.resize(it.track.size());
@@ -529,7 +528,7 @@ activity::smooth(const activity &src, int width)
 	      sum.heart_rate -= p.heart_rate;
 	      sum.cadence -= p.cadence;
 	      sum.vertical_oscillation -= p.vertical_oscillation;
-	      sum.ground_contact -= p.ground_contact;
+	      sum.stance_time -= p.stance_time;
 	      sum_n--;
 	    }
 	  s_out++;
@@ -544,7 +543,7 @@ activity::smooth(const activity &src, int width)
 	  sum.heart_rate += s.heart_rate;
 	  sum.cadence += s.cadence;
 	  sum.vertical_oscillation += s.vertical_oscillation;
-	  sum.ground_contact += s.ground_contact;
+	  sum.stance_time += s.stance_time;
 	  sum_n++;
 	}
 
@@ -561,7 +560,7 @@ activity::smooth(const activity &src, int width)
 	  d.heart_rate = sum.heart_rate * mul;
 	  d.cadence = sum.cadence * mul;
 	  d.vertical_oscillation = sum.vertical_oscillation * mul;
-	  d.ground_contact = sum.ground_contact * mul;
+	  d.stance_time = sum.stance_time * mul;
 	}
       else
 	d = s;
@@ -622,9 +621,9 @@ mix(gps::activity::point &a, const gps::activity::point &b,
   mix(a.speed, b.speed, c.speed, f);
   mix(a.heart_rate, b.heart_rate, c.heart_rate, f);
   mix(a.cadence, b.cadence, c.cadence, f);
-  mix(a.vertical_oscillation,
-      b.vertical_oscillation, c.vertical_oscillation, f);
-  mix(a.ground_contact, b.ground_contact, c.ground_contact, f);
+  mix(a.vertical_oscillation, b.vertical_oscillation,
+      c.vertical_oscillation, f);
+  mix(a.stance_time, b.stance_time, c.stance_time, f);
 }
 
 } // namespace act

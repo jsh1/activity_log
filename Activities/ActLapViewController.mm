@@ -56,6 +56,14 @@ addTableColumn (NSTableView *tv, NSFont *font, NSString *ident,NSString *title)
   [tc release];
 }
 
+#if 0
+static void
+setTableColumnEnabled(NSTableView *tv, NSString *ident, BOOL state)
+{
+  [[tv tableColumnWithIdentifier:ident] setHidden:!state];
+}
+#endif
+
 - (id)initWithController:(ActWindowController *)controller
 {
   self = [super initWithController:controller];
@@ -101,10 +109,14 @@ addTableColumn (NSTableView *tv, NSFont *font, NSString *ident,NSString *title)
   addTableColumn(_tableView, font, @"distance", @"Distance");
   addTableColumn(_tableView, font, @"duration", @"Duration");
   addTableColumn(_tableView, font, @"pace", @"Pace");
-  addTableColumn(_tableView, font, @"max-pace", @"Max Pace");
-  addTableColumn(_tableView, font, @"average-hr", @"Avg HR");
-  addTableColumn(_tableView, font, @"max-hr", @"Max HR");
+  addTableColumn(_tableView, font, @"max_pace", @"Max Pace");
+  addTableColumn(_tableView, font, @"avg_hr", @"Avg HR");
+  addTableColumn(_tableView, font, @"max_hr", @"Max HR");
+  addTableColumn(_tableView, font, @"avg_cadence", @"Avg Cad.");
+  addTableColumn(_tableView, font, @"max_cadence", @"Max Cad.");
   addTableColumn(_tableView, font, @"calories", @"Calories");
+  addTableColumn(_tableView, font, @"avg_stance_time", @"Stance Time");
+  addTableColumn(_tableView, font, @"avg_vertical_oscillation", @"Vert. Oscillation");
 
   [_lapView addSubview:_tableView];
   [_tableView release];
@@ -114,6 +126,37 @@ addTableColumn (NSTableView *tv, NSFont *font, NSString *ident,NSString *title)
 
 - (void)selectedActivityDidChange:(NSNotification *)note
 {
+#if 0
+  const act::activity *a = [_controller selectedActivity];
+  if (!a)
+    return;
+
+  const act::gps::activity *gps_a = a->gps_data();
+  if (!gps_a)
+    return;
+
+  bool has_speed = gps_a->has_speed();
+  bool has_hr = gps_a->has_heart_rate();
+  bool has_altitude = gps_a->has_altitude();
+  bool has_cadence = gps_a->has_cadence();
+  bool has_dynamics = gps_a->has_dynamics();
+
+  setTableColumnEnabled(_tableView, @"pace", has_speed);
+  setTableColumnEnabled(_tableView, @"max_pace", has_speed);
+
+  setTableColumnEnabled(_tableView, @"avg_hr", has_hr);
+  setTableColumnEnabled(_tableView, @"max_hr", has_hr);
+
+  setTableColumnEnabled(_tableView, @"ascent", has_altitude);
+  setTableColumnEnabled(_tableView, @"descent", has_altitude);
+
+  setTableColumnEnabled(_tableView, @"avg_cadence", has_cadence);
+  setTableColumnEnabled(_tableView, @"max_cadence", has_cadence);
+
+  setTableColumnEnabled(_tableView, @"avg_stance_time", has_dynamics);
+  setTableColumnEnabled(_tableView, @"avg_vertical_oscillation", has_dynamics);
+#endif
+
   [_tableView reloadData];
 }
 
@@ -210,18 +253,26 @@ addTableColumn (NSTableView *tv, NSFont *font, NSString *ident,NSString *title)
     act::format_duration(str, lap.total_descent);
   else if ([ident isEqualToString:@"pace"] && lap.avg_speed != 0)
     act::format_pace(str, lap.avg_speed, act::unit_type::unknown);
-  else if ([ident isEqualToString:@"max-pace"] && lap.max_speed != 0)
+  else if ([ident isEqualToString:@"max_pace"] && lap.max_speed != 0)
     act::format_pace(str, lap.max_speed, act::unit_type::unknown);
   else if ([ident isEqualToString:@"speed"] && lap.avg_speed != 0)
     act::format_speed(str, lap.avg_speed, act::unit_type::unknown);
-  else if ([ident isEqualToString:@"max-speed"] && lap.max_speed != 0)
+  else if ([ident isEqualToString:@"max_speed"] && lap.max_speed != 0)
     act::format_speed(str, lap.max_speed, act::unit_type::unknown);
-  else if ([ident isEqualToString:@"average-hr"] && lap.avg_heart_rate != 0)
-    act::format_number(str, lap.avg_heart_rate);
-  else if ([ident isEqualToString:@"max-hr"] && lap.max_heart_rate != 0)
-    act::format_number(str, lap.max_heart_rate);
+  else if ([ident isEqualToString:@"avg_hr"] && lap.avg_heart_rate != 0)
+    act::format_heart_rate(str, lap.avg_heart_rate, act::unit_type::beats_per_minute);
+  else if ([ident isEqualToString:@"max_hr"] && lap.max_heart_rate != 0)
+    act::format_heart_rate(str, lap.max_heart_rate, act::unit_type::beats_per_minute);
   else if ([ident isEqualToString:@"calories"] && lap.total_calories != 0)
     act::format_number(str, lap.total_calories);
+  else if ([ident isEqualToString:@"avg_cadence"] && lap.avg_cadence != 0)
+    act::format_cadence(str, lap.avg_cadence, act::unit_type::unknown);
+  else if ([ident isEqualToString:@"max_cadence"] && lap.max_cadence != 0)
+    act::format_cadence(str, lap.max_cadence, act::unit_type::unknown);
+  else if ([ident isEqualToString:@"avg_stance_time"] && lap.avg_stance_time != 0)
+    act::format_duration(str, lap.avg_stance_time);
+  else if ([ident isEqualToString:@"avg_vertical_oscillation"] && lap.avg_vertical_oscillation != 0)
+    act::format_distance(str, lap.avg_vertical_oscillation, act::unit_type::millimetres);
 
   if (str.size() != 0)
     return [NSString stringWithUTF8String:str.c_str()];

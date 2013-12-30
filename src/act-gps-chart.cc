@@ -107,6 +107,8 @@ chart::line::convert_from_si(double x) const
       return x * FEET_PER_METER;
     case value_conversion::distance_m_cm:
       return x * 1e2;
+    case value_conversion::distance_m_mm:
+      return x * 1e3;
     case value_conversion::time_s_ms:
       return x * 1e3;
     default:
@@ -147,6 +149,8 @@ chart::line::convert_to_si(double x) const
       return x * (1. / FEET_PER_METER);
     case value_conversion::distance_m_cm:
       return x * 1e-2;
+    case value_conversion::distance_m_mm:
+      return x * 1e-3;
     case value_conversion::time_s_ms:
       return x * 1e-3;
     default:
@@ -265,9 +269,9 @@ chart::line::format_tick(std::string &s, double tick, double value) const
     }
   else if (field == &activity::point::vertical_oscillation)
     {
-      format_distance(s, value, unit_type::centimetres);
+      format_distance(s, value, unit_type::millimetres);
     }
-  else if (field == &activity::point::ground_contact)
+  else if (field == &activity::point::stance_time)
     {
       format_duration(s, value);
     }

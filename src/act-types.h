@@ -57,7 +57,7 @@ enum class field_id
   avg_cadence,
   max_cadence,
   avg_vertical_oscillation,
-  avg_ground_contact,
+  avg_stance_time,
   avg_stride_length,
   calories,
   training_effect,
@@ -108,6 +108,7 @@ enum class unit_type
 
   // distance units
   centimetres,
+  millimetres,
   metres,
   kilometres,
   inches,

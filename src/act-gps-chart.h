@@ -60,6 +60,7 @@ public:
       distance_m_mi,
       distance_m_ft,
       distance_m_cm,
+      distance_m_mm,
       time_s_ms,
     };
 

@@ -478,7 +478,7 @@ make_training_effect(uint8_t value)
 }
 
 inline double
-make_ground_contact(uint16_t value)
+make_stance_time(uint16_t value)
 {
   return value * 1e-4;
 }
@@ -552,11 +552,16 @@ fit_parser::read_record_message(const message_type &def, uint32_t timestamp)
 	    destination().set_has_dynamics(true);
 	  break;
 
-	case 41:			/* ground_contact_time */
-	  p.ground_contact = make_ground_contact(read_field(def, it));
-	  if (p.ground_contact != 0)
+	case 41:			/* stance_time */
+	  p.stance_time = make_stance_time(read_field(def, it));
+	  if (p.stance_time != 0)
 	    destination().set_has_dynamics(true);
 	  break;
+
+	case 40:			/* stance_time_percent */
+	case 42:			/* activity_type */
+	case 53:			/* unknown */
+	  /* fall through. */
 
 	default:
 	  skip_field(it);
@@ -571,6 +576,9 @@ fit_parser::read_lap_message(const message_type &def, uint32_t timestamp)
 {
   destination().laps().push_back(activity::lap());
   activity::lap &lap = destination().laps().back();
+
+  double avg_cadence_frac = 0;
+  double max_cadence_frac = 0;
 
   for (const auto &it : def.fields)
     {
@@ -631,19 +639,37 @@ fit_parser::read_lap_message(const message_type &def, uint32_t timestamp)
 	  lap.total_descent = read_field(def, it);
 	  break;
 
-	case 77:			/* vertical_oscillation */
-	  lap.vertical_oscillation
+	case 77:			/* avg_vertical_oscillation */
+	  lap.avg_vertical_oscillation
 	    = make_vertical_oscillation(read_field(def, it));
 	  break;
 
-	case 79:			/* ground_contact_time */
-	  lap.ground_contact = make_ground_contact(read_field(def, it));
+	case 79:			/* avg_stance_time */
+	  lap.avg_stance_time = make_stance_time(read_field(def, it));
 	  break;
+
+	case 80:			/* avg_fractional_cadence */
+	  avg_cadence_frac = read_field(def, it) * (1/128.);
+	  break;
+
+	case 81:			/* max_fractional_cadence */
+	  max_cadence_frac = read_field(def, it) * (1/128.);
+	  break;
+
+	case 10:			/* total_strides */
+	case 78:			/* avg_stance_time_percent */
+	case 82:			/* total_fractional_cycles(invalid) */
+	  /* fall through. */
 
 	default:
 	  skip_field(it);
 	}
     }
+
+  if (lap.avg_cadence != 0)
+    lap.avg_cadence += avg_cadence_frac;
+  if (lap.max_cadence != 0)
+    lap.max_cadence += max_cadence_frac;
 
   using std::swap;
   swap(lap.track, _records);
@@ -654,6 +680,9 @@ void
 fit_parser::read_session_message(const message_type &def, uint32_t timestamp)
 {
   activity &d = destination();
+
+  double avg_cadence_frac = 0;
+  double max_cadence_frac = 0;
 
   for (const auto &it : def.fields)
     {
@@ -722,18 +751,37 @@ fit_parser::read_session_message(const message_type &def, uint32_t timestamp)
 	  d.set_training_effect(make_training_effect(read_field(def, it)));
 	  break;
 
-	case 89:			/* vertical_oscillation */
-	  d.set_vertical_oscillation(make_vertical_oscillation(read_field(def, it)));
+	case 89: {			/* avg_vertical_oscillation */
+	  double x = make_vertical_oscillation(read_field(def, it));
+	  d.set_avg_vertical_oscillation(x);
+	  break; }
+
+	case 91:			/* avg_stance_time */
+	  d.set_avg_stance_time(make_stance_time(read_field(def, it)));
 	  break;
 
-	case 91:			/* ground_contact_time */
-	  d.set_ground_contact(make_ground_contact(read_field(def, it)));
+	case 92:			/* avg_fractional_cadence */
+	  avg_cadence_frac = read_field(def, it) * (1/128.);
 	  break;
+
+	case 93:			/* max_fractional_cadence */
+	  max_cadence_frac = read_field(def, it) * (1/128.);
+	  break;
+
+	case 90:			/* avg_stance_time_percent */
+	case 81:			/* unknown */
+	case 94:			/* total_fractional_cycles(invalid) */
+	  /* fall through. */
 
 	default:
 	  skip_field(it);
 	}
     }
+
+  if (d.avg_cadence() != 0)
+    d.set_avg_cadence(d.avg_cadence() + avg_cadence_frac);
+  if (d.max_cadence() != 0)
+    d.set_max_cadence(d.max_cadence() + max_cadence_frac);
 }
 
 void
