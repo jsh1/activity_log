@@ -84,33 +84,37 @@
 
   if (a != nullptr)
     {
-      if (a->vdot() != 0)
-	[_headerView addDisplayedField:@"VDOT"];
-      if (a->points() != 0)
-	[_headerView addDisplayedField:@"Points"];
+      if (a->elapsed_time() != 0)
+	[_headerView addDisplayedField:@"Elapsed-Time"];
 
       if (a->avg_hr() != 0)
 	[_headerView addDisplayedField:@"Avg-HR"];
       if (a->max_hr() != 0)
 	[_headerView addDisplayedField:@"Max-HR"];
-      if (a->training_effect() != 0)
-	[_headerView addDisplayedField:@"Training-Effect"];
 
       if (a->avg_cadence() != 0)
 	[_headerView addDisplayedField:@"Avg-Cadence"];
       if (a->max_cadence() != 0)
 	[_headerView addDisplayedField:@"Max-Cadence"];
 
-      if (a->avg_stance_time() != 0)
-	[_headerView addDisplayedField:@"Avg-Stance-Time"];
+      if (a->vdot() != 0)
+	[_headerView addDisplayedField:@"VDOT"];
+      if (a->efficiency() != 0)
+	[_headerView addDisplayedField:@"Efficiency"];
+      if (a->points() != 0)
+	[_headerView addDisplayedField:@"Points"];
+
       if (a->avg_vertical_oscillation() != 0)
 	[_headerView addDisplayedField:@"Avg-Vertical-Oscillation"];
+      if (a->avg_stance_time() != 0)
+	[_headerView addDisplayedField:@"Avg-Stance-Time"];
+      if (a->avg_stance_ratio() != 0)
+	[_headerView addDisplayedField:@"Avg-Stance-Ratio"];
       if (a->avg_stride_length() != 0)
 	[_headerView addDisplayedField:@"Avg-Stride-Length"];
 
-      if (a->elapsed_time() != 0)
-	[_headerView addDisplayedField:@"Elapsed-Time"];
-
+      if (a->training_effect() != 0)
+	[_headerView addDisplayedField:@"Training-Effect"];
       if (a->calories() != 0)
 	[_headerView addDisplayedField:@"Calories"];
       if (a->weight() != 0)
