@@ -20,7 +20,7 @@ bin_products =			\
 	act-fold		\
 	act-log			\
 	act-new			\
-	act-gps-test
+	act-gps-info
 
 symlink_products =		\
 	act-cat			\
@@ -80,9 +80,9 @@ act-new_libraries = -lact -lxml2
 act-new_objects = act-new-main.o
 act-new_deps = libact.a
 
-act-gps-test_libraries = -lact -lxml2
-act-gps-test_objects = act-gps-test.o
-act-gps-test_deps = libact.a
+act-gps-info_libraries = -lact -lxml2
+act-gps-info_objects = act-gps-info.o
+act-gps-info_deps = libact.a
 
 act-show_src = act-log
 act-slog_src = act-log

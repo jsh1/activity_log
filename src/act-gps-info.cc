@@ -38,9 +38,10 @@ static const struct option long_options[] =
   {"tcx", no_argument, 0, 't'},
   {"print-summary", no_argument, 0, 's'},
   {"print-laps", no_argument, 0, 'l'},
+  {"print-date", required_argument, 0, 'd'},
 };
 
-static const char short_options[] = "ftsl";
+static const char short_options[] = "ftsld:";
 
 static void
 usage_and_exit(int ret)
@@ -56,6 +57,7 @@ main(int argc, char **argv)
   bool opt_tcx = false;
   bool opt_print_summary = false;
   bool opt_print_laps = false;
+  const char *opt_print_date = nullptr;
 
   while (1)
     {
@@ -81,6 +83,10 @@ main(int argc, char **argv)
 	  opt_print_laps = true;
 	  break;
 
+	case 'd':
+	  opt_print_date = optarg;
+	  break;
+
 	default:
 	  usage_and_exit(1);
 	}
@@ -96,6 +102,21 @@ main(int argc, char **argv)
 	test_activity.read_tcx_file(argv[i]);
       else
 	test_activity.read_file(argv[i]);
+
+      if (opt_print_date)
+	{
+	  time_t d = (time_t) test_activity.start_time();
+	  if (d == 0)
+	    continue;
+
+	  struct tm tm = {0};
+	  localtime_r(&d, &tm);
+
+	  char buf[1024];
+	  strftime(buf, sizeof(buf), opt_print_date, &tm);
+
+	  printf("%s\n", buf);
+	}
 
       if (opt_print_summary)
 	test_activity.print_summary(stdout);
