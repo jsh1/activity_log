@@ -82,13 +82,14 @@ NSString *const ActDeviceManagerDevicesDidChange
   NSString *path = [url path];
   NSFileManager *fm = [NSFileManager defaultManager];
 
-  if ([fm fileExistsAtPath:[path stringByAppendingPathComponent:@"Garmin"]])
+  for (NSString *dir in @[@"Garmin", @"GARMIN"])
     {
-      return [[[ActGarminDevice alloc] initWithPath:
-	       [path stringByAppendingPathComponent:@"Garmin"]] autorelease];
+      NSString *gp = [path stringByAppendingPathComponent:dir];
+      if ([fm fileExistsAtPath:gp])
+	return [[[ActGarminDevice alloc] initWithPath:gp] autorelease];
     }
-  else
-    return nil;
+
+  return nil;
 }
 
 - (void)rescanVolumes

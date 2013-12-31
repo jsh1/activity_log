@@ -24,11 +24,14 @@
 
 #import "ActGarminDevice.h"
 
+#import "ActFoundationExtensions.h"
+
 // FIXME: really we should look for and parse the GarminDevice.xml file
 // in the root of the device's filesystem. But that's a lot of work
 // that's not really needed right now.
 
-#define ACTIVITTY_PATH "Activities"
+#define ACTIVITTY_PATH_0 "Activities"
+#define ACTIVITTY_PATH_1 "ACTIVITY"
 
 @implementation ActGarminDevice
 
@@ -60,17 +63,25 @@
 - (NSArray *)activityURLs
 {
   NSFileManager *fm = [NSFileManager defaultManager];
-  NSString *path = [_path stringByAppendingPathComponent:@ACTIVITTY_PATH];
+  NSString *path = [_path stringByAppendingPathComponent:@ACTIVITTY_PATH_0];
 
   if (![fm fileExistsAtPath:path])
-    return [NSArray array];
+    {
+      path = [_path stringByAppendingPathComponent:@ACTIVITTY_PATH_1];
+      if (![fm fileExistsAtPath:path])
+	return [NSArray array];
+    }
 
   NSMutableArray *array = [NSMutableArray array];
 
   for (NSString *file in [fm contentsOfDirectoryAtPath:path error:nullptr])
     {
-      if ([[file pathExtension] isEqualToString:@"fit"])
-	[array addObject:[NSURL fileURLWithPath:[path stringByAppendingPathComponent:file]]];
+      if ([[file pathExtension] isEqualToStringNoCase:@"fit"])
+	{
+	  NSURL *url = [NSURL fileURLWithPath:
+			[path stringByAppendingPathComponent:file]];
+	  [array addObject:url];
+	}
     }
 
   return array;
