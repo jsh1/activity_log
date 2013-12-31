@@ -60,6 +60,7 @@ enum class field_id
   avg_stance_ratio,
   avg_stance_time,
   avg_stride_length,
+  efficiency,
   calories,
   training_effect,
   equipment,
@@ -87,6 +88,7 @@ enum class field_data_type
   weight,
   heart_rate,
   cadence,
+  efficiency,
   keywords,
   unknown = string,
 };
@@ -141,6 +143,11 @@ enum class unit_type
 
   // cadence units
   steps_per_minute,
+
+  // efficiency units
+  beats_per_metre,
+  beats_per_kilometre,
+  beats_per_mile,
 };
 
 struct date_range

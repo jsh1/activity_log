@@ -77,7 +77,9 @@ lookup_field_id(const char *str)
       break;
 
     case 'e':
-      if (strcasecmp(str, "effort") == 0)
+      if (strcasecmp(str, "efficiency") == 0)
+	return field_id::efficiency;
+      else if (strcasecmp(str, "effort") == 0)
 	return field_id::effort;
       else if (strcasecmp(str, "elapsed-time") == 0)
 	return field_id::elapsed_time;
@@ -185,6 +187,8 @@ canonical_field_name(field_id id)
       return "Distance";
     case field_id::duration:
       return "Duration";
+    case field_id::efficiency:
+      return "Efficiency";
     case field_id::effort:
       return "Effort";
     case field_id::elapsed_time:
@@ -234,6 +238,7 @@ field_read_only_p(field_id id)
   switch (id)
     {
     case field_id::avg_stride_length:
+    case field_id::efficiency:
     case field_id::vdot:
       return true;
 
@@ -254,9 +259,9 @@ lookup_field_data_type(const field_id id)
     case field_id::custom:
       return field_data_type::string;
     case field_id::calories:
-    case field_id::vdot:
     case field_id::points:
     case field_id::training_effect:
+    case field_id::vdot:
       return field_data_type::number;
     case field_id::date:
       return field_data_type::date;
@@ -296,6 +301,8 @@ lookup_field_data_type(const field_id id)
     case field_id::avg_cadence:
     case field_id::max_cadence:
       return field_data_type::cadence;
+    case field_id::efficiency:
+      return field_data_type::efficiency;
     }
 }
 
@@ -410,6 +417,17 @@ canonicalize_field_string(field_data_type type, std::string &str)
 	{
 	  str.clear();
 	  format_cadence(str, value, unit);
+	  return true;
+	}
+      break; }
+
+    case field_data_type::efficiency: {
+      double value;
+      unit_type unit;
+      if (parse_efficiency(str, &value, &unit))
+	{
+	  str.clear();
+	  format_efficiency(str, value, unit);
 	  return true;
 	}
       break; }

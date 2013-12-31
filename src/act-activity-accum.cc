@@ -413,6 +413,7 @@ activity_accum::print_expansion(const char *name, const char *arg,
 	case field_data_type::weight:
 	case field_data_type::heart_rate:
 	case field_data_type::cadence:
+	case field_data_type::efficiency:
 	  format_value(str, type, value, unit_type::unknown);
 	  break;
 	}

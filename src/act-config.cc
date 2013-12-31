@@ -38,6 +38,7 @@ config::config()
   _default_speed_unit(unit_type::miles_per_hour),
   _default_temperature_unit(unit_type::celsius),
   _default_weight_unit(unit_type::kilogrammes),
+  _default_efficiency_unit(unit_type::beats_per_mile),
   _start_of_week(0),
   _resting_hr(0),
   _max_hr(0),
@@ -224,6 +225,11 @@ config::read_config_file(const char *path)
 	    {
 	      parse_unit(std::string(value), field_data_type::weight,
 			 _default_weight_unit);
+	    }
+	  else if (strcmp(name, "default-efficiency-unit") == 0)
+	    {
+	      parse_unit(std::string(value), field_data_type::efficiency,
+			 _default_efficiency_unit);
 	    }
 	}
       else if (strcmp(section.c_str(), "calendar") == 0)

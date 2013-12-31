@@ -98,7 +98,6 @@ public:
   double avg_stance_time() const;
   double avg_stance_ratio() const;
   double avg_vertical_oscillation() const;
-  double avg_stride_length() const;
 
   const std::vector<std::string> &equipment() const;
 
@@ -113,6 +112,16 @@ public:
   const std::vector<std::string> &keywords() const;
 
   double vdot() const;
+
+  /* A function of duration(), distance() and avg_cadence(), units are
+     metres. */
+
+  double avg_stride_length() const;
+
+  /* A function of duration(), distance() and avg_hr(), units are
+     beats/metre. */
+
+  double efficiency() const;
 
 private:
   activity_storage_ref _storage;

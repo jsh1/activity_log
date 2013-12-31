@@ -44,6 +44,7 @@ class config
   unit_type _default_speed_unit;
   unit_type _default_temperature_unit;
   unit_type _default_weight_unit;
+  unit_type _default_efficiency_unit;
 
   int _start_of_week;
 
@@ -68,6 +69,7 @@ public:
   unit_type default_speed_unit() const;
   unit_type default_temperature_unit() const;
   unit_type default_weight_unit() const;
+  unit_type default_efficiency_unit() const;
 
   // delta from sunday, i.e. -1 = saturday, +1 = monday.
 
@@ -141,6 +143,12 @@ inline unit_type
 config::default_weight_unit() const
 {
   return _default_weight_unit;
+}
+
+inline unit_type
+config::default_efficiency_unit() const
+{
+  return _default_efficiency_unit;
 }
 
 inline int

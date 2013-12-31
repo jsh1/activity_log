@@ -43,9 +43,9 @@
 #define SECONDS_PER_DAY 86400
 #define POUNDS_PER_KILO 2.2046
 
-#define MINUTES_PER_MILE(x) ((1. / (x)) * (1. / (MILES_PER_METER * 60.)))
-#define SECS_PER_MILE(x) ((1. /  (x)) * (1. / MILES_PER_METER))
-#define SECS_PER_KM(x) ((1. /  (x)) * 1e3)
+#define MINUTES_PER_MILE(x) (METERS_PER_MILE / ((x) * 60))
+#define SECS_PER_MILE(x) (METERS_PER_MILE / (x))
+#define SECS_PER_KM(x) (1e3 / (x))
 
 #define DEBUG_DATE_RANGES 0
 
@@ -368,11 +368,43 @@ format_cadence(std::string &str, double value, unit_type unit)
 }
 
 void
+format_efficiency(std::string &str, double value, unit_type unit)
+{
+  const char *format = nullptr;
+
+  if (unit == unit_type::unknown)
+    unit = shared_config().default_efficiency_unit();
+
+  switch (unit)
+    {
+    case unit_type::beats_per_metre:
+      format = "%.f beats/m";
+      break;
+
+    case unit_type::beats_per_kilometre:
+      format = "%.f beats/km";
+      value = value * 1000;
+      break;
+
+    case unit_type::beats_per_mile:
+    default:
+      format = "%.f beats/mi";
+      value = value * METERS_PER_MILE;
+      break;
+    }
+
+  char buf[64];
+
+  snprintf_l(buf, sizeof(buf), nullptr, format, value);
+
+  str.append(buf);
+}
+void
 format_fraction(std::string &str, double frac)
 {
   char buf[32];
 
-  snprintf_l(buf, sizeof(buf), nullptr, "%.1f/10", frac * 10);
+  snprintf_l(buf, sizeof(buf), nullptr, "%d%%", (int)round(frac * 100));
 
   str.append(buf);
 }
@@ -422,6 +454,10 @@ format_value(std::string &str, field_data_type type,
 
     case field_data_type::cadence:
       format_cadence(str, value, unit);
+      break;
+
+    case field_data_type::efficiency:
+      format_efficiency(str, value, unit);
       break;
 
     case field_data_type::date:
@@ -603,7 +639,7 @@ static const parsable_unit distance_units[] =
 
 static const parsable_unit pace_units[] =
 {
-  {"mi\0mile\0", unit_type::seconds_per_mile, 1/MILES_PER_METER},
+  {"mi\0mile\0", unit_type::seconds_per_mile, METERS_PER_MILE},
   {"km\0kilometre\0kilometer\0", unit_type::seconds_per_kilometre, 1000},
   {0}
 };
@@ -634,6 +670,15 @@ static const parsable_unit weight_units[] =
 static const parsable_unit cadence_units[] =
 {
   {"spm\0", unit_type::steps_per_minute, 1},
+  {0}
+};
+
+static const parsable_unit efficiency_units[] =
+{
+  {"beats/m\0beats/metre\0beats/meter\0", unit_type::beats_per_metre, 1},
+  {"beats/km\0beats/kilometre\0beats/kilometer\0",
+   unit_type::beats_per_kilometre, 1e-3},
+  {"beats/mi\0beats/mile\0", unit_type::beats_per_mile, MILES_PER_METER},
   {0}
 };
 
@@ -1503,6 +1548,30 @@ parse_cadence(const std::string &str, double *value_ptr, unit_type *unit_ptr)
 }
 
 bool
+parse_efficiency(const std::string &str,
+		 double *value_ptr, unit_type *unit_ptr)
+{
+  size_t idx = skip_whitespace(str, 0);
+
+  double value;
+  if (!parse_number(str, idx, value))
+    return false;
+
+  idx = skip_whitespace(str, idx);
+
+  unit_type unit = shared_config().default_efficiency_unit();
+
+  parse_unit(efficiency_units, str, idx, value, unit);
+
+  *value_ptr = value;
+
+  if (unit_ptr)
+    *unit_ptr = unit;
+
+  return check_trailer(str, idx);
+}
+
+bool
 parse_fraction(const std::string &str, double *frac_ptr)
 {
   double value;
@@ -1601,6 +1670,9 @@ parse_value(const std::string &str, field_data_type type,
     case field_data_type::cadence:
       return parse_cadence(str, value_ptr, unit_ptr);
 
+    case field_data_type::efficiency:
+      return parse_efficiency(str, value_ptr, unit_ptr);
+
     case field_data_type::date: {
       time_t time = 0;
       if (parse_date_time(str, &time, nullptr))
@@ -1651,6 +1723,11 @@ parse_unit(const std::string &str, field_data_type type, unit_type &unit)
   if ((type == field_data_type::unknown
        || type == field_data_type::cadence)
       && parse_unit(cadence_units, str, idx, value, unit))
+    return true;
+
+  if ((type == field_data_type::unknown
+       || type == field_data_type::efficiency)
+      && parse_unit(efficiency_units, str, idx, value, unit))
     return true;
 
   return false;

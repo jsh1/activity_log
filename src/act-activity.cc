@@ -311,6 +311,8 @@ activity::field_value(field_id id) const
     case field_id::max_speed:
     case field_id::max_pace:
       return max_speed();
+    case field_id::efficiency:
+      return efficiency();
     case field_id::effort:
       return effort();
     case field_id::quality:
@@ -691,23 +693,28 @@ double
 activity::avg_stride_length() const
 {
   /* stride_length = distance / steps
-     steps = duration * avg_cadence. */
+		   = velocity / avg_cadence,
+     where
+	steps = duration * avg_cadence. */
 
-  double dist = distance();
-  if (dist == 0)
+  double steps_per_sec = avg_cadence() / 60;
+  if (steps_per_sec == 0)
     return 0;
 
-  double dur = duration();
-  if (dur == 0)
+  return speed() / steps_per_sec;
+}
+
+double
+activity::efficiency() const
+{
+  /* efficiency = (duration * avg_hr_per_second) / distance
+		= velocity / avg_hr_per_second. */
+
+  double beats_per_sec = avg_hr() / 60;
+  if (beats_per_sec == 0)
     return 0;
 
-  double cadence = avg_cadence();
-  if (cadence == 0)
-    return 0;
-
-  double steps = (dur * (1./60)) * cadence;
-
-  return dist / steps;
+  return beats_per_sec / speed();
 }
 
 bool
@@ -901,7 +908,8 @@ activity::print_expansion(FILE *fh, const char *name,
 	case field_data_type::fraction:
 	case field_data_type::weight:
 	case field_data_type::heart_rate:
-	case field_data_type::cadence: {
+	case field_data_type::cadence:
+	case field_data_type::efficiency: {
 	  double value = field_value(id);
 	  unit_type unit = field_unit(id);
 	  format_value(tem, type, value, unit);
