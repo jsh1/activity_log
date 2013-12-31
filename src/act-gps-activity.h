@@ -44,6 +44,22 @@ public:
       swimming,
     };
 
+  enum class point_field
+    {
+      timestamp,
+      altitude,
+      distance,
+      speed,
+      pace,
+      heart_rate,
+      cadence,
+      vertical_oscillation,
+      stance_time,
+      stance_ratio,
+      stride_length,
+      efficiency,
+    };
+
   struct point
     {
       double timestamp;
@@ -61,6 +77,10 @@ public:
       : timestamp(0), altitude(0), distance(0), speed(0), heart_rate(0),
         cadence(0), vertical_oscillation(0), stance_time(0),
 	stance_ratio(0) {}
+
+      typedef double (*field_fn)(const point *);
+
+      static field_fn field_function(point_field field);
     };
 
   struct lap
@@ -189,7 +209,7 @@ public:
   void print_summary(FILE *fh) const;
   void print_laps(FILE *fh) const;
 
-  void get_range(double point:: *field, double &ret_min,
+  void get_range(point_field field, double &ret_min,
     double &ret_max, double &ret_mean, double &ret_sdev) const;
 
   void set_sport(sport_type x) {_sport = x;}

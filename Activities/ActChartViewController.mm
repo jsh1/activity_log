@@ -63,8 +63,10 @@ enum ChartFields
   CHART_ALT_FT,
   CHART_ALT_M,
   CHART_CADENCE,
+  CHART_STRIDE_LENGTH,
   CHART_VERT_OSC,
   CHART_STANCE_TIME,
+  CHART_STANCE_RATIO,
   CHART_FIELD_COUNT,
 };
 
@@ -84,8 +86,10 @@ enum ChartFieldMasks
   CHART_ALT_M_MASK = 1U << CHART_ALT_M,
 
   CHART_CADENCE_MASK = 1U << CHART_CADENCE,
+  CHART_STRIDE_LENGTH_MASK = 1U << CHART_STRIDE_LENGTH,
   CHART_VERT_OSC_MASK = 1U << CHART_VERT_OSC,
   CHART_STANCE_TIME_MASK = 1U << CHART_STANCE_TIME,
+  CHART_STANCE_RATIO_MASK = 1U << CHART_STANCE_RATIO,
 
   CHART_SPEED_ANY_MASK = CHART_PACE_MI_MASK
 			 | CHART_PACE_KM_MASK
@@ -97,6 +101,10 @@ enum ChartFieldMasks
 		      | CHART_HR_MAX_MASK,
   CHART_ALT_ANY_MASK = CHART_ALT_FT_MASK
 		       | CHART_ALT_M_MASK,
+  CHART_CADENCE_ANY_MASK = CHART_CADENCE_MASK
+			   | CHART_STRIDE_LENGTH_MASK,
+  CHART_STANCE_ANY_MASK = CHART_STANCE_TIME_MASK
+			  | CHART_STANCE_RATIO_MASK,
 };
 
 namespace chart_view {
@@ -238,6 +246,10 @@ chart::draw_line(const line &l, const x_axis_state &xs, CGFloat tx)
     // basic smoothing to avoid rendering multiple data points per pixel
 
     double skipped_total = 0, skipped_count = 0;
+
+    act::gps::activity::point::field_fn dist_fn = xs.field_fn;
+    act::gps::activity::point::field_fn value_fn
+      = act::gps::activity::point::field_function(l.field);
   
     for (size_t li = 0; li < _activity.laps().size(); li++)
       {
@@ -247,8 +259,8 @@ chart::draw_line(const line &l, const x_axis_state &xs, CGFloat tx)
 	for (size_t ti = 0; ti < lap.track.size(); ti++)
 	  {
 	    const act::gps::activity::point &p = track[ti];
-	    double dist = p.*xs.field;
-	    double value = p.*(l.field);
+	    double dist = dist_fn(&p);
+	    double value = value_fn(&p);
 	    if (dist == 0 || value == 0)
 	      continue;
 	    CGFloat x = dist * xs.xm + xs.xc;
@@ -460,7 +472,7 @@ chart::draw_current_time()
 
   x_axis_state xs(*this, x_axis());
 
-  double t = pt.*xs.field;
+  double t = xs.field_fn(&pt);
   if (t < xs.min_value || t > xs.max_value)
     return;
 
@@ -501,10 +513,15 @@ chart::draw_current_time()
 
   for (const auto &it : _lines)
     {
-      if (it.field == &act::gps::activity::point::speed)
-	act::format_pace(buf, pt.speed, act::unit_type::unknown);
-      else if (it.field == &act::gps::activity::point::heart_rate)
+      double value = act::gps::activity::point::field_function(it.field)(&pt);
+
+      switch (it.field)
 	{
+	case act::gps::activity::point_field::speed:
+	  act::format_pace(buf, value, act::unit_type::unknown);
+	  break;
+
+	case act::gps::activity::point_field::heart_rate: {
 	  act::unit_type unit = act::unit_type::beats_per_minute;
 	  if (it.conversion
 	      == act::gps::chart::value_conversion::heartrate_bpm_pmax)
@@ -512,32 +529,42 @@ chart::draw_current_time()
 	  else if (it.conversion
 		   == act::gps::chart::value_conversion::heartrate_bpm_hrr)
 	    unit = act::unit_type::percent_hr_reserve;
-	    act::format_heart_rate(buf, pt.heart_rate, unit);
-	}
-      else if (it.field == &act::gps::activity::point::altitude)
-	{
+	  act::format_heart_rate(buf, value, unit);
+	  break; }
+
+	case act::gps::activity::point_field::altitude: {
 	  act::unit_type unit = act::unit_type::metres;
 	  if (it.conversion
 	      == act::gps::chart::value_conversion::distance_m_ft)
 	    unit = act::unit_type::feet;
-	  act::format_distance(buf, pt.altitude, unit);
+	  act::format_distance(buf, value, unit);
+	  break; }
+
+	case act::gps::activity::point_field::cadence:
+	  act::format_cadence(buf, value, act::unit_type::steps_per_minute);
+	  break;
+
+	case act::gps::activity::point_field::vertical_oscillation:
+	  act::format_distance(buf, value, act::unit_type::millimetres);
+	  break;
+
+	case act::gps::activity::point_field::stance_time:
+	  act::format_duration(buf, value);
+	  break;
+
+	case act::gps::activity::point_field::stance_ratio:
+	  act::format_fraction(buf, value);
+	  break;
+
+	case act::gps::activity::point_field::stride_length:
+	  act::format_distance(buf, value, act::unit_type::metres);
+	  break;
+
+	default:
+	  act::format_number(buf, value);
+	  break;
 	}
-      else if (it.field == &act::gps::activity::point::cadence)
-	{
-	  act::format_cadence(buf, pt.cadence,
-			      act::unit_type::steps_per_minute);
-	}
-      else if (it.field == &act::gps::activity::point::vertical_oscillation)
-	{
-	  act::format_distance(buf, pt.vertical_oscillation,
-			       act::unit_type::millimetres);
-	}
-      else if (it.field == &act::gps::activity::point::stance_time)
-	{
-	  act::format_duration(buf, pt.stance_time);
-	}
-      else
-	continue;
+
       buf.append("\n");
     }
 
@@ -557,7 +584,7 @@ chart::current_time_rect() const
 
   x_axis_state xs(*this, x_axis());
 
-  double t = pt.*xs.field;
+  double t = xs.field_fn(&pt);
   if (t < xs.min_value || t > xs.max_value)
     return CGRectNull;
 
@@ -659,11 +686,12 @@ chart::current_time_rect() const
   bool draw_hr = (_fieldMask & CHART_HR_ANY_MASK) && gps_a->has_heart_rate();
   bool draw_altitude = (_fieldMask & CHART_ALT_ANY_MASK) && gps_a->has_altitude();
   bool draw_cadence = (_fieldMask & CHART_CADENCE_MASK) && gps_a->has_cadence();
+  bool draw_stride_len = (_fieldMask & CHART_STRIDE_LENGTH_MASK) && gps_a->has_cadence();
   bool draw_vert_osc = (_fieldMask & CHART_VERT_OSC_MASK) && gps_a->has_dynamics();
-  bool draw_grnd_con = (_fieldMask & CHART_STANCE_TIME_MASK) && gps_a->has_dynamics();
+  bool draw_stance = (_fieldMask & CHART_STANCE_ANY_MASK) && gps_a->has_dynamics();
 
-  if (!(draw_pace || draw_hr || draw_altitude
-	|| draw_cadence || draw_vert_osc || draw_grnd_con))
+  if (!(draw_pace || draw_hr || draw_altitude || draw_cadence
+	|| draw_stride_len || draw_vert_osc || draw_stance))
     return;
 
   _chart.reset(new chart_view::chart(*_smoothed_data.get(),
@@ -679,7 +707,7 @@ chart::current_time_rect() const
       else if (_fieldMask & CHART_HR_MAX_MASK)
 	conv = act::gps::chart::value_conversion::heartrate_bpm_pmax;
 
-      _chart->add_line(&act::gps::activity::point::heart_rate, conv,
+      _chart->add_line(act::gps::activity::point_field::heart_rate, conv,
 		       act::gps::chart::line_color::orange,
 		       act::gps::chart::FILL_BG
 		       | act::gps::chart::OPAQUE_BG
@@ -702,7 +730,7 @@ chart::current_time_rect() const
       else if (_fieldMask & CHART_SPEED_VVO2MAX_MASK)
 	conv = act::gps::chart::value_conversion::speed_ms_vvo2max;
 
-      _chart->add_line(&act::gps::activity::point::speed, conv,
+      _chart->add_line(act::gps::activity::point_field::speed, conv,
 		       act::gps::chart::line_color::blue,
 		       act::gps::chart::FILL_BG
 		       | act::gps::chart::OPAQUE_BG
@@ -726,32 +754,39 @@ chart::current_time_rect() const
       else
 	flags |= act::gps::chart::TICK_LINES;
 
-      _chart->add_line(&act::gps::activity::point::altitude, conv,
+      _chart->add_line(act::gps::activity::point_field::altitude, conv,
 		       color, flags, -0.05, 1.05);
     }
 
   if (draw_cadence)
     {
-      _chart->add_line(&act::gps::activity::point::cadence,
+      _chart->add_line(act::gps::activity::point_field::cadence,
 		       act::gps::chart::value_conversion::identity,
-		       act::gps::chart::line_color::tomato,
-		       act::gps::chart::TICK_LINES, -0.05, 1.05);
+		       act::gps::chart::line_color::tomato, 0, -0.05, 1.05);
+    }
+
+  if (draw_stride_len)
+    {
+      _chart->add_line(act::gps::activity::point_field::stride_length,
+		       act::gps::chart::value_conversion::identity,
+		       act::gps::chart::line_color::green, 0, -0.05, 1.05);
     }
 
   if (draw_vert_osc)
     {
-      _chart->add_line(&act::gps::activity::point::vertical_oscillation,
+      _chart->add_line(act::gps::activity::point_field::vertical_oscillation,
 		       act::gps::chart::value_conversion::distance_m_cm,
-		       act::gps::chart::line_color::teal,
-		       act::gps::chart::TICK_LINES, -0.05, 1.05);
+		       act::gps::chart::line_color::teal, 0, -0.05, 1.05);
     }
 
-  if (draw_grnd_con)
+  if (draw_stance)
     {
-      _chart->add_line(&act::gps::activity::point::stance_time,
-		       act::gps::chart::value_conversion::time_s_ms,
-		       act::gps::chart::line_color::magenta,
-		       act::gps::chart::TICK_LINES, -0.05, 1.05);
+      auto field = (_fieldMask & CHART_STANCE_TIME_MASK
+		    ? act::gps::activity::point_field::stance_time
+		    : act::gps::activity::point_field::stance_ratio);
+
+      _chart->add_line(field, act::gps::chart::value_conversion::time_s_ms,
+		       act::gps::chart::line_color::magenta, 0, -0.05, 1.05);
     }
 
   _chart->set_chart_rect(NSRectToCGRect([_chartView bounds]));
@@ -822,11 +857,17 @@ chart::current_time_rect() const
 	    case CHART_CADENCE:
 	      type = @"Cadence (spm)";
 	      break;
+	    case CHART_STRIDE_LENGTH:
+	      type = @"Stride Length (m)";
+	      break;
 	    case CHART_VERT_OSC:
 	      type = @"Vertical Oscillation (cm)";
 	      break;
 	    case CHART_STANCE_TIME:
 	      type = @"Stance Time (ms)";
+	      break;
+	    case CHART_STANCE_RATIO:
+	      type = @"Stance Ratio (%)";
 	      break;
 	    }
 	  if (type != nil)
@@ -884,6 +925,8 @@ chart::current_time_rect() const
     mask |= CHART_HR_ANY_MASK;
   else if (mask & CHART_ALT_ANY_MASK)
     mask |= CHART_ALT_ANY_MASK;
+  else if (mask & CHART_STANCE_ANY_MASK)
+    mask |= CHART_STANCE_ANY_MASK;
 
   _fieldMask = _fieldMask & ~mask;
 
@@ -956,9 +999,9 @@ chart::current_time_rect() const
 	      if (gps_a->has_altitude())
 		enableMask |= CHART_ALT_ANY_MASK;
 	      if (gps_a->has_cadence())
-		enableMask |= CHART_CADENCE_MASK;
+		enableMask |= CHART_CADENCE_ANY_MASK;
 	      if (gps_a->has_dynamics())
-		enableMask |= CHART_VERT_OSC_MASK | CHART_STANCE_TIME_MASK;
+		enableMask |= CHART_VERT_OSC_MASK | CHART_STANCE_ANY_MASK;
 	    }
 	}
 

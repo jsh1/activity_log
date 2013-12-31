@@ -122,16 +122,30 @@
                         <action selector="configMenuAction:" target="-2" id="Yph-Qi-zSe"/>
                     </connections>
                 </menuItem>
-                <menuItem title="Vertical Oscillation" tag="11" id="Nj6-PA-Tim">
+                <menuItem title="Stride Length" tag="11" id="3w3-ML-If6">
+                    <modifierMask key="keyEquivalentModifierMask"/>
+                    <connections>
+                        <action selector="configMenuAction:" target="-2" id="aSj-43-rxV"/>
+                    </connections>
+                </menuItem>
+                <menuItem isSeparatorItem="YES" id="27e-Za-viW"/>
+                <menuItem title="Vertical Oscillation" tag="12" id="Nj6-PA-Tim">
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <connections>
                         <action selector="configMenuAction:" target="-2" id="aT4-Ry-lLg"/>
                     </connections>
                 </menuItem>
-                <menuItem title="Stance Time" tag="12" id="q2h-e9-IRD">
+                <menuItem isSeparatorItem="YES" id="a8E-fz-u3R"/>
+                <menuItem title="Stance Time" tag="13" id="q2h-e9-IRD">
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <connections>
                         <action selector="configMenuAction:" target="-2" id="w8p-y4-eWI"/>
+                    </connections>
+                </menuItem>
+                <menuItem title="Stance Ratio" tag="14" id="Csr-RX-w5n">
+                    <modifierMask key="keyEquivalentModifierMask"/>
+                    <connections>
+                        <action selector="configMenuAction:" target="-2" id="FQ1-QO-L3h"/>
                     </connections>
                 </menuItem>
             </items>

@@ -697,11 +697,12 @@ activity::avg_stride_length() const
      where
 	steps = duration * avg_cadence. */
 
-  double steps_per_sec = avg_cadence() / 60;
-  if (steps_per_sec == 0)
-    return 0;
+  double steps_per_min = avg_cadence();
 
-  return speed() / steps_per_sec;
+  if (steps_per_min != 0)
+    return (speed() * 60) / steps_per_min;
+  else
+    return 0;
 }
 
 double
@@ -710,11 +711,12 @@ activity::efficiency() const
   /* efficiency = (duration * avg_hr_per_second) / distance
 		= velocity / avg_hr_per_second. */
 
-  double beats_per_sec = avg_hr() / 60;
-  if (beats_per_sec == 0)
-    return 0;
+  double spd = speed();
 
-  return beats_per_sec / speed();
+  if (spd != 0)
+    return avg_hr() / (spd * 60);
+  else
+    return 0;
 }
 
 bool

@@ -51,17 +51,19 @@ chart::x_axis_state::x_axis_state(const chart &chart, x_axis_type type)
   switch (type)
     {
     case x_axis_type::distance:
-      field = &activity::point::distance;
+      field = activity::point_field::distance;
       min_value = chart._min_distance;
       max_value = chart._max_distance;
       break;
 
     case x_axis_type::elapsed_time:
-      field = &activity::point::timestamp;
+      field = activity::point_field::timestamp;
       min_value = chart._min_time;
       max_value = chart._max_time;
       break;
     }
+
+  field_fn = activity::point::field_function(field);
 
   CGFloat x_scale = 1. / (max_value - min_value);
 
@@ -170,12 +172,12 @@ chart::line::update_values(const chart &c)
   min_value -= border;
   max_value += border;
 
-  if (field == &activity::point::speed)
+  if (field == activity::point_field::speed)
     {
       min_value = mean - 3 * sdev;
       max_value = mean + 3 * sdev;
     }
-  else if (field == &activity::point::altitude)
+  else if (field == activity::point_field::altitude)
     {
       if (max_value - min_value < 100)
 	max_value = min_value + 100;
@@ -232,13 +234,14 @@ chart::line::update_values(const chart &c)
 void
 chart::line::format_tick(std::string &s, double tick, double value) const
 {
-  if (field == &activity::point::altitude)
+  switch (field)
     {
+    case activity::point_field::altitude:
       format_distance(s, value, conversion == value_conversion::distance_m_ft
 		      ? unit_type::feet : unit_type::metres);
-    }
-  else if (field == &activity::point::speed)
-    {
+      break;
+
+    case activity::point_field::speed:
       if (conversion == value_conversion::speed_ms_pace_mi)
 	format_pace(s, value, unit_type::seconds_per_mile);
       else if (conversion == value_conversion::speed_ms_pace_km)
@@ -253,30 +256,30 @@ chart::line::format_tick(std::string &s, double tick, double value) const
 	  snprintf(buf, sizeof(buf), "%d%% vVO2", (int) tick);
 	  s.append(buf);
 	}
-    }
-  else if (field == &activity::point::heart_rate)
-    {
+      break;
+
+    case activity::point_field::heart_rate: {
       unit_type unit = unit_type::beats_per_minute;
       if (conversion == value_conversion::heartrate_bpm_hrr)
 	unit = unit_type::percent_hr_reserve;
       else if (conversion == value_conversion::heartrate_bpm_pmax)
 	unit = unit_type::percent_hr_max;
       format_heart_rate(s, value, unit);
-    }
-  else if (field == &activity::point::cadence)
-    {
+      break; }
+
+    case activity::point_field::cadence:
       format_cadence(s, value, unit_type::steps_per_minute);
-    }
-  else if (field == &activity::point::vertical_oscillation)
-    {
+      break;
+
+    case activity::point_field::vertical_oscillation:
       format_distance(s, value, unit_type::millimetres);
-    }
-  else if (field == &activity::point::stance_time)
-    {
+      break;
+
+    case activity::point_field::stance_time:
       format_duration(s, value);
-    }
-  else
-    {
+      break;
+
+    default:
       format_number(s, tick);
     }
 }
@@ -289,14 +292,14 @@ chart::chart(const activity &a, x_axis_type xa)
   _current_time(-1)
 {
   double mean, sdev;
-  a.get_range(&activity::point::timestamp,
+  a.get_range(activity::point_field::timestamp,
 	      _min_time, _max_time, mean, sdev);
-  a.get_range(&activity::point::distance,
+  a.get_range(activity::point_field::distance,
 	      _min_distance, _max_distance, mean, sdev);
 }
 
 void
-chart::add_line(double activity::point:: *field, value_conversion conv,
+chart::add_line(activity::point_field field, value_conversion conv,
 		line_color color, uint32_t flags, double min_ratio,
 		double max_ratio)
 {
@@ -337,7 +340,7 @@ chart::point_at_x(CGFloat x, activity::point &ret_p) const
 
       for (const auto &it : lap.track)
 	{
-	  double it_value = it.*x_axis.field;
+	  double it_value = x_axis.field_fn(&it);
 	  if (it_value == 0)
 	    continue;
 

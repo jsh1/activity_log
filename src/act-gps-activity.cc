@@ -339,11 +339,61 @@ activity::print_laps(FILE *fh) const
     fputc('\n', fh);
 }
 
+activity::point::field_fn
+activity::point::field_function(point_field field)
+{
+  switch (field)
+    {
+    case point_field::timestamp:
+      return [] (const point *p) {return p->timestamp;};
+
+    case point_field::altitude:
+      return [] (const point *p) {return p->altitude;};
+
+    case point_field::distance:
+      return [] (const point *p) {return p->distance;};
+
+    case point_field::speed:
+      return [] (const point *p) {return p->speed;};
+
+    case point_field::pace:
+      return [] (const point *p) {return 1 / p->speed;};
+
+    case point_field::heart_rate:
+      return [] (const point *p) {return p->heart_rate;};
+
+    case point_field::cadence:
+      return [] (const point *p) {return p->cadence;};
+
+    case point_field::vertical_oscillation:
+      return [] (const point *p) {return p->vertical_oscillation;};
+
+    case point_field::stance_time:
+      return [] (const point *p) {return p->stance_time;};
+
+    case point_field::stance_ratio:
+      return [] (const point *p) {return p->stance_ratio;};
+
+    case point_field::stride_length:
+      return [] (const point *p) {
+	return p->cadence != 0 ? p->speed / (p->cadence * (1/60.)) : 0;};
+
+    case point_field::efficiency:
+      return [] (const point *p) {
+	return p->speed != 0 ? (p->heart_rate * (1/60.)) / p->speed : 0;};
+
+    default:
+      return nullptr;
+    }
+}
+
 void
-activity::get_range(double point:: *field, double &ret_min, double &ret_max,
+activity::get_range(point_field field, double &ret_min, double &ret_max,
 		    double &ret_mean, double &ret_sdev) const
 {
   double min = 0, max = 0, total = 0, total_sq = 0, samples = 0;
+
+  point::field_fn field_fn = point::field_function(field);
 
   for (size_t li = 0; li < laps().size(); li++)
     {
@@ -352,7 +402,7 @@ activity::get_range(double point:: *field, double &ret_min, double &ret_max,
       for (size_t ti = 0; ti < l.track.size(); ti++)
 	{
 	  const point &p = l.track[ti];
-	  double value = p.*field;
+	  double value = field_fn(&p);
 
 	  if (p.distance == 0 || !(value > 0))
 	    continue;

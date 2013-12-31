@@ -92,7 +92,7 @@ public:
   const activity &get_activity() const;
   x_axis_type x_axis() const;
 
-  void add_line(double activity::point:: *field, value_conversion conv,
+  void add_line(activity::point_field field, value_conversion conv,
     line_color color, uint32_t fill_bg, double min_ratio, double max_ratio);
 
   void set_selected_lap(int idx);
@@ -117,7 +117,7 @@ public:
 protected:
   struct line
     {
-      double activity::point:: *field;
+      activity::point_field field;
       value_conversion conversion;
       line_color color;
       uint32_t flags;
@@ -131,7 +131,7 @@ protected:
       double tick_min, tick_max, tick_delta;
 
       line();
-      line(double activity::point:: *field, value_conversion conversion,
+      line(activity::point_field field, value_conversion conversion,
 	line_color color, uint32_t flags, double min_ratio, double max_ratio);
 
       void update_values(const chart &c);
@@ -146,7 +146,8 @@ protected:
 
   struct x_axis_state
     {
-      double activity::point:: *field;
+      activity::point_field field;
+      activity::point::field_fn field_fn;
 
       double min_value;
       double max_value;
@@ -188,7 +189,7 @@ chart::line::line()
 }
 
 inline
-chart::line::line(double activity::point:: *field_, value_conversion
+chart::line::line(activity::point_field field_, value_conversion
 		  conversion_, line_color color_, uint32_t flags_,
 		  double min_ratio_, double max_ratio_)
 : field(field_),
