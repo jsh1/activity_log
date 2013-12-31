@@ -34,6 +34,7 @@
 
 #define FIELD_HEIGHT 12
 #define FIELD_Y_SPACING 2
+#define MIN_COLUMN_WIDTH 200
 #define X_INSET 8
 #define Y_INSET 8
 
@@ -225,14 +226,33 @@
 
 - (CGFloat)heightForWidth:(CGFloat)width
 {
-  CGFloat h = 0;
+  width = width - X_INSET * 2;
+
+  int cols = (int) fmax(1, floor(width / MIN_COLUMN_WIDTH));
+  int rows = ([[self subviews] count] + (cols - 1)) / cols;
+
+  CGFloat h = 0, col_h = 0;
+  int xi = 0, yi = 0;
 
   for (ActHeaderFieldView *field in [self subviews])
     {
-      if (h != 0)
-	h += FIELD_Y_SPACING;
-      h += [field preferredHeight];
+      CGFloat fh = [field preferredHeight];
+
+      if (yi != 0)
+	col_h += FIELD_Y_SPACING;
+
+      col_h += fh;
+
+      if (++yi == rows)
+	{
+	  yi = 0;
+	  xi++;
+	  h = fmax(col_h, h);
+	  col_h = 0;
+	}
     }
+
+  h = fmax(col_h, h);
 
   return h + Y_INSET * 2;
 }
@@ -240,19 +260,35 @@
 - (void)layoutSubviews
 {
   NSRect bounds = NSInsetRect([self bounds], X_INSET, Y_INSET);
+
+  int cols = (int) fmax(1, floor(bounds.size.width / MIN_COLUMN_WIDTH));
+  int rows = ([[self subviews] count] + (cols - 1)) / cols;
+
+  CGFloat col_w = floor(bounds.size.width / cols);
+
+  int xi = 0, yi = 0;
   CGFloat y = 0;
 
   for (ActHeaderFieldView *field in [self subviews])
     {
+      CGFloat fh = [field preferredHeight];
+
       NSRect frame;
-      CGFloat h = [field preferredHeight];
-      frame.origin.x = bounds.origin.x;
-      frame.origin.y = bounds.origin.y + bounds.size.height - (y + h);
-      frame.size.width = bounds.size.width;
-      frame.size.height = h;
+      frame.origin.x = bounds.origin.x + xi * col_w;
+      frame.origin.y = bounds.origin.y + bounds.size.height - (y + fh);
+      frame.size.width = col_w;
+      frame.size.height = fh;
       [field setFrame:frame];
       [field layoutSubviews];
-      y += h + FIELD_Y_SPACING;
+
+      y += fh + FIELD_Y_SPACING;
+
+      if (++yi == rows)
+	{
+	  xi++;
+	  yi = 0;
+	  y = 0;
+	}
     }
 }
 

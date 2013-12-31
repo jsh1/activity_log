@@ -30,7 +30,7 @@
 
 #import "act-database.h"
 
-#define LABEL_WIDTH 120
+#define LABEL_WIDTH 100
 #define LABEL_HEIGHT 14
 #define SPACING 8
 
@@ -55,7 +55,6 @@
   [_labelField setAction:@selector(controlAction:)];
   [_labelField setDelegate:self];
   [_labelField setDrawsBackground:NO];
-  [_labelField setAlignment:NSRightTextAlignment];
   [[_labelField cell] setBordered:NO];
   [[_labelField cell] setFont:font];
   [[_labelField cell] setTextColor:[ActColor controlTextColor]];
