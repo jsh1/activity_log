@@ -52,6 +52,7 @@ activity::activity()
   _max_cadence(0),
   _avg_vertical_oscillation(0),
   _avg_stance_time(0),
+  _avg_stance_ratio(0),
   _has_location(false),
   _has_speed(false),
   _has_heart_rate(false),
@@ -147,6 +148,7 @@ activity::update_summary()
   _max_cadence = 0;
   _avg_vertical_oscillation = 0;
   _avg_stance_time = 0;
+  _avg_stance_ratio = 0;
 
   if (laps().size() < 1)
     return;
@@ -174,6 +176,7 @@ activity::update_summary()
       _max_cadence = fmax(_max_cadence, it.max_cadence);
       _avg_vertical_oscillation += it.avg_vertical_oscillation * it.total_duration;
       _avg_stance_time += it.avg_stance_time * it.total_duration;
+      _avg_stance_ratio += it.avg_stance_ratio * it.total_duration;
     }
 
   _avg_speed = _total_distance / _total_duration;
@@ -181,6 +184,7 @@ activity::update_summary()
   _avg_cadence = _avg_cadence / _total_duration;
   _avg_vertical_oscillation = _avg_vertical_oscillation / _total_duration;
   _avg_stance_time = _avg_stance_time / _total_duration;
+  _avg_stance_ratio = _avg_stance_ratio / _total_duration;
 }
 
 void
@@ -254,6 +258,9 @@ activity::print_summary(FILE *fh) const
       format_duration(tem, avg_stance_time());
       fprintf(fh, "Avg-Stance-Time: %s\n", tem.c_str());
       tem.clear();
+
+      fprintf(fh, "Avg-Stance-Ratio: %.1f%%\n",
+	      avg_stance_ratio() * 100);
     }
 
   if (total_calories() != 0)
@@ -316,7 +323,8 @@ activity::print_laps(FILE *fh) const
 	{
 	  char buf[20];
 	  snprintf(buf, sizeof(buf), "%.1f", it.avg_vertical_oscillation * 100);
-	  fprintf(fh, "  %4s  %3d", buf, (int)(it.avg_stance_time * 1000));
+	  fprintf(fh, "  %4s  %3d %.1f", buf, (int)(it.avg_stance_time * 1000),
+		  it.avg_stance_ratio * 100);
 	}
 
       std::string cal;
@@ -503,6 +511,7 @@ activity::smooth(const activity &src, int width)
       l.max_cadence = it.max_cadence;
       l.avg_vertical_oscillation = it.avg_vertical_oscillation;
       l.avg_stance_time = it.avg_stance_time;
+      l.avg_stance_ratio = it.avg_stance_ratio;
       l.region = it.region;
 
       l.track.resize(it.track.size());
@@ -529,6 +538,7 @@ activity::smooth(const activity &src, int width)
 	      sum.cadence -= p.cadence;
 	      sum.vertical_oscillation -= p.vertical_oscillation;
 	      sum.stance_time -= p.stance_time;
+	      sum.stance_ratio -= p.stance_ratio;
 	      sum_n--;
 	    }
 	  s_out++;
@@ -544,6 +554,7 @@ activity::smooth(const activity &src, int width)
 	  sum.cadence += s.cadence;
 	  sum.vertical_oscillation += s.vertical_oscillation;
 	  sum.stance_time += s.stance_time;
+	  sum.stance_ratio += s.stance_ratio;
 	  sum_n++;
 	}
 
@@ -561,6 +572,7 @@ activity::smooth(const activity &src, int width)
 	  d.cadence = sum.cadence * mul;
 	  d.vertical_oscillation = sum.vertical_oscillation * mul;
 	  d.stance_time = sum.stance_time * mul;
+	  d.stance_ratio = sum.stance_ratio * mul;
 	}
       else
 	d = s;
@@ -624,6 +636,7 @@ mix(gps::activity::point &a, const gps::activity::point &b,
   mix(a.vertical_oscillation, b.vertical_oscillation,
       c.vertical_oscillation, f);
   mix(a.stance_time, b.stance_time, c.stance_time, f);
+  mix(a.stance_ratio, b.stance_ratio, c.stance_ratio, f);
 }
 
 } // namespace act

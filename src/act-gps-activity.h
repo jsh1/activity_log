@@ -55,10 +55,12 @@ public:
       double cadence;
       double vertical_oscillation;
       double stance_time;		/* aka ground contact time */
+      double stance_ratio;
 
       point()
       : timestamp(0), altitude(0), distance(0), speed(0), heart_rate(0),
-        cadence(0), vertical_oscillation(0), stance_time(0) {}
+        cadence(0), vertical_oscillation(0), stance_time(0),
+	stance_ratio(0) {}
     };
 
   struct lap
@@ -78,6 +80,7 @@ public:
       double max_cadence;
       double avg_vertical_oscillation;
       double avg_stance_time;
+      double avg_stance_ratio;
       std::vector<point> track;
       location_region region;
 
@@ -86,7 +89,8 @@ public:
 	total_distance(0), total_ascent(0), total_descent(0),
 	total_calories(0), avg_speed(0), max_speed(0), avg_heart_rate(0),
 	max_heart_rate(0), avg_cadence(0), max_cadence(0),
-	avg_vertical_oscillation(0), avg_stance_time(0) {}
+	avg_vertical_oscillation(0), avg_stance_time(0),
+	avg_stance_ratio(0) {}
 
       void update_region();
     };
@@ -148,6 +152,7 @@ private:
   double _max_cadence;
   double _avg_vertical_oscillation;
   double _avg_stance_time;
+  double _avg_stance_ratio;
 
   std::vector<lap> _laps;
 
@@ -243,6 +248,9 @@ public:
 
   void set_avg_stance_time(double x) {_avg_stance_time = x;}
   double avg_stance_time() const {return _avg_stance_time;}
+
+  void set_avg_stance_ratio(double x) {_avg_stance_ratio = x;}
+  double avg_stance_ratio() const {return _avg_stance_ratio;}
 
   std::vector<lap> &laps() {return _laps;}
   const std::vector<lap> &laps() const {return _laps;}

@@ -478,6 +478,12 @@ make_training_effect(uint8_t value)
 }
 
 inline double
+make_stance_ratio(uint16_t value)
+{
+  return value * 1e-4;
+}
+
+inline double
 make_stance_time(uint16_t value)
 {
   return value * 1e-4;
@@ -552,13 +558,16 @@ fit_parser::read_record_message(const message_type &def, uint32_t timestamp)
 	    destination().set_has_dynamics(true);
 	  break;
 
+	case 40:			/* stance_time_percent */
+	  p.stance_ratio = make_stance_ratio(read_field(def, it));
+	  break;
+
 	case 41:			/* stance_time */
 	  p.stance_time = make_stance_time(read_field(def, it));
 	  if (p.stance_time != 0)
 	    destination().set_has_dynamics(true);
 	  break;
 
-	case 40:			/* stance_time_percent */
 	case 42:			/* activity_type */
 	case 53:			/* unknown */
 	  /* fall through. */
@@ -644,6 +653,10 @@ fit_parser::read_lap_message(const message_type &def, uint32_t timestamp)
 	    = make_vertical_oscillation(read_field(def, it));
 	  break;
 
+	case 78:			/* avg_stance_time_percent */
+	  lap.avg_stance_ratio = make_stance_ratio(read_field(def, it));
+	  break;
+
 	case 79:			/* avg_stance_time */
 	  lap.avg_stance_time = make_stance_time(read_field(def, it));
 	  break;
@@ -657,7 +670,6 @@ fit_parser::read_lap_message(const message_type &def, uint32_t timestamp)
 	  break;
 
 	case 10:			/* total_strides */
-	case 78:			/* avg_stance_time_percent */
 	case 82:			/* total_fractional_cycles(invalid) */
 	  /* fall through. */
 
@@ -756,6 +768,10 @@ fit_parser::read_session_message(const message_type &def, uint32_t timestamp)
 	  d.set_avg_vertical_oscillation(x);
 	  break; }
 
+	case 90:			/* avg_stance_time_percent */
+	  d.set_avg_stance_ratio(make_stance_ratio(read_field(def, it)));
+	  break;
+
 	case 91:			/* avg_stance_time */
 	  d.set_avg_stance_time(make_stance_time(read_field(def, it)));
 	  break;
@@ -768,7 +784,6 @@ fit_parser::read_session_message(const message_type &def, uint32_t timestamp)
 	  max_cadence_frac = read_field(def, it) * (1/128.);
 	  break;
 
-	case 90:			/* avg_stance_time_percent */
 	case 81:			/* unknown */
 	case 94:			/* total_fractional_cycles(invalid) */
 	  /* fall through. */

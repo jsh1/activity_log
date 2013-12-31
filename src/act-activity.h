@@ -96,6 +96,7 @@ public:
   double avg_cadence() const;
   double max_cadence() const;
   double avg_stance_time() const;
+  double avg_stance_ratio() const;
   double avg_vertical_oscillation() const;
   double avg_stride_length() const;
 
@@ -165,6 +166,7 @@ private:
   mutable double _avg_cadence;
   mutable double _max_cadence;
   mutable double _avg_stance_time;
+  mutable double _avg_stance_ratio;
   mutable double _avg_vertical_oscillation;
 
   // group_other

@@ -44,6 +44,8 @@ lookup_field_id(const char *str)
 	return field_id::ascent;
       else if (strcasecmp(str, "avg-cadence") == 0)
 	return field_id::avg_cadence;
+      else if (strcasecmp(str, "avg-stance-ratio") == 0)
+	return field_id::avg_stance_ratio;
       else if (strcasecmp(str, "avg-stance-time") == 0)
 	return field_id::avg_stance_time;
       else if (strcasecmp(str, "avg-hr") == 0)
@@ -157,6 +159,8 @@ canonical_field_name(field_id id)
       return "Ascent";
     case field_id::avg_cadence:
       return "Avg-Cadence";
+    case field_id::avg_stance_ratio:
+      return "Avg-Stance-Ratio";
     case field_id::avg_stance_time:
       return "Avg-Stance-Time";
     case field_id::avg_hr:
@@ -266,6 +270,7 @@ lookup_field_data_type(const field_id id)
     case field_id::duration:
     case field_id::elapsed_time:
       return field_data_type::duration;
+    case field_id::avg_stance_ratio:
     case field_id::effort:
     case field_id::quality:
       return field_data_type::fraction;

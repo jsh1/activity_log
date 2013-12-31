@@ -57,6 +57,7 @@ enum class field_id
   avg_cadence,
   max_cadence,
   avg_vertical_oscillation,
+  avg_stance_ratio,
   avg_stance_time,
   avg_stride_length,
   calories,

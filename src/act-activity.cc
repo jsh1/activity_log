@@ -94,6 +94,7 @@ activity::validate_cached_values(unsigned int groups) const
 	  _avg_cadence = 0;
 	  _max_cadence = 0;
 	  _avg_stance_time = 0;
+	  _avg_stance_ratio = 0;
 	  _avg_vertical_oscillation = 0;
 	}
 
@@ -185,11 +186,14 @@ activity::validate_cached_values(unsigned int groups) const
 	    parse_cadence(*s, &_max_cadence, nullptr);
 	  if (const std::string *s = field_ptr("avg-stance-time"))
 	    parse_duration(*s, &_avg_stance_time);
+	  if (const std::string *s = field_ptr("avg-stance-ratio"))
+	    parse_duration(*s, &_avg_stance_ratio);
 	  if (const std::string *s = field_ptr("avg-vertical-oscillation"))
 	    parse_distance(*s, &_avg_vertical_oscillation, nullptr);
 
 	  if (_avg_cadence == 0 || _max_cadence == 0
-	      || _avg_stance_time == 0 || _avg_vertical_oscillation == 0)
+	      || _avg_stance_time == 0 || _avg_stance_ratio == 0
+	      || _avg_vertical_oscillation == 0)
 	    use_gps = true;
 	}
 
@@ -274,6 +278,8 @@ activity::validate_cached_values(unsigned int groups) const
 		    _max_cadence = data->max_cadence();
 		  if (_avg_stance_time == 0)
 		    _avg_stance_time = data->avg_stance_time();
+		  if (_avg_stance_ratio == 0)
+		    _avg_stance_ratio = data->avg_stance_ratio();
 		  if (_avg_vertical_oscillation == 0)
 		    _avg_vertical_oscillation = data->avg_vertical_oscillation();
 		}
@@ -327,6 +333,8 @@ activity::field_value(field_id id) const
       return max_cadence();
     case field_id::avg_stance_time:
       return avg_stance_time();
+    case field_id::avg_stance_ratio:
+      return avg_stance_ratio();
     case field_id::avg_vertical_oscillation:
       return avg_vertical_oscillation();
     case field_id::temperature:
@@ -596,6 +604,13 @@ activity::avg_stance_time() const
 {
   validate_cached_values(group_dynamics);
   return _avg_stance_time;
+}
+
+double
+activity::avg_stance_ratio() const
+{
+  validate_cached_values(group_dynamics);
+  return _avg_stance_ratio;
 }
 
 double

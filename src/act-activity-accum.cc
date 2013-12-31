@@ -127,6 +127,9 @@ activity_accum::add(const activity &a)
   if (double x = a.avg_stance_time())
     _accum[static_cast<int>(accum_id::avg_stance_time)].add(x);
 
+  if (double x = a.avg_stance_ratio())
+    _accum[static_cast<int>(accum_id::avg_stance_ratio)].add(x);
+
   if (double x = a.avg_vertical_oscillation())
     _accum[static_cast<int>(accum_id::avg_vertical_oscillation)].add(x);
 
@@ -289,6 +292,11 @@ activity_accum::get_field_value(const char *name, const char *arg,
       break;
     case field_id::avg_stance_time:
       a_id = accum_id::avg_stance_time;
+      if (!arg)
+	arg = "average";
+      break;
+    case field_id::avg_stance_ratio:
+      a_id = accum_id::avg_stance_ratio;
       if (!arg)
 	arg = "average";
       break;

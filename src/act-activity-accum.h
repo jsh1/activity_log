@@ -66,6 +66,7 @@ class activity_accum
       avg_cadence,
       max_cadence,
       avg_stance_time,
+      avg_stance_ratio,
       avg_stride_length,
       avg_vertical_oscillation,
       calories,
