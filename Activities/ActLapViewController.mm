@@ -65,8 +65,9 @@ setTableColumnEnabled(NSTableView *tv, NSString *ident, BOOL state)
 #endif
 
 - (id)initWithController:(ActWindowController *)controller
+    options:(NSDictionary *)opts
 {
-  self = [super initWithController:controller];
+  self = [super initWithController:controller options:opts];
   if (self == nil)
     return nil;
 

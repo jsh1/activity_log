@@ -23,6 +23,30 @@
 	<key>VDOT</key>
 	<real>50</real>
 
+	<key>ActActivitySubviewControllers</key>
+	<array>
+		<dict>
+			<key>className</key>
+			<string>ActSummaryViewController</string>
+		</dict>
+		<dict>
+			<key>className</key>
+			<string>ActHeaderViewController</string>
+		</dict>
+		<dict>
+			<key>className</key>
+			<string>ActMapViewController</string>
+		</dict>
+		<dict>
+			<key>className</key>
+			<string>ActChartViewController</string>
+		</dict>
+		<dict>
+			<key>className</key>
+			<string>ActLapViewController</string>
+		</dict>
+	</array>
+
 	<key>ActMapSources</key>
 	<array>
 		<string>openstreetmap-tiles</string>

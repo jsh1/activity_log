@@ -32,15 +32,26 @@
 {
   ActWindowController *_controller;
 
+@private
+  ActViewController *_superviewController;
   NSMutableArray *_subviewControllers;
-
+  NSString *_identifierSuffix;
   BOOL _viewHasBeenLoaded;
 }
 
 + (NSString *)viewNibName;
+
++ (ActViewController *)viewControllerWithPropertyListRepresentation:(id)obj
+    controller:(ActWindowController *)controller;
+
+- (id)propertyListRepresentation;
+
 - (NSString *)identifier;
 
-- (id)initWithController:(ActWindowController *)controller;
+@property(nonatomic, readonly) NSString *identifierSuffix;
+
+- (id)initWithController:(ActWindowController *)controller
+    options:(NSDictionary *)dict;
 
 @property(nonatomic, readonly) BOOL viewHasBeenLoaded;
 
@@ -50,9 +61,12 @@
 
 - (ActViewController *)viewControllerWithClass:(Class)cls;
 
+@property(nonatomic, readonly) ActViewController *superviewController;
 @property(nonatomic, copy) NSArray *subviewControllers;
 
 - (void)addSubviewController:(ActViewController *)controller;
+- (void)addSubviewController:(ActViewController *)controller
+    after:(ActViewController *)pred;
 - (void)removeSubviewController:(ActViewController *)controller;
 
 @property(nonatomic, readonly) NSView *initialFirstResponder;

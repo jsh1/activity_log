@@ -7,9 +7,11 @@
     <objects>
         <customObject id="-2" userLabel="File's Owner" customClass="ActChartViewController">
             <connections>
+                <outlet property="_addButton" destination="WAY-qW-xIg" id="E9Q-Zn-I4A"/>
                 <outlet property="_chartView" destination="U4C-Ob-I1X" id="7OP-vU-cpi"/>
                 <outlet property="_configButton" destination="cJ8-01-tf3" id="Jdj-cq-2uE"/>
                 <outlet property="_configMenu" destination="TRA-fz-MhK" id="gKx-cQ-g4u"/>
+                <outlet property="_removeButton" destination="vqB-00-ezl" id="Ebr-ae-S4F"/>
                 <outlet property="view" destination="g4c-Zf-beA" id="PVy-XO-9dh"/>
             </connections>
         </customObject>
@@ -31,9 +33,9 @@
                     <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES"/>
                     <subviews>
                         <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" id="cJ8-01-tf3" customClass="ActChartViewConfigLabel">
-                            <rect key="frame" x="47" y="3" width="68" height="14"/>
+                            <rect key="frame" x="10" y="3" width="68" height="14"/>
                             <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES"/>
-                            <textFieldCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Configure" id="T4T-lN-Pj0">
+                            <textFieldCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="center" title="Configure" id="T4T-lN-Pj0">
                                 <font key="font" metaFont="smallSystem"/>
                                 <color key="textColor" white="0.25" alpha="1" colorSpace="deviceWhite"/>
                                 <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
@@ -42,6 +44,28 @@
                                 <outlet property="_controller" destination="-2" id="uaG-kn-7na"/>
                             </connections>
                         </textField>
+                        <button verticalHuggingPriority="750" id="vqB-00-ezl">
+                            <rect key="frame" x="96" y="0.0" width="20" height="20"/>
+                            <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES"/>
+                            <buttonCell key="cell" type="square" bezelStyle="shadowlessSquare" image="NSRemoveTemplate" imagePosition="only" alignment="center" state="on" inset="2" id="rMp-bH-50Q">
+                                <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                <font key="font" metaFont="system"/>
+                            </buttonCell>
+                            <connections>
+                                <action selector="buttonAction:" target="-2" id="vOK-kS-ooI"/>
+                            </connections>
+                        </button>
+                        <button verticalHuggingPriority="750" id="WAY-qW-xIg">
+                            <rect key="frame" x="76" y="0.0" width="20" height="20"/>
+                            <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES"/>
+                            <buttonCell key="cell" type="square" bezelStyle="shadowlessSquare" image="NSAddTemplate" imagePosition="only" alignment="center" state="on" inset="2" id="kqx-hr-GHx">
+                                <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                <font key="font" metaFont="system"/>
+                            </buttonCell>
+                            <connections>
+                                <action selector="buttonAction:" target="-2" id="HGc-Hg-NvO"/>
+                            </connections>
+                        </button>
                     </subviews>
                 </customView>
             </subviews>
@@ -154,4 +178,8 @@
             </connections>
         </menu>
     </objects>
+    <resources>
+        <image name="NSAddTemplate" width="8" height="8"/>
+        <image name="NSRemoveTemplate" width="8" height="8"/>
+    </resources>
 </document>

@@ -38,27 +38,28 @@
 }
 
 - (id)initWithController:(ActWindowController *)controller
+    options:(NSDictionary *)opts
 {
-  self = [super initWithController:controller];
+  self = [super initWithController:controller options:opts];
   if (self == nil)
     return nil;
 
-  if (ActViewController *obj
-      = [[ActListViewController alloc] initWithController:_controller])
+  if (ActViewController *obj = [[ActListViewController alloc]
+				initWithController:_controller options:nil])
     {
       [self addSubviewController:obj];
     }
 
-  if (ActViewController *obj
-      = [[ActNotesListViewController alloc] initWithController:_controller])
+  if (ActViewController *obj = [[ActNotesListViewController alloc]
+				initWithController:_controller options:nil])
     {
       [self addSubviewController:obj];
     }
 
   // FIXME: also some kind of multi-activity summary view
 
-  if (ActViewController *obj
-      = [[ActActivityViewController alloc] initWithController:_controller])
+  if (ActViewController *obj = [[ActActivityViewController alloc]
+				initWithController:_controller options:nil])
     {
       [self addSubviewController:obj];
       [obj release];

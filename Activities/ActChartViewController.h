@@ -38,6 +38,8 @@ namespace chart_view {
 {
   IBOutlet ActChartView *_chartView;
   IBOutlet ActChartViewConfigLabel *_configButton;
+  IBOutlet NSButton *_addButton;
+  IBOutlet NSButton *_removeButton;
   IBOutlet NSMenu *_configMenu;
 
   uint32_t _fieldMask;
@@ -47,6 +49,7 @@ namespace chart_view {
 }
 
 - (IBAction)configMenuAction:(id)sender;
+- (IBAction)buttonAction:(id)sender;
 
 @end
 

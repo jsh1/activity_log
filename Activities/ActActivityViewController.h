@@ -31,6 +31,11 @@
   IBOutlet NSScrollView *_scrollView;
   IBOutlet ActActivityView *_activityView;
 }
+
+- (void)addSubviewControllerWithClass:(Class)cls
+    after:(ActViewController *)pred;
+- (void)removeSubviewController:(ActViewController *)controller;
+
 @end
 
 @interface ActActivityView : NSView

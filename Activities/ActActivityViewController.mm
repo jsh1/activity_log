@@ -43,46 +43,23 @@
 }
 
 - (id)initWithController:(ActWindowController *)controller
+    options:(NSDictionary *)opts
 {
-  self = [super initWithController:controller];
+  self = [super initWithController:controller options:opts];
   if (self == nil)
     return nil;
 
-  if (ActViewController *obj
-      = [[ActSummaryViewController alloc] initWithController:_controller])
-    {
-      [self addSubviewController:obj];
-      [obj release];
-    }
+  NSArray *subviews = [[NSUserDefaults standardUserDefaults]
+		       arrayForKey:@"ActActivitySubviewControllers"];
 
-  // FIXME: these should be configurable and persistent
-
-  if (ActViewController *obj
-      = [[ActHeaderViewController alloc] initWithController:_controller])
+  for (NSDictionary *dict in subviews)
     {
-      [self addSubviewController:obj];
-      [obj release];
-    }
+      ActViewController *obj
+        = [ActViewController viewControllerWithPropertyListRepresentation:dict
+	   controller:_controller];
 
-  if (ActViewController *obj
-      = [[ActMapViewController alloc] initWithController:_controller])
-    {
-      [self addSubviewController:obj];
-      [obj release];
-    }
-
-  if (ActViewController *obj
-      = [[ActChartViewController alloc] initWithController:_controller])
-    {
-      [self addSubviewController:obj];
-      [obj release];
-    }
-
-  if (ActViewController *obj
-      = [[ActLapViewController alloc] initWithController:_controller])
-    {
-      [self addSubviewController:obj];
-      [obj release];
+      if (obj != nil)
+	[self addSubviewController:obj];
     }
 
   return self;
@@ -94,6 +71,72 @@
 
   for (ActViewController *controller in [self subviewControllers])
     [_activityView addSubview:[controller view]];
+}
+
+- (void)updateSubviews
+{
+  NSMutableArray *array = [NSMutableArray array];
+
+  for (ActViewController *controller in [self subviewControllers])
+    [array addObject:[controller view]];
+
+  [_activityView setSubviews:array];
+  [_activityView subviewNeedsLayout:nil];
+}
+
+- (void)updateSubviewDefaults
+{
+  NSMutableArray *array = [NSMutableArray array];
+
+  for (ActViewController *controller in [self subviewControllers])
+    {
+      id obj = [controller propertyListRepresentation];
+      if (obj != nil)
+	[array addObject:obj];
+    }
+
+  [[NSUserDefaults standardUserDefaults]
+   setObject:array forKey:@"ActActivitySubviewControllers"];
+}
+
+- (void)addSubviewControllerWithClass:(Class)cls
+    after:(ActViewController *)pred
+{
+  NSString *suffix = nil;
+
+  while (1)
+    {
+      suffix = [NSString stringWithFormat:@".%08x", arc4random()];
+      BOOL unique = YES;
+      for (ActViewController *c in [self subviewControllers])
+	{
+	  if ([[c identifierSuffix] isEqualToString:suffix])
+	    unique = NO;
+	}
+      if (unique)
+	break;
+    }
+
+  NSDictionary *dict = @{@"className": NSStringFromClass(cls),
+			 @"identifierSuffix": suffix};
+
+  ActViewController *obj
+    = [ActViewController viewControllerWithPropertyListRepresentation:dict
+       controller:_controller];
+
+  if (obj != nil)
+    [self addSubviewController:obj after:pred];
+
+  [self updateSubviews];
+  [self updateSubviewDefaults];
+}
+
+- (void)removeSubviewController:(ActViewController *)controller
+{
+  [super removeSubviewController:controller];
+
+  [self updateSubviews];
+  [self updateSubviewDefaults];
 }
 
 - (NSDictionary *)savedViewState

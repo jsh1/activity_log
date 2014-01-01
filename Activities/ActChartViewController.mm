@@ -24,6 +24,7 @@
 
 #import "ActChartViewController.h"
 
+#import "ActActivityViewController.h"
 #import "ActCollapsibleView.h"
 #import "ActColor.h"
 #import "ActViewLayout.h"
@@ -47,7 +48,8 @@
 #define BOX_INSET 8
 
 @interface ActChartViewController ()
-- (void)_updateTitle;
+- (void)updateChart;
+- (void)updateTitle;
 @end
 
 enum ChartFields
@@ -614,8 +616,9 @@ chart::current_time_rect() const
 }
 
 - (id)initWithController:(ActWindowController *)controller
+    options:(NSDictionary *)opts
 {
-  self = [super initWithController:controller];
+  self = [super initWithController:controller options:opts];
   if (self == nil)
     return nil;
 
@@ -634,7 +637,7 @@ chart::current_time_rect() const
    addObserver:self selector:@selector(currentTimeDidChange:)
    name:ActCurrentTimeDidChange object:_controller];
 
-  _fieldMask = CHART_PACE_MI_MASK;
+  _fieldMask = CHART_PACE_MI_MASK | CHART_ALT_M_MASK;
 
   return self;
 }
@@ -643,7 +646,9 @@ chart::current_time_rect() const
 {
   [_configMenu setFont:[NSFont systemFontOfSize:[NSFont smallSystemFontSize]]];
 
-  [self _updateTitle];
+  [_removeButton setEnabled:[self identifierSuffix] != nil];
+
+  [self updateTitle];
 }
 
 - (void)dealloc
@@ -657,7 +662,7 @@ chart::current_time_rect() const
   return _chart.get();
 }
 
-- (void)__updateChart
+- (void)_updateChart
 {
   if (_chart)
     {
@@ -762,21 +767,27 @@ chart::current_time_rect() const
     {
       _chart->add_line(act::gps::activity::point_field::cadence,
 		       act::gps::chart::value_conversion::identity,
-		       act::gps::chart::line_color::tomato, 0, -0.05, 1.05);
+		       act::gps::chart::line_color::tomato,
+		       act::gps::chart::FILL_BG | act::gps::chart::TICK_LINES,
+		       -0.05, 1.05);
     }
 
   if (draw_stride_len)
     {
       _chart->add_line(act::gps::activity::point_field::stride_length,
 		       act::gps::chart::value_conversion::identity,
-		       act::gps::chart::line_color::green, 0, -0.05, 1.05);
+		       act::gps::chart::line_color::green,
+		       act::gps::chart::FILL_BG | act::gps::chart::TICK_LINES,
+		       -0.05, 1.05);
     }
 
   if (draw_vert_osc)
     {
       _chart->add_line(act::gps::activity::point_field::vertical_oscillation,
 		       act::gps::chart::value_conversion::distance_m_cm,
-		       act::gps::chart::line_color::teal, 0, -0.05, 1.05);
+		       act::gps::chart::line_color::teal,
+		       act::gps::chart::FILL_BG | act::gps::chart::TICK_LINES,
+		       -0.05, 1.05);
     }
 
   if (draw_stance)
@@ -786,7 +797,9 @@ chart::current_time_rect() const
 		    : act::gps::activity::point_field::stance_ratio);
 
       _chart->add_line(field, act::gps::chart::value_conversion::time_s_ms,
-		       act::gps::chart::line_color::magenta, 0, -0.05, 1.05);
+		       act::gps::chart::line_color::yellow,
+		       act::gps::chart::FILL_BG | act::gps::chart::TICK_LINES,
+		       -0.05, 1.05);
     }
 
   _chart->set_chart_rect(NSRectToCGRect([_chartView bounds]));
@@ -796,11 +809,11 @@ chart::current_time_rect() const
   [_chartView setNeedsDisplay:YES];
 }
 
-- (void)_updateChart
+- (void)updateChart
 {
   bool had_chart = (bool)_chart;
 
-  [self __updateChart];
+  [self _updateChart];
 
   bool has_chart = (bool)_chart;
 
@@ -808,7 +821,7 @@ chart::current_time_rect() const
     [[_chartView superview] subviewNeedsLayout:_chartView];
 }
 
-- (void)_updateTitle
+- (void)updateTitle
 {
   NSMutableString *str = nil;
 
@@ -882,7 +895,7 @@ chart::current_time_rect() const
 
 - (void)selectedActivityDidChange:(NSNotification *)note
 {
-  [self _updateChart];
+  [self updateChart];
 }
 
 - (void)selectedLapIndexDidChange:(NSNotification *)note
@@ -933,14 +946,28 @@ chart::current_time_rect() const
   if (![sender state])
     _fieldMask |= bit;
 
-  [self _updateChart];
-  [self _updateTitle];
+  [self updateChart];
+  [self updateTitle];
 }
 
 - (void)popUpConfigMenuForView:(NSView *)view
 {
   [_configMenu popUpMenuPositioningItem:[_configMenu itemAtIndex:0]
    atLocation:[view bounds].origin inView:view];
+}
+
+- (IBAction)buttonAction:(id)sender
+{
+  if (sender == _addButton)
+    {
+      [(ActActivityViewController *)[self superviewController]
+       addSubviewControllerWithClass:[self class] after:self];
+    }
+  else if (sender == _removeButton)
+    {
+      [(ActActivityViewController *)[self superviewController]
+       removeSubviewController:self];
+    }
 }
 
 - (NSDictionary *)savedViewState
@@ -956,8 +983,8 @@ chart::current_time_rect() const
   if (NSNumber *obj = [state objectForKey:@"fieldMask"])
     {
       _fieldMask = [obj unsignedIntValue];
-      [self _updateChart];
-      [self _updateTitle];
+      [self updateChart];
+      [self updateTitle];
     }
 }
 
@@ -968,7 +995,7 @@ chart::current_time_rect() const
   if (view == _chartView)
     {
       if ([self chart])
-	return 180;
+	return 150;
       else
 	return 0;
     }

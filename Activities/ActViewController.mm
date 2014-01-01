@@ -29,6 +29,8 @@
 @implementation ActViewController
 
 @synthesize controller = _controller;
+@synthesize identifierSuffix = _identifierSuffix;
+@synthesize superviewController = _superviewController;
 @synthesize viewHasBeenLoaded = _viewHasBeenLoaded;
 
 + (NSString *)viewNibName
@@ -36,12 +38,36 @@
   return nil;
 }
 
-- (NSString *)identifier
++ (ActViewController *)viewControllerWithPropertyListRepresentation:(id)obj
+    controller:(ActWindowController *)controller
 {
-  return NSStringFromClass([self class]);
+  if (![obj isKindOfClass:[NSDictionary class]])
+    return nil;
+
+  NSDictionary *dict = obj;
+
+  Class cls = NSClassFromString([dict objectForKey:@"className"]);
+  if (![cls isSubclassOfClass:[ActViewController class]])
+    return nil;
+
+  return [[[cls alloc] initWithController:
+	   controller options:dict] autorelease];
+}
+
+- (id)propertyListRepresentation
+{
+  NSMutableDictionary *dict = [NSMutableDictionary dictionary];
+
+  [dict setObject:NSStringFromClass([self class]) forKey:@"className"];
+
+  if (_identifierSuffix != nil)
+    [dict setObject:_identifierSuffix forKey:@"identifierSuffix"];
+
+  return dict;
 }
 
 - (id)initWithController:(ActWindowController *)controller
+    options:(NSDictionary *)opts
 {
   self = [super initWithNibName:[[self class] viewNibName]
 	  bundle:[NSBundle mainBundle]];
@@ -50,6 +76,7 @@
 
   _controller = controller;
   _subviewControllers = [[NSMutableArray alloc] init];
+  _identifierSuffix = [[opts objectForKey:@"identifierSuffix"] copy];
 
   return self;
 }
@@ -57,7 +84,18 @@
 - (void)dealloc
 {
   [_subviewControllers release];
+  [_identifierSuffix release];
   [super dealloc];
+}
+
+- (NSString *)identifier
+{
+  NSString *ident = NSStringFromClass([self class]);
+
+  if (_identifierSuffix != nil)
+    ident = [ident stringByAppendingString:_identifierSuffix];
+
+  return ident;
 }
 
 - (ActViewController *)viewControllerWithClass:(Class)cls
@@ -82,13 +120,31 @@
 
 - (void)setSubviewControllers:(NSArray *)array
 {
+  for (ActViewController *c in _subviewControllers)
+    c->_superviewController = nil;
+
   [_subviewControllers release];
   _subviewControllers = [array mutableCopy];
+
+  for (ActViewController *c in _subviewControllers)
+    c->_superviewController = self;
 }
 
 - (void)addSubviewController:(ActViewController *)controller
 {
   [_subviewControllers addObject:controller];
+  controller->_superviewController = self;
+}
+
+- (void)addSubviewController:(ActViewController *)controller
+    after:(ActViewController *)pred
+{
+  NSInteger idx = [_subviewControllers indexOfObjectIdenticalTo:pred];
+  if (idx != NSNotFound)
+    [_subviewControllers insertObject:controller atIndex:idx+1];
+  else
+    [_subviewControllers addObject:controller];
+  controller->_superviewController = self;
 }
 
 - (void)removeSubviewController:(ActViewController *)controller
@@ -96,7 +152,10 @@
   NSInteger idx = [_subviewControllers indexOfObjectIdenticalTo:controller];
 
   if (idx != NSNotFound)
-    [_subviewControllers removeObjectAtIndex:idx];
+    {
+      controller->_superviewController = nil;
+      [_subviewControllers removeObjectAtIndex:idx];
+    }
 }
 
 - (NSView *)initialFirstResponder

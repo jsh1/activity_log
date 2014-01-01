@@ -345,15 +345,15 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
   [_fieldEditor setAllowsDocumentBackgroundColorChange:NO];
   [_fieldEditor setAllowsImageEditing:NO];
 
-  if (ActViewController *obj
-      = [[ActViewerViewController alloc] initWithController:self])
+  if (ActViewController *obj = [[ActViewerViewController alloc]
+				initWithController:self options:nil])
     {
       [_viewControllers addObject:obj];
       [obj release];
     }
 
-  if (ActViewController *obj
-      = [[ActImporterViewController alloc] initWithController:self])
+  if (ActViewController *obj = [[ActImporterViewController alloc]
+				initWithController:self options:nil])
     {
       [_viewControllers addObject:obj];
       [obj release];
