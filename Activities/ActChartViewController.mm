@@ -290,7 +290,7 @@ chart::draw_line(const line &l, const x_axis_state &xs, CGFloat tx)
 
     // Fill under the line
 
-    if (l.flags & FILL_BG)
+    if (!first_pt && (l.flags & FILL_BG))
       {
 	NSBezierPath *fill_path = [path copy];
 	CGFloat y1 = _chart_rect.origin.y + _chart_rect.size.height;
@@ -320,7 +320,7 @@ chart::draw_line(const line &l, const x_axis_state &xs, CGFloat tx)
 
     // Draw stroked line
 
-    if (!(l.flags & NO_STROKE))
+    if (!first_pt && !(l.flags & NO_STROKE))
       {
 	[[NSColor colorWithCalibratedRed:stroke_rgb[0] green:stroke_rgb[1]
 	  blue:stroke_rgb[2] alpha:1] setStroke];
