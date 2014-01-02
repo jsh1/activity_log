@@ -36,6 +36,8 @@
     after:(ActViewController *)pred;
 - (void)removeSubviewController:(ActViewController *)controller;
 
+- (IBAction)toggleActivityPane:(id)sender;
+
 @end
 
 @interface ActActivityView : NSView

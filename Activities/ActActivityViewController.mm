@@ -24,12 +24,7 @@
 
 #import "ActActivityViewController.h"
 
-#import "ActChartViewController.h"
 #import "ActCollapsibleView.h"
-#import "ActHeaderViewController.h"
-#import "ActLapViewController.h"
-#import "ActMapViewController.h"
-#import "ActSummaryViewController.h"
 #import "ActViewLayout.h"
 #import "ActWindowController.h"
 
@@ -137,6 +132,59 @@
 
   [self updateSubviews];
   [self updateSubviewDefaults];
+}
+
+- (IBAction)toggleActivityPane:(id)sender
+{
+  NSString *class_name = nil;
+
+  switch ([sender tag])
+    {
+    case 1:
+      class_name = @"ActSummaryViewController";
+      break;
+    case 2:
+      class_name = @"ActHeaderViewController";
+      break;
+    case 3:
+      class_name = @"ActMapViewController";
+      break;
+    case 4:
+      class_name = @"ActChartViewController";
+      break;
+    case 5:
+      class_name = @"ActLapViewController";
+      break;
+    default:
+      return;
+    }
+
+  Class cls = NSClassFromString(class_name);
+  if (cls == nil)
+    return;
+
+  BOOL any_visible = NO;
+
+  for (ActViewController *controller in [self subviewControllers])
+    {
+      if ([controller isKindOfClass:cls])
+	{
+	  ActCollapsibleView *view = (id)[controller view];
+	  if ([view isKindOfClass:[ActCollapsibleView class]]
+	      && ![view isCollapsed])
+	    any_visible = YES;
+	}
+    }
+
+  for (ActViewController *controller in [self subviewControllers])
+    {
+      if ([controller isKindOfClass:cls])
+	{
+	  ActCollapsibleView *view = (id)[controller view];
+	  if ([view isKindOfClass:[ActCollapsibleView class]])
+	    [view setCollapsed:any_visible];
+	}
+    }
 }
 
 - (NSDictionary *)savedViewState

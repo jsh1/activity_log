@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="4514" systemVersion="13A603" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="4514" systemVersion="13B42" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
     <dependencies>
         <deployment defaultVersion="1090" identifier="macosx"/>
         <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="4514"/>
@@ -343,25 +343,23 @@ DQ
                                 </connections>
                             </menuItem>
                             <menuItem isSeparatorItem="YES" id="zx8-8X-6wq"/>
-                            <menuItem title="Next Activity" keyEquivalent="]" id="4lo-8d-lRR">
+                            <menuItem title="Next Activity" keyEquivalent="" id="4lo-8d-lRR">
                                 <connections>
                                     <action selector="nextActivity:" target="-1" id="RFM-qM-Ehr"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="Previous Activity" keyEquivalent="[" id="2SS-WH-Wkn">
+                            <menuItem title="Previous Activity" keyEquivalent="" id="2SS-WH-Wkn">
                                 <connections>
                                     <action selector="previousActivity:" target="-1" id="T7i-iB-1wX"/>
                                 </connections>
                             </menuItem>
                             <menuItem isSeparatorItem="YES" id="m9I-QJ-Av6"/>
-                            <menuItem title="First Activity" keyEquivalent="[" id="UaR-hD-tU5">
-                                <modifierMask key="keyEquivalentModifierMask" shift="YES" command="YES"/>
+                            <menuItem title="First Activity" keyEquivalent="" id="UaR-hD-tU5">
                                 <connections>
                                     <action selector="firstActivity:" target="-1" id="Lqw-50-VEt"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="Last Activity" keyEquivalent="]" id="PFe-1v-ZXb">
-                                <modifierMask key="keyEquivalentModifierMask" shift="YES" command="YES"/>
+                            <menuItem title="Last Activity" keyEquivalent="" id="PFe-1v-ZXb">
                                 <connections>
                                     <action selector="lastActivity:" target="-1" id="FHc-5m-j68"/>
                                 </connections>
@@ -645,6 +643,37 @@ DQ
                                 </connections>
                             </menuItem>
                             <menuItem isSeparatorItem="YES" id="yeB-Bt-ud4"/>
+                            <menuItem title="Toggle Summary Pane" tag="1" keyEquivalent="" id="M1m-R5-WCx">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                                <connections>
+                                    <action selector="toggleActivityPane:" target="-1" id="EVM-a2-qZw"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem title="Toggle Data Pane" tag="2" keyEquivalent="" id="WXx-cC-a4g">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                                <connections>
+                                    <action selector="toggleActivityPane:" target="-1" id="FRX-qr-Hzz"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem title="Toggle Route Pane" tag="3" keyEquivalent="" id="eE3-tn-0NA">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                                <connections>
+                                    <action selector="toggleActivityPane:" target="-1" id="Kve-R5-p7j"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem title="Toggle Chart Pane(s)" tag="4" keyEquivalent="" id="RsO-bj-8lD">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                                <connections>
+                                    <action selector="toggleActivityPane:" target="-1" id="qzY-Nk-5fY"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem title="Toggle Laps Pane" tag="5" keyEquivalent="" id="FPS-19-NpS">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                                <connections>
+                                    <action selector="toggleActivityPane:" target="-1" id="aVP-De-4KZ"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem isSeparatorItem="YES" id="mxj-hS-wcz"/>
                             <menuItem title="Show Toolbar" keyEquivalent="t" id="297">
                                 <modifierMask key="keyEquivalentModifierMask" option="YES" command="YES"/>
                                 <connections>

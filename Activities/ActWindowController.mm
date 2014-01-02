@@ -24,6 +24,7 @@
 
 #import "ActWindowController.h"
 
+#import "ActActivityViewController.h"
 #import "ActAppDelegate.h"
 #import "ActDevice.h"
 #import "ActDeviceManager.h"
@@ -1122,6 +1123,12 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
 {
   [self setWindowMode:ActWindowMode_Viewer];
   [self setListViewType:[sender tag]];
+}
+
+- (IBAction)toggleActivityPane:(id)sender
+{
+  [[self viewControllerWithClass:[ActActivityViewController class]]
+   performSelector:_cmd withObject:sender];
 }
 
 - (void)devicesDidChange:(NSNotification *)note

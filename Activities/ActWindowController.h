@@ -154,4 +154,6 @@ enum ActWindowMode
 
 - (IBAction)setListViewAction:(id)sender;
 
+- (IBAction)toggleActivityPane:(id)sender;
+
 @end
