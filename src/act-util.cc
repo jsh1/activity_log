@@ -267,6 +267,15 @@ tilde_expand_file_name(std::string &dest, const char *src)
   dest.append(src);
 }
 
+void
+tilde_expand_file_name(std::string &str)
+{
+  std::string tem;
+  tilde_expand_file_name(tem, str.c_str());
+  using std::swap;
+  swap(str, tem);
+}
+
 bool
 leap_year_p(int year)
 {

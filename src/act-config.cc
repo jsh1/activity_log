@@ -82,6 +82,11 @@ config::config()
     }
 #endif
 
+  if (const char *path = getenv("ACT_GPS_PATH"))
+    append_gps_file_path(path, false);
+  else
+    _gps_file_path.push_back(_gps_file_dir);
+
   if (const char *opt = getenv("ACT_START_OF_WEEK"))
     set_start_of_week(opt);
 
@@ -193,6 +198,8 @@ config::read_config_file(const char *path)
 	    tilde_expand_file_name(_activity_dir, value);
 	  else if (strcmp(name, "gps-file-directory") == 0)
 	    tilde_expand_file_name(_gps_file_dir, value);
+	  else if (strcmp(name, "gps-file-path") == 0)
+	    append_gps_file_path(value, true);
 	}
       else if (strcmp(section.c_str(), "units") == 0)
 	{
@@ -267,6 +274,27 @@ config::set_start_of_week(const char *value)
 	_start_of_week = 6;
       else
 	printf("warning: unknown start-of-week: %s\n", value);
+    }
+}
+
+void
+config::append_gps_file_path(const char *path_str, bool tilde_expand)
+{
+  while (const char *ptr = strchr(path_str, ':'))
+    {
+      std::string str(path_str, ptr - path_str);
+      if (tilde_expand)
+	tilde_expand_file_name(str);
+      _gps_file_path.push_back(str);
+      path_str = ptr + 1;
+    }
+
+  if (*path_str != 0)
+    {
+      std::string str(path_str);
+      if (tilde_expand)
+	tilde_expand_file_name(str);
+      _gps_file_path.push_back(str);
     }
 }
 

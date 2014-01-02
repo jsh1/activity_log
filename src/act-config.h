@@ -37,6 +37,7 @@ class config
 {
   std::string _activity_dir;
   std::string _gps_file_dir;
+  std::vector<std::string> _gps_file_path;
 
   unit_type _default_distance_unit;
   unit_type _default_height_unit;
@@ -62,6 +63,7 @@ public:
 
   const char *activity_dir() const;
   const char *gps_file_dir() const;
+  const std::vector<std::string> &gps_file_path() const;
 
   unit_type default_distance_unit() const;
   unit_type default_height_unit() const;
@@ -91,6 +93,7 @@ public:
 private:
   void read_config_file(const char *path);
   void set_start_of_week(const char *value);
+  void append_gps_file_path(const char *path_str, bool tilde_expand);
 };
 
 const config &shared_config();
@@ -107,6 +110,12 @@ inline const char *
 config::gps_file_dir() const
 {
   return _gps_file_dir.c_str();
+}
+
+inline const std::vector<std::string> &
+config::gps_file_path() const
+{
+  return _gps_file_path;
 }
 
 inline unit_type

@@ -38,10 +38,11 @@ static const struct option long_options[] =
   {"tcx", no_argument, 0, 't'},
   {"print-summary", no_argument, 0, 's'},
   {"print-laps", no_argument, 0, 'l'},
-  {"print-date", required_argument, 0, 'd'},
+  {"print-date", optional_argument, 0, 'd'},
+  {"global-time", no_argument, 0, 'g'},
 };
 
-static const char short_options[] = "ftsld:";
+static const char short_options[] = "ftsld:g";
 
 static void
 usage_and_exit(int ret)
@@ -58,6 +59,7 @@ main(int argc, char **argv)
   bool opt_print_summary = false;
   bool opt_print_laps = false;
   const char *opt_print_date = nullptr;
+  bool opt_global_time = false;
 
   while (1)
     {
@@ -84,7 +86,14 @@ main(int argc, char **argv)
 	  break;
 
 	case 'd':
-	  opt_print_date = optarg;
+	  if (optarg)
+	    opt_print_date = optarg;
+	  else
+	    opt_print_date = "%a, %d %b %Y %H:%M:%S %z";
+	  break;
+
+	case 'g':
+	  opt_global_time = true;
 	  break;
 
 	default:
@@ -110,7 +119,10 @@ main(int argc, char **argv)
 	    continue;
 
 	  struct tm tm = {0};
-	  localtime_r(&d, &tm);
+	  if (opt_global_time)
+	    gmtime_r(&d, &tm);
+	  else
+	    localtime_r(&d, &tm);
 
 	  char buf[1024];
 	  strftime(buf, sizeof(buf), opt_print_date, &tm);

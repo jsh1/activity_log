@@ -145,6 +145,7 @@ bool make_path(const char *path);
 
 bool path_has_extension(const char *path, const char *ext);
 
+void tilde_expand_file_name(std::string &str);
 void tilde_expand_file_name(std::string &dest, const char *src);
 
 // misc date utility functions
