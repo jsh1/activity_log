@@ -81,6 +81,10 @@ public:
       typedef double (*field_fn)(const point *);
 
       static field_fn field_function(point_field field);
+
+      void add(const point &x);
+      void sub(const point &x);
+      void mul(double x);
     };
 
   struct lap

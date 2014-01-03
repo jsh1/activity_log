@@ -77,99 +77,123 @@
         </customView>
         <menu title="Chart Types" id="TRA-fz-MhK">
             <items>
-                <menuItem title="Pace (min/mi)" id="jR4-Oc-Hle">
+                <menuItem title="Fields" enabled="NO" id="LDK-Ic-mxb">
+                    <modifierMask key="keyEquivalentModifierMask"/>
+                </menuItem>
+                <menuItem title="Pace (min/mi)" indentationLevel="1" id="jR4-Oc-Hle">
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <connections>
                         <action selector="configMenuAction:" target="-2" id="70e-FX-x5d"/>
                     </connections>
                 </menuItem>
-                <menuItem title="Pace (min/km)" tag="1" id="qlG-5r-2WF">
+                <menuItem title="Pace (min/km)" tag="1" indentationLevel="1" id="qlG-5r-2WF">
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <connections>
                         <action selector="configMenuAction:" target="-2" id="H4Q-tl-tdo"/>
                     </connections>
                 </menuItem>
-                <menuItem title="Speed (mph)" tag="2" id="Ja8-7z-B9m">
+                <menuItem title="Speed (mph)" tag="2" indentationLevel="1" id="Ja8-7z-B9m">
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <connections>
                         <action selector="configMenuAction:" target="-2" id="jd4-Nw-tCe"/>
                     </connections>
                 </menuItem>
-                <menuItem title="Speed (km/h)" tag="3" id="ECm-6f-QSR">
+                <menuItem title="Speed (km/h)" tag="3" indentationLevel="1" id="ECm-6f-QSR">
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <connections>
                         <action selector="configMenuAction:" target="-2" id="L2E-IM-hBI"/>
                     </connections>
                 </menuItem>
-                <menuItem title="Speed (% vVO₂max)" tag="4" id="dcB-IH-xCS">
+                <menuItem title="Speed (% vVO₂max)" tag="4" indentationLevel="1" id="dcB-IH-xCS">
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <connections>
                         <action selector="configMenuAction:" target="-2" id="1nk-Af-UNA"/>
                     </connections>
                 </menuItem>
-                <menuItem isSeparatorItem="YES" id="PEM-Ng-FaB"/>
-                <menuItem title="Heart Rate (bpm)" tag="5" id="FNw-sq-sUm">
+                <menuItem isSeparatorItem="YES" id="I0a-VQ-uMO"/>
+                <menuItem title="Heart Rate (bpm)" tag="5" indentationLevel="1" id="FNw-sq-sUm">
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <connections>
                         <action selector="configMenuAction:" target="-2" id="4Fb-rX-Ke6"/>
                     </connections>
                 </menuItem>
-                <menuItem title="Heart Rate (% reserve)" tag="6" id="3BB-80-Xid">
+                <menuItem title="Heart Rate (% reserve)" tag="6" indentationLevel="1" id="3BB-80-Xid">
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <connections>
                         <action selector="configMenuAction:" target="-2" id="3jB-9Z-Wve"/>
                     </connections>
                 </menuItem>
-                <menuItem title="Heart Rate (% max)" tag="7" id="kTh-k4-Jxt">
+                <menuItem title="Heart Rate (% max)" tag="7" indentationLevel="1" id="kTh-k4-Jxt">
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <connections>
                         <action selector="configMenuAction:" target="-2" id="SWq-j7-5Fa"/>
                     </connections>
                 </menuItem>
-                <menuItem isSeparatorItem="YES" id="F0w-gP-7Ov"/>
-                <menuItem title="Altitude (ft)" tag="8" id="od5-rE-SSn">
+                <menuItem isSeparatorItem="YES" id="Fv5-Fk-qqd"/>
+                <menuItem title="Altitude (ft)" tag="8" indentationLevel="1" id="od5-rE-SSn">
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <connections>
                         <action selector="configMenuAction:" target="-2" id="hYx-kv-VCL"/>
                     </connections>
                 </menuItem>
-                <menuItem title="Altitude (m)" tag="9" id="Fpe-nN-Cq7">
+                <menuItem title="Altitude (m)" tag="9" indentationLevel="1" id="Fpe-nN-Cq7">
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <connections>
                         <action selector="configMenuAction:" target="-2" id="yyU-Gw-GTm"/>
                     </connections>
                 </menuItem>
-                <menuItem isSeparatorItem="YES" id="fa6-k7-13Z"/>
-                <menuItem title="Cadence" tag="10" id="Psb-xl-gNq">
+                <menuItem isSeparatorItem="YES" id="ZXB-1z-XFx"/>
+                <menuItem title="Cadence" tag="10" indentationLevel="1" id="Psb-xl-gNq">
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <connections>
                         <action selector="configMenuAction:" target="-2" id="Yph-Qi-zSe"/>
                     </connections>
                 </menuItem>
-                <menuItem title="Stride Length" tag="11" id="3w3-ML-If6">
+                <menuItem title="Stride Length" tag="11" indentationLevel="1" id="3w3-ML-If6">
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <connections>
                         <action selector="configMenuAction:" target="-2" id="aSj-43-rxV"/>
                     </connections>
                 </menuItem>
-                <menuItem isSeparatorItem="YES" id="27e-Za-viW"/>
-                <menuItem title="Vertical Oscillation" tag="12" id="Nj6-PA-Tim">
+                <menuItem isSeparatorItem="YES" id="eIU-Yz-V1l"/>
+                <menuItem title="Vertical Oscillation" tag="12" indentationLevel="1" id="Nj6-PA-Tim">
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <connections>
                         <action selector="configMenuAction:" target="-2" id="aT4-Ry-lLg"/>
                     </connections>
                 </menuItem>
-                <menuItem isSeparatorItem="YES" id="a8E-fz-u3R"/>
-                <menuItem title="Stance Time" tag="13" id="q2h-e9-IRD">
+                <menuItem title="Stance Time" tag="13" indentationLevel="1" id="q2h-e9-IRD">
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <connections>
                         <action selector="configMenuAction:" target="-2" id="w8p-y4-eWI"/>
                     </connections>
                 </menuItem>
-                <menuItem title="Stance Ratio" tag="14" id="Csr-RX-w5n">
+                <menuItem title="Stance Ratio" tag="14" indentationLevel="1" id="Csr-RX-w5n">
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <connections>
                         <action selector="configMenuAction:" target="-2" id="FQ1-QO-L3h"/>
+                    </connections>
+                </menuItem>
+                <menuItem isSeparatorItem="YES" id="EB3-xx-zQC"/>
+                <menuItem title="Smoothing" enabled="NO" id="aS3-QW-YK2">
+                    <modifierMask key="keyEquivalentModifierMask"/>
+                </menuItem>
+                <menuItem title="None" indentationLevel="1" id="rp0-m1-rFK">
+                    <modifierMask key="keyEquivalentModifierMask"/>
+                    <connections>
+                        <action selector="smoothingAction:" target="-2" id="iti-Br-v4B"/>
+                    </connections>
+                </menuItem>
+                <menuItem title="Some" tag="5" indentationLevel="1" id="scf-oa-Mnj">
+                    <modifierMask key="keyEquivalentModifierMask"/>
+                    <connections>
+                        <action selector="smoothingAction:" target="-2" id="PTm-7N-exb"/>
+                    </connections>
+                </menuItem>
+                <menuItem title="Lots" tag="11" indentationLevel="1" id="9sv-n6-Mxq">
+                    <modifierMask key="keyEquivalentModifierMask"/>
+                    <connections>
+                        <action selector="smoothingAction:" target="-2" id="ZzM-fX-el5"/>
                     </connections>
                 </menuItem>
             </items>

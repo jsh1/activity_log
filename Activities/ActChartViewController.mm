@@ -35,7 +35,6 @@
 
 #define MIN_WIDTH 500
 #define MIN_HEIGHT 200
-#define SMOOTHING 5
 
 #define MIN_TICK_GAP 30
 #define KEY_TEXT_WIDTH 60
@@ -231,6 +230,11 @@ chart::draw_line(const line &l, const x_axis_state &xs, CGFloat tx)
       fill_rgb[0] = stroke_rgb[0] = 1;
       fill_rgb[1] = stroke_rgb[1] = 99/255.;
       fill_rgb[2] = stroke_rgb[2] = 71/255.;
+      break;
+    case line_color::dark_orchid:
+      fill_rgb[0] = stroke_rgb[0] = 153/255.;
+      fill_rgb[1] = stroke_rgb[1] = 50/255.;
+      fill_rgb[2] = stroke_rgb[2] = 204/255.;
       break;
     case line_color::gray:
       fill_rgb[0] = stroke_rgb[0] = .6;
@@ -684,19 +688,24 @@ chart::current_time_rect() const
       || _smoothed_data->total_distance() != gps_a->total_distance()
       || _smoothed_data->total_duration() != gps_a->total_duration())
     {
-      _smoothed_data.reset(new act::gps::activity);
-      _smoothed_data->smooth(*gps_a, SMOOTHING);
+      if (_smoothing > 0)
+	{
+	  _smoothed_data.reset(new act::gps::activity);
+	  _smoothed_data->smooth(*gps_a, _smoothing);
+	}
+      else if (_smoothed_data)
+	_smoothed_data.reset();
     }
 
   enum line
     {
-      line_hr,
       line_speed,
-      line_altitude,
+      line_hr,
       line_cadence,
       line_stride,
       line_vert_osc,
       line_stance,
+      line_altitude,			/* last as it draws on top */
     };
 
   uint32_t line_mask = 0;
@@ -704,8 +713,6 @@ chart::current_time_rect() const
     line_mask |= 1U << line_speed;
   if ((_fieldMask & CHART_HR_ANY_MASK) && gps_a->has_heart_rate())
     line_mask |= 1U << line_hr;
-  if ((_fieldMask & CHART_ALT_ANY_MASK) && gps_a->has_altitude())
-    line_mask |= 1U << line_altitude;
   if ((_fieldMask & CHART_CADENCE_MASK) && gps_a->has_cadence())
     line_mask |= 1U << line_cadence;
   if ((_fieldMask & CHART_STRIDE_LENGTH_MASK) && gps_a->has_cadence())
@@ -714,13 +721,18 @@ chart::current_time_rect() const
     line_mask |= 1U << line_vert_osc;
   if ((_fieldMask & CHART_STANCE_ANY_MASK) && gps_a->has_dynamics())
     line_mask |= 1U << line_stance;
+  if ((_fieldMask & CHART_ALT_ANY_MASK) && gps_a->has_altitude())
+    line_mask |= 1U << line_altitude;
 
   int count = act::popcount(line_mask);
   if (count == 0)
     return;
 
-  _chart.reset(new chart_view::chart(*_smoothed_data.get(),
-				   act::gps::chart::x_axis_type::distance));
+  const act::gps::activity *data = _smoothed_data.get();
+  if (data == nullptr)
+    data = gps_a;
+     
+  _chart.reset(new chart_view::chart(*data, act::gps::chart::x_axis_type::distance));
 
   int slices = count;
   if (slices > 1 && (line_mask & (1U << line_altitude)))
@@ -729,7 +741,7 @@ chart::current_time_rect() const
   int slice_idx = 0;
   double slices_rcp = 1. / slices;
 
-  for (int line_type = line_hr; line_type <= line_stance; line_type++)
+  for (int line_type = line_speed; line_type <= line_altitude; line_type++)
     {
       if (!(line_mask & (1U << line_type)))
 	continue;
@@ -739,20 +751,6 @@ chart::current_time_rect() const
 
       switch (line_type)
 	{
-	case line_hr: {
-	  auto conv = act::gps::chart::value_conversion::identity;
-	  if (_fieldMask & CHART_HR_HRR_MASK)
-	    conv = act::gps::chart::value_conversion::heartrate_bpm_hrr;
-	  else if (_fieldMask & CHART_HR_MAX_MASK)
-	    conv = act::gps::chart::value_conversion::heartrate_bpm_pmax;
-
-	  _chart->add_line(act::gps::activity::point_field::heart_rate, conv,
-			   act::gps::chart::line_color::orange,
-			   act::gps::chart::FILL_BG
-			   | act::gps::chart::OPAQUE_BG
-			   | act::gps::chart::TICK_LINES, bot, top);
-	  break; }
-
 	case line_speed: {
 	  auto conv = act::gps::chart::value_conversion::identity;
 	  if (_fieldMask & CHART_PACE_MI_MASK)
@@ -768,6 +766,20 @@ chart::current_time_rect() const
 	  
 	  _chart->add_line(act::gps::activity::point_field::speed, conv,
 			   act::gps::chart::line_color::blue,
+			   act::gps::chart::FILL_BG
+			   | act::gps::chart::OPAQUE_BG
+			   | act::gps::chart::TICK_LINES, bot, top);
+	  break; }
+
+	case line_hr: {
+	  auto conv = act::gps::chart::value_conversion::identity;
+	  if (_fieldMask & CHART_HR_HRR_MASK)
+	    conv = act::gps::chart::value_conversion::heartrate_bpm_hrr;
+	  else if (_fieldMask & CHART_HR_MAX_MASK)
+	    conv = act::gps::chart::value_conversion::heartrate_bpm_pmax;
+
+	  _chart->add_line(act::gps::activity::point_field::heart_rate, conv,
+			   act::gps::chart::line_color::orange,
 			   act::gps::chart::FILL_BG
 			   | act::gps::chart::OPAQUE_BG
 			   | act::gps::chart::TICK_LINES, bot, top);
@@ -806,7 +818,7 @@ chart::current_time_rect() const
 	case line_stride:
 	  _chart->add_line(act::gps::activity::point_field::stride_length,
 			   act::gps::chart::value_conversion::identity,
-			   act::gps::chart::line_color::green,
+			   act::gps::chart::line_color::dark_orchid,
 			   act::gps::chart::FILL_BG
 			   | act::gps::chart::OPAQUE_BG
 			   | act::gps::chart::TICK_LINES, bot, top);
@@ -986,6 +998,18 @@ chart::current_time_rect() const
   [self updateTitle];
 }
 
+- (IBAction)smoothingAction:(id)sender
+{
+  int tag = [sender tag];
+
+  if (_smoothing != tag)
+    {
+      _smoothing = tag;
+      _smoothed_data.reset();
+      [self _updateChart];
+    }
+}
+
 - (void)popUpConfigMenuForView:(NSView *)view
 {
   [_configMenu popUpMenuPositioningItem:[_configMenu itemAtIndex:0]
@@ -1008,20 +1032,22 @@ chart::current_time_rect() const
 
 - (NSDictionary *)savedViewState
 {
-  return [NSDictionary dictionaryWithObjectsAndKeys:
-	  [NSNumber numberWithUnsignedInt:_fieldMask],
-	  @"fieldMask",
-	  nil];
+  return @{
+    @"fieldMask": @(_fieldMask),
+    @"smoothing": @(_smoothing)
+  };
 }
 
 - (void)applySavedViewState:(NSDictionary *)state
 {
   if (NSNumber *obj = [state objectForKey:@"fieldMask"])
-    {
-      _fieldMask = [obj unsignedIntValue];
-      [self updateChart];
-      [self updateTitle];
-    }
+    _fieldMask = [obj unsignedIntValue];
+
+  if (NSNumber *obj = [state objectForKey:@"smoothing"])
+    _smoothing = [obj intValue];
+
+  [self updateChart];
+  [self updateTitle];
 }
 
 // ActLayoutDelegate methods
@@ -1075,6 +1101,10 @@ chart::current_time_rect() const
 	      uint32_t bit = 1U << [item tag];
 	      [item setState:(_fieldMask & bit) ? NSOnState : NSOffState];
 	      [item setEnabled:(_fieldMask & bit) ? YES : NO];
+	    }
+	  else if ([item action] == @selector(smoothingAction:))
+	    {
+	      [item setState:[item tag] == _smoothing];
 	    }
 	}	      
     }

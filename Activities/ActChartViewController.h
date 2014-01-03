@@ -43,12 +43,14 @@ namespace chart_view {
   IBOutlet NSMenu *_configMenu;
 
   uint32_t _fieldMask;
+  int _smoothing;
 
   std::unique_ptr<chart_view::chart> _chart;
   std::unique_ptr<act::gps::activity> _smoothed_data;
 }
 
 - (IBAction)configMenuAction:(id)sender;
+- (IBAction)smoothingAction:(id)sender;
 - (IBAction)buttonAction:(id)sender;
 
 @end

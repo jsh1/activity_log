@@ -388,6 +388,54 @@ activity::point::field_function(point_field field)
 }
 
 void
+activity::point::add(const point &x)
+{
+  timestamp += x.timestamp;
+  location.latitude += x.location.latitude;
+  location.longitude += x.location.longitude;
+  altitude += x.altitude;
+  distance += x.distance;
+  speed += x.speed;
+  heart_rate += x.heart_rate;
+  cadence += x.cadence;
+  vertical_oscillation += x.vertical_oscillation;
+  stance_time += x.stance_time;
+  stance_ratio += x.stance_ratio;
+}
+
+void
+activity::point::sub(const point &x)
+{
+  timestamp -= x.timestamp;
+  location.latitude -= x.location.latitude;
+  location.longitude -= x.location.longitude;
+  altitude -= x.altitude;
+  distance -= x.distance;
+  speed -= x.speed;
+  heart_rate -= x.heart_rate;
+  cadence -= x.cadence;
+  vertical_oscillation -= x.vertical_oscillation;
+  stance_time -= x.stance_time;
+  stance_ratio -= x.stance_ratio;
+}
+
+void
+activity::point::mul(double x)
+{
+  timestamp *= x;
+  location.latitude *= x;
+  location.longitude *= x;
+  altitude *= x;
+  distance *= x;
+  speed *= x;
+  heart_rate *= x;
+  cadence *= x;
+  vertical_oscillation *= x;
+  stance_time *= x;
+  stance_ratio *= x;
+}
+
+void
 activity::get_range(point_field field, double &ret_min, double &ret_max,
 		    double &ret_mean, double &ret_sdev) const
 {
@@ -582,13 +630,7 @@ activity::smooth(const activity &src, int width)
 	  const point &p = *s_out;
 	  if (p.distance != 0)
 	    {
-	      sum.altitude -= p.altitude;
-	      sum.speed -= p.speed;
-	      sum.heart_rate -= p.heart_rate;
-	      sum.cadence -= p.cadence;
-	      sum.vertical_oscillation -= p.vertical_oscillation;
-	      sum.stance_time -= p.stance_time;
-	      sum.stance_ratio -= p.stance_ratio;
+	      sum.sub(p);
 	      sum_n--;
 	    }
 	  s_out++;
@@ -598,13 +640,7 @@ activity::smooth(const activity &src, int width)
 
       if (s.distance != 0)
 	{
-	  sum.altitude += s.altitude;
-	  sum.speed += s.speed;
-	  sum.heart_rate += s.heart_rate;
-	  sum.cadence += s.cadence;
-	  sum.vertical_oscillation += s.vertical_oscillation;
-	  sum.stance_time += s.stance_time;
-	  sum.stance_ratio += s.stance_ratio;
+	  sum.add(s);
 	  sum_n++;
 	}
 
@@ -612,17 +648,8 @@ activity::smooth(const activity &src, int width)
 
       if (sum_n > 0)
 	{
-	  double mul = 1. / sum_n;
-	  d.timestamp = s.timestamp;
-	  d.location = s.location;
-	  d.altitude = sum.altitude * mul;
-	  d.distance = s.distance;
-	  d.speed = sum.speed * mul;
-	  d.heart_rate = sum.heart_rate * mul;
-	  d.cadence = sum.cadence * mul;
-	  d.vertical_oscillation = sum.vertical_oscillation * mul;
-	  d.stance_time = sum.stance_time * mul;
-	  d.stance_ratio = sum.stance_ratio * mul;
+	  d = sum;
+	  d.mul(1. / sum_n);
 	}
       else
 	d = s;

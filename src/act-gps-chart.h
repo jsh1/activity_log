@@ -75,6 +75,7 @@ public:
       teal,
       steel_blue,
       tomato,
+      dark_orchid,
       gray
     };
 
