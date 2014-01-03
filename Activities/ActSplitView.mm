@@ -88,8 +88,8 @@
 
   for (NSInteger i = 0; i < count; i++)
     {
-      CGFloat x = [[data objectAtIndex:i*3+0] doubleValue] * size;
-      CGFloat w = [[data objectAtIndex:i*3+1] doubleValue] * size;
+      CGFloat x = round([[data objectAtIndex:i*3+0] doubleValue] * size);
+      CGFloat w = round([[data objectAtIndex:i*3+1] doubleValue] * size);
       BOOL flag = [[data objectAtIndex:i*3+2] boolValue];
 
       NSView *subview = [subviews objectAtIndex:i];
