@@ -172,20 +172,17 @@ chart::line::update_values(const chart &c)
   min_value -= border;
   max_value += border;
 
-  if (field == activity::point_field::speed)
-    {
-      min_value = mean - 3 * sdev;
-      max_value = mean + 3 * sdev;
-    }
-  else if (field == activity::point_field::altitude)
-    {
-      if (max_value - min_value < 100)
-	max_value = min_value + 100;
-    }
+  min_value = mean - 3 * sdev;
+  max_value = mean + 3 * sdev;
 
-  double range = max_value - min_value;
-  scaled_min_value = min_value + range * min_ratio;
-  scaled_max_value = min_value + range * max_ratio;
+  if (field == activity::point_field::altitude && max_value - min_value < 100)
+    max_value = min_value + 100;
+
+  double f0 = ((0 - min_ratio) * (1 / (max_ratio - min_ratio)));
+  double f1 = ((1 - max_ratio) * (1 / (max_ratio - min_ratio)));
+
+  scaled_min_value = min_value + (max_value - min_value) * f0;
+  scaled_max_value = max_value + (max_value - min_value) * f1;
 
   tick_min = convert_from_si(min_value);
   tick_max = convert_from_si(max_value);

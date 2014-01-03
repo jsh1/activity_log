@@ -161,6 +161,10 @@ time_t month_time(int year, int month);
 int day_of_week_index(const char *str);
 int month_index(const char *str);
 
+// general utility functions
+
+int popcount(uint32_t x);
+
 // implementation details
 
 inline size_t

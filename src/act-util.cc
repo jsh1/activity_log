@@ -382,6 +382,18 @@ month_index(const char *str)
   return -1;
 }
 
+int
+popcount(uint32_t x)
+{
+  int count = 0;
+  while (x != 0)
+    {
+      x = x & (x - 1);
+      count++;
+    }
+  return count;
+}
+
 output_pipe::output_pipe(const char *program_path,
 			 const char *const program_argv[])
 : _program_path(program_path),
