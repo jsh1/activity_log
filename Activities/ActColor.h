@@ -38,6 +38,7 @@
 
 + (NSColor *)controlBackgroundColor;
 + (NSColor *)darkControlBackgroundColor;
++ (NSColor *)midControlBackgroundColor;
 + (NSArray *)controlAlternatingRowBackgroundColors;
 
 + (NSColor *)activityColor:(const act::activity &)activity;

@@ -6,6 +6,7 @@
     <objects>
         <customObject id="-2" userLabel="File's Owner" customClass="ActWeekViewController">
             <connections>
+                <outlet property="_displayModeControl" destination="eds-E0-UCP" id="S7s-wa-FS9"/>
                 <outlet property="_headerView" destination="ldB-fk-9Cu" id="inG-3a-egj"/>
                 <outlet property="_listView" destination="A2q-Ju-lhh" id="Igo-Hz-kxN"/>
                 <outlet property="_scaleSlider" destination="Z2s-B1-M2S" id="m3B-cl-bwT"/>
@@ -20,21 +21,46 @@
             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
             <subviews>
                 <customView id="ldB-fk-9Cu" customClass="ActWeekHeaderView">
-                    <rect key="frame" x="0.0" y="391" width="473" height="52"/>
+                    <rect key="frame" x="0.0" y="404" width="473" height="39"/>
                     <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
+                    <subviews>
+                        <slider verticalHuggingPriority="750" id="Z2s-B1-M2S">
+                            <rect key="frame" x="323" y="12" width="140" height="15"/>
+                            <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES"/>
+                            <sliderCell key="cell" controlSize="mini" continuous="YES" state="on" alignment="left" maxValue="1" doubleValue="0.5" tickMarkPosition="above" sliderType="linear" id="m4E-TO-xRy"/>
+                            <connections>
+                                <action selector="controlAction:" target="-2" id="hPH-QP-rzF"/>
+                            </connections>
+                        </slider>
+                        <segmentedControl verticalHuggingPriority="750" id="eds-E0-UCP">
+                            <rect key="frame" x="10" y="9" width="156" height="21"/>
+                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                            <segmentedCell key="cell" controlSize="small" alignment="left" style="smallSquare" trackingMode="selectOne" id="ezO-Tj-iwP">
+                                <font key="font" metaFont="smallSystem"/>
+                                <segments>
+                                    <segment label="DIstance" selected="YES"/>
+                                    <segment label="Time" tag="1"/>
+                                    <segment label="Stress"/>
+                                </segments>
+                            </segmentedCell>
+                            <connections>
+                                <action selector="controlAction:" target="-2" id="9rn-kr-jen"/>
+                            </connections>
+                        </segmentedControl>
+                    </subviews>
                     <connections>
                         <outlet property="_controller" destination="-2" id="Lmb-dm-Gia"/>
                     </connections>
                 </customView>
                 <scrollView borderType="none" horizontalLineScroll="10" horizontalPageScroll="10" verticalLineScroll="10" verticalPageScroll="10" hasHorizontalScroller="NO" usesPredominantAxisScrolling="NO" horizontalScrollElasticity="none" id="pz9-jO-6Hk">
-                    <rect key="frame" x="0.0" y="30" width="473" height="361"/>
+                    <rect key="frame" x="0.0" y="0.0" width="473" height="404"/>
                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                     <clipView key="contentView" id="lbI-cU-0C3">
-                        <rect key="frame" x="0.0" y="0.0" width="473" height="361"/>
+                        <rect key="frame" x="0.0" y="0.0" width="473" height="404"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <customView id="A2q-Ju-lhh" customClass="ActWeekListView">
-                                <rect key="frame" x="0.0" y="0.0" width="473" height="361"/>
+                                <rect key="frame" x="0.0" y="0.0" width="473" height="404"/>
                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                 <connections>
                                     <outlet property="_controller" destination="-2" id="jHx-kV-X43"/>
@@ -48,18 +74,10 @@
                         <autoresizingMask key="autoresizingMask"/>
                     </scroller>
                     <scroller key="verticalScroller" verticalHuggingPriority="750" doubleValue="1" horizontal="NO" id="ude-xF-P6v">
-                        <rect key="frame" x="457" y="0.0" width="16" height="361"/>
+                        <rect key="frame" x="457" y="0.0" width="16" height="404"/>
                         <autoresizingMask key="autoresizingMask"/>
                     </scroller>
                 </scrollView>
-                <slider verticalHuggingPriority="750" id="Z2s-B1-M2S">
-                    <rect key="frame" x="313" y="7" width="140" height="15"/>
-                    <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxY="YES"/>
-                    <sliderCell key="cell" controlSize="mini" continuous="YES" state="on" alignment="left" maxValue="1" doubleValue="0.5" tickMarkPosition="above" sliderType="linear" id="m4E-TO-xRy"/>
-                    <connections>
-                        <action selector="controlAction:" target="-2" id="hPH-QP-rzF"/>
-                    </connections>
-                </slider>
             </subviews>
         </customView>
     </objects>

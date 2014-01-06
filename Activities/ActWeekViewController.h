@@ -27,16 +27,28 @@
 @class ActWeekListView, ActWeekHeaderView;
 @class ActWeekView_ActivityLayer;
 
+enum ActWeekViewDisplayMode
+{
+  ActWeekView_Distance,
+  ActWeekView_Duration,
+  ActWeekView_Points,
+};
+
 @interface ActWeekViewController : ActViewController
 {
   IBOutlet NSScrollView *_scrollView;
   IBOutlet ActWeekListView *_listView;
   IBOutlet ActWeekHeaderView *_headerView;
+  IBOutlet NSSegmentedControl *_displayModeControl;
   IBOutlet NSSlider *_scaleSlider;
+
+  int _displayMode;
 
   int _animationsEnabled;
   int _animationsDisabled;
 }
+
+@property(nonatomic) int displayMode;
 
 - (int)weekForActivityStorage:(const act::activity_storage_ref)storage;
 

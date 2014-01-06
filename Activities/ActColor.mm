@@ -104,6 +104,16 @@
   return color;
 }
 
++ (NSColor *)midControlBackgroundColor
+{
+  static NSColor *color;
+
+  if (color == nil)
+    color = [[NSColor colorWithCalibratedHue:BG_HUE saturation:.02 brightness:.935 alpha:1] retain];
+
+  return color;
+}
+
 + (NSArray *)controlAlternatingRowBackgroundColors
 {
   static NSArray *colors;

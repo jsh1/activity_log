@@ -62,9 +62,12 @@
 @interface ActWeekView_ScaledLayer : CALayer
 {
   CGFloat _interfaceScale;
+  int _displayMode;
 }
 
 @property CGFloat interfaceScale;
+@property(nonatomic) int displayMode;
+
 @end
 
 @interface ActWeekViewLayer : ActWeekView_ScaledLayer
@@ -88,12 +91,14 @@
 @interface ActWeekView_StatsLayer : CATextLayer
 {
   time_t _date;
+  int _displayMode;
   double _distance;
   double _duration;
   double _points;
 }
 
 @property(nonatomic) time_t date;
+@property(nonatomic) int displayMode;
 @property(nonatomic) double distance;
 @property(nonatomic) double duration;
 @property(nonatomic) double points;
@@ -162,18 +167,33 @@ date_for_week(int week)
   return week * SECONDS_PER_WEEK + (start_of_week - 4) * SECONDS_PER_DAY;
 }
 
-static double
-activity_radius(double dist, double dur, double pts)
+static CGFloat
+activity_radius(double dist, double dur, double pts, int displayMode)
 {
-  if (dist > 0)
-    return sqrt(dist * (1/M_PI)) * DIST_RADIUS_SCALE;
-  else if (dur > 0)
-    return sqrt(dur * (1/M_PI)) * DUR_RADIUS_SCALE;
-  else
-    return sqrt(pts * (1/M_PI)) * PTS_RADIUS_SCALE;
+  double value, scale;
+  if (displayMode == ActWeekView_Distance)
+    value = dist, scale = DIST_RADIUS_SCALE;
+  else if (displayMode == ActWeekView_Duration)
+    value = dur, scale = DUR_RADIUS_SCALE;
+  else /* if (displayMode == ActWeekView_Points) */
+    value = pts, scale = PTS_RADIUS_SCALE;
+
+  if (!(value > 0))
+    {
+      if (dist > 0)
+	value = dist, scale = DIST_RADIUS_SCALE;
+      else if (dur > 0)
+	value = dur, scale = DUR_RADIUS_SCALE;
+      else
+	value = pts, scale = PTS_RADIUS_SCALE;
+    }
+
+  return sqrt(value * (1/M_PI)) * scale;
 }
 
 @implementation ActWeekViewController
+
+@synthesize displayMode = _displayMode;
 
 + (NSString *)viewNibName
 {
@@ -302,14 +322,28 @@ activity_radius(double dist, double dur, double pts)
 {
   if (sender == _scaleSlider)
     {
-      _animationsDisabled = YES;
+      BOOL disableAnimations = YES;
+      switch ([[[[self view] window] currentEvent] type])
+	{
+	case NSLeftMouseDown:
+	case NSRightMouseDown:
+	case NSOtherMouseDown:
+	  disableAnimations = NO;
+	}
+
+      if (disableAnimations)
+	_animationsDisabled++;
 
       [_listView setNeedsDisplay:YES];
 
-      dispatch_async(dispatch_get_main_queue(), ^
-	{
-	  _animationsDisabled = NO;
-	});
+      if (disableAnimations)
+	dispatch_async(dispatch_get_main_queue(), ^{_animationsDisabled--;});
+    }
+  else if (sender == _displayModeControl)
+    {
+      _displayMode = [sender selectedSegment];
+
+      [_listView setNeedsDisplay:YES];
     }
 }
 
@@ -496,6 +530,8 @@ activity_radius(double dist, double dur, double pts)
   [new_sublayers release];
   [old_sublayers release];
 
+  [layer setBackgroundColor:[[ActColor midControlBackgroundColor] CGColor]];
+
   [self setPreparedContentRect:rect];
 }
 
@@ -633,22 +669,35 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
 - (void)drawRect:(NSRect)r
 {
   static NSGradient *grad;
+  static NSColor *separator_color;
+  static dispatch_once_t once;
 
-  if (grad == nil)
+  dispatch_once(&once, ^
     {
       grad = [[NSGradient alloc] initWithStartingColor:
-	      [ActColor controlBackgroundColor] endingColor:
-	      [ActColor darkControlBackgroundColor]];
-    }
+	      [ActColor darkControlBackgroundColor] endingColor:
+	      [ActColor controlBackgroundColor]];
+
+      separator_color = [[NSColor colorWithDeviceWhite:.80 alpha:1] retain];
+    });
 
   NSRect bounds = [self bounds];
 
   [grad drawInRect:bounds angle:90];
-}
 
-- (BOOL)isFlipped
-{
-  return YES;
+  // draw separator
+
+  NSRect subR;
+  subR.origin.x = bounds.origin.x;
+  subR.origin.y = bounds.origin.y + 1;
+  subR.size.width = bounds.size.width;
+  subR.size.height = 1;
+
+  [separator_color setFill];
+  [NSBezierPath fillRect:subR];
+  subR.origin.y -= 1;
+  [[ActColor whiteColor] setFill];
+  [NSBezierPath fillRect:subR];
 }
 
 - (BOOL)isOpaque
@@ -670,6 +719,20 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
   if (_interfaceScale != x)
     {
       _interfaceScale = x;
+      [self setNeedsLayout];
+    }
+}
+
+- (int)displayMode
+{
+  return _displayMode;
+}
+
+- (void)setDisplayMode:(int)x
+{
+  if (_displayMode != x)
+    {
+      _displayMode = x;
       [self setNeedsLayout];
     }
 }
@@ -771,8 +834,10 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
     }
 
   CGRect bounds = [self bounds];
+  int displayMode = [(ActWeekViewController *)[self delegate] displayMode];
 
   [_statsLayer setDate:_date];
+  [_statsLayer setDisplayMode:displayMode];
   [_statsLayer setDistance:distance];
   [_statsLayer setDuration:duration];
   [_statsLayer setPoints:points];
@@ -785,6 +850,7 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
   [_groupLayer setInterfaceScale:[self interfaceScale]];
   [_groupLayer setDate:_date];
   [_groupLayer setActivities:_activities];
+  [_groupLayer setDisplayMode:displayMode];
   CGFloat xoff = STATS_WIDTH + COLUMN_SPACING;
   [_groupLayer setFrame:CGRectMake(bounds.origin.x + xoff,
 	bounds.origin.y, bounds.size.width - xoff, bounds.size.height)];
@@ -813,6 +879,20 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
   if (_date != x)
     {
       _date = x;
+      [self setNeedsLayout];
+    }
+}
+
+- (int)displayMode
+{
+  return _displayMode;
+}
+
+- (void)setDisplayMode:(int)x
+{
+  if (_displayMode != x)
+    {
+      _displayMode = x;
       [self setNeedsLayout];
     }
 }
@@ -911,23 +991,44 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
 
   size_t date_len = [date_str length];
 
-  std::string rest;
-  act::format_distance(rest, _distance, act::unit_type::unknown);
-  rest.push_back('\n');
-
-  size_t main_len = rest.size();
+  std::string dist_str;
+  act::format_distance(dist_str, _distance, act::unit_type::unknown);
 
   int hours = floor(_duration / 3600);
   int mins = round((_duration - hours*3600) / 60);
   int pts = round(_points);
 
-  char buf[128];
-  if (pts != 0)
-    snprintf(buf, sizeof(buf), "%dh %02dm, %d pts", hours, mins, pts);
-  else
-    snprintf(buf, sizeof(buf), "%dh %02dm", hours, mins);
-  rest.append(buf);
+  char dur_buf[32];
+  snprintf(dur_buf, sizeof(dur_buf), "%dh %02dm", hours, mins);
 
+  char pts_buf[32];
+  snprintf(pts_buf, sizeof(pts_buf), "%d pts", pts);
+
+  std::string rest;
+
+  if (_displayMode == ActWeekView_Distance)
+    rest.append(dist_str);
+  else if (_displayMode == ActWeekView_Duration)
+    rest.append(dur_buf);
+  else
+    rest.append(pts_buf);
+
+  rest.push_back('\n');
+
+  size_t main_len = rest.size();
+
+  if (_displayMode == ActWeekView_Distance)
+    rest.append(dur_buf);
+  else
+    rest.append(dist_str);
+
+  rest.append(", ");
+
+  if (_displayMode == ActWeekView_Points)
+    rest.append(dur_buf);
+  else
+    rest.append(pts_buf);
+  
   size_t sub_len = rest.size() - main_len;
 
   NSString *str = [date_str stringByAppendingString:
@@ -945,7 +1046,7 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
 
 - (void)drawInContext:(CGContextRef)ctx
 {
-  CGContextSetFillColorWithColor(ctx, [[ActColor controlBackgroundColor] CGColor]);
+  CGContextSetFillColorWithColor(ctx, [[ActColor midControlBackgroundColor] CGColor]);
   CGContextFillRect(ctx, [self bounds]);
   CGContextSetShouldSmoothFonts(ctx, true);
   [super drawInContext:ctx];
@@ -1021,7 +1122,11 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
       CGFloat px = bounds.origin.x + floor(i * item_width + item_width * .5);
       CGFloat py = bounds.origin.y + floor(ROW_HEIGHT * .5);
 
-      [sublayer setPosition:CGPointMake(px, py)];
+      [(ActWeekViewController *)[self delegate] withAnimationsEnabled:^
+        {
+	  [sublayer setPosition:CGPointMake(px, py)];
+	}];
+
       [sublayer setContentsScale:[self contentsScale]];
 
       [new_sublayers addObject:sublayer];
@@ -1036,6 +1141,7 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
 	}
 
       [sublayer setActivities:day_vec];
+      [sublayer setDisplayMode:[self displayMode]];
       [sublayer setInterfaceScale:[self interfaceScale]];
 
       day_date = next_day_date;
@@ -1125,12 +1231,10 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
 
   CGFloat scale = [self interfaceScale];
 
-  CGFloat radius = round(activity_radius(dist, dur, pts) * scale);
+  CGFloat radius = activity_radius(dist, dur, pts, [self displayMode]);
+  radius = round(radius * scale);
   if (radius < MIN_RADIUS)
     radius = MIN_RADIUS;
-
-  [self setBounds:CGRectMake(0, 0, radius*2, radius*2)];
-  [self setCornerRadius:radius];
 
   if (_date != 0)
     {
@@ -1142,28 +1246,33 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
       _textLayer = nil;
     }
 
-  NSColor *c = nil;
+  NSColor *color = nil;
   if (_activities.size() == 1)
-    c = [ActColor activityColor:*_activities[0]];
+    color = [ActColor activityColor:*_activities[0]];
   else
-    c = [NSColor colorWithDeviceWhite:.5 alpha:1];
+    color = [NSColor colorWithDeviceWhite:.5 alpha:1];
+
+  NSColor *background_color = nil;
+  if (_activities.size() == 1)
+    background_color = [color blendedColorWithFraction:.6 ofColor:[NSColor whiteColor]];
+  else
+    background_color = [NSColor colorWithDeviceWhite:.85 alpha:1];
+
+  NSColor *border_color = nil;
+  if (!_selected)
+    border_color = color;
+  else
+    border_color = [ActColor alternateSelectedControlColor];
+  
+  BOOL shadowed = _expanded && _activities.size() == 1;
 
   [(ActWeekViewController *)[self delegate] withAnimationsEnabled:^
     {
-      [self setBorderColor:
-       [(!_selected ? c : [ActColor alternateSelectedControlColor]) CGColor]];
-      [self setBorderWidth:_selected ? 4 : _activities.size() == 1 ? 1.3 : 0];
-
-      if (_activities.size() == 1)
-	{
-	  NSColor *cc = [c blendedColorWithFraction:.5
-			 ofColor:[NSColor whiteColor]];
-	  [self setBackgroundColor:[cc CGColor]];
-	}
-      else
-	[self setBackgroundColor:[[NSColor colorWithDeviceWhite:.85 alpha:1] CGColor]];
-
-      BOOL shadowed = _expanded && _activities.size() == 1;
+      [self setBounds:CGRectMake(0, 0, radius*2, radius*2)];
+      [self setCornerRadius:radius];
+      [self setBackgroundColor:[background_color CGColor]];
+      [self setBorderColor:[border_color CGColor]];
+      [self setBorderWidth:_selected ? 4 : _activities.size() == 1 ? 1 : 0];
       [self setShadowOpacity:shadowed ? .5 : 0];
     }];
 
@@ -1177,8 +1286,10 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
 	  [_groupLayer setDelegate:[self delegate]];
 	  [self addSublayer:_groupLayer];
 	}
+
       [_groupLayer setInterfaceScale:scale];
       [_groupLayer setActivities:_activities];
+      [_groupLayer setDisplayMode:[self displayMode]];
       [_groupLayer setExpanded:_expanded];
       [_groupLayer setFrame:[self bounds]];
     }
@@ -1258,7 +1369,8 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
       double dur = _activities[i]->duration();
       double pts = _activities[i]->points();
 
-      CGFloat radius = round(activity_radius(dist, dur, pts) * scale);
+      CGFloat radius = activity_radius(dist, dur, pts, [self displayMode]);
+      radius = round(radius * scale);
       CGFloat ang = i * ang_step + M_PI;
       CGFloat hyp = bounds.size.width * .5 - radius * (_expanded ? .4 : 1);
       CGFloat px = cx + sin(ang) * hyp;
@@ -1270,6 +1382,7 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
 	}];
 
       [sublayer setInterfaceScale:scale];
+      [sublayer setDisplayMode:[self displayMode]];
       [sublayer setExpanded:_expanded];
       [sublayer setContentsScale:[self contentsScale]];
 
