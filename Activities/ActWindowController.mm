@@ -555,7 +555,7 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
 
   for (auto &it : items)
     {
-      _activityList.push_back(it->storage());
+      _activityList.push_back(*it);
 
       if (it->storage() == _selectedActivityStorage)
 	selection = YES;
@@ -579,12 +579,12 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
   [_sourceListView reloadData];
 }
 
-- (const std::vector<act::activity_storage_ref> &)activityList
+- (const std::vector<act::database::item> &)activityList
 {
   return _activityList;
 }
 
-- (void)setActivityList:(const std::vector<act::activity_storage_ref> &)vec
+- (void)setActivityList:(const std::vector<act::database::item> &)vec
 {
   _activityList = vec;
 
@@ -1078,11 +1078,13 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
   if (_selectedActivityStorage == nullptr)
     return [self firstActivity:sender];
 
-  auto it = std::find(_activityList.begin(), _activityList.end(),
-		      _selectedActivityStorage);
+  auto it = std::find_if(_activityList.begin(), _activityList.end(),
+			 [=] (const act::database::item &a) {
+			   return a.storage() == _selectedActivityStorage;
+			 });
 
   if (++it < _activityList.end())
-    [self setSelectedActivityStorage:*it];
+    [self setSelectedActivityStorage:it->storage()];
   else
     NSBeep();
 }
@@ -1094,11 +1096,13 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
   if (_selectedActivityStorage == nullptr)
     return [self lastActivity:sender];
 
-  auto it = std::find(_activityList.begin(), _activityList.end(),
-		      _selectedActivityStorage);
+  auto it = std::find_if(_activityList.begin(), _activityList.end(),
+			 [=] (const act::database::item &a) {
+			   return a.storage() == _selectedActivityStorage;
+			 });
 
   if (--it >= _activityList.begin())
-    [self setSelectedActivityStorage:*it];
+    [self setSelectedActivityStorage:it->storage()];
   else
     NSBeep();
 }
@@ -1108,7 +1112,7 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
   [self setWindowMode:ActWindowMode_Viewer];
 
   if (_activityList.size() > 0)
-    [self setSelectedActivityStorage:_activityList.front()];
+    [self setSelectedActivityStorage:_activityList.front().storage()];
 }
 
 - (IBAction)lastActivity:(id)sender
@@ -1116,7 +1120,7 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
   [self setWindowMode:ActWindowMode_Viewer];
 
   if (_activityList.size() > 0)
-    [self setSelectedActivityStorage:_activityList.back()];
+    [self setSelectedActivityStorage:_activityList.back().storage()];
 }
 
 - (IBAction)setListViewAction:(id)sender

@@ -74,22 +74,24 @@
   if (storage == nullptr)
     return NSNotFound;
 
-  const std::vector<act::activity_storage_ref> &activities
-    = [_controller activityList];
+  const std::vector<act::database::item> &vec = [_controller activityList];
 
-  const auto &pos = std::find(activities.begin(), activities.end(), storage);
+  const auto &pos = std::find_if(vec.begin(), vec.end(),
+				 [=] (const act::database::item &a) {
+				   return a.storage() == storage;
+				 });
 
-  if (pos != activities.end())
-    return pos - activities.begin();
+  if (pos != vec.end())
+    return pos - vec.begin();
   else
     return NSNotFound;
 }
 
 - (act::activity *)activityForRow:(NSInteger)row
 {
-  const std::vector<act::activity_storage_ref> vec
-    = [_controller activityList];
-  act::activity_storage_ref storage = vec[row];
+  const auto &vec = [_controller activityList];
+
+  act::activity_storage_ref storage = vec[row].storage();
 
   act::activity *a = _activity_cache[storage].get();
 
@@ -148,10 +150,7 @@
 
 - (NSInteger)numberOfRowsInTableView:(NSTableView *)tv
 {
-  const std::vector<act::activity_storage_ref> &activities
-    = [_controller activityList];
-
-  return activities.size();
+  return [_controller activityList].size();
 }
 
 - (id)tableView:(NSTableView *)tv
@@ -201,11 +200,10 @@
 - (void)tableViewSelectionDidChange:(NSNotification *)note
 {
   NSInteger row = [_tableView selectedRow];
-  const std::vector<act::activity_storage_ref> &activities
-    = [_controller activityList];
+  const auto &activities = [_controller activityList];
 
   if (row >= 0 && row < activities.size())
-    [_controller setSelectedActivityStorage:activities[row]];
+    [_controller setSelectedActivityStorage:activities[row].storage()];
   else
     [_controller setSelectedActivityStorage:nullptr];
 }

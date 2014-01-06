@@ -24,6 +24,15 @@
 
 #import <AppKit/AppKit.h>
 
+@interface NSView (ActAppKitExtensions)
+
+- (void)scrollRectToVisible:(NSRect)rect animated:(BOOL)flag;
+
+- (void)flashScrollersIfNeeded;
+
+@end
+
+
 @interface NSCell (ActAppKitExtensions)
 
 @property(getter=isVerticallyCentered) BOOL verticallyCentered;

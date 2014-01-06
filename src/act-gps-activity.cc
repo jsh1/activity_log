@@ -572,6 +572,7 @@ activity::smooth(const activity &src, int width)
   _total_elapsed_time = src._total_elapsed_time;
   _total_duration = src._total_duration;
   _total_distance = src._total_distance;
+  _training_effect = src._training_effect;
   _total_ascent = src._total_ascent;
   _total_descent = src._total_descent;
   _total_calories = src._total_calories;
@@ -622,6 +623,10 @@ activity::smooth(const activity &src, int width)
   point sum;
   int sum_n = 0;
   int i = 0;
+
+  /* FIXME: this doesn't handle non-uniform sample intervals. Normalize
+     to a stream of 1s intervals by holding previous samples as we process
+     the array? */
 
   while (s_in != src.end())
     {

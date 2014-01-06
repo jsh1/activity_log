@@ -45,8 +45,11 @@
 		571DBA0317BE6B6C0001514C /* libxml2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 571DB9FD17BE68090001514C /* libxml2.dylib */; };
 		5730789317C56820002C5B28 /* act-gps-chart.cc in Sources */ = {isa = PBXBuildFile; fileRef = 5730789117C56820002C5B28 /* act-gps-chart.cc */; };
 		5730789617C56E54002C5B28 /* ActChartViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = 5730789517C56E54002C5B28 /* ActChartViewController.mm */; };
-		5734E189181007EB007BDC1B /* ActColor.m in Sources */ = {isa = PBXBuildFile; fileRef = 5734E188181007EB007BDC1B /* ActColor.m */; };
+		5734E189181007EB007BDC1B /* ActColor.mm in Sources */ = {isa = PBXBuildFile; fileRef = 5734E188181007EB007BDC1B /* ActColor.mm */; };
 		5734E18C18103C5D007BDC1B /* ActAppKitExtensions.mm in Sources */ = {isa = PBXBuildFile; fileRef = 5734E18B18103C5D007BDC1B /* ActAppKitExtensions.mm */; };
+		5736AE56187752DC00EAE652 /* ActWeekView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 5736AE54187752DC00EAE652 /* ActWeekView.xib */; };
+		5736AE5918775A8100EAE652 /* ActWeekViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = 5736AE5818775A8100EAE652 /* ActWeekViewController.mm */; };
+		5736AE5B1878272700EAE652 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5736AE5A1878272700EAE652 /* QuartzCore.framework */; };
 		573ABAF71823FC05004FAF17 /* PXSourceList.m in Sources */ = {isa = PBXBuildFile; fileRef = 573ABAF41823FC05004FAF17 /* PXSourceList.m */; };
 		5755061E1824721D00A69209 /* ActSourceListDeviceItem.mm in Sources */ = {isa = PBXBuildFile; fileRef = 575506191824721D00A69209 /* ActSourceListDeviceItem.mm */; };
 		5755061F1824721D00A69209 /* ActSourceListItem.mm in Sources */ = {isa = PBXBuildFile; fileRef = 5755061B1824721D00A69209 /* ActSourceListItem.mm */; };
@@ -167,9 +170,13 @@
 		5730789417C56E54002C5B28 /* ActChartViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActChartViewController.h; sourceTree = "<group>"; };
 		5730789517C56E54002C5B28 /* ActChartViewController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ActChartViewController.mm; sourceTree = "<group>"; };
 		5734E187181007EB007BDC1B /* ActColor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActColor.h; sourceTree = "<group>"; };
-		5734E188181007EB007BDC1B /* ActColor.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ActColor.m; sourceTree = "<group>"; };
+		5734E188181007EB007BDC1B /* ActColor.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ActColor.mm; sourceTree = "<group>"; };
 		5734E18A18103C5D007BDC1B /* ActAppKitExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActAppKitExtensions.h; sourceTree = "<group>"; };
 		5734E18B18103C5D007BDC1B /* ActAppKitExtensions.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ActAppKitExtensions.mm; sourceTree = "<group>"; };
+		5736AE55187752DC00EAE652 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/ActWeekView.xib; sourceTree = "<group>"; };
+		5736AE5718775A8100EAE652 /* ActWeekViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActWeekViewController.h; sourceTree = "<group>"; };
+		5736AE5818775A8100EAE652 /* ActWeekViewController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ActWeekViewController.mm; sourceTree = "<group>"; };
+		5736AE5A1878272700EAE652 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		573ABAF31823FC05004FAF17 /* PXSourceList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PXSourceList.h; path = PXSourceList/PXSourceList.h; sourceTree = "<group>"; };
 		573ABAF41823FC05004FAF17 /* PXSourceList.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = PXSourceList.m; path = PXSourceList/PXSourceList.m; sourceTree = "<group>"; };
 		573ABAF51823FC05004FAF17 /* PXSourceListDataSource.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PXSourceListDataSource.h; path = PXSourceList/PXSourceListDataSource.h; sourceTree = "<group>"; };
@@ -247,6 +254,7 @@
 				571DB9FF17BE689D0001514C /* libact.a in Frameworks */,
 				571DB9AF17BE63AC0001514C /* AppKit.framework in Frameworks */,
 				571DB9B017BE63AF0001514C /* Foundation.framework in Frameworks */,
+				5736AE5B1878272700EAE652 /* QuartzCore.framework in Frameworks */,
 				570E6AD217F71B4F00A5BB4D /* libsqlite3.dylib in Frameworks */,
 				571DBA0317BE6B6C0001514C /* libxml2.dylib in Frameworks */,
 			);
@@ -288,6 +296,7 @@
 		571DB99117BE615C0001514C /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				5736AE5A1878272700EAE652 /* QuartzCore.framework */,
 				570E6AD117F71B4F00A5BB4D /* libsqlite3.dylib */,
 				571DB99517BE615C0001514C /* AppKit.framework */,
 				571DB99717BE615C0001514C /* Foundation.framework */,
@@ -325,6 +334,8 @@
 				571DB9B217BE66A60001514C /* ActListViewController.mm */,
 				57193D4417FDFC9D009634B4 /* ActNotesListViewController.h */,
 				57193D4517FDFC9D009634B4 /* ActNotesListViewController.mm */,
+				5736AE5718775A8100EAE652 /* ActWeekViewController.h */,
+				5736AE5818775A8100EAE652 /* ActWeekViewController.mm */,
 				57B51B0A180DFC63004F1A1D /* ActActivityViewController.h */,
 				57B51B0B180DFC63004F1A1D /* ActActivityViewController.mm */,
 				5730789417C56E54002C5B28 /* ActChartViewController.h */,
@@ -340,7 +351,7 @@
 				5769E6D81812D2DD00E3D801 /* ActCollapsibleView.h */,
 				5769E6D91812D2DD00E3D801 /* ActCollapsibleView.mm */,
 				5734E187181007EB007BDC1B /* ActColor.h */,
-				5734E188181007EB007BDC1B /* ActColor.m */,
+				5734E188181007EB007BDC1B /* ActColor.mm */,
 				579772E317C4F63900AA2E9D /* ActHeaderView.h */,
 				579772E417C4F63900AA2E9D /* ActHeaderView.mm */,
 				579772E617C4FB0A00AA2E9D /* ActHeaderFieldView.h */,
@@ -464,6 +475,7 @@
 				570E6AC217F473C600A5BB4D /* ActLapView.xib */,
 				570E6ACB17F47A9C00A5BB4D /* ActListView.xib */,
 				57193D4717FDFCAE009634B4 /* ActNotesListView.xib */,
+				5736AE54187752DC00EAE652 /* ActWeekView.xib */,
 				570E6ABF17F472E800A5BB4D /* ActMapView.xib */,
 				570E6AC517F474F700A5BB4D /* ActSummaryView.xib */,
 			);
@@ -568,6 +580,7 @@
 				57DB7BB217E0D4790093C735 /* opencyclemap-tiles.json in Resources */,
 				57E44D211822D70E006A58B4 /* ActImporterView.xib in Resources */,
 				57193D521801A514009634B4 /* ActHeaderView.xib in Resources */,
+				5736AE56187752DC00EAE652 /* ActWeekView.xib in Resources */,
 				57DB7BB317E0D4790093C735 /* openstreetmap-tiles.json in Resources */,
 				57193D4917FDFCAE009634B4 /* ActNotesListView.xib in Resources */,
 				570E6AC717F474F700A5BB4D /* ActSummaryView.xib in Resources */,
@@ -605,12 +618,13 @@
 				57707AE817DFBC4C009BAC5D /* ActMapSource.mm in Sources */,
 				57707AE917DFBC4C009BAC5D /* ActMapView.mm in Sources */,
 				57707AEA17DFBC4C009BAC5D /* ActTileJSONMapSource.mm in Sources */,
+				5736AE5918775A8100EAE652 /* ActWeekViewController.mm in Sources */,
 				57707AED17DFBF99009BAC5D /* ActMapViewController.mm in Sources */,
 				5755061F1824721D00A69209 /* ActSourceListItem.mm in Sources */,
 				578D797A17E75DE300E50C29 /* ActSummaryViewController.mm in Sources */,
 				570E6AD017F717FB00A5BB4D /* ActURLCache.m in Sources */,
 				575506201824721D00A69209 /* ActSourceListQueryItem.mm in Sources */,
-				5734E189181007EB007BDC1B /* ActColor.m in Sources */,
+				5734E189181007EB007BDC1B /* ActColor.mm in Sources */,
 				570E6ABE17F4711500A5BB4D /* ActViewController.mm in Sources */,
 				578D797D17E7671000E50C29 /* ActHorizontalBoxView.mm in Sources */,
 				57193D4617FDFC9D009634B4 /* ActNotesListViewController.mm in Sources */,
@@ -726,6 +740,14 @@
 				571DB9A817BE615C0001514C /* en */,
 			);
 			name = MainMenu.xib;
+			sourceTree = "<group>";
+		};
+		5736AE54187752DC00EAE652 /* ActWeekView.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				5736AE55187752DC00EAE652 /* en */,
+			);
+			name = ActWeekView.xib;
 			sourceTree = "<group>";
 		};
 		57921A5517BEAEF0001AD35D /* ActWindow.xib */ = {

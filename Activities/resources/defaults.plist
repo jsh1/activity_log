@@ -57,5 +57,33 @@
 	</array>
 	<key>ActDefaultMapSource</key>
 	<string>OpenCycleMap</string>
+
+	<key>ActActivityColors</key>
+	<dict>
+		<key>run/easy</key>
+		<string>.33 .82 .03</string>
+		<key>run/easy+strides</key>
+		<string>.49 .82 .02</string>
+		<key>run/easy+hills</key>
+		<string>.49 .82 .02</string>
+		<key>run/recovery</key>
+		<string>.26 .65 .02</string>
+		<key>run/trail</key>
+		<string>.59 .41 .11</string>
+		<key>run/long</key>
+		<string>.30 .69 1</string>
+		<key>run/medium</key>
+		<string>.85 .82 .02</string>
+		<key>run/tempo</key>
+		<string>1 .5 0</string>
+		<key>run/fartlek</key>
+		<string>.70 .17 .95</string>
+		<key>run/hill</key>
+		<string>.70 .17 .95</string>
+		<key>run/interval</key>
+		<string>.90 0 .89</string>
+		<key>run/race</key>
+		<string>.87 0 .02</string>
+	</dict>
 </dict>
 </plist>

@@ -57,13 +57,14 @@ public:
 
     public:
       item();
-      item(const item &rhs);
+      item(const item &rhs) = default;
 
       time_t date() const {return _date;}
 
-      activity_storage_ref storage() {return _storage;}
-      const_activity_storage_ref storage() const {
-	return std::const_pointer_cast<const activity_storage> (_storage);}
+      activity_storage_ref storage() const {return _storage;}
+
+      bool operator==(const item &rhs) const;
+      bool operator!=(const item &rhs) const;
     };
 
   const std::vector<item> &items() const;
@@ -237,17 +238,22 @@ database::item::item()
 {
 }
 
-inline
-database::item::item(const item &rhs)
-: _date(rhs._date),
-  _storage(new act::activity_storage(*rhs._storage.get()))
-{
-}
-
 inline const std::vector<database::item> &
 database::items() const
 {
   return _items;
+}
+
+inline bool
+database::item::operator==(const item &rhs) const
+{
+  return _date == rhs._date;
+}
+
+inline bool
+database::item::operator!=(const item &rhs) const
+{
+  return _date != rhs._date;
 }
 
 } // namespace act

@@ -119,4 +119,54 @@
   return colors;
 }
 
++ (NSColor *)activityColor:(const act::activity &)activity
+{
+  static NSDictionary *colors;
+  static dispatch_once_t once;
+
+  dispatch_once(&once, ^
+    {
+      NSDictionary *strings = [[NSUserDefaults standardUserDefaults]
+			       objectForKey:@"ActActivityColors"];
+      NSMutableDictionary *dict = [NSMutableDictionary dictionary];
+
+      for (NSString *name in strings)
+	{
+	  NSString *desc = [strings objectForKey:name];
+	  NSArray *strings = [desc componentsSeparatedByCharactersInSet:
+			      [NSCharacterSet whitespaceCharacterSet]];
+	  if ([strings count] == 3)
+	    {
+	      CGFloat red = [[strings objectAtIndex:0] doubleValue];
+	      CGFloat green = [[strings objectAtIndex:1] doubleValue];
+	      CGFloat blue = [[strings objectAtIndex:2] doubleValue];
+	      NSColor *c = [NSColor colorWithDeviceRed:red green:green
+			    blue:blue alpha:1];
+	      [dict setObject:c forKey:name];
+	    }
+	}
+
+      colors = [dict copy];
+    });
+
+  const std::string *type1 = activity.field_ptr("activity");
+  const std::string *type2 = activity.field_ptr("type");
+
+  std::string type;
+
+  if (type1 != nullptr)
+    type.append(*type1);
+  if (type1 != nullptr && type2 != nullptr)
+    type.push_back('/');
+  if (type2 != nullptr)
+    type.append(*type2);
+
+  NSColor *c = [colors objectForKey:
+		[NSString stringWithUTF8String:type.c_str()]];
+  if (c == nil)
+    c = [NSColor colorWithDeviceWhite:.5 alpha:1];
+
+  return c;
+}
+
 @end

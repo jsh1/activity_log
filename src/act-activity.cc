@@ -57,9 +57,13 @@ activity::validate_cached_values(unsigned int groups) const
 
       const config &cfg = shared_config();
 
-      if (groups & group_timing)
+      if (groups & group_date)
 	{
 	  _date = 0;
+	}
+
+      if (groups & group_timing)
+	{
 	  _duration = 0;
 	  _distance = 0;
 	  _distance_unit = cfg.default_distance_unit();
@@ -116,11 +120,17 @@ activity::validate_cached_values(unsigned int groups) const
 
       bool use_gps = false;
 
-      if (groups & group_timing)
+      if (groups & group_date)
 	{
 	  if (const std::string *s = field_ptr("date"))
 	    parse_date_time(*s, &_date, nullptr);
 
+	  if (_date == 0)
+	    use_gps = true;
+	}
+
+      if (groups & group_timing)
+	{
 	  if (const std::string *s = field_ptr("duration"))
 	    parse_duration(*s, &_duration);
 
@@ -131,9 +141,6 @@ activity::validate_cached_values(unsigned int groups) const
 	    parse_pace(*s, &_speed, &_speed_unit);
 	  else if (const std::string *s = field_ptr("speed"))
 	    parse_speed(*s, &_speed, &_speed_unit);
-
-	  if (_date == 0)
-	    use_gps = true;
 
 	  if (_duration != 0 + _distance != 0 + _speed != 0 < 2)
 	    use_gps = true;
@@ -226,10 +233,14 @@ activity::validate_cached_values(unsigned int groups) const
 	{
 	  if (const gps::activity *data = gps_data())
 	    {
-	      if (groups & group_timing)
+	      if (groups & group_date)
 		{
 		  if (_date == 0)
 		    _date = (time_t) data->start_time();
+		}
+
+	      if (groups & group_timing)
+		{
 		  if (_duration == 0)
 		    _duration = data->total_duration();
 		  if (_distance == 0)
@@ -407,7 +418,7 @@ activity::field_unit(field_id id) const
 time_t
 activity::date() const
 {
-  validate_cached_values(group_timing);
+  validate_cached_values(group_date);
   return _date;
 }
 

@@ -73,7 +73,7 @@ enum ActWindowMode
   std::unique_ptr<act::database> _database;
   BOOL _needsSynchronize;
 
-  std::vector<act::activity_storage_ref> _activityList;
+  std::vector<act::database::item> _activityList;
   act::activity_storage_ref _selectedActivityStorage;
   std::unique_ptr<act::activity> _selectedActivity;
   NSInteger _selectedLapIndex;
@@ -92,7 +92,7 @@ enum ActWindowMode
 - (void)synchronize;
 - (void)synchronizeIfNeeded;
 
-@property(nonatomic) const std::vector<act::activity_storage_ref> &activityList;
+@property(nonatomic) const std::vector<act::database::item> &activityList;
 @property(nonatomic) act::activity_storage_ref selectedActivityStorage;
 @property(nonatomic, readonly) act::activity *selectedActivity;
 @property(nonatomic) NSInteger selectedLapIndex;

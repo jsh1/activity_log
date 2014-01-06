@@ -22,24 +22,48 @@
    CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
    SOFTWARE. */
 
-#import <AppKit/NSColor.h>
+#import "ActViewController.h"
 
-#import "act-activity.h"
+@class ActWeekListView, ActWeekHeaderView;
+@class ActWeekView_ActivityLayer;
 
-@interface ActColor : NSColor
+@interface ActWeekViewController : ActViewController
+{
+  IBOutlet NSScrollView *_scrollView;
+  IBOutlet ActWeekListView *_listView;
+  IBOutlet ActWeekHeaderView *_headerView;
+  IBOutlet NSSlider *_scaleSlider;
 
-+ (NSColor *)controlTextColor;
-+ (NSColor *)disabledControlTextColor;
-+ (NSColor *)controlTextColor:(BOOL)disabled;
+  int _animationsEnabled;
+  int _animationsDisabled;
+}
 
-+ (NSColor *)controlDetailTextColor;
-+ (NSColor *)disabledControlDetailTextColor;
-+ (NSColor *)controlDetailTextColor:(BOOL)disabled;
+- (int)weekForActivityStorage:(const act::activity_storage_ref)storage;
 
-+ (NSColor *)controlBackgroundColor;
-+ (NSColor *)darkControlBackgroundColor;
-+ (NSArray *)controlAlternatingRowBackgroundColors;
+- (IBAction)controlAction:(id)sender;
 
-+ (NSColor *)activityColor:(const act::activity &)activity;
+@end
 
+@interface ActWeekListView : NSView
+{
+  IBOutlet ActWeekViewController *_controller;
+
+  NSRange _weekRange;
+
+  NSTrackingArea *_trackingArea;
+  ActWeekView_ActivityLayer *_expandedLayer;
+  ActWeekView_ActivityLayer *_selectedLayer;
+}
+
+@property(nonatomic) NSRange weekRange;
+
+- (NSRect)rectForWeek:(int)week;
+- (NSRect)visibleRectForWeek:(int)week;
+
+@end
+
+@interface ActWeekHeaderView : NSView
+{
+  IBOutlet ActWeekViewController *_controller;
+}
 @end

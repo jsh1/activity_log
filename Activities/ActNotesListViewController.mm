@@ -308,13 +308,12 @@
 
 - (void)activityListDidChange:(NSNotification *)note
 {
-  const std::vector<act::activity_storage_ref> &activities
-    = [_controller activityList];
+  const auto &activities = [_controller activityList];
 
   _activities.clear();
 
   for (const auto &it : activities)
-    _activities.emplace_back(it);
+    _activities.emplace_back(it.storage());
 
   [self updateListViewBounds];
   [self updateHeaderItemIndex];

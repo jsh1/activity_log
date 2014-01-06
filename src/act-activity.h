@@ -133,11 +133,12 @@ private:
 
   enum field_groups
     {
-      group_timing = 1U << 0,
-      group_physiological = 1U << 1,
-      group_gps_extended = 1U << 2,
-      group_dynamics = 1U << 3,
-      group_other = 1U << 4,
+      group_date = 1U << 0,
+      group_timing = 1U << 1,
+      group_physiological = 1U << 2,
+      group_gps_extended = 1U << 3,
+      group_dynamics = 1U << 4,
+      group_other = 1U << 5,
       group_all = 0xffU,
     };
 

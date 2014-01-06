@@ -28,6 +28,7 @@
 #import "ActListViewController.h"
 #import "ActNotesListViewController.h"
 #import "ActSplitView.h"
+#import "ActWeekViewController.h"
 #import "ActWindowController.h"
 
 @implementation ActViewerViewController
@@ -51,6 +52,12 @@
     }
 
   if (ActViewController *obj = [[ActNotesListViewController alloc]
+				initWithController:_controller options:nil])
+    {
+      [self addSubviewController:obj];
+    }
+
+  if (ActViewController *obj = [[ActWeekViewController alloc]
 				initWithController:_controller options:nil])
     {
       [self addSubviewController:obj];
@@ -90,7 +97,10 @@
 	   [_controller selectedActivityStorage] ? NO : YES];
 	}
       else
-	[controller addToContainerView:_listContainer];
+	{
+	  [[controller view] setHidden:YES];
+	  [controller addToContainerView:_listContainer];
+	}
     }
 
   if (_listViewType < 0)
@@ -103,11 +113,22 @@
   [super dealloc];
 }
 
+static Class
+listViewControllerClass(int type)
+{
+  if (type == 0)
+    return [ActNotesListViewController class];
+  else if (type == 1)
+    return [ActWeekViewController class];
+  else if (type == 2)
+    return [ActListViewController class];
+  else
+    return nil;
+}
+
 - (NSView *)initialFirstResponder
 {
-  Class cls = (_listViewType == 0
-	       ? [ActNotesListViewController class]
-	       : [ActListViewController class]);
+  Class cls = listViewControllerClass(_listViewType);
 
   return [[self viewControllerWithClass:cls] initialFirstResponder];
 }
@@ -118,13 +139,11 @@
     {
       NSWindow *window = [[self view] window];
 
-      ActViewController *list = [self viewControllerWithClass:
-				 [ActListViewController class]];
-      ActViewController *notes = [self viewControllerWithClass:
-				  [ActNotesListViewController class]];
+      ActViewController *old_cls = listViewControllerClass(_listViewType);
+      ActViewController *new_cls = listViewControllerClass(type);
 
-      ActViewController *oldC = type == 0 ? list : notes;
-      ActViewController *newC = type == 1 ? list : notes;
+      ActViewController *oldC = [self viewControllerWithClass:old_cls];
+      ActViewController *newC = [self viewControllerWithClass:new_cls];
 
       NSResponder *first = [window firstResponder];
 
