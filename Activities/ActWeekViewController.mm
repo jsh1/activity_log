@@ -36,13 +36,13 @@
 
 #import <QuartzCore/CoreAnimation.h>
 
-#define ROW_HEIGHT 90
+#define ROW_HEIGHT 80
 #define STATS_WIDTH 100
-#define COLUMN_SPACING 10
-#define LEFT_BORDER 8
-#define RIGHT_BORDER 20
+#define COLUMN_SPACING 2
+#define LEFT_BORDER 10
+#define RIGHT_BORDER 15
 #define STATS_X_INSET 0
-#define STATS_Y_INSET 16
+#define STATS_Y_INSET 11
 #define STATS_DATE_FONT_SIZE 12
 #define STATS_MAIN_FONT_SIZE 24
 #define STATS_SUB_FONT_SIZE 12
@@ -739,8 +739,11 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
 
 	  if (vec.size() == 1)
 	    {
-	      [[_controller controller]
-	       setSelectedActivityStorage:vec[0]->storage()];
+	      ActWindowController *c = [_controller controller];
+	      if ([c selectedActivityStorage] != vec[0]->storage())
+		[c setSelectedActivityStorage:vec[0]->storage()];
+	      else
+		[c setSelectedActivityStorage:nullptr];
 	      break;
 	    }
 	}
@@ -881,12 +884,15 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
   subR.origin.y = bounds.origin.y + HEADER_DAY_Y;
   subR.size.height = HEADER_DAY_HEIGHT;
 
+  int start_of_week = act::shared_config().start_of_week();
+
   for (int i = 0; i < 7; i++)
     {
       subR.origin.x = dlx + dw * i;
       subR.size.width = dw;
 
-      [[[date_formatter shortWeekdaySymbols] objectAtIndex:i]
+      int di = (i + start_of_week) % 7;
+      [[[date_formatter shortWeekdaySymbols] objectAtIndex:di]
        drawInRect:subR withAttributes:day_attrs];
     }
 
@@ -1246,6 +1252,7 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
   [astr setAttributes:sub_attrs range:NSMakeRange(date_len + main_len, sub_len)];
 
   [self setString:astr];
+  [astr release];
 }
 
 - (void)drawInContext:(CGContextRef)ctx
