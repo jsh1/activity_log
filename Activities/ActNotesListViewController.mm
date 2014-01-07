@@ -25,6 +25,7 @@
 #import "ActNotesListViewController.h"
 
 #import "ActAppDelegate.h"
+#import "ActAppKitExtensions.h"
 #import "ActColor.h"
 #import "ActWindowController.h"
 
@@ -448,6 +449,20 @@
     }
 }
 
+- (void)scrollPageUpAnimated:(BOOL)flag
+{
+  NSRect rect = [self visibleRect];
+  rect.origin.y -= rect.size.height;
+  [self scrollRectToVisible:rect animated:flag];
+}
+
+- (void)scrollPageDownAnimated:(BOOL)flag
+{
+  NSRect rect = [self visibleRect];
+  rect.origin.y += rect.size.height;
+  [self scrollRectToVisible:rect animated:flag];
+}
+
 - (BOOL)isFlipped
 {
   return YES;
@@ -477,24 +492,41 @@
 
 - (void)keyDown:(NSEvent *)e
 {
-  switch ([e keyCode])
+  NSString *chars = [e charactersIgnoringModifiers];
+
+  if ([chars length] == 1)
     {
-    case 125:
-      [[_controller controller] nextActivity:_controller];
-      return;
+      switch ([chars characterAtIndex:0])
+	{
+	case NSDownArrowFunctionKey:
+	  [[_controller controller] nextActivity:_controller];
+	  return;
 
-    case 126:
-      [[_controller controller] previousActivity:_controller];
-      return;
+	case NSUpArrowFunctionKey:
+	  [[_controller controller] previousActivity:_controller];
+	  return;
 
-    case 115:
-      [[_controller controller] firstActivity:_controller];
-      return;
+	case NSHomeFunctionKey:
+	  [[_controller controller] firstActivity:_controller];
+	  return;
 
-    case 119:
-      [[_controller controller] lastActivity:_controller];
-      return;
+	case NSEndFunctionKey:
+	  [[_controller controller] lastActivity:_controller];
+	  return;
+
+	case NSPageUpFunctionKey:
+	  [self scrollPageUpAnimated:NO];
+	  [self flashScrollersIfNeeded];
+	  return;
+
+	case NSPageDownFunctionKey:
+	  [self scrollPageDownAnimated:NO];
+	  [self flashScrollersIfNeeded];
+	  return;
+	}
     }
+
+  [super keyDown:e];
 }
 
 - (void)mouseDown:(NSEvent *)e
