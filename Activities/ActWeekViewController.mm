@@ -243,6 +243,11 @@ activity_radius(double dist, double dur, double pts, int displayMode)
   [_scaleSlider setDoubleValue:_interfaceScale];
 }
 
+- (void)viewWillAppear
+{
+  [_listView setNeedsDisplay:YES];
+}
+
 - (void)dealloc
 {
   [[NSNotificationCenter defaultCenter] removeObserver:self];
@@ -452,11 +457,6 @@ activity_radius(double dist, double dur, double pts, int displayMode)
   return nil;
 }
 
-- (BOOL)wantsUpdateLayer
-{
-  return YES;
-}
-
 - (void)updateFrameSize
 {
   NSRect frame = [self frame];
@@ -565,8 +565,6 @@ activity_radius(double dist, double dur, double pts, int displayMode)
   [old_sublayers release];
 
   [layer setBackgroundColor:[[ActColor midControlBackgroundColor] CGColor]];
-
-  [self setPreparedContentRect:rect];
 }
 
 static ActWeekView_ActivityLayer *
@@ -612,9 +610,18 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
     }
 }
 
-- (void)updateLayer
+- (BOOL)wantsUpdateLayer
+{
+  return YES;
+}
+
+- (void)layout
 {
   [self updateFrameSize];
+}
+
+- (void)updateLayer
+{
   [self updateLayersForRect:[self visibleRect]];
   [self updateSelectionState];
 }
@@ -627,6 +634,62 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
 - (BOOL)isOpaque
 {
   return YES;
+}
+
+- (BOOL)acceptsFirstResponder
+{
+  return YES;
+}
+
+- (BOOL)becomeFirstResponder
+{
+  [self setNeedsDisplay:YES];
+  return YES;
+}
+
+- (BOOL)resignFirstResponder
+{
+  [self setNeedsDisplay:YES];
+  return YES;
+}
+
+- (void)keyDown:(NSEvent *)e
+{
+  NSString *chars = [e charactersIgnoringModifiers];
+
+  if ([chars length] == 1)
+    {
+      switch ([chars characterAtIndex:0])
+	{
+	case NSLeftArrowFunctionKey:
+	  [[_controller controller] nextActivity:_controller];
+	  return;
+
+	case NSRightArrowFunctionKey:
+	  [[_controller controller] previousActivity:_controller];
+	  return;
+
+	case NSHomeFunctionKey:
+	  [[_controller controller] firstActivity:_controller];
+	  return;
+
+	case NSEndFunctionKey:
+	  [[_controller controller] lastActivity:_controller];
+	  return;
+
+#if 0
+	case NSPageUpFunctionKey:
+	  [self scrollPageUpAnimated:NO];
+	  [self flashScrollersIfNeeded];
+	  return;
+
+	case NSPageDownFunctionKey:
+	  [self scrollPageDownAnimated:NO];
+	  [self flashScrollersIfNeeded];
+	  return;
+#endif
+	}
+    }
 }
 
 - (void)mouseDown:(NSEvent *)e
