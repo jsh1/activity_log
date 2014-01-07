@@ -64,14 +64,14 @@ public:
     {
       double timestamp;
       location location;
-      double altitude;
-      double distance;
-      double speed;
-      double heart_rate;
-      double cadence;
-      double vertical_oscillation;
-      double stance_time;		/* aka ground contact time */
-      double stance_ratio;
+      float altitude;
+      float distance;
+      float speed;
+      float heart_rate;
+      float cadence;
+      float vertical_oscillation;
+      float stance_time;		/* aka ground contact time */
+      float stance_ratio;
 
       point()
       : timestamp(0), altitude(0), distance(0), speed(0), heart_rate(0),
@@ -84,27 +84,27 @@ public:
 
       void add(const point &x);
       void sub(const point &x);
-      void mul(double x);
+      void mul(float x);
     };
 
   struct lap
     {
       double start_time;
-      double total_elapsed_time;
-      double total_duration;
-      double total_distance;
-      double total_ascent;
-      double total_descent;
-      double total_calories;
-      double avg_speed;
-      double max_speed;
-      double avg_heart_rate;
-      double max_heart_rate;
-      double avg_cadence;
-      double max_cadence;
-      double avg_vertical_oscillation;
-      double avg_stance_time;
-      double avg_stance_ratio;
+      float total_elapsed_time;
+      float total_duration;
+      float total_distance;
+      float total_ascent;
+      float total_descent;
+      float total_calories;
+      float avg_speed;
+      float max_speed;
+      float avg_heart_rate;
+      float max_heart_rate;
+      float avg_cadence;
+      float max_cadence;
+      float avg_vertical_oscillation;
+      float avg_stance_time;
+      float avg_stance_ratio;
       std::vector<point> track;
       location_region region;
 
@@ -161,22 +161,22 @@ private:
   std::string _device;
 
   double _start_time;
-  double _total_elapsed_time;
-  double _total_duration;
-  double _total_distance;
-  double _training_effect;
-  double _total_ascent;
-  double _total_descent;
-  double _total_calories;
-  double _avg_speed;
-  double _max_speed;
-  double _avg_heart_rate;
-  double _max_heart_rate;
-  double _avg_cadence;
-  double _max_cadence;
-  double _avg_vertical_oscillation;
-  double _avg_stance_time;
-  double _avg_stance_ratio;
+  float _total_elapsed_time;
+  float _total_duration;
+  float _total_distance;
+  float _training_effect;
+  float _total_ascent;
+  float _total_descent;
+  float _total_calories;
+  float _avg_speed;
+  float _max_speed;
+  float _avg_heart_rate;
+  float _max_heart_rate;
+  float _avg_cadence;
+  float _max_cadence;
+  float _avg_vertical_oscillation;
+  float _avg_stance_time;
+  float _avg_stance_ratio;
 
   std::vector<lap> _laps;
 
@@ -228,53 +228,53 @@ public:
   void set_start_time(double x) {_start_time = x;}
   double start_time() const {return _start_time;}
 
-  void set_total_elapsed_time(double x) {_total_elapsed_time = x;}
-  double total_elapsed_time() const {return _total_elapsed_time;}
+  void set_total_elapsed_time(float x) {_total_elapsed_time = x;}
+  float total_elapsed_time() const {return _total_elapsed_time;}
 
-  void set_total_duration(double x) {_total_duration = x;}
-  double total_duration() const {return _total_duration;}
+  void set_total_duration(float x) {_total_duration = x;}
+  float total_duration() const {return _total_duration;}
 
-  void set_total_distance(double x) {_total_distance = x;}
-  double total_distance() const {return _total_distance;}
+  void set_total_distance(float x) {_total_distance = x;}
+  float total_distance() const {return _total_distance;}
 
-  void set_training_effect(double x) {_training_effect = x;}
-  double training_effect() const {return _training_effect;}
+  void set_training_effect(float x) {_training_effect = x;}
+  float training_effect() const {return _training_effect;}
 
-  void set_total_ascent(double x) {_total_ascent = x;}
-  double total_ascent() const {return _total_ascent;}
+  void set_total_ascent(float x) {_total_ascent = x;}
+  float total_ascent() const {return _total_ascent;}
 
-  void set_total_descent(double x) {_total_descent = x;}
-  double total_descent() const {return _total_descent;}
+  void set_total_descent(float x) {_total_descent = x;}
+  float total_descent() const {return _total_descent;}
 
-  void set_total_calories(double x) {_total_calories = x;}
-  double total_calories() const {return _total_calories;}
+  void set_total_calories(float x) {_total_calories = x;}
+  float total_calories() const {return _total_calories;}
 
-  void set_avg_speed(double x) {_avg_speed = x;}
-  double avg_speed() const {return _avg_speed;}
+  void set_avg_speed(float x) {_avg_speed = x;}
+  float avg_speed() const {return _avg_speed;}
 
-  void set_max_speed(double x) {_max_speed = x;}
-  double max_speed() const {return _max_speed;}
+  void set_max_speed(float x) {_max_speed = x;}
+  float max_speed() const {return _max_speed;}
 
-  void set_avg_heart_rate(double x) {_avg_heart_rate = x;}
-  double avg_heart_rate() const {return _avg_heart_rate;}
+  void set_avg_heart_rate(float x) {_avg_heart_rate = x;}
+  float avg_heart_rate() const {return _avg_heart_rate;}
 
-  void set_max_heart_rate(double x) {_max_heart_rate = x;}
-  double max_heart_rate() const {return _max_heart_rate;}
+  void set_max_heart_rate(float x) {_max_heart_rate = x;}
+  float max_heart_rate() const {return _max_heart_rate;}
 
-  void set_avg_cadence(double x) {_avg_cadence = x;}
-  double avg_cadence() const {return _avg_cadence;}
+  void set_avg_cadence(float x) {_avg_cadence = x;}
+  float avg_cadence() const {return _avg_cadence;}
 
-  void set_max_cadence(double x) {_max_cadence = x;}
-  double max_cadence() const {return _max_cadence;}
+  void set_max_cadence(float x) {_max_cadence = x;}
+  float max_cadence() const {return _max_cadence;}
 
-  void set_avg_vertical_oscillation(double x) {_avg_vertical_oscillation = x;}
-  double avg_vertical_oscillation() const {return _avg_vertical_oscillation;}
+  void set_avg_vertical_oscillation(float x) {_avg_vertical_oscillation = x;}
+  float avg_vertical_oscillation() const {return _avg_vertical_oscillation;}
 
-  void set_avg_stance_time(double x) {_avg_stance_time = x;}
-  double avg_stance_time() const {return _avg_stance_time;}
+  void set_avg_stance_time(float x) {_avg_stance_time = x;}
+  float avg_stance_time() const {return _avg_stance_time;}
 
-  void set_avg_stance_ratio(double x) {_avg_stance_ratio = x;}
-  double avg_stance_ratio() const {return _avg_stance_ratio;}
+  void set_avg_stance_ratio(float x) {_avg_stance_ratio = x;}
+  float avg_stance_ratio() const {return _avg_stance_ratio;}
 
   std::vector<lap> &laps() {return _laps;}
   const std::vector<lap> &laps() const {return _laps;}
@@ -487,7 +487,7 @@ activity::cend() const
 } // namespace gps
 
 void mix(gps::activity::point &a, const gps::activity::point &b,
-  const gps::activity::point &c, double f);
+  const gps::activity::point &c, float f);
 
 } // namespace act
 

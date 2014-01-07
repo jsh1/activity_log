@@ -345,41 +345,41 @@ activity::point::field_function(point_field field)
   switch (field)
     {
     case point_field::timestamp:
-      return [] (const point *p) {return p->timestamp;};
+      return [] (const point *p) -> double {return p->timestamp;};
 
     case point_field::altitude:
-      return [] (const point *p) {return p->altitude;};
+      return [] (const point *p) -> double {return p->altitude;};
 
     case point_field::distance:
-      return [] (const point *p) {return p->distance;};
+      return [] (const point *p) -> double {return p->distance;};
 
     case point_field::speed:
-      return [] (const point *p) {return p->speed;};
+      return [] (const point *p) -> double {return p->speed;};
 
     case point_field::pace:
-      return [] (const point *p) {return 1 / p->speed;};
+      return [] (const point *p) -> double {return 1 / p->speed;};
 
     case point_field::heart_rate:
-      return [] (const point *p) {return p->heart_rate;};
+      return [] (const point *p) -> double {return p->heart_rate;};
 
     case point_field::cadence:
-      return [] (const point *p) {return p->cadence;};
+      return [] (const point *p) -> double {return p->cadence;};
 
     case point_field::vertical_oscillation:
-      return [] (const point *p) {return p->vertical_oscillation;};
+      return [] (const point *p) -> double {return p->vertical_oscillation;};
 
     case point_field::stance_time:
-      return [] (const point *p) {return p->stance_time;};
+      return [] (const point *p) -> double {return p->stance_time;};
 
     case point_field::stance_ratio:
-      return [] (const point *p) {return p->stance_ratio;};
+      return [] (const point *p) -> double {return p->stance_ratio;};
 
     case point_field::stride_length:
-      return [] (const point *p) {
+      return [] (const point *p) -> double {
 	return p->cadence != 0 ? p->speed / (p->cadence * (1/60.)) : 0;};
 
     case point_field::efficiency:
-      return [] (const point *p) {
+      return [] (const point *p) -> double {
 	return p->speed != 0 ? (p->heart_rate * (1/60.)) / p->speed : 0;};
 
     default:
@@ -420,7 +420,7 @@ activity::point::sub(const point &x)
 }
 
 void
-activity::point::mul(double x)
+activity::point::mul(float x)
 {
   timestamp *= x;
   location.latitude *= x;
@@ -686,7 +686,7 @@ activity::point_at_time(double t, point &ret_p) const
 	    {
 	      if (last_p != nullptr)
 		{
-		  double f = (pt.timestamp - t) / (pt.timestamp - last_p->timestamp);
+		  float f = (pt.timestamp - t) / (pt.timestamp - last_p->timestamp);
 		  mix(ret_p, *last_p, pt, 1-f);
 		  return true;
 		}
@@ -706,7 +706,7 @@ activity::point_at_time(double t, point &ret_p) const
 
 void
 mix(gps::activity::point &a, const gps::activity::point &b,
-  const gps::activity::point &c, double f)
+  const gps::activity::point &c, float f)
 {
   mix(a.timestamp, b.timestamp, c.timestamp, f);
   mix(a.location, b.location, c.location, f);

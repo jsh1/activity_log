@@ -462,37 +462,37 @@ make_duration(uint32_t value)
 inline double
 make_altitude(uint16_t value)
 {
-  return value * (1/5.) - 500;
+  return value * .2 - 500;
 }
 
-inline double
+inline float
 make_cadence(uint16_t value)
 {
   return value * 2;
 }
 
-inline double
+inline float
 make_training_effect(uint8_t value)
 {
-  return value * .1;
+  return value * .1f;
 }
 
-inline double
+inline float
 make_stance_ratio(uint16_t value)
 {
-  return value * 1e-4;
+  return value * 1e-4f;
 }
 
-inline double
+inline float
 make_stance_time(uint16_t value)
 {
-  return value * 1e-4;
+  return value * 1e-4f;
 }
 
-inline double
+inline float
 make_vertical_oscillation(uint16_t value)
 {
-  return value * 1e-4;
+  return value * 1e-4f;
 }
 
 } // anonymous namespace
