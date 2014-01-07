@@ -177,6 +177,22 @@
     [self viewDidLoad];
 }
 
+- (void)viewWillAppear
+{
+}
+
+- (void)viewDidAppear
+{
+}
+
+- (void)viewWillDisappear
+{
+}
+
+- (void)viewDidDisappear
+{
+}
+
 - (NSDictionary *)savedViewState
 {
   if ([_subviewControllers count] == 0)
@@ -213,14 +229,24 @@
   if (NSView *view = [self view])
     {
       assert([view superview] == nil);
+
       [view setFrame:[superview bounds]];
+
+      [self viewWillAppear];
+
       [superview addSubview:view];
+
+      [self viewDidAppear];
     }
 }
 
 - (void)removeFromContainer
 {
+  [self viewWillDisappear];
+
   [[self view] removeFromSuperview];
+
+  [self viewDidDisappear];
 }
 
 // ActActivityTextFieldDelegate methods

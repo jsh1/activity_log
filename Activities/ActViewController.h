@@ -57,6 +57,12 @@
 
 - (void)viewDidLoad;
 
+- (void)viewWillAppear;
+- (void)viewDidAppear;
+
+- (void)viewWillDisappear;
+- (void)viewDidDisappear;
+
 @property(nonatomic, readonly) ActWindowController *controller;
 
 - (ActViewController *)viewControllerWithClass:(Class)cls;
