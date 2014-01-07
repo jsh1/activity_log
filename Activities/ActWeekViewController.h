@@ -42,12 +42,14 @@ enum ActWeekViewDisplayMode
   IBOutlet NSSegmentedControl *_displayModeControl;
   IBOutlet NSSlider *_scaleSlider;
 
+  CGFloat _interfaceScale;
   int _displayMode;
 
   int _animationsEnabled;
   int _animationsDisabled;
 }
 
+@property(nonatomic) CGFloat interfaceScale;
 @property(nonatomic) int displayMode;
 
 - (int)weekForActivityStorage:(const act::activity_storage_ref)storage;

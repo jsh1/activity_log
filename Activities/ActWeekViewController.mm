@@ -193,11 +193,24 @@ activity_radius(double dist, double dur, double pts, int displayMode)
 
 @implementation ActWeekViewController
 
+@synthesize interfaceScale = _interfaceScale;
 @synthesize displayMode = _displayMode;
 
 + (NSString *)viewNibName
 {
   return @"ActWeekView";
+}
+
+- (id)initWithController:(ActWindowController *)controller
+    options:(NSDictionary *)dict
+{
+  self = [super initWithController:controller options:dict];
+  if (self == nil)
+    return nil;
+
+  _interfaceScale = .5;
+
+  return self;
 }
 
 - (void)viewDidLoad
@@ -226,6 +239,8 @@ activity_radius(double dist, double dur, double pts, int displayMode)
   [[NSNotificationCenter defaultCenter]
    addObserver:self selector:@selector(listViewBoundsDidChange:)
    name:NSViewFrameDidChangeNotification object:_listView];
+
+  [_scaleSlider setDoubleValue:_interfaceScale];
 }
 
 - (void)dealloc
@@ -248,11 +263,6 @@ activity_radius(double dist, double dur, double pts, int displayMode)
   thunk();
 
   _animationsEnabled--;
-}
-
-- (CGFloat)interfaceScale
-{
-  return [_scaleSlider doubleValue];
 }
 
 - (int)weekForActivityStorage:(const act::activity_storage_ref)storage
@@ -322,6 +332,8 @@ activity_radius(double dist, double dur, double pts, int displayMode)
 {
   if (sender == _scaleSlider)
     {
+      _interfaceScale = [sender doubleValue];
+
       BOOL disableAnimations = YES;
       switch ([[[[self view] window] currentEvent] type])
 	{
@@ -345,6 +357,28 @@ activity_radius(double dist, double dur, double pts, int displayMode)
 
       [_listView setNeedsDisplay:YES];
     }
+}
+
+- (NSDictionary *)savedViewState
+{
+  return @{
+    @"interfaceScale": @(_interfaceScale),
+    @"displayMode": @(_displayMode)
+  };
+}
+
+- (void)applySavedViewState:(NSDictionary *)state
+{
+  if (NSNumber *obj = [state objectForKey:@"interfaceScale"])
+    _interfaceScale = [obj doubleValue];
+
+  if (NSNumber *obj = [state objectForKey:@"displayMode"])
+    _displayMode = [obj intValue];
+
+  if (_scaleSlider != nil)
+    [_scaleSlider setDoubleValue:_interfaceScale];
+  if (_displayModeControl != nil)
+    [_displayModeControl setSelectedSegment:_displayMode];
 }
 
 // CALayerDelegate methods
