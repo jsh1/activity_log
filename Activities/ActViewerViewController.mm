@@ -96,11 +96,6 @@
 	  [[controller view] setHidden:
 	   [_controller selectedActivityStorage] ? NO : YES];
 	}
-      else
-	{
-	  [[controller view] setHidden:YES];
-	  [controller addToContainerView:_listContainer];
-	}
     }
 
   if (_listViewType < 0)
@@ -150,8 +145,8 @@ listViewControllerClass(int type)
       BOOL firstResponder = ([first isKindOfClass:[NSView class]]
 			     && [(NSView *)first isDescendantOf:[oldC view]]);
 
-      [[newC view] setHidden:NO];
-      [[oldC view] setHidden:YES];
+      [newC addToContainerView:_listContainer];
+      [oldC removeFromContainer];
 
       _listViewType = type;
 
