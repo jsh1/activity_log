@@ -27,73 +27,67 @@
 
 #include "act-gps-activity.h"
 
-#if TARGET_OS_IPHONE || TARGET_OS_MAC
-
-#if TARGET_OS_IPHONE
-# include <CoreGraphics/CoreGraphics.h>
-#elif TARGET_OS_MAC
-# include <ApplicationServices/ApplicationServices.h>
-#endif
+#import <CoreGraphics/CoreGraphics.h>
 
 namespace act {
-namespace gps {
+namespace chart_view {
+
+enum line_flags
+{
+  FILL_BG = 1U << 0,
+  OPAQUE_BG = 1U << 1,
+  NO_STROKE = 1U << 2,
+  TICK_LINES = 1U << 3,
+  RIGHT_TICKS = 1U << 4,
+};
+
+enum class line_color
+{
+  red,
+  green,
+  blue,
+  orange,
+  yellow,
+  magenta,
+  teal,
+  steel_blue,
+  tomato,
+  dark_orchid,
+  gray
+};
+
+enum class x_axis_type
+{
+  distance,
+  elapsed_time,
+};
+
+enum class value_conversion
+{
+  identity,
+  heartrate_bpm_hrr,
+  heartrate_bpm_pmax,
+  speed_ms_pace_mi,
+  speed_ms_pace_km,
+  speed_ms_mph,
+  speed_ms_kph,
+  speed_ms_vvo2max,
+  distance_m_mi,
+  distance_m_ft,
+  distance_m_cm,
+  distance_m_mm,
+  time_s_ms,
+};
 
 class chart
 {
 public:
-  enum class x_axis_type
-    {
-      distance,
-      elapsed_time,
-    };
+  chart(const gps::activity &a, x_axis_type x_axis);
 
-  enum class value_conversion
-    {
-      identity,
-      heartrate_bpm_hrr,
-      heartrate_bpm_pmax,
-      speed_ms_pace_mi,
-      speed_ms_pace_km,
-      speed_ms_mph,
-      speed_ms_kph,
-      speed_ms_vvo2max,
-      distance_m_mi,
-      distance_m_ft,
-      distance_m_cm,
-      distance_m_mm,
-      time_s_ms,
-    };
-
-  enum class line_color
-    {
-      red,
-      green,
-      blue,
-      orange,
-      yellow,
-      magenta,
-      teal,
-      steel_blue,
-      tomato,
-      dark_orchid,
-      gray
-    };
-
-  enum line_flags
-    {
-      FILL_BG = 1U << 0,
-      OPAQUE_BG = 1U << 1,
-      NO_STROKE = 1U << 2,
-      TICK_LINES = 1U << 3,
-      RIGHT_TICKS = 1U << 4,
-    };
-
-  chart(const activity &a, x_axis_type x_axis);
-
-  const activity &get_activity() const;
+  const gps::activity &get_activity() const;
   x_axis_type x_axis() const;
 
-  void add_line(activity::point_field field, value_conversion conv,
+  void add_line(gps::activity::point_field field, value_conversion conv,
     line_color color, uint32_t fill_bg, double min_ratio, double max_ratio);
 
   void set_selected_lap(int idx);
@@ -102,23 +96,23 @@ public:
   void set_current_time(double t);
   double current_time() const;
 
-  bool point_at_x(CGFloat x, activity::point &ret_p) const;
+  void set_chart_rect(const CGRect &r);		/* calls update_values() */
+  const CGRect &chart_rect() const;
+
+  void draw();
+
+  CGRect current_time_rect() const;
+
+  bool point_at_x(double x, gps::activity::point &ret_p) const;
 
   void remove_all_lines();
 
   void update_values();
 
-  void set_chart_rect(const CGRect &r);		/* calls update_values() */
-  const CGRect &chart_rect() const;
-
-  virtual void draw() = 0;
-
-  virtual CGRect current_time_rect() const = 0;
-
 protected:
   struct line
     {
-      activity::point_field field;
+      gps::activity::point_field field;
       value_conversion conversion;
       line_color color;
       uint32_t flags;
@@ -132,7 +126,7 @@ protected:
       double tick_min, tick_max, tick_delta;
 
       line();
-      line(activity::point_field field, value_conversion conversion,
+      line(gps::activity::point_field field, value_conversion conversion,
 	line_color color, uint32_t flags, double min_ratio, double max_ratio);
 
       void update_values(const chart &c);
@@ -147,38 +141,43 @@ protected:
 
   struct x_axis_state
     {
-      activity::point_field field;
-      activity::point::field_fn field_fn;
+      gps::activity::point_field field;
+      gps::activity::point::field_fn field_fn;
 
       double min_value;
       double max_value;
 
-      CGFloat xm, xc;
+      double xm, xc;
 
       x_axis_state(const chart &chart, x_axis_type type);
     };
 
   friend struct x_axis_state;
 
-  const activity &_activity;
+  const gps::activity &_activity;
   x_axis_type _x_axis;
   double _min_time, _max_time;
   double _min_distance, _max_distance;
   std::vector<line> _lines;
-  CGRect _chart_rect;
   int _selected_lap;
   double _current_time;
+  CGRect _chart_rect;
+
+private:
+  void draw_line(const line &l, const x_axis_state &xs, CGFloat tx);
+  void draw_lap_markers(const x_axis_state &xs);
+  void draw_current_time();
 };
 
 // implementation details
 
-inline const activity &
+inline const gps::activity &
 chart::get_activity() const
 {
   return _activity;
 }
 
-inline chart::x_axis_type
+inline x_axis_type
 chart::x_axis() const
 {
   return _x_axis;
@@ -190,9 +189,10 @@ chart::line::line()
 }
 
 inline
-chart::line::line(activity::point_field field_, value_conversion
-		  conversion_, line_color color_, uint32_t flags_,
-		  double min_ratio_, double max_ratio_)
+chart::line::line(gps::activity::point_field field_,
+		  value_conversion conversion_, line_color color_,
+		  uint32_t flags_, double min_ratio_,
+		  double max_ratio_)
 : field(field_),
   conversion(conversion_),
   color(color_),
@@ -200,18 +200,6 @@ chart::line::line(activity::point_field field_, value_conversion
   min_ratio(min_ratio_),
   max_ratio(max_ratio_)
 {
-}
-
-inline void
-chart::set_chart_rect(const CGRect &r)
-{
-  _chart_rect = r;
-}
-
-inline const CGRect &
-chart::chart_rect() const
-{
-  return _chart_rect;
 }
 
 inline void
@@ -238,8 +226,19 @@ chart::current_time() const
   return _current_time;
 }
 
-} // namespace gps
+inline void
+chart::set_chart_rect(const CGRect &r)
+{
+  _chart_rect = r;
+}
+
+inline const CGRect &
+chart::chart_rect() const
+{
+  return _chart_rect;
+}
+
+} // namespace chart_view
 } // namespace act
 
-#endif /* TARGET_OS_IPHONE || TARGET_OS_MAC */
 #endif /* ACT_GPS_CHART_H */

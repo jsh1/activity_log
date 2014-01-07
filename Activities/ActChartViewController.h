@@ -24,15 +24,18 @@
 
 #import "ActViewController.h"
 
-#import "act-gps-chart.h"
-
 #import <memory>
 
-@class ActChartView, ActChartViewConfigLabel;
-
-namespace chart_view {
-  class chart;
+namespace act {
+  namespace gps {
+    class activity;
+  }
+  namespace chart_view {
+    class chart;
+  }
 }
+
+@class ActChartView, ActChartViewConfigLabel;
 
 @interface ActChartViewController : ActViewController
 {
@@ -45,7 +48,7 @@ namespace chart_view {
   uint32_t _fieldMask;
   int _smoothing;
 
-  std::unique_ptr<chart_view::chart> _chart;
+  std::unique_ptr<act::chart_view::chart> _chart;
   std::unique_ptr<act::gps::activity> _smoothed_data;
 }
 
