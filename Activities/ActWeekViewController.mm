@@ -46,6 +46,12 @@
 #define STATS_DATE_FONT_SIZE 12
 #define STATS_MAIN_FONT_SIZE 24
 #define STATS_SUB_FONT_SIZE 12
+#define HEADER_MONTH_FONT_SIZE 16
+#define HEADER_MONTH_Y 2
+#define HEADER_MONTH_HEIGHT 25
+#define HEADER_DAY_FONT_SIZE 12
+#define HEADER_DAY_Y 2
+#define HEADER_DAY_HEIGHT 20
 #define MIN_RADIUS 3
 
 /* FIXME: should be calibrated dynamically? */
@@ -58,6 +64,10 @@
 
 @class ActWeekView_StatsLayer, ActWeekView_GroupLayer;
 @class ActWeekView_ActivityLayer, ActWeekView_ActivityGroupLayer;
+
+@interface ActWeekViewController ()
+@property(nonatomic, readonly) ActWeekHeaderView *headerView;
+@end
 
 @interface ActWeekView_ScaledLayer : CALayer
 {
@@ -195,6 +205,7 @@ activity_radius(double dist, double dur, double pts, int displayMode)
 
 @synthesize interfaceScale = _interfaceScale;
 @synthesize displayMode = _displayMode;
+@synthesize headerView = _headerView;
 
 + (NSString *)viewNibName
 {
@@ -300,6 +311,7 @@ activity_radius(double dist, double dur, double pts, int displayMode)
     }
 
   [_listView setWeekRange:NSMakeRange(first_week, last_week + 1 - first_week)];
+  [_listView setNeedsDisplay:YES];
 }
 
 - (void)selectedActivityDidChange:(NSNotification *)note
@@ -352,6 +364,7 @@ activity_radius(double dist, double dur, double pts, int displayMode)
 	_animationsDisabled++;
 
       [_listView setNeedsDisplay:YES];
+      [_headerView setNeedsDisplay:YES];
 
       if (disableAnimations)
 	dispatch_async(dispatch_get_main_queue(), ^{_animationsDisabled--;});
@@ -504,6 +517,8 @@ activity_radius(double dist, double dur, double pts, int displayMode)
 
   int week_idx = _weekRange.location + (_weekRange.length - (y0 + 1));
 
+  [[_controller headerView] setWeekIndex:week_idx];
+
   time_t week_date = date_for_week(week_idx);
 
   /* Find first item whose date is at or before the end of the first
@@ -543,7 +558,8 @@ activity_radius(double dist, double dur, double pts, int displayMode)
       
       [sublayer setFrame:CGRectMake(bounds.origin.x + LEFT_BORDER,
 		bounds.origin.y + ROW_HEIGHT * y, bounds.size.width
-		- (LEFT_BORDER + RIGHT_BORDER * interface_scale), ROW_HEIGHT)];
+		- floor((LEFT_BORDER + RIGHT_BORDER * interface_scale)),
+		ROW_HEIGHT)];
       [sublayer setContentsScale:backing_scale];
 
       [new_sublayers addObject:sublayer];
@@ -636,6 +652,20 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
   return YES;
 }
 
+- (void)scrollPageUpAnimated:(BOOL)flag
+{
+  NSRect rect = [self visibleRect];
+  rect.origin.y -= rect.size.height;
+  [self scrollRectToVisible:rect animated:flag];
+}
+
+- (void)scrollPageDownAnimated:(BOOL)flag
+{
+  NSRect rect = [self visibleRect];
+  rect.origin.y += rect.size.height;
+  [self scrollRectToVisible:rect animated:flag];
+}
+
 - (BOOL)acceptsFirstResponder
 {
   return YES;
@@ -677,7 +707,6 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
 	  [[_controller controller] lastActivity:_controller];
 	  return;
 
-#if 0
 	case NSPageUpFunctionKey:
 	  [self scrollPageUpAnimated:NO];
 	  [self flashScrollersIfNeeded];
@@ -687,9 +716,10 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
 	  [self scrollPageDownAnimated:NO];
 	  [self flashScrollersIfNeeded];
 	  return;
-#endif
 	}
     }
+
+  [super keyDown:e];
 }
 
 - (void)mouseDown:(NSEvent *)e
@@ -763,14 +793,58 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
 
 @implementation ActWeekHeaderView
 
+- (int)weekIndex
+{
+  return _weekIndex;
+}
+
+- (void)setWeekIndex:(int)idx
+{
+  if (_weekIndex != idx)
+    {
+      _weekIndex = idx;
+      [self setNeedsDisplay:YES];
+    }
+}
+
 - (void)drawRect:(NSRect)r
 {
+  static NSDateFormatter *date_formatter;
+  static NSDictionary *month_attrs;
+  static NSDictionary *day_attrs;
   static NSGradient *grad;
   static NSColor *separator_color;
   static dispatch_once_t once;
 
   dispatch_once(&once, ^
     {
+      NSLocale *locale = [(ActAppDelegate *)[NSApp delegate] currentLocale];
+
+      date_formatter = [[NSDateFormatter alloc] init];
+      [date_formatter setLocale:locale];
+      [date_formatter setDateFormat:
+       [NSDateFormatter dateFormatFromTemplate:@"MMMyyyy" options:0
+	locale:locale]];
+
+      NSColor *greyColor = [ActColor controlTextColor];
+
+      NSMutableParagraphStyle *centerStyle
+        = [[NSParagraphStyle defaultParagraphStyle] mutableCopy];
+      [centerStyle setAlignment:NSCenterTextAlignment];
+
+      month_attrs = [[NSDictionary alloc] initWithObjectsAndKeys:
+		     [NSFont fontWithName:@"Helvetica Neue Bold"
+		      size:HEADER_MONTH_FONT_SIZE], NSFontAttributeName,
+		     greyColor, NSForegroundColorAttributeName,
+		     nil];
+
+      day_attrs = [[NSDictionary alloc] initWithObjectsAndKeys:
+		   [NSFont fontWithName:@"Helvetica Neue"
+		    size:HEADER_DAY_FONT_SIZE], NSFontAttributeName,
+		   greyColor, NSForegroundColorAttributeName,
+		   centerStyle, NSParagraphStyleAttributeName,
+		   nil];
+
       grad = [[NSGradient alloc] initWithStartingColor:
 	      [ActColor darkControlBackgroundColor] endingColor:
 	      [ActColor controlBackgroundColor]];
@@ -782,9 +856,42 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
 
   [grad drawInRect:bounds angle:90];
 
-  // draw separator
+  CGFloat scale = [_controller interfaceScale];
 
   NSRect subR;
+
+  // draw month name
+
+  subR.origin.x = bounds.origin.x + LEFT_BORDER;
+  subR.origin.y = bounds.origin.y + HEADER_MONTH_Y;
+  subR.size.width = STATS_WIDTH + COLUMN_SPACING; 
+  subR.size.height = HEADER_MONTH_HEIGHT;
+
+  time_t date = date_for_week(_weekIndex);
+
+  [[date_formatter stringFromDate:[NSDate dateWithTimeIntervalSince1970:date]]
+   drawInRect:subR withAttributes:month_attrs];
+
+  // draw days of week
+
+  CGFloat dlx = bounds.origin.x + LEFT_BORDER + STATS_WIDTH + COLUMN_SPACING;
+  CGFloat drx = bounds.origin.x + bounds.size.width - (RIGHT_BORDER * scale);
+  CGFloat dw = floor((drx - dlx) / (CGFloat)7);
+
+  subR.origin.y = bounds.origin.y + HEADER_DAY_Y;
+  subR.size.height = HEADER_DAY_HEIGHT;
+
+  for (int i = 0; i < 7; i++)
+    {
+      subR.origin.x = dlx + dw * i;
+      subR.size.width = dw;
+
+      [[[date_formatter shortWeekdaySymbols] objectAtIndex:i]
+       drawInRect:subR withAttributes:day_attrs];
+    }
+
+  // draw separator
+
   subR.origin.x = bounds.origin.x;
   subR.origin.y = bounds.origin.y + 1;
   subR.size.width = bounds.size.width;
@@ -1050,7 +1157,7 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
       date_formatter = [[NSDateFormatter alloc] init];
       [date_formatter setLocale:locale];
       [date_formatter setDateFormat:
-       [NSDateFormatter dateFormatFromTemplate:@"MMdd" options:0
+       [NSDateFormatter dateFormatFromTemplate:@"dMMM" options:0
 	locale:locale]];
 
       NSColor *greyColor = [ActColor controlTextColor];
@@ -1079,7 +1186,7 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
   time_t start_date = _date;
   time_t end_date = _date + SECONDS_PER_WEEK;
 
-  NSString *date_str = [NSString stringWithFormat:@"%@ %@ %@\n",
+  NSString *date_str = [NSString stringWithFormat:@"%@%@%@\n",
 			[date_formatter stringFromDate:
 			 [NSDate dateWithTimeIntervalSince1970:start_date]],
 			en_dash,

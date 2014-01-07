@@ -79,5 +79,10 @@ enum ActWeekViewDisplayMode
 @interface ActWeekHeaderView : NSView
 {
   IBOutlet ActWeekViewController *_controller;
+
+  int _weekIndex;
 }
+
+@property(nonatomic) int weekIndex;
+
 @end

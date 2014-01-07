@@ -21,11 +21,11 @@
             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
             <subviews>
                 <customView id="ldB-fk-9Cu" customClass="ActWeekHeaderView">
-                    <rect key="frame" x="0.0" y="404" width="473" height="39"/>
+                    <rect key="frame" x="0.0" y="391" width="473" height="52"/>
                     <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                     <subviews>
                         <slider verticalHuggingPriority="750" id="Z2s-B1-M2S">
-                            <rect key="frame" x="323" y="12" width="140" height="15"/>
+                            <rect key="frame" x="328" y="29" width="140" height="15"/>
                             <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES"/>
                             <sliderCell key="cell" controlSize="mini" continuous="YES" state="on" alignment="left" maxValue="1" doubleValue="0.5" tickMarkPosition="above" sliderType="linear" id="m4E-TO-xRy"/>
                             <connections>
@@ -33,7 +33,7 @@
                             </connections>
                         </slider>
                         <segmentedControl verticalHuggingPriority="750" id="eds-E0-UCP">
-                            <rect key="frame" x="10" y="9" width="156" height="21"/>
+                            <rect key="frame" x="5" y="27" width="156" height="21"/>
                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                             <segmentedCell key="cell" controlSize="small" alignment="left" style="smallSquare" trackingMode="selectOne" id="ezO-Tj-iwP">
                                 <font key="font" metaFont="smallSystem"/>
@@ -53,14 +53,14 @@
                     </connections>
                 </customView>
                 <scrollView borderType="none" horizontalLineScroll="10" horizontalPageScroll="10" verticalLineScroll="10" verticalPageScroll="10" hasHorizontalScroller="NO" usesPredominantAxisScrolling="NO" horizontalScrollElasticity="none" id="pz9-jO-6Hk">
-                    <rect key="frame" x="0.0" y="0.0" width="473" height="404"/>
+                    <rect key="frame" x="0.0" y="0.0" width="473" height="391"/>
                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                     <clipView key="contentView" id="lbI-cU-0C3">
-                        <rect key="frame" x="0.0" y="0.0" width="473" height="404"/>
+                        <rect key="frame" x="0.0" y="0.0" width="473" height="391"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <customView id="A2q-Ju-lhh" customClass="ActWeekListView">
-                                <rect key="frame" x="0.0" y="0.0" width="473" height="404"/>
+                                <rect key="frame" x="0.0" y="0.0" width="473" height="391"/>
                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                 <connections>
                                     <outlet property="_controller" destination="-2" id="jHx-kV-X43"/>
@@ -74,7 +74,7 @@
                         <autoresizingMask key="autoresizingMask"/>
                     </scroller>
                     <scroller key="verticalScroller" verticalHuggingPriority="750" doubleValue="1" horizontal="NO" id="ude-xF-P6v">
-                        <rect key="frame" x="457" y="0.0" width="16" height="404"/>
+                        <rect key="frame" x="457" y="0.0" width="16" height="391"/>
                         <autoresizingMask key="autoresizingMask"/>
                     </scroller>
                 </scrollView>
