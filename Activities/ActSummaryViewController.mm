@@ -397,4 +397,9 @@
   [NSBezierPath fillRect:r];
 }
 
+- (BOOL)isOpaque
+{
+  return YES;
+}
+
 @end

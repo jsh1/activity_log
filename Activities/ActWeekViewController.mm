@@ -251,6 +251,8 @@ activity_radius(double dist, double dur, double pts, int displayMode)
    addObserver:self selector:@selector(listViewBoundsDidChange:)
    name:NSViewFrameDidChangeNotification object:_listView];
 
+  [_scrollView setBackgroundColor:[ActColor midControlBackgroundColor]];
+
   [_scaleSlider setDoubleValue:_interfaceScale];
 }
 
@@ -619,8 +621,6 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
 
   [new_sublayers release];
   [old_sublayers release];
-
-  [layer setBackgroundColor:[[ActColor midControlBackgroundColor] CGColor]];
 }
 
 - (void)updateSelectionState
@@ -1090,6 +1090,8 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
 + (id)defaultValueForKey:(NSString *)key
 {
   if ([key isEqualToString:@"wrapped"])
+    return @YES;
+  if ([key isEqualToString:@"opaque"])
     return @YES;
 
   return [super defaultValueForKey:key];
