@@ -333,11 +333,7 @@ activity_radius(double dist, double dur, double pts, int displayMode)
   void *ptr = [[[note userInfo] objectForKey:@"activity"] pointerValue];
   const auto &a = *reinterpret_cast<const act::activity_storage_ref *> (ptr);
 
-  int week = [self weekForActivityStorage:a];
-  if (week <= 0)
-    return;
-
-  [_listView setNeedsDisplayInRect:[_listView visibleRectForWeek:week]];
+  [_listView invalidateActivityStorage:a];
 }
 
 - (void)listViewBoundsDidChange:(NSNotification *)note
@@ -470,6 +466,50 @@ activity_radius(double dist, double dur, double pts, int displayMode)
   return nil;
 }
 
+static ActWeekView_ActivityLayer *
+activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
+{
+  for (ActWeekView_ActivityLayer *layer in sublayers)
+    {
+      const std::vector<act::activity *> &vec = [layer activities];
+      if (std::any_of(vec.begin(), vec.end(),
+		      [=] (act::activity *a) {
+			return a->storage() == storage;}))
+	return layer;
+    }
+
+  return nil;
+}
+
+- (ActWeekView_ActivityLayer *)activityLayerForStorage:
+    (const act::activity_storage_ref)storage
+{
+  if (storage == nullptr)
+    return nil;
+
+  int week = [_controller weekForActivityStorage:storage];
+
+  ActWeekView_GroupLayer *glayer = [self groupLayerForWeek:week];
+  if (glayer == nil)
+    return nil;
+
+  ActWeekView_ActivityLayer *layer
+    = activityLayerForStorage([glayer sublayers], storage);
+  if (layer == nil)
+    return nil;
+
+  ActWeekView_ActivityGroupLayer *aglayer = [layer groupLayer];
+  if (aglayer != nil)
+    layer = activityLayerForStorage([aglayer sublayers], storage);
+
+  return layer;
+}
+
+- (void)invalidateActivityStorage:(const act::activity_storage_ref)storage
+{
+  [[self activityLayerForStorage:storage] setNeedsLayout];
+}
+
 - (void)updateFrameSize
 {
   NSRect frame = [self frame];
@@ -583,37 +623,13 @@ activity_radius(double dist, double dur, double pts, int displayMode)
   [layer setBackgroundColor:[[ActColor midControlBackgroundColor] CGColor]];
 }
 
-static ActWeekView_ActivityLayer *
-activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
-{
-  for (ActWeekView_ActivityLayer *layer in sublayers)
-    {
-      const std::vector<act::activity *> &vec = [layer activities];
-      if (std::any_of(vec.begin(), vec.end(),
-		      [=] (act::activity *a) {
-			return a->storage() == storage;}))
-	return layer;
-    }
-
-  return nil;
-}
-
 - (void)updateSelectionState
 {
   act::activity_storage_ref storage
     = [[_controller controller] selectedActivityStorage];
 
-  ActWeekView_ActivityLayer *selected_layer = nil;
-
-  if (storage != nullptr)
-    {
-      int week = [_controller weekForActivityStorage:storage];
-      ActWeekView_GroupLayer *glayer = [self groupLayerForWeek:week];
-      selected_layer = activityLayerForStorage([glayer sublayers], storage);
-      ActWeekView_ActivityGroupLayer *aglayer = [selected_layer groupLayer];
-      if (aglayer != nil)
-	selected_layer = activityLayerForStorage([aglayer sublayers], storage);
-    }
+  ActWeekView_ActivityLayer *selected_layer
+    = [self activityLayerForStorage:storage];
 
   if (_selectedLayer != selected_layer)
     {

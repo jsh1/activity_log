@@ -74,6 +74,8 @@ enum ActWeekViewDisplayMode
 - (NSRect)rectForWeek:(int)week;
 - (NSRect)visibleRectForWeek:(int)week;
 
+- (void)invalidateActivityStorage:(const act::activity_storage_ref)storage;
+
 @end
 
 @interface ActWeekHeaderView : NSView
