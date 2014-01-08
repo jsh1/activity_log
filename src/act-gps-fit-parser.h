@@ -42,14 +42,18 @@ class fit_parser : public parser
   size_t _header_size;
   size_t _data_size;
 
+  double _start_time;
+
+  bool _stopped;
+  double _stopped_timestamp;
+  double _stopped_duration;
+
   uint32_t _previous_timestamp;
 
   enum {MAX_MESSAGE_TYPES = 16};
   struct message_type;
   struct message_field;
   message_type *_message_types[MAX_MESSAGE_TYPES];
-
-  std::vector<activity::point> _records;
 
 public:
   fit_parser(activity &dest);
@@ -71,6 +75,7 @@ private:
     int32_t invalid_value = 0);
   void skip_field (const message_field &field);
   void read_record_message(const message_type &def, uint32_t timestamp);
+  void read_event_message(const message_type &def, uint32_t timestamp);
   void read_lap_message(const message_type &def, uint32_t timestamp);
   void read_session_message(const message_type &def, uint32_t timestamp);
   void skip_message(const message_type &def);

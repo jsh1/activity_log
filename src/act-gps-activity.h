@@ -46,7 +46,8 @@ public:
 
   enum class point_field
     {
-      timestamp,
+      elapsed_time,
+      timer_time,
       altitude,
       distance,
       speed,
@@ -62,8 +63,9 @@ public:
 
   struct point
     {
-      double timestamp;
       location location;
+      float elapsed_time;
+      float timer_time;
       float altitude;
       float distance;
       float speed;
@@ -74,11 +76,11 @@ public:
       float stance_ratio;
 
       point()
-      : timestamp(0), altitude(0), distance(0), speed(0), heart_rate(0),
-        cadence(0), vertical_oscillation(0), stance_time(0),
+      : elapsed_time(0), timer_time(0), altitude(0), distance(0), speed(0),
+	heart_rate(0), cadence(0), vertical_oscillation(0), stance_time(0),
 	stance_ratio(0) {}
 
-      typedef double (*field_fn)(const point *);
+      typedef float (*field_fn)(const point &);
 
       static field_fn field_function(point_field field);
 
@@ -87,9 +89,11 @@ public:
       void mul(float x);
     };
 
+  typedef std::vector<point> point_vector;
+
   struct lap
     {
-      double start_time;
+      float start_elapsed_time;
       float total_elapsed_time;
       float total_duration;
       float total_distance;
@@ -105,60 +109,36 @@ public:
       float avg_vertical_oscillation;
       float avg_stance_time;
       float avg_stance_ratio;
-      std::vector<point> track;
       location_region region;
 
       lap()
-      : start_time(0), total_elapsed_time(0), total_duration(0),
+      : start_elapsed_time(0), total_elapsed_time(0), total_duration(0),
 	total_distance(0), total_ascent(0), total_descent(0),
 	total_calories(0), avg_speed(0), max_speed(0), avg_heart_rate(0),
 	max_heart_rate(0), avg_cadence(0), max_cadence(0),
-	avg_vertical_oscillation(0), avg_stance_time(0),
-	avg_stance_ratio(0) {}
+	avg_vertical_oscillation(0), avg_stance_time(0), avg_stance_ratio(0) {}
 
-      void update_region();
+      lap(const lap &rhs) = default;
     };
 
-  class iterator
-    {
-      activity *activity;
-      size_t lap;
-      size_t point;
-
-    public:
-      iterator(class activity &a, bool end);
-      iterator(const iterator &rhs);
-      iterator &operator=(const iterator &rhs);
-      iterator &operator++();
-      iterator operator++(int);
-      bool operator==(const iterator &rhs) const;
-      bool operator!=(const iterator &rhs) const;
-      struct point &operator*() const;
-      struct point *operator->() const;
-    };
-
-  class const_iterator
-    {
-      const activity *activity;
-      size_t lap;
-      size_t point;
-
-    public:
-      const_iterator(const class activity &a, bool end);
-      const_iterator(const const_iterator &rhs);
-      const_iterator &operator=(const const_iterator &rhs);
-      const_iterator &operator++();
-      const_iterator operator++(int);
-      bool operator==(const const_iterator &rhs) const;
-      bool operator!=(const const_iterator &rhs) const;
-      const struct point &operator*() const;
-      const struct point *operator->() const;
-    };
+  typedef std::vector<lap> lap_vector;
 
 private:
   std::string _activity_id;
   sport_type _sport;
   std::string _device;
+
+  bool _has_location;
+  bool _has_speed;
+  bool _has_heart_rate;
+  bool _has_cadence;
+  bool _has_altitude;
+  bool _has_dynamics;
+
+  lap_vector _laps;
+
+  point_vector _points;
+  location_region _region;
 
   double _start_time;
   float _total_elapsed_time;
@@ -172,34 +152,16 @@ private:
   float _max_speed;
   float _avg_heart_rate;
   float _max_heart_rate;
+  float _recovery_heart_rate;
+  double _recovery_heart_rate_timestamp;
   float _avg_cadence;
   float _max_cadence;
   float _avg_vertical_oscillation;
   float _avg_stance_time;
   float _avg_stance_ratio;
 
-  std::vector<lap> _laps;
-
-  location_region _region;
-
-  bool _has_location;
-  bool _has_speed;
-  bool _has_heart_rate;
-  bool _has_cadence;
-  bool _has_altitude;
-  bool _has_dynamics;
-
 public:
   activity();
-
-  // iterates over all points, ignoring lap boundaries
-
-  iterator begin();
-  iterator end();
-  const_iterator begin() const;
-  const_iterator end() const;
-  const_iterator cbegin() const;
-  const_iterator cend() const;
 
   // uses file extension to deduce format
   bool read_file(const char *path);
@@ -213,8 +175,8 @@ public:
   void print_summary(FILE *fh) const;
   void print_laps(FILE *fh) const;
 
-  void get_range(point_field field, double &ret_min,
-    double &ret_max, double &ret_mean, double &ret_sdev) const;
+  void get_range(point_field field, float &ret_min, float &ret_max,
+    float &ret_mean, float &ret_sdev) const;
 
   void set_sport(sport_type x) {_sport = x;}
   sport_type sport() const {return _sport;}
@@ -261,6 +223,12 @@ public:
   void set_max_heart_rate(float x) {_max_heart_rate = x;}
   float max_heart_rate() const {return _max_heart_rate;}
 
+  void set_recovery_heart_rate(float x, double t) {
+    _recovery_heart_rate = x; _recovery_heart_rate_timestamp = t;}
+  float recovery_heart_rate() const {return _recovery_heart_rate;}
+  float recovery_heart_rate_timestamp() const {
+    return _recovery_heart_rate_timestamp;}
+
   void set_avg_cadence(float x) {_avg_cadence = x;}
   float avg_cadence() const {return _avg_cadence;}
 
@@ -276,8 +244,14 @@ public:
   void set_avg_stance_ratio(float x) {_avg_stance_ratio = x;}
   float avg_stance_ratio() const {return _avg_stance_ratio;}
 
-  std::vector<lap> &laps() {return _laps;}
-  const std::vector<lap> &laps() const {return _laps;}
+  lap_vector &laps() {return _laps;}
+  const lap_vector &laps() const {return _laps;}
+
+  point_vector &points() {return _points;}
+  const point_vector &points() const {return _points;}
+
+  point_vector::iterator points_from(point_field field, float x);
+  point_vector::const_iterator points_from(point_field field, float x) const;
 
   const location_region &region() const {return _region;}
 
@@ -299,189 +273,68 @@ public:
   void set_has_dynamics(bool x) {_has_dynamics = x;}
   bool has_dynamics() const {return _has_dynamics;}
 
-  void update_region();
+  void update_regions();
 
   void smooth(const activity &src, int width);
 
-  bool point_at_time(double t, point &ret_p) const;
+  bool point_at(point_field field, float x, point &ret_p) const;
+
+  // conveniences that call points_from()
+
+  point_vector::iterator lap_begin(lap &l);
+  point_vector::const_iterator lap_begin(const lap &l) const;
+
+  point_vector::iterator lap_end(lap &l);
+  point_vector::const_iterator lap_end(const lap &l) const;
+
+private:
+  void copy_summary(const activity &src);
 };
 
 // implementation details
 
-inline
-activity::iterator::iterator(class activity &a, bool end)
-: activity(&a), lap(!end ? 0 : a.laps().size()), point(0)
+inline activity::point_vector::iterator
+activity::points_from(point_field field, float x)
 {
+  point::field_fn f = point::field_function(field);
+  return std::lower_bound(_points.begin(), _points.end(), x,
+			  [=] (const point &p, float x) {
+			    return f(p) < x;});
 }
 
-inline
-activity::iterator::iterator(const iterator &rhs)
-: activity(rhs.activity), lap(rhs.lap), point(rhs.point)
+inline activity::point_vector::const_iterator
+activity::points_from(point_field field, float x) const
 {
+  point::field_fn f = point::field_function(field);
+  return std::lower_bound(_points.begin(), _points.end(), x,
+			  [=] (const point &p, float x) {
+			    return f(p) < x;});
 }
 
-inline activity::iterator &
-activity::iterator::operator=(const iterator &rhs)
+inline activity::point_vector::iterator
+activity::lap_begin(lap &l)
 {
-  activity = rhs.activity;
-  lap = rhs.lap;
-  point = rhs.point;
-  return *this;
+  return points_from(point_field::elapsed_time, l.start_elapsed_time);
 }
 
-inline activity::iterator &
-activity::iterator::operator++()
+inline activity::point_vector::const_iterator
+activity::lap_begin(const lap &l) const
 {
-  ++point;
-  if (point >= activity->laps()[lap].track.size())
-    lap++, point = 0;
-  return *this;
+  return points_from(point_field::elapsed_time, l.start_elapsed_time);
 }
 
-inline activity::iterator
-activity::iterator::operator++(int)
+inline activity::point_vector::iterator
+activity::lap_end(lap &l)
 {
-  iterator ret = *this;
-  ++(*this);
-  return ret;
+  return points_from(point_field::elapsed_time,
+		     l.start_elapsed_time + l.total_elapsed_time);
 }
 
-inline bool
-activity::iterator::operator==(const iterator &rhs) const
+inline activity::point_vector::const_iterator
+activity::lap_end(const lap &l) const
 {
-  return activity == rhs.activity && lap == rhs.lap && point == rhs.point;
-}
-
-inline bool
-activity::iterator::operator!=(const iterator &rhs) const
-{
-  return !(activity == rhs.activity && lap == rhs.lap && point == rhs.point);
-}
-
-inline activity::point &
-activity::iterator::operator*() const
-{
-#if DEBUG
-  assert(lap < activity->laps().size()
-	 && point < activity->laps()[lap].track.size());
-#endif
-  return activity->laps()[lap].track[point];
-}
-
-inline activity::point *
-activity::iterator::operator->() const
-{
-#if DEBUG
-  assert(lap < activity->laps().size()
-	 && point < activity->laps()[lap].track.size());
-#endif
-  return &activity->laps()[lap].track[point];
-}
-
-inline
-activity::const_iterator::const_iterator(const class activity &a, bool end)
-: activity(&a), lap(!end ? 0 : a.laps().size()), point(0)
-{
-}
-
-inline
-activity::const_iterator::const_iterator(const const_iterator &rhs)
-: activity(rhs.activity), lap(rhs.lap), point(rhs.point)
-{
-}
-
-inline activity::const_iterator &
-activity::const_iterator::operator=(const const_iterator &rhs)
-{
-  activity = rhs.activity;
-  lap = rhs.lap;
-  point = rhs.point;
-  return *this;
-}
-
-inline activity::const_iterator &
-activity::const_iterator::operator++()
-{
-  ++point;
-  if (point >= activity->laps()[lap].track.size())
-    lap++, point = 0;
-  return *this;
-}
-
-inline activity::const_iterator
-activity::const_iterator::operator++(int)
-{
-  const_iterator ret = *this;
-  ++(*this);
-  return ret;
-}
-
-inline bool
-activity::const_iterator::operator==(const const_iterator &rhs) const
-{
-  return activity == rhs.activity && lap == rhs.lap && point == rhs.point;
-}
-
-inline bool
-activity::const_iterator::operator!=(const const_iterator &rhs) const
-{
-  return !(activity == rhs.activity && lap == rhs.lap && point == rhs.point);
-}
-
-inline const activity::point &
-activity::const_iterator::operator*() const
-{
-#if DEBUG
-  assert(lap < activity->laps().size()
-	 && point < activity->laps()[lap].track.size());
-#endif
-  return activity->laps()[lap].track[point];
-}
-
-inline const activity::point *
-activity::const_iterator::operator->() const
-{
-#if DEBUG
-  assert(lap < activity->laps().size()
-	 && point < activity->laps()[lap].track.size());
-#endif
-  return &activity->laps()[lap].track[point];
-}
-
-inline activity::iterator
-activity::begin()
-{
-  return iterator(*this, false);
-}
-
-inline activity::iterator
-activity::end()
-{
-  return iterator(*this, true);
-}
-
-inline activity::const_iterator
-activity::begin() const
-{
-  return const_iterator(*this, false);
-}
-
-inline activity::const_iterator
-activity::end() const
-{
-  return const_iterator(*this, true);
-}
-
-inline activity::const_iterator
-activity::cbegin() const
-{
-  return begin();
-}
-
-inline activity::const_iterator
-activity::cend() const
-{
-  return end();
+  return points_from(point_field::elapsed_time,
+		     l.start_elapsed_time + l.total_elapsed_time);
 }
 
 } // namespace gps

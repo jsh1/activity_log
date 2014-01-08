@@ -72,7 +72,7 @@ chart::x_axis_state::x_axis_state(const chart &chart, x_axis_type type)
       break;
 
     case x_axis_type::elapsed_time:
-      field = gps::activity::point_field::timestamp;
+      field = gps::activity::point_field::elapsed_time;
       min_value = chart._min_time;
       max_value = chart._max_time;
       break;
@@ -182,21 +182,22 @@ chart::line::update_values(const chart &c)
 {
   const gps::activity &a = c._activity;
 
-  double mean, sdev;
+  float mean, sdev;
   a.get_range(field, min_value, max_value, mean, sdev);
 
-  double border = (max_value - min_value) * .05;
+  float border = (max_value - min_value) * .05f;
   min_value -= border;
   max_value += border;
 
   min_value = mean - 3 * sdev;
   max_value = mean + 3 * sdev;
 
-  if (field == gps::activity::point_field::altitude && max_value - min_value < 100)
+  if (field == gps::activity::point_field::altitude
+      && max_value - min_value < 100)
     max_value = min_value + 100;
 
-  double f0 = ((0 - min_ratio) * (1 / (max_ratio - min_ratio)));
-  double f1 = ((1 - max_ratio) * (1 / (max_ratio - min_ratio)));
+  float f0 = ((0 - min_ratio) * (1 / (max_ratio - min_ratio)));
+  float f1 = ((1 - max_ratio) * (1 / (max_ratio - min_ratio)));
 
   scaled_min_value = min_value + (max_value - min_value) * f0;
   scaled_max_value = max_value + (max_value - min_value) * f1;
@@ -304,8 +305,8 @@ chart::chart(const gps::activity &a, x_axis_type xa)
   _selected_lap(-1),
   _current_time(-1)
 {
-  double mean, sdev;
-  a.get_range(gps::activity::point_field::timestamp,
+  float mean, sdev;
+  a.get_range(gps::activity::point_field::elapsed_time,
 	      _min_time, _max_time, mean, sdev);
   a.get_range(gps::activity::point_field::distance,
 	      _min_distance, _max_distance, mean, sdev);
@@ -313,8 +314,8 @@ chart::chart(const gps::activity &a, x_axis_type xa)
 
 void
 chart::add_line(gps::activity::point_field field, value_conversion conv,
-		line_color color, uint32_t flags, double min_ratio,
-		double max_ratio)
+		line_color color, uint32_t flags, float min_ratio,
+		float max_ratio)
 {
   _lines.push_back(line(field, conv, color, flags, min_ratio, max_ratio));
 }
@@ -394,39 +395,33 @@ chart::draw_line(const line &l, const x_axis_state &xs, CGFloat tx)
     gps::activity::point::field_fn value_fn
       = gps::activity::point::field_function(l.field);
   
-    for (size_t li = 0; li < _activity.laps().size(); li++)
+    for (const auto &p : _activity.points())
       {
-	const gps::activity::lap &lap = _activity.laps()[li];
-	const gps::activity::point *track = &lap.track[0];
+	double dist = dist_fn(p);
+	double value = value_fn(p);
+	if (dist == 0 || value == 0)
+	  continue;
 
-	for (size_t ti = 0; ti < lap.track.size(); ti++)
+	CGFloat x = dist * xs.xm + xs.xc;
+	if (first_pt || x - last_x >= 1)
 	  {
-	    const gps::activity::point &p = track[ti];
-	    double dist = dist_fn(&p);
-	    double value = value_fn(&p);
-	    if (dist == 0 || value == 0)
-	      continue;
-	    CGFloat x = dist * xs.xm + xs.xc;
-	    if (first_pt || x - last_x >= 1)
+	    if (skipped_count > 0)
 	      {
-		if (skipped_count > 0)
-		  {
-		    value = (value + skipped_total) / (skipped_count + 1);
-		    skipped_total = skipped_count = 0;
-		  }
-		CGFloat y = value * ym + yc;
-		if (first_pt)
-		  {
-		    [path moveToPoint:NSMakePoint(x, y)];
-		    first_x = x, first_y = y, first_pt = false;
-		  }
-		else
-		  [path lineToPoint:NSMakePoint(x, y)];
-		last_x = x, last_y = y;
+		value = (value + skipped_total) / (skipped_count + 1);
+		skipped_total = skipped_count = 0;
+	      }
+	    CGFloat y = value * ym + yc;
+	    if (first_pt)
+	      {
+		[path moveToPoint:NSMakePoint(x, y)];
+		first_x = x, first_y = y, first_pt = false;
 	      }
 	    else
-	      skipped_total += value, skipped_count += 1;
+	      [path lineToPoint:NSMakePoint(x, y)];
+	    last_x = x, last_y = y;
 	  }
+	else
+	  skipped_total += value, skipped_count += 1;
       }
 
     // Fill under the line
@@ -585,8 +580,8 @@ chart::draw_lap_markers(const x_axis_state &xs)
       if (x_axis() == x_axis_type::distance)
 	total_dist += _activity.laps()[i].total_distance;
       else
-	total_dist = (_activity.laps()[i].start_time
-		      + _activity.laps()[i].total_duration);
+	total_dist = (_activity.laps()[i].start_elapsed_time
+		      + _activity.laps()[i].total_elapsed_time);
     }
 
   static const CGFloat dash[] = {4, 2};
@@ -610,12 +605,13 @@ chart::draw_current_time()
     return;
 
   gps::activity::point pt;
-  if (!_activity.point_at_time(_activity.start_time() + _current_time, pt))
+  auto elapsed_time = gps::activity::point_field::elapsed_time;
+  if (!_activity.point_at(elapsed_time, _current_time, pt))
     return;
 
   x_axis_state xs(*this, x_axis());
 
-  double t = xs.field_fn(&pt);
+  double t = xs.field_fn(pt);
   if (t < xs.min_value || t > xs.max_value)
     return;
 
@@ -649,14 +645,14 @@ chart::draw_current_time()
 			 nil];
 
   std::string buf;
-  format_duration(buf, round(pt.timestamp - _activity.start_time()));
+  format_duration(buf, round(pt.elapsed_time));
   buf.append("\n");
   format_distance(buf, pt.distance, unit_type::unknown);
   buf.append("\n");
 
   for (const auto &it : _lines)
     {
-      double value = gps::activity::point::field_function(it.field)(&pt);
+      double value = gps::activity::point::field_function(it.field)(pt);
 
       switch (it.field)
 	{
@@ -719,12 +715,13 @@ chart::current_time_rect() const
     return CGRectNull;
 
   gps::activity::point pt;
-  if (!_activity.point_at_time(_activity.start_time() + _current_time, pt))
+  auto elapsed_time = gps::activity::point_field::elapsed_time;
+  if (!_activity.point_at(elapsed_time, _current_time, pt))
     return CGRectNull;
 
   x_axis_state xs(*this, x_axis());
 
-  double t = xs.field_fn(&pt);
+  double t = xs.field_fn(pt);
   if (t < xs.min_value || t > xs.max_value)
     return CGRectNull;
 
@@ -757,7 +754,7 @@ chart::point_at_x(double x, gps::activity::point &ret_p) const
 
       if (_x_axis == x_axis_type::elapsed_time)
 	{
-	  lx0 = lap.start_time * x_axis.xm + x_axis.xc;
+	  lx0 = lap.start_elapsed_time * x_axis.xm + x_axis.xc;
 	  lx1 = lx0 + lap.total_elapsed_time * x_axis.xm;
 	}
       else
@@ -776,28 +773,31 @@ chart::point_at_x(double x, gps::activity::point &ret_p) const
       const gps::activity::point *last_p = nullptr;
       double last_x = 0;
 
-      for (const auto &it : lap.track)
+      for (auto it = _activity.lap_begin(lap);
+	   it != _activity.points().end(); it++)
 	{
-	  double it_value = x_axis.field_fn(&it);
-	  if (it_value == 0)
+	  auto p = *it;
+
+	  double p_value = x_axis.field_fn(p);
+	  if (p_value == 0)
 	    continue;
 
-	  double it_x = it_value * x_axis.xm + x_axis.xc;
+	  double p_x = p_value * x_axis.xm + x_axis.xc;
 
-	  if (it_x > x)
+	  if (p_x > x)
 	    {
 	      if (last_p != nullptr)
 		{
-		  double f = (it_x - x) / (it_x - last_x);
-		  mix(ret_p, *last_p, it, 1-f);
+		  double f = (p_x - x) / (p_x - last_x);
+		  mix(ret_p, *last_p, p, 1-f);
 		  return true;
 		}
 	      else
 		return false;
 	    }
       
-	  last_p = &it;
-	  last_x = it_x;
+	  last_p = &p;
+	  last_x = p_x;
 	}
     }
 

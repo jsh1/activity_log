@@ -36,6 +36,12 @@ namespace gps {
 
 activity::activity()
 : _sport(sport_type::unknown),
+  _has_location(false),
+  _has_speed(false),
+  _has_heart_rate(false),
+  _has_cadence(false),
+  _has_altitude(false),
+  _has_dynamics(false),
   _start_time(0),
   _total_elapsed_time(0),
   _total_duration(0),
@@ -48,17 +54,13 @@ activity::activity()
   _max_speed(0),
   _avg_heart_rate(0),
   _max_heart_rate(0),
+  _recovery_heart_rate(0),
+  _recovery_heart_rate_timestamp(0),
   _avg_cadence(0),
   _max_cadence(0),
   _avg_vertical_oscillation(0),
   _avg_stance_time(0),
-  _avg_stance_ratio(0),
-  _has_location(false),
-  _has_speed(false),
-  _has_heart_rate(false),
-  _has_cadence(false),
-  _has_altitude(false),
-  _has_dynamics(false)
+  _avg_stance_ratio(0)
 {
 }
 
@@ -133,7 +135,6 @@ activity::read_compressed_tcx_file(const char *path, const char *prog)
 void
 activity::update_summary()
 {
-  _start_time = 0;
   _total_elapsed_time = 0;
   _total_duration = 0;
   _total_distance = 0;
@@ -144,47 +145,42 @@ activity::update_summary()
   _max_speed = 0;
   _avg_heart_rate = 0;
   _max_heart_rate = 0;
+  _recovery_heart_rate = 0;
+  _recovery_heart_rate_timestamp = 0;
   _avg_cadence = 0;
   _max_cadence = 0;
   _avg_vertical_oscillation = 0;
   _avg_stance_time = 0;
   _avg_stance_ratio = 0;
 
-  if (laps().size() < 1)
-    return;
-
-  _start_time = laps()[0].start_time;
-
-  for (auto &it : laps())
+  if (_laps.size() > 0)
     {
-      if (it.total_elapsed_time == 0 && it.track.size() >= 2)
+      for (auto &it : _laps)
 	{
-	  it.total_elapsed_time = (it.track.back().timestamp
-				   - it.track.front().timestamp);
+	  _total_elapsed_time += it.total_elapsed_time;
+	  _total_duration += it.total_duration;
+	  _total_distance += it.total_distance;
+	  _total_ascent += it.total_ascent;
+	  _total_descent += it.total_descent;
+	  _total_calories += it.total_calories;
+	  _max_speed = fmax(_max_speed, it.max_speed);
+	  _avg_heart_rate += it.avg_heart_rate * it.total_duration;
+	  _max_heart_rate = fmax(_max_heart_rate, it.max_heart_rate);
+	  _avg_cadence += it.avg_cadence * it.total_duration;
+	  _max_cadence = fmax(_max_cadence, it.max_cadence);
+	  _avg_vertical_oscillation
+	    += it.avg_vertical_oscillation * it.total_duration;
+	  _avg_stance_time += it.avg_stance_time * it.total_duration;
+	  _avg_stance_ratio += it.avg_stance_ratio * it.total_duration;
 	}
 
-      _total_elapsed_time += it.total_elapsed_time;
-      _total_duration += it.total_duration;
-      _total_distance += it.total_distance;
-      _total_ascent += it.total_ascent;
-      _total_descent += it.total_descent;
-      _total_calories += it.total_calories;
-      _max_speed = fmax(_max_speed, it.max_speed);
-      _avg_heart_rate += it.avg_heart_rate * it.total_duration;
-      _max_heart_rate = fmax(_max_heart_rate, it.max_heart_rate);
-      _avg_cadence += it.avg_cadence * it.total_duration;
-      _max_cadence = fmax(_max_cadence, it.max_cadence);
-      _avg_vertical_oscillation += it.avg_vertical_oscillation * it.total_duration;
-      _avg_stance_time += it.avg_stance_time * it.total_duration;
-      _avg_stance_ratio += it.avg_stance_ratio * it.total_duration;
+      _avg_speed = _total_distance / _total_duration;
+      _avg_heart_rate = _avg_heart_rate / _total_duration;
+      _avg_cadence = _avg_cadence / _total_duration;
+      _avg_vertical_oscillation = _avg_vertical_oscillation / _total_duration;
+      _avg_stance_time = _avg_stance_time / _total_duration;
+      _avg_stance_ratio = _avg_stance_ratio / _total_duration;
     }
-
-  _avg_speed = _total_distance / _total_duration;
-  _avg_heart_rate = _avg_heart_rate / _total_duration;
-  _avg_cadence = _avg_cadence / _total_duration;
-  _avg_vertical_oscillation = _avg_vertical_oscillation / _total_duration;
-  _avg_stance_time = _avg_stance_time / _total_duration;
-  _avg_stance_ratio = _avg_stance_ratio / _total_duration;
 }
 
 void
@@ -236,6 +232,14 @@ activity::print_summary(FILE *fh) const
       format_heart_rate(tem, max_heart_rate(), unit_type::beats_per_minute);
       fprintf(fh, "Max-HR: %s\n", tem.c_str());
       tem.clear();
+
+      if (recovery_heart_rate() != 0)
+	{
+	  format_heart_rate(tem, recovery_heart_rate(),
+			    unit_type::beats_per_minute);
+	  fprintf(fh, "Recovery-HR: %s\n", tem.c_str());
+	  tem.clear();
+	}
     }
 
   if (has_cadence())
@@ -270,7 +274,7 @@ activity::print_summary(FILE *fh) const
 void
 activity::print_laps(FILE *fh) const
 {
-  if (laps().size() == 0)
+  if (_laps.size() == 0)
     return;
 
   fprintf(fh, "    %-3s  %8s  %6s  %5s %5s", "Lap", "Time", "Dist.",
@@ -288,7 +292,7 @@ activity::print_laps(FILE *fh) const
   const double miles_per_meter = 0.000621371192;
 
   int lap_idx = 0;
-  for (const auto &it : laps())
+  for (const auto &it : _laps)
     {
       std::string dur;
       format_time(dur, it.total_duration, true, "");
@@ -344,43 +348,46 @@ activity::point::field_function(point_field field)
 {
   switch (field)
     {
-    case point_field::timestamp:
-      return [] (const point *p) -> double {return p->timestamp;};
+    case point_field::timer_time:
+      return [] (const point &p) -> float {return p.timer_time;};
+
+    case point_field::elapsed_time:
+      return [] (const point &p) -> float {return p.elapsed_time;};
 
     case point_field::altitude:
-      return [] (const point *p) -> double {return p->altitude;};
+      return [] (const point &p) -> float {return p.altitude;};
 
     case point_field::distance:
-      return [] (const point *p) -> double {return p->distance;};
+      return [] (const point &p) -> float {return p.distance;};
 
     case point_field::speed:
-      return [] (const point *p) -> double {return p->speed;};
+      return [] (const point &p) -> float {return p.speed;};
 
     case point_field::pace:
-      return [] (const point *p) -> double {return 1 / p->speed;};
+      return [] (const point &p) -> float {return 1 / p.speed;};
 
     case point_field::heart_rate:
-      return [] (const point *p) -> double {return p->heart_rate;};
+      return [] (const point &p) -> float {return p.heart_rate;};
 
     case point_field::cadence:
-      return [] (const point *p) -> double {return p->cadence;};
+      return [] (const point &p) -> float {return p.cadence;};
 
     case point_field::vertical_oscillation:
-      return [] (const point *p) -> double {return p->vertical_oscillation;};
+      return [] (const point &p) -> float {return p.vertical_oscillation;};
 
     case point_field::stance_time:
-      return [] (const point *p) -> double {return p->stance_time;};
+      return [] (const point &p) -> float {return p.stance_time;};
 
     case point_field::stance_ratio:
-      return [] (const point *p) -> double {return p->stance_ratio;};
+      return [] (const point &p) -> float {return p.stance_ratio;};
 
     case point_field::stride_length:
-      return [] (const point *p) -> double {
-	return p->cadence != 0 ? p->speed / (p->cadence * (1/60.)) : 0;};
+      return [] (const point &p) -> float {
+	return p.cadence != 0 ? p.speed / (p.cadence * (1/60.)) : 0;};
 
     case point_field::efficiency:
-      return [] (const point *p) -> double {
-	return p->speed != 0 ? (p->heart_rate * (1/60.)) / p->speed : 0;};
+      return [] (const point &p) -> float {
+	return p.speed != 0 ? (p.heart_rate * (1/60.)) / p.speed : 0;};
 
     default:
       return nullptr;
@@ -390,9 +397,10 @@ activity::point::field_function(point_field field)
 void
 activity::point::add(const point &x)
 {
-  timestamp += x.timestamp;
   location.latitude += x.location.latitude;
   location.longitude += x.location.longitude;
+  elapsed_time += x.elapsed_time;
+  timer_time += x.timer_time;
   altitude += x.altitude;
   distance += x.distance;
   speed += x.speed;
@@ -406,9 +414,10 @@ activity::point::add(const point &x)
 void
 activity::point::sub(const point &x)
 {
-  timestamp -= x.timestamp;
   location.latitude -= x.location.latitude;
   location.longitude -= x.location.longitude;
+  elapsed_time -= x.elapsed_time;
+  timer_time -= x.timer_time;
   altitude -= x.altitude;
   distance -= x.distance;
   speed -= x.speed;
@@ -422,9 +431,10 @@ activity::point::sub(const point &x)
 void
 activity::point::mul(float x)
 {
-  timestamp *= x;
   location.latitude *= x;
   location.longitude *= x;
+  elapsed_time *= x;
+  timer_time *= x;
   altitude *= x;
   distance *= x;
   speed *= x;
@@ -436,37 +446,32 @@ activity::point::mul(float x)
 }
 
 void
-activity::get_range(point_field field, double &ret_min, double &ret_max,
-		    double &ret_mean, double &ret_sdev) const
+activity::get_range(point_field field, float &ret_min, float &ret_max,
+		    float &ret_mean, float &ret_sdev) const
 {
-  double min = 0, max = 0, total = 0, total_sq = 0, samples = 0;
+  float min = 0, max = 0, total = 0, total_sq = 0;
+  int samples = 0;
 
-  point::field_fn field_fn = point::field_function(field);
+  point::field_fn fn = point::field_function(field);
 
-  for (size_t li = 0; li < laps().size(); li++)
+  for (const auto &p : _points)
     {
-      const lap &l = laps()[li];
+      float value = fn(p);
 
-      for (size_t ti = 0; ti < l.track.size(); ti++)
+      if (p.distance == 0 || !(value > 0))
+	continue;
+
+      if (samples == 0)
+	min = max = value;
+      else
 	{
-	  const point &p = l.track[ti];
-	  double value = field_fn(&p);
-
-	  if (p.distance == 0 || !(value > 0))
-	    continue;
-
-	  if (samples == 0)
-	    min = max = value;
-	  else
-	    {
-	      min = std::min(min, value);
-	      max = std::max(max, value);
-	    }
-
-	  total += value;
-	  total_sq += value * value;
-	  samples++;
+	  min = std::min(min, value);
+	  max = std::max(max, value);
 	}
+
+      total += value;
+      total_sq += value * value;
+      samples++;
     }
 
   ret_min = min;
@@ -474,26 +479,29 @@ activity::get_range(point_field field, double &ret_min, double &ret_max,
 
   if (samples > 0)
     {
-      double recip = 1 / samples;
+      float recip = 1.f / samples;
       ret_mean = total * recip;
-      ret_sdev = sqrt(total_sq * recip - ret_mean * ret_mean);
+      ret_sdev = sqrtf(total_sq * recip - ret_mean * ret_mean);
     }
   else
     ret_mean = 0, ret_sdev = 0;
 }
 
 void
-activity::lap::update_region()
+activity::update_regions()
 {
   /* FIXME: none of this correctly handles regions spanning the wrap point. */
 
   double min_lat = 0, min_long = 0, max_lat = 0, max_long = 0;
   bool first = true;
 
-  for (size_t i = 0; i < track.size(); i++)
-    {
-      const point &p = track[i];
+  auto lap = _laps.begin();
 
+  double lap_min_lat = 0, lap_min_long = 0, lap_max_lat = 0, lap_max_long = 0;
+  bool lap_first = true;
+
+  for (const auto &p : _points)
+    {
       if (p.location.latitude == 0 && p.location.longitude == 0)
 	continue;
 
@@ -510,50 +518,44 @@ activity::lap::update_region()
 	  min_long = std::min(min_long, p.location.longitude);
 	  max_long = std::max(max_long, p.location.longitude);
 	}
+
+      if (lap != _laps.end()
+	  && p.elapsed_time > (lap->start_elapsed_time
+			       + lap->total_elapsed_time))
+	{
+	  location cen = location((min_lat + max_lat)*.5,
+				  (min_long + max_long)*.5);
+	  location_size sz = location_size(max_lat - min_lat,
+					   max_long - min_long);
+	  lap->region = location_region(cen, sz);
+	  lap_min_lat = lap_max_lat = 0;
+	  lap_min_long = lap_max_long = 0;
+	  lap_first = true;
+	  lap++;
+	}
+
+      if (lap_first)
+	{
+	  lap_min_lat = lap_max_lat = p.location.latitude;
+	  lap_min_long = lap_max_long = p.location.longitude;
+	  lap_first = false;
+	}
+      else
+	{
+	  lap_min_lat = std::min(lap_min_lat, p.location.latitude);
+	  lap_max_lat = std::max(lap_max_lat, p.location.latitude);
+	  lap_min_long = std::min(lap_min_long, p.location.longitude);
+	  lap_max_long = std::max(lap_max_long, p.location.longitude);
+	}
     }
 
-  location cen = location((min_lat + max_lat)*.5, (min_long + max_long)*.5);
-  location_size sz = location_size(max_lat - min_lat, max_long - min_long);
-  this->region = location_region(cen, sz);
-}
-
-void
-activity::update_region()
-{
-  double min_lat = 0, min_long = 0, max_lat = 0, max_long = 0;
-  bool first = true;
-
-  for (size_t i = 0; i < laps().size(); i++)
+  if (lap != _laps.end())
     {
-      lap &l = laps()[i];
-
-      l.update_region();
-
-      if (l.region.size.latitude != 0 || l.region.size.longitude != 0)
-	{
-	  double lat0 = (l.region.center.latitude
-			 - l.region.size.latitude * .5);
-	  double long0 = (l.region.center.longitude
-			  - l.region.size.longitude * .5);
-	  double lat1 = lat0 + l.region.size.latitude;
-	  double long1 = long0 + l.region.size.longitude;
-
-	  if (first)
-	    {
-	      min_lat = lat0;
-	      max_lat = lat1;
-	      min_long = long0;
-	      max_long = long1;
-	      first = false;
-	    }
-	  else
-	    {
-	      min_lat = std::min(min_lat, lat0);
-	      max_lat = std::max(max_lat, lat1);
-	      min_long = std::min(min_long, long0);
-	      max_long = std::max(max_long, long1);
-	    }
-	}
+      location cen = location((min_lat + max_lat)*.5,
+			      (min_long + max_long)*.5);
+      location_size sz = location_size(max_lat - min_lat,
+				       max_long - min_long);
+      lap->region = location_region(cen, sz);
     }
 
   location cen = location((min_lat + max_lat)*.5, (min_long + max_long)*.5);
@@ -562,11 +564,20 @@ activity::update_region()
 }
 
 void
-activity::smooth(const activity &src, int width)
+activity::copy_summary(const activity &src)
 {
   _activity_id = src._activity_id;
   _sport = src._sport;
   _device = src._device;
+
+  _has_location = src._has_location;
+  _has_speed = src._has_speed;
+  _has_heart_rate = src._has_heart_rate;
+  _has_cadence = src._has_cadence;
+  _has_altitude = src._has_altitude;
+  _has_dynamics = src._has_dynamics;
+
+  _region = src._region;
 
   _start_time = src._start_time;
   _total_elapsed_time = src._total_elapsed_time;
@@ -580,45 +591,26 @@ activity::smooth(const activity &src, int width)
   _max_speed = src._max_speed;
   _avg_heart_rate = src._avg_heart_rate;
   _max_heart_rate = src._max_heart_rate;
+  _recovery_heart_rate = src._recovery_heart_rate;
+  _recovery_heart_rate_timestamp = src._recovery_heart_rate_timestamp;
   _avg_cadence = src._avg_cadence;
   _max_cadence = src._max_cadence;
+  _avg_vertical_oscillation = src._avg_vertical_oscillation;
+  _avg_stance_time = src._avg_stance_time;
+  _avg_stance_ratio = src._avg_stance_ratio;
+}
 
-  _has_location = src._has_location;
-  _has_speed = src._has_speed;
-  _has_heart_rate = src._has_heart_rate;
-  _has_cadence = src._has_cadence;
-  _has_altitude = src._has_altitude;
-  _has_dynamics = src._has_dynamics;
+void
+activity::smooth(const activity &src, int width)
+{
+  copy_summary(src);
+  _laps = src._laps;
 
-  for (const auto &it : src.laps())
-    {
-      _laps.push_back(lap());
-      lap &l = _laps.back();
+  _points.resize(src._points.size());
 
-      l.start_time = it.start_time;
-      l.total_elapsed_time = it.total_elapsed_time;
-      l.total_duration = it.total_duration;
-      l.total_distance = it.total_distance;
-      l.total_ascent = it.total_ascent;
-      l.total_descent = it.total_descent;
-      l.total_calories = it.total_calories;
-      l.avg_speed = it.avg_speed;
-      l.max_speed = it.max_speed;
-      l.avg_heart_rate = it.avg_heart_rate;
-      l.max_heart_rate = it.max_heart_rate;
-      l.avg_cadence = it.avg_cadence;
-      l.max_cadence = it.max_cadence;
-      l.avg_vertical_oscillation = it.avg_vertical_oscillation;
-      l.avg_stance_time = it.avg_stance_time;
-      l.avg_stance_ratio = it.avg_stance_ratio;
-      l.region = it.region;
-
-      l.track.resize(it.track.size());
-    }
-
-  const_iterator s_in = src.begin();
-  const_iterator s_out = s_in;
-  iterator it = begin();
+  auto s_in = src._points.begin();
+  auto s_out = s_in;
+  auto it = _points.begin();
 
   point sum;
   int sum_n = 0;
@@ -628,7 +620,7 @@ activity::smooth(const activity &src, int width)
      to a stream of 1s intervals by holding previous samples as we process
      the array? */
 
-  while (s_in != src.end())
+  while (s_in != src._points.end())
     {
       if (i >= width)
 	{
@@ -666,35 +658,25 @@ activity::smooth(const activity &src, int width)
 }
 
 bool
-activity::point_at_time(double t, point &ret_p) const
+activity::point_at(point_field field, float x, point &ret_p) const
 {
-  for (const auto &lap : laps())
+  auto p = points_from(field, x);
+
+  if (p != _points.end())
     {
-      if (lap.start_time + lap.total_elapsed_time < t)
-	continue;
-      if (lap.start_time > t)
-	return false;
-
-      const activity::point *last_p = nullptr;
-
-      for (const auto &pt : lap.track)
+      if (p != _points.begin())
 	{
-	  if (pt.timestamp == 0)
-	    continue;
+	  point::field_fn fn = point::field_function(field);
 
-	  if (pt.timestamp > t)
-	    {
-	      if (last_p != nullptr)
-		{
-		  float f = (pt.timestamp - t) / (pt.timestamp - last_p->timestamp);
-		  mix(ret_p, *last_p, pt, 1-f);
-		  return true;
-		}
-	      else
-		return false;
-	    }
-      
-	  last_p = &pt;
+	  auto last_p = p - 1;
+
+	  float px = fn(*p);
+	  float last_px = fn(*last_p);
+
+	  float f = (px - x) / (px - last_px);
+
+	  mix(ret_p, *p, *last_p, f);
+	  return true;
 	}
     }
 
@@ -703,13 +685,13 @@ activity::point_at_time(double t, point &ret_p) const
 
 } // namespace gps
 
-
 void
 mix(gps::activity::point &a, const gps::activity::point &b,
   const gps::activity::point &c, float f)
 {
-  mix(a.timestamp, b.timestamp, c.timestamp, f);
   mix(a.location, b.location, c.location, f);
+  mix(a.elapsed_time, b.elapsed_time, c.elapsed_time, f);
+  mix(a.timer_time, b.timer_time, c.timer_time, f);
   mix(a.altitude, b.altitude, c.altitude, f);
   mix(a.distance, b.distance, c.distance, f);
   mix(a.speed, b.speed, c.speed, f);

@@ -79,6 +79,12 @@ fit_parser::parse_file(FILE *fh)
 {
   _file = fh;
 
+  _start_time = 0;
+
+  _stopped = false;
+  _stopped_timestamp = 0;
+  _stopped_duration = 0;
+
   read_header ();
   read_data_records ();
 
@@ -87,7 +93,7 @@ fit_parser::parse_file(FILE *fh)
   /* FIXME: ignoring CRC. */
 
   if (!had_error())
-    destination().update_region();
+    destination().update_regions();
 }
 
 /* pass null 'buf' pointer to seek forwards. */
@@ -292,8 +298,11 @@ fit_parser::read_data_message(const message_type &def, uint32_t timestamp)
       read_record_message(def, timestamp);
       break;
 
+    case 21:
+      read_event_message(def, timestamp);
+      break;
+
     case 0:				/* file_id */
-    case 21:				/* event */
     case 23:				/* device_info */
     case 34:				/* activity */
     case 49:				/* file_creator */
@@ -502,7 +511,13 @@ fit_parser::read_record_message(const message_type &def, uint32_t timestamp)
 {
   activity::point p;
 
-  p.timestamp = make_time(timestamp);
+  double record_t = make_time(timestamp);
+
+  if (_start_time == 0)
+    _start_time = record_t;
+
+  p.elapsed_time = record_t - _start_time;
+  p.timer_time = record_t - (_start_time + _stopped_duration);
 
   for (const auto &it : def.fields)
     {
@@ -577,7 +592,82 @@ fit_parser::read_record_message(const message_type &def, uint32_t timestamp)
 	}
     }
 
-  _records.push_back(p);
+  destination().points().push_back(p);
+}
+
+void
+fit_parser::read_event_message(const message_type &def, uint32_t timestamp)
+{
+  double time = make_time(timestamp);
+  uint32_t data = 0;
+  int event = -1;
+  int event_type = -1;
+
+  for (const auto &it : def.fields)
+    {
+      if (had_error())
+	break;
+
+      switch (it.field_type)
+	{
+	case 0:				/* event */
+	  event = read_field(def, it);
+	  break;
+
+	case 1:				/* event_type */
+	  event_type = read_field(def, it);
+	  break;
+
+	case 2:				/* data16 */
+	case 3:				/* data */
+	  data = read_field(def, it);
+	  break;
+
+	case 4:				/* event_group */
+	  /* fall through. */
+
+	default:
+	  skip_field(it);
+	}
+    }
+
+  switch (event)
+    {
+    case 0:				/* timer */
+      if (event_type == 0)		/* event_type_start */
+	{
+	  if (_start_time == 0)
+	    _start_time = time;
+
+	  if (_stopped)
+	    {
+	      if (_stopped_timestamp != 0)
+		_stopped_duration += time - _stopped_timestamp;
+
+	      _stopped = false;
+	    }
+	}
+      else if (event_type == 1		/* event_type_stop */
+	       || event_type == 4)	/* event_type_stop_all */
+	{
+	  if (!_stopped)
+	    {
+	      _stopped_timestamp = time;
+	      _stopped = true;
+	    }
+	}
+      break;
+
+    case 21:				/* recovery_hr */
+      if (event_type == 3)		/* marker */
+	destination().set_recovery_heart_rate(data, timestamp);
+      break;
+
+    case 37:				/* unknown */
+    case 38:				/* unknown */
+    case 39:				/* unknown */
+      break;
+    }
 }
 
 void
@@ -597,7 +687,8 @@ fit_parser::read_lap_message(const message_type &def, uint32_t timestamp)
       switch (it.field_type)
 	{
 	case 2:				/* start_time */
-	  lap.start_time = make_time(read_field(def, it));
+	  lap.start_elapsed_time
+	    = make_time(read_field(def, it)) - _start_time;
 	  break;
 
 	case 7:				/* total_elapsed_time */
@@ -682,10 +773,6 @@ fit_parser::read_lap_message(const message_type &def, uint32_t timestamp)
     lap.avg_cadence += avg_cadence_frac;
   if (lap.max_cadence != 0)
     lap.max_cadence += max_cadence_frac;
-
-  using std::swap;
-  swap(lap.track, _records);
-  _records.resize(0);
 }
 
 void

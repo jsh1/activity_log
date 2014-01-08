@@ -241,7 +241,7 @@ setTableColumnEnabled(NSTableView *tv, NSString *ident, BOOL state)
   if ([ident isEqualToString:@"lap"])
     return [NSString stringWithFormat:@"%d", (int) row + 1];
   else if ([ident isEqualToString:@"date"])
-    act::format_date_time(str, (time_t) lap.start_time, "%F %-l%p");
+    act::format_date_time(str, (time_t) (gps_data->start_time() + lap.start_elapsed_time), "%F %-l%p");
   else if ([ident isEqualToString:@"distance"])
     act::format_distance(str, lap.total_distance, act::unit_type::unknown);
   else if ([ident isEqualToString:@"duration"])

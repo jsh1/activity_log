@@ -88,7 +88,7 @@ public:
   x_axis_type x_axis() const;
 
   void add_line(gps::activity::point_field field, value_conversion conv,
-    line_color color, uint32_t fill_bg, double min_ratio, double max_ratio);
+    line_color color, uint32_t fill_bg, float min_ratio, float max_ratio);
 
   void set_selected_lap(int idx);
   int selected_lap() const;
@@ -116,10 +116,10 @@ protected:
       value_conversion conversion;
       line_color color;
       uint32_t flags;
-      double min_ratio, max_ratio;
+      float min_ratio, max_ratio;
 
       // in "standard unit" source space
-      double min_value, max_value;
+      float min_value, max_value;
       double scaled_min_value, scaled_max_value;
 
       // in "target unit" source space
@@ -127,7 +127,7 @@ protected:
 
       line();
       line(gps::activity::point_field field, value_conversion conversion,
-	line_color color, uint32_t flags, double min_ratio, double max_ratio);
+	line_color color, uint32_t flags, float min_ratio, float max_ratio);
 
       void update_values(const chart &c);
 
@@ -156,8 +156,8 @@ protected:
 
   const gps::activity &_activity;
   x_axis_type _x_axis;
-  double _min_time, _max_time;
-  double _min_distance, _max_distance;
+  float _min_time, _max_time;
+  float _min_distance, _max_distance;
   std::vector<line> _lines;
   int _selected_lap;
   double _current_time;
@@ -191,8 +191,7 @@ chart::line::line()
 inline
 chart::line::line(gps::activity::point_field field_,
 		  value_conversion conversion_, line_color color_,
-		  uint32_t flags_, double min_ratio_,
-		  double max_ratio_)
+		  uint32_t flags_, float min_ratio_, float max_ratio_)
 : field(field_),
   conversion(conversion_),
   color(color_),

@@ -597,7 +597,7 @@ enum ChartFieldMasks
       act::gps::activity::point pt;
       if (_chart->point_at_x(p.x, pt))
 	{
-	  double t = pt.timestamp - _chart->get_activity().start_time();
+	  double t = pt.elapsed_time;
 	  [_controller setCurrentTime:t];
 	}
     }

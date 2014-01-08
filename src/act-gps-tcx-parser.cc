@@ -70,6 +70,8 @@ tcx_parser::parse_file(FILE *fh)
   if (had_error())
     return;
 
+  _start_time = 0;
+
   char buffer[BUFSIZ];
   while (size_t size = fread(buffer, 1, BUFSIZ, fh))
     xmlParseChunk(_ctx, buffer, size, false);
@@ -79,7 +81,7 @@ tcx_parser::parse_file(FILE *fh)
   destination().update_summary();
 
   if (!had_error())
-    destination().update_region();
+    destination().update_regions();
 }
 
 namespace {
@@ -185,7 +187,15 @@ tcx_parser::sax_start_element(void *ctx, const xmlChar *name,
 	      p->destination().laps().push_back(activity::lap());
 	      std::string s;
 	      if (find_attr(s, n_attr, attr, "StartTime"))
-		p->current_lap().start_time = parse_time(s);
+		{
+		  double t = parse_time(s);
+		  if (p->_start_time == 0)
+		    {
+		      p->_start_time = t;
+		      p->destination().set_start_time(t);
+		    }
+		  p->current_lap().start_elapsed_time = t - p->_start_time;
+		}
 	    }
 	  break;
 	case state::LAP:
@@ -210,7 +220,7 @@ tcx_parser::sax_start_element(void *ctx, const xmlChar *name,
 	  if (strcmp((const char *)name, "Trackpoint") == 0)
 	    {
 	      new_state = state::TRACKPOINT;
-	      p->current_lap().track.push_back(activity::point());
+	      p->destination().points().push_back(activity::point());
 	    }
 	  break;
 	case state::TRACKPOINT:
@@ -350,7 +360,9 @@ tcx_parser::sax_end_element(void *ctx, const xmlChar *name,
 	  p->current_lap().max_cadence = parse_double(*p->_characters) * 2;
 	  break;
 	case state::TP_TIME:
-	  p->current_point().timestamp = parse_time(*p->_characters);
+	  p->current_point().elapsed_time
+	    = parse_time(*p->_characters) - p->_start_time;
+	  p->current_point().timer_time = p->current_point().elapsed_time;
 	  break;
 	case state::TP_LAT:
 	  p->current_point().location.latitude = parse_double(*p->_characters);

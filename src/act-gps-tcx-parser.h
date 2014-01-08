@@ -76,6 +76,8 @@ class tcx_parser : public parser
   std::vector<state> _state;
   std::string *_characters;
 
+  double _start_time;
+
 public:
   tcx_parser(activity &dest);
   ~tcx_parser();
@@ -89,8 +91,9 @@ private:
   state current_state() {return _state.back();}
   state previous_state() {return _state[_state.size()-2];}
 
+  activity::lap &first_lap() {return destination().laps().front();}
   activity::lap &current_lap() {return destination().laps().back();}
-  activity::point &current_point() {return current_lap().track.back();}
+  activity::point &current_point() {return destination().points().back();}
 
   static void sax_start_element(void *ctx, const xmlChar *name,
     const xmlChar *pfx, const xmlChar *uri, int n_ns, const xmlChar **ns,

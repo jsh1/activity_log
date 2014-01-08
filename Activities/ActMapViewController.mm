@@ -306,7 +306,8 @@
     return;
 
   act::gps::activity::point p;
-  if (gps_a->point_at_time(gps_a->start_time() + t, p))
+  auto elapsed_time = act::gps::activity::point_field::elapsed_time;
+  if (gps_a->point_at(elapsed_time, t, p))
     {
       _currentLocation = p.location;
       _hasCurrentLocation = YES;
@@ -397,25 +398,22 @@
 
   bool in_subpath = false;
 
-  for (const auto &lap : gps_a->laps())
+  for (const auto &p : gps_a->points())
     {
-      for (const auto &p : lap.track)
+      if (p.location.longitude == 0 && p.location.latitude == 0)
+	continue;
+
+      CGFloat px = p.location.longitude * xa + xb;
+      CGFloat py = p.location.latitude * ya + yb;
+
+      if (!in_subpath)
 	{
-	  if (p.location.longitude == 0 && p.location.latitude == 0)
-	    continue;
-
-	  CGFloat px = p.location.longitude * xa + xb;
-	  CGFloat py = p.location.latitude * ya + yb;
-
-	  if (!in_subpath)
-	    {
-	      CGContextBeginPath(ctx);
-	      CGContextMoveToPoint(ctx, px, py);
-	      in_subpath = true;
-	    }
-	  else
-	    CGContextAddLineToPoint(ctx, px, py);
+	  CGContextBeginPath(ctx);
+	  CGContextMoveToPoint(ctx, px, py);
+	  in_subpath = true;
 	}
+      else
+	CGContextAddLineToPoint(ctx, px, py);
     }
 
   if (in_subpath)
@@ -432,9 +430,16 @@
       CGContextBeginPath(ctx);
 
       bool in_subpath = false;
-	
-      for (const auto &p : lap.track)
+
+      auto lap_start = gps_a->lap_begin(lap);
+      auto lap_end = gps_a->lap_end(lap);
+
+      for (auto lap_it = lap_start; lap_it != lap_end; lap_it++)
 	{
+	  assert(lap_it != gps_a->points().end());
+
+	  auto p = *lap_it;
+
 	  if (p.location.longitude == 0 && p.location.latitude == 0)
 	    continue;
 
