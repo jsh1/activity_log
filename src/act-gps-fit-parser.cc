@@ -517,7 +517,8 @@ fit_parser::read_record_message(const message_type &def, uint32_t timestamp)
     _start_time = record_t;
 
   p.elapsed_time = record_t - _start_time;
-  p.timer_time = record_t - (_start_time + _stopped_duration);
+  p.timer_time = ((!_stopped ? record_t : _stopped_timestamp)
+		  - (_start_time + _stopped_duration));
 
   for (const auto &it : def.fields)
     {
