@@ -131,6 +131,7 @@
   time_t _date;
   std::vector<act::activity *> _activities;
   BOOL _selected;
+  BOOL _highlit;
   BOOL _expanded, _expandable;
 
   CATextLayer *_textLayer;
@@ -140,6 +141,7 @@
 @property(nonatomic) time_t date;
 @property(nonatomic) const std::vector<act::activity *> &activities;
 @property(nonatomic, getter=isSelected) BOOL selected;
+@property(nonatomic, getter=isHighlit) BOOL highlit;
 @property(nonatomic, getter=isExpanded) BOOL expanded;
 @property(nonatomic, getter=isExpandable) BOOL expandable;
 
@@ -411,6 +413,7 @@ activity_radius(double dist, double dur, double pts, int displayMode)
 - (void)dealloc
 {
   [_expandedLayer release];
+  [_highlitLayer release];
   [_selectedLayer release];
   [super dealloc];
 }
@@ -775,26 +778,43 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
 
   CALayer *self_layer = [self layer];
   CALayer *layer = [self_layer hitTest:NSPointToCGPoint(p)];
+  ActWeekView_ActivityLayer *highlit_layer = nil;
   ActWeekView_ActivityLayer *expanded_layer = nil;
 
   while (layer != nil && layer != self_layer)
     {
-      if ([layer isKindOfClass:[ActWeekView_ActivityLayer class]]
-	  && [(ActWeekView_ActivityLayer *)layer isExpandable])
+      if ([layer isKindOfClass:[ActWeekView_ActivityLayer class]])
 	{
-	  expanded_layer = (ActWeekView_ActivityLayer *)layer;
-	  break;
+	  if (highlit_layer == nil
+	      && [(ActWeekView_ActivityLayer *)layer activities].size() == 1)
+	    {
+	      highlit_layer = (ActWeekView_ActivityLayer *)layer;
+	    }
+
+	  if ([(ActWeekView_ActivityLayer *)layer isExpandable])
+	    {
+	      expanded_layer = (ActWeekView_ActivityLayer *)layer;
+	      break;
+	    }
 	}
 
       layer = [layer superlayer];
     }
 
-  if (expanded_layer != _expandedLayer)
+  if (_expandedLayer != expanded_layer)
     {
       [_expandedLayer setExpanded:NO];
       [_expandedLayer release];
       _expandedLayer = [expanded_layer retain];
       [_expandedLayer setExpanded:YES];
+    }
+
+  if (_highlitLayer != highlit_layer)
+    {
+      [_highlitLayer setHighlit:NO];
+      [_highlitLayer release];
+      _highlitLayer = [highlit_layer retain];
+      [_highlitLayer setHighlit:YES];
     }
 }
 
@@ -805,6 +825,13 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
       [_expandedLayer setExpanded:NO];
       [_expandedLayer release];
       _expandedLayer = nil;
+    }
+
+  if (_highlitLayer != nil)
+    {
+      [_highlitLayer setHighlit:NO];
+      [_highlitLayer release];
+      _highlitLayer = nil;
     }
 }
 
@@ -1397,9 +1424,11 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
   else if ([key isEqualToString:@"borderColor"])
     return (id)[[NSColor colorWithDeviceWhite:0 alpha:.25] CGColor];
   else if ([key isEqualToString:@"shadowOffset"])
-    return [NSValue valueWithSize:NSMakeSize(0, 2)];
+    return [NSValue valueWithSize:NSZeroSize];
   else if ([key isEqualToString:@"shadowRadius"])
-    return @1.5;
+    return @8;
+  else if ([key isEqualToString:@"shadowColor"])
+    return (id)[[ActColor alternateSelectedControlColor] CGColor];
   else if ([key isEqualToString:@"shadowPathIsBounds"])
     return @YES;
 
@@ -1444,6 +1473,20 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
   if (_selected != flag)
     {
       _selected = flag;
+      [self setNeedsLayout];
+    }
+}
+
+- (BOOL)isHighlit
+{
+  return _highlit;
+}
+
+- (void)setHighlit:(BOOL)flag
+{
+  if (_highlit != flag)
+    {
+      _highlit = flag;
       [self setNeedsLayout];
     }
 }
@@ -1493,8 +1536,6 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
   else
     border_color = [ActColor alternateSelectedControlColor];
   
-  BOOL shadowed = _expanded && _activities.size() == 1;
-
   [(ActWeekViewController *)[self delegate] withAnimationsEnabled:^
     {
       [self setBounds:CGRectMake(0, 0, radius*2, radius*2)];
@@ -1502,7 +1543,7 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
       [self setBackgroundColor:[background_color CGColor]];
       [self setBorderColor:[border_color CGColor]];
       [self setBorderWidth:_selected ? 4 : _activities.size() == 1 ? 1 : 0];
-      [self setShadowOpacity:shadowed ? .5 : 0];
+      [self setShadowOpacity:_highlit ? 1 : 0];
     }];
 
   [self setZPosition:_expanded ? 1 : 0];
@@ -1612,7 +1653,6 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
 
       [sublayer setInterfaceScale:scale];
       [sublayer setDisplayMode:[self displayMode]];
-      [sublayer setExpanded:_expanded];
       [sublayer setContentsScale:[self contentsScale]];
 
       std::vector<act::activity *> day_vec;

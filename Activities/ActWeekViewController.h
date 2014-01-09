@@ -66,6 +66,7 @@ enum ActWeekViewDisplayMode
 
   NSTrackingArea *_trackingArea;
   ActWeekView_ActivityLayer *_expandedLayer;
+  ActWeekView_ActivityLayer *_highlitLayer;
   ActWeekView_ActivityLayer *_selectedLayer;
 }
 
