@@ -720,15 +720,25 @@ resampler_stream<Stream>::next(activity::point &ret_p)
 	  if (!p1_valid)
 	    {
 	      ret_p = *p0;
-	      ret_p.timer_time = t;
+	      return true;
+	    }
+
+	  if (fabsf((p1->timer_time - p1->elapsed_time)
+		    - (p0->timer_time - p0->elapsed_time)) > 1e-3f)
+	    {
+	      t = p1->timer_time;
+	      ret_p = *p0;
 	      return true;
 	    }
 	}
 
+      if (t < p0->timer_time)
+	t = p0->timer_time;
+
       float f = (t - p0->timer_time) / (p1->timer_time - p0->timer_time);
       t += sample_width;
 
-      mix(ret_p, *p1, *p0, f);
+      mix(ret_p, *p0, *p1, f);
       return true;
     }
 
