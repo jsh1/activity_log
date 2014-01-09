@@ -600,61 +600,209 @@ activity::copy_summary(const activity &src)
   _avg_stance_ratio = src._avg_stance_ratio;
 }
 
+namespace {
+
+/* Composable gps track manipulations. */
+
+template<typename Iterator>
+struct input_stream
+{
+  Iterator p;
+  Iterator end;
+
+  input_stream(Iterator begin, Iterator end);
+  input_stream(const input_stream &rhs);
+
+  bool next(activity::point &p);
+};
+
+template<typename Stream>
+struct resampler_stream
+{
+  Stream src;
+  float sample_width;
+
+  activity::point p[2];
+  activity::point *p0;
+  activity::point *p1;
+  bool p1_valid;
+
+  float t;
+
+  resampler_stream(Stream src, float sample_width);
+  resampler_stream(const resampler_stream &rhs);
+
+  bool next(activity::point &p);
+};
+
+template<typename Stream>
+struct box_stream
+{
+  Stream s_in;
+  Stream s_out;
+  bool s_in_valid;
+
+  int filter_width;
+
+  activity::point sum;
+  int sum_n;
+  int total;
+
+  box_stream(Stream src, int filter_width);
+  box_stream(const box_stream &rhs);
+
+  bool next(activity::point &p);
+};
+
+template<typename Iterator> inline
+input_stream<Iterator>::input_stream (Iterator begin_, Iterator end_)
+: p(begin_),
+  end(end_)
+{
+}
+
+template<typename Iterator> inline
+input_stream<Iterator>::input_stream (const input_stream &rhs)
+: input_stream(rhs.p, rhs.end)
+{
+}
+
+template<typename Iterator> inline bool
+input_stream<Iterator>::next(activity::point &ret_p)
+{
+  if (p != end)
+    {
+      ret_p = *p++;
+      return true;
+    }
+  else
+    return false;
+}
+
+template<typename Stream> inline
+resampler_stream<Stream>::resampler_stream (Stream src_, float sample_width_)
+: src(src_),
+  sample_width(sample_width_)
+{
+  p0 = p + 0;
+  p1 = p + 1;
+
+  if (src.next(*p0))
+    p1_valid = src.next(*p1);
+  else
+    p1_valid = false;
+
+  t = p0->timer_time;
+}
+
+template<typename Stream> inline
+resampler_stream<Stream>::resampler_stream(const resampler_stream &rhs)
+: resampler_stream(rhs.src, rhs.sample_width)
+{
+}
+
+template<typename Stream> bool
+resampler_stream<Stream>::next(activity::point &ret_p)
+{
+  /* Standard (crap) linear interpolator with clamp-to-edge behavior. */
+
+  if (p1_valid)
+    {
+      while (!(t < p1->timer_time))
+	{
+	  /* swap pointers to avoid copying all the fields. */
+
+	  using std::swap;
+	  swap(p0, p1);
+
+	  p1_valid = src.next(*p1);
+
+	  if (!p1_valid)
+	    {
+	      ret_p = *p0;
+	      ret_p.timer_time = t;
+	      return true;
+	    }
+	}
+
+      float f = (t - p0->timer_time) / (p1->timer_time - p0->timer_time);
+      t += sample_width;
+
+      mix(ret_p, *p1, *p0, f);
+      return true;
+    }
+
+  return false;
+}
+
+template<typename Stream> inline
+box_stream<Stream>::box_stream(Stream src_, int filter_width_)
+: s_in(src_),
+  s_out(src_),
+  s_in_valid(true),
+  filter_width(filter_width_),
+  sum_n(0),
+  total(0)
+{
+}
+
+template<typename Stream> inline
+box_stream<Stream>::box_stream(const box_stream &rhs)
+: box_stream(rhs.s_in, rhs.filter_width)
+{
+}
+
+template<typename Stream> bool
+box_stream<Stream>::next(activity::point &ret_p)
+{
+  if (s_in_valid)
+    {
+      if (total >= filter_width)
+	{
+	  activity::point p;
+	  s_out.next(p);
+	  sum.sub(p);
+	  sum_n--;
+	}
+
+      activity::point p;
+      s_in_valid = s_in.next(p);
+      if (!s_in_valid)
+	return false;
+
+      sum.add(p);
+      sum_n++;
+      total++;
+
+      ret_p = sum;
+      ret_p.mul(1.f / sum_n);
+      return true;
+    }
+  else
+    return false;
+}
+
+} // anonymous namespace
+
 void
 activity::smooth(const activity &src, int width)
 {
   copy_summary(src);
   _laps = src._laps;
 
-  _points.resize(src._points.size());
+  /* Resample to one second intervals, smooth across width samples,
+     resample to five second intervals. */
 
-  auto s_in = src._points.begin();
-  auto s_out = s_in;
-  auto it = _points.begin();
+  typedef input_stream<point_vector::const_iterator> f1;
+  typedef resampler_stream<f1> f2;
+  typedef box_stream<f2> f3;
+  typedef resampler_stream<f3> f4;
 
-  point sum;
-  int sum_n = 0;
-  int i = 0;
+  f4 filter(f3(f2(f1(src._points.begin(), src._points.end()), 1), width), 5);
 
-  /* FIXME: this doesn't handle non-uniform sample intervals. Normalize
-     to a stream of 1s intervals by holding previous samples as we process
-     the array? */
-
-  while (s_in != src._points.end())
-    {
-      if (i >= width)
-	{
-	  const point &p = *s_out;
-	  if (p.distance != 0)
-	    {
-	      sum.sub(p);
-	      sum_n--;
-	    }
-	  s_out++;
-	}
-
-      const point &s = *s_in;
-
-      if (s.distance != 0)
-	{
-	  sum.add(s);
-	  sum_n++;
-	}
-
-      point &d = *it;
-
-      if (sum_n > 0)
-	{
-	  d = sum;
-	  d.mul(1. / sum_n);
-	}
-      else
-	d = s;
-
-      i++;
-      s_in++;
-      it++;
-    }
+  point p;
+  while (filter.next(p))
+    _points.push_back(p);
 }
 
 bool

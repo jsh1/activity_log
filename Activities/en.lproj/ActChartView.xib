@@ -184,16 +184,22 @@
                         <action selector="smoothingAction:" target="-2" id="iti-Br-v4B"/>
                     </connections>
                 </menuItem>
-                <menuItem title="Some" tag="5" indentationLevel="1" id="scf-oa-Mnj">
-                    <modifierMask key="keyEquivalentModifierMask"/>
-                    <connections>
-                        <action selector="smoothingAction:" target="-2" id="PTm-7N-exb"/>
-                    </connections>
-                </menuItem>
-                <menuItem title="Lots" tag="11" indentationLevel="1" id="9sv-n6-Mxq">
+                <menuItem title="15s average" tag="15" indentationLevel="1" id="9sv-n6-Mxq">
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <connections>
                         <action selector="smoothingAction:" target="-2" id="ZzM-fX-el5"/>
+                    </connections>
+                </menuItem>
+                <menuItem title="1min average" tag="60" indentationLevel="1" id="ufW-iO-kME">
+                    <modifierMask key="keyEquivalentModifierMask"/>
+                    <connections>
+                        <action selector="smoothingAction:" target="-2" id="IqS-mk-Xkm"/>
+                    </connections>
+                </menuItem>
+                <menuItem title="4min average" tag="240" indentationLevel="1" id="b7D-OI-1Mb">
+                    <modifierMask key="keyEquivalentModifierMask"/>
+                    <connections>
+                        <action selector="smoothingAction:" target="-2" id="yAK-fr-abM"/>
                     </connections>
                 </menuItem>
             </items>
