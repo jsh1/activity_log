@@ -28,8 +28,13 @@
 #import "ActColor.h"
 #import "ActWindowController.h"
 
+#define BODY_X_INSET 6
+#define MIN_BODY_HEIGHT 60
+#define MAX_BODY_HEIGHT 400
+
 @interface ActPopoverViewController ()
 - (void)reloadFields;
+- (void)sizeToFit;
 @end
 
 @implementation ActPopoverViewController
@@ -42,6 +47,26 @@
 - (void)viewDidLoad
 {
   [super viewDidLoad];
+
+  _baseHeight = [[self view] frame].size.height;
+
+  _bodyTextView = [[NSTextView alloc] initWithFrame:NSZeroRect];
+  [_bodyTextView setEditable:NO];
+  [_bodyTextView setRichText:NO];
+  [_bodyTextView setUsesFontPanel:NO];
+  [_bodyTextView setImportsGraphics:NO];
+  [_bodyTextView setDrawsBackground:NO];
+  [_bodyTextView setFont:[NSFont fontWithName:@"Helvetica Neue" size:11]];
+  [_bodyTextView setTextColor:[ActColor controlTextColor]];
+  [[self view] addSubview:_bodyTextView];
+  [_bodyTextView release];
+
+  _bodyLayoutContainer = [[NSTextContainer alloc]
+			  initWithContainerSize:NSZeroSize];
+  [_bodyLayoutContainer setLineFragmentPadding:0];
+  _bodyLayoutManager = [[NSLayoutManager alloc] init];
+  [_bodyLayoutManager addTextContainer:_bodyLayoutContainer];
+  [[_bodyTextView textStorage] addLayoutManager:_bodyLayoutManager];
 
   [[NSNotificationCenter defaultCenter]
    addObserver:self selector:@selector(activityDidChangeField:)
@@ -65,9 +90,15 @@
   [_paceField setTextColor:redColor];
   [_pointsLabel setTextColor:greyColor];
   [_pointsField setTextColor:redColor];
-  [_notesField setTextColor:greyColor];
 
   [self reloadFields];
+}
+
+- (void)dealloc
+{
+  [_bodyLayoutManager release];
+  [_bodyLayoutContainer release];
+  [super dealloc];
 }
 
 - (void)setActivityStorage:(act::activity_storage_ref)storage
@@ -101,7 +132,7 @@
   const auto &a = *reinterpret_cast<const act::activity_storage_ref *> (ptr);
 
   if (a == _activityStorage)
-    [self reloadFields];
+    [_bodyTextView setString:[_controller bodyString]];
 }
 
 - (void)reloadFields
@@ -116,7 +147,7 @@
       [date_formatter setLocale:locale];
       [date_formatter setDateFormat:
        [NSDateFormatter dateFormatFromTemplate:
-	@"E d/M/yyyy ha" options:0 locale:locale]];
+	@"E dd MMM yyyy ha" options:0 locale:locale]];
     });
 
   if (_activity)
@@ -137,8 +168,7 @@
        [_controller stringForField:@"pace" ofActivity:*_activity]];
       [_pointsField setObjectValue:
        [_controller stringForField:@"points" ofActivity:*_activity]];
-      [_notesField setObjectValue:
-       [_controller bodyStringOfActivity:*_activity]];
+      [_bodyTextView setString:[_controller bodyStringOfActivity:*_activity]];
     }
   else
     {
@@ -148,8 +178,37 @@
       [_durationField setObjectValue:nil];
       [_paceField setObjectValue:nil];
       [_pointsField setObjectValue:nil];
-      [_notesField setObjectValue:nil];
+      [_bodyTextView setString:@""];
     }
+}
+
+- (void)sizeToFit
+{
+  NSView *view = [self view];
+  NSRect old_frame = [view frame];
+
+  // See https://developer.apple.com/library/mac/documentation/Cocoa/Conceptual/TextLayout/Tasks/StringHeight.html
+ 
+  [_bodyLayoutContainer setContainerSize:
+   NSMakeSize(old_frame.size.width - BODY_X_INSET*2, CGFLOAT_MAX)];
+  [_bodyLayoutManager glyphRangeForTextContainer:_bodyLayoutContainer];
+ 
+  CGFloat new_height = ([_bodyLayoutManager usedRectForTextContainer:
+			 _bodyLayoutContainer].size.height);
+  new_height = ceil(new_height);
+  new_height = std::max(new_height, (CGFloat)MIN_BODY_HEIGHT);
+  new_height = std::min(new_height, (CGFloat)MAX_BODY_HEIGHT);
+
+  NSRect new_frame = old_frame;
+  new_frame.size.height = _baseHeight + new_height + 10;
+  [view setFrameSize:new_frame.size];
+
+  NSRect view_frame;
+  view_frame.origin.x = BODY_X_INSET;
+  view_frame.size.width = new_frame.size.width - BODY_X_INSET*2;
+  view_frame.origin.y = 10;
+  view_frame.size.height = new_height;
+  [_bodyTextView setFrame:view_frame];
 }
 
 @end

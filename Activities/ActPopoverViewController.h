@@ -41,12 +41,19 @@
   IBOutlet NSTextField *_paceField;
   IBOutlet NSTextField *_pointsLabel;
   IBOutlet NSTextField *_pointsField;
-  IBOutlet NSTextField *_notesField;
+
+  CGFloat _baseHeight;
+
+  NSTextView *_bodyTextView;
+  NSLayoutManager *_bodyLayoutManager;
+  NSTextContainer *_bodyLayoutContainer;
 
   act::activity_storage_ref _activityStorage;
   std::unique_ptr<act::activity> _activity;
 }
 
 @property(nonatomic) act::activity_storage_ref activityStorage;
+
+- (void)sizeToFit;
 
 @end

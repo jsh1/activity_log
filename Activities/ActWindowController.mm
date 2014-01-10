@@ -1149,17 +1149,20 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
     relativeToRect:(NSRect)r ofView:(NSView *)view
     preferredEdge:(NSRectEdge)edge
 {
+  ActPopoverViewController *c = (ActPopoverViewController *)
+    [self viewControllerWithClass:[ActPopoverViewController class]];
+
   if (_activityPopover == nil)
     {
       _activityPopover = [[NSPopover alloc] init];
-      ActPopoverViewController *c = (ActPopoverViewController *)
-        [self viewControllerWithClass:[ActPopoverViewController class]];
       [_activityPopover setContentViewController:c];
       [_activityPopover setDelegate:self];
     }
 
-  [(ActPopoverViewController *)[_activityPopover contentViewController]
-   setActivityStorage:storage];
+  NSView *c_view = [c view];
+  [c setActivityStorage:storage];
+  [c sizeToFit];
+  [_activityPopover setContentSize:[c_view frame].size];
   [_activityPopover showRelativeToRect:r ofView:view preferredEdge:edge];
 }
 

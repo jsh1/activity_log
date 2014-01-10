@@ -69,6 +69,10 @@
 @property(nonatomic, readonly) ActWeekHeaderView *headerView;
 @end
 
+@interface ActWeekListView ()
+- (void)updatePopover;
+@end
+
 @interface ActWeekView_ScaledLayer : CALayer
 {
   CGFloat _interfaceScale;
@@ -816,24 +820,31 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
       _highlitLayer = [highlit_layer retain];
       [_highlitLayer setHighlit:YES];
 
-      [[_controller controller] hidePopover];
       [NSRunLoop cancelPreviousPerformRequestsWithTarget:self
-       selector:@selector(showPopover) object:nil];
-      [self performSelector:@selector(showPopover) withObject:nil
-       afterDelay:.25];
+       selector:@selector(updatePopover) object:nil];
+      [[_controller controller] hidePopover];
+
+      if (_highlitLayer != nil)
+	{
+	  [self performSelector:@selector(updatePopover) withObject:nil
+	   afterDelay:.25];
+	}
     }
 }
 
-- (void)showPopover
+- (void)updatePopover
 {
   if (_highlitLayer != nil && [_highlitLayer activities].size() == 1)
     {
       act::activity *a = [_highlitLayer activities].front();
-      NSRect r = NSRectFromCGRect([[self layer] convertRect:[_highlitLayer bounds] fromLayer:_highlitLayer]);
+      NSRect r = NSRectFromCGRect([[self layer] convertRect:
+			[_highlitLayer bounds] fromLayer:_highlitLayer]);
 
       [[_controller controller] showPopoverWithActivityStorage:a->storage()
        relativeToRect:r ofView:self preferredEdge:NSMaxYEdge];
     }
+  else
+    [[_controller controller] hidePopover];
 }
 
 - (void)mouseExited:(NSEvent *)e
@@ -850,6 +861,7 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
       [_highlitLayer setHighlit:NO];
       [_highlitLayer release];
       _highlitLayer = nil;
+      [self updatePopover];
     }
 }
 
