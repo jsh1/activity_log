@@ -53,6 +53,8 @@
 		5755061E1824721D00A69209 /* ActSourceListDeviceItem.mm in Sources */ = {isa = PBXBuildFile; fileRef = 575506191824721D00A69209 /* ActSourceListDeviceItem.mm */; };
 		5755061F1824721D00A69209 /* ActSourceListItem.mm in Sources */ = {isa = PBXBuildFile; fileRef = 5755061B1824721D00A69209 /* ActSourceListItem.mm */; };
 		575506201824721D00A69209 /* ActSourceListQueryItem.mm in Sources */ = {isa = PBXBuildFile; fileRef = 5755061D1824721D00A69209 /* ActSourceListQueryItem.mm */; };
+		575B3D79187F6DEB003A94E7 /* ActPopoverViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = 575B3D78187F6DEB003A94E7 /* ActPopoverViewController.mm */; };
+		575B3D7C18801F12003A94E7 /* ActPopoverView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 575B3D7A18801F12003A94E7 /* ActPopoverView.xib */; };
 		57638D5017DB72EA00BE93AC /* act-intensity-points.cc in Sources */ = {isa = PBXBuildFile; fileRef = 57638D4E17DB72EA00BE93AC /* act-intensity-points.cc */; };
 		57638D5117DB72EA00BE93AC /* act-intensity-points.h in Headers */ = {isa = PBXBuildFile; fileRef = 57638D4F17DB72EA00BE93AC /* act-intensity-points.h */; };
 		5769E6DA1812D2DD00E3D801 /* ActCollapsibleView.mm in Sources */ = {isa = PBXBuildFile; fileRef = 5769E6D91812D2DD00E3D801 /* ActCollapsibleView.mm */; };
@@ -185,6 +187,9 @@
 		5755061B1824721D00A69209 /* ActSourceListItem.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ActSourceListItem.mm; sourceTree = "<group>"; };
 		5755061C1824721D00A69209 /* ActSourceListQueryItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActSourceListQueryItem.h; sourceTree = "<group>"; };
 		5755061D1824721D00A69209 /* ActSourceListQueryItem.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ActSourceListQueryItem.mm; sourceTree = "<group>"; };
+		575B3D77187F6DEB003A94E7 /* ActPopoverViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActPopoverViewController.h; sourceTree = "<group>"; };
+		575B3D78187F6DEB003A94E7 /* ActPopoverViewController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ActPopoverViewController.mm; sourceTree = "<group>"; };
+		575B3D7B18801F12003A94E7 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/ActPopoverView.xib; sourceTree = "<group>"; };
 		57638D4E17DB72EA00BE93AC /* act-intensity-points.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "act-intensity-points.cc"; path = "../src/act-intensity-points.cc"; sourceTree = "<group>"; };
 		57638D4F17DB72EA00BE93AC /* act-intensity-points.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "act-intensity-points.h"; path = "../src/act-intensity-points.h"; sourceTree = "<group>"; };
 		5769E6D81812D2DD00E3D801 /* ActCollapsibleView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActCollapsibleView.h; sourceTree = "<group>"; };
@@ -348,6 +353,8 @@
 				57707AEC17DFBF99009BAC5D /* ActMapViewController.mm */,
 				578D797817E75DE300E50C29 /* ActSummaryViewController.h */,
 				578D797917E75DE300E50C29 /* ActSummaryViewController.mm */,
+				575B3D77187F6DEB003A94E7 /* ActPopoverViewController.h */,
+				575B3D78187F6DEB003A94E7 /* ActPopoverViewController.mm */,
 				5769E6D81812D2DD00E3D801 /* ActCollapsibleView.h */,
 				5769E6D91812D2DD00E3D801 /* ActCollapsibleView.mm */,
 				5734E187181007EB007BDC1B /* ActColor.h */,
@@ -478,6 +485,7 @@
 				5736AE54187752DC00EAE652 /* ActWeekView.xib */,
 				570E6ABF17F472E800A5BB4D /* ActMapView.xib */,
 				570E6AC517F474F700A5BB4D /* ActSummaryView.xib */,
+				575B3D7A18801F12003A94E7 /* ActPopoverView.xib */,
 			);
 			name = Nibs;
 			sourceTree = SOURCE_ROOT;
@@ -573,6 +581,7 @@
 				57921A5717BEAEF0001AD35D /* ActWindow.xib in Resources */,
 				570E6AC117F472E800A5BB4D /* ActMapView.xib in Resources */,
 				570E6AC417F473C600A5BB4D /* ActLapView.xib in Resources */,
+				575B3D7C18801F12003A94E7 /* ActPopoverView.xib in Resources */,
 				57DB7BAE17E0D4790093C735 /* defaults.plist in Resources */,
 				57DB7BAF17E0D4790093C735 /* hikebikemap-tiles.json in Resources */,
 				57DB7BB017E0D4790093C735 /* mapquest-map-tiles.json in Resources */,
@@ -621,6 +630,7 @@
 				5736AE5918775A8100EAE652 /* ActWeekViewController.mm in Sources */,
 				57707AED17DFBF99009BAC5D /* ActMapViewController.mm in Sources */,
 				5755061F1824721D00A69209 /* ActSourceListItem.mm in Sources */,
+				575B3D79187F6DEB003A94E7 /* ActPopoverViewController.mm in Sources */,
 				578D797A17E75DE300E50C29 /* ActSummaryViewController.mm in Sources */,
 				570E6AD017F717FB00A5BB4D /* ActURLCache.m in Sources */,
 				575506201824721D00A69209 /* ActSourceListQueryItem.mm in Sources */,
@@ -748,6 +758,14 @@
 				5736AE55187752DC00EAE652 /* en */,
 			);
 			name = ActWeekView.xib;
+			sourceTree = "<group>";
+		};
+		575B3D7A18801F12003A94E7 /* ActPopoverView.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				575B3D7B18801F12003A94E7 /* en */,
+			);
+			name = ActPopoverView.xib;
 			sourceTree = "<group>";
 		};
 		57921A5517BEAEF0001AD35D /* ActWindow.xib */ = {

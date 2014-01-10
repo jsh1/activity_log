@@ -29,6 +29,7 @@
 #import "ActDevice.h"
 #import "ActDeviceManager.h"
 #import "ActImporterViewController.h"
+#import "ActPopoverViewController.h"
 #import "ActSourceListItem.h"
 #import "ActSourceListDeviceItem.h"
 #import "ActSourceListQueryItem.h"
@@ -360,6 +361,13 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
       [obj release];
     }
 
+  if (ActViewController *obj = [[ActPopoverViewController alloc]
+				initWithController:self options:nil])
+    {
+      [_viewControllers addObject:obj];
+      [obj release];
+    }
+
   // make sure we're in viewer mode before trying to restore view state
 
   [self setWindowMode:ActWindowMode_Viewer];
@@ -399,6 +407,8 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
   [_undoManager release];
   [_fieldEditor release];
   [_selectedDevice release];
+  [_activityPopover close];
+  [_activityPopover release];
 
   [super dealloc];
 }
@@ -1135,6 +1145,29 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
    performSelector:_cmd withObject:sender];
 }
 
+- (void)showPopoverWithActivityStorage:(act::activity_storage_ref)storage
+    relativeToRect:(NSRect)r ofView:(NSView *)view
+    preferredEdge:(NSRectEdge)edge
+{
+  if (_activityPopover == nil)
+    {
+      _activityPopover = [[NSPopover alloc] init];
+      ActPopoverViewController *c = (ActPopoverViewController *)
+        [self viewControllerWithClass:[ActPopoverViewController class]];
+      [_activityPopover setContentViewController:c];
+      [_activityPopover setDelegate:self];
+    }
+
+  [(ActPopoverViewController *)[_activityPopover contentViewController]
+   setActivityStorage:storage];
+  [_activityPopover showRelativeToRect:r ofView:view preferredEdge:edge];
+}
+
+- (void)hidePopover
+{
+  [_activityPopover close];
+}
+
 - (void)devicesDidChange:(NSNotification *)note
 {
   ActSourceListItem *item = [self sourceListItemWithPath:@"DEVICES"];
@@ -1201,6 +1234,32 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
     return [(ActSplitView *)view shouldAdjustSizeOfSubview:subview];
   else
     return YES;
+}
+
+// NSPopoverDelegate methods
+
+- (void)popoverWillShow:(NSNotification *)notification
+{
+  [(ActViewController *)[(NSPopover *)[notification object]
+			 contentViewController] viewWillAppear];
+}
+
+- (void)popoverDidShow:(NSNotification *)notification
+{
+  [(ActViewController *)[(NSPopover *)[notification object]
+			 contentViewController] viewDidAppear];
+}
+
+- (void)popoverWillClose:(NSNotification *)notification
+{
+  [(ActViewController *)[(NSPopover *)[notification object]
+			 contentViewController] viewWillDisappear];
+}
+
+- (void)popoverDidClose:(NSNotification *)notification
+{
+  [(ActViewController *)[(NSPopover *)[notification object]
+			 contentViewController] viewDidDisappear];
 }
 
 // PXSourceListDataSource methods

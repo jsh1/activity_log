@@ -52,7 +52,8 @@ enum ActWindowMode
 @class ActDevice;
 
 @interface ActWindowController : NSWindowController
-    <NSSplitViewDelegate, PXSourceListDataSource, PXSourceListDelegate>
+    <NSSplitViewDelegate, PXSourceListDataSource, PXSourceListDelegate,
+    NSPopoverDelegate>
 {
   IBOutlet ActSplitView *_splitView;
 
@@ -80,6 +81,8 @@ enum ActWindowMode
   double _currentTime;
 
   ActDevice *_selectedDevice;
+
+  NSPopover *_activityPopover;
 }
 
 @property(nonatomic) NSInteger windowMode;
@@ -155,5 +158,10 @@ enum ActWindowMode
 - (IBAction)setListViewAction:(id)sender;
 
 - (IBAction)toggleActivityPane:(id)sender;
+
+- (void)showPopoverWithActivityStorage:(act::activity_storage_ref)storage
+    relativeToRect:(NSRect)r ofView:(NSView *)view
+    preferredEdge:(NSRectEdge)edge;
+- (void)hidePopover;
 
 @end

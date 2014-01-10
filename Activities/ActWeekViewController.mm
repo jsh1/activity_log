@@ -815,6 +815,24 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
       [_highlitLayer release];
       _highlitLayer = [highlit_layer retain];
       [_highlitLayer setHighlit:YES];
+
+      [[_controller controller] hidePopover];
+      [NSRunLoop cancelPreviousPerformRequestsWithTarget:self
+       selector:@selector(showPopover) object:nil];
+      [self performSelector:@selector(showPopover) withObject:nil
+       afterDelay:.25];
+    }
+}
+
+- (void)showPopover
+{
+  if (_highlitLayer != nil && [_highlitLayer activities].size() == 1)
+    {
+      act::activity *a = [_highlitLayer activities].front();
+      NSRect r = NSRectFromCGRect([[self layer] convertRect:[_highlitLayer bounds] fromLayer:_highlitLayer]);
+
+      [[_controller controller] showPopoverWithActivityStorage:a->storage()
+       relativeToRect:r ofView:self preferredEdge:NSMaxYEdge];
     }
 }
 
