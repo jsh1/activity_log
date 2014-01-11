@@ -144,16 +144,16 @@
       class_name = @"ActSummaryViewController";
       break;
     case 2:
-      class_name = @"ActHeaderViewController";
+      class_name = @"ActLapViewController";
       break;
     case 3:
-      class_name = @"ActMapViewController";
+      class_name = @"ActHeaderViewController";
       break;
     case 4:
-      class_name = @"ActChartViewController";
+      class_name = @"ActMapViewController";
       break;
     case 5:
-      class_name = @"ActLapViewController";
+      class_name = @"ActChartViewController";
       break;
     default:
       return;

@@ -753,6 +753,8 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
   CALayer *self_layer = [self layer];
   CALayer *layer = [self_layer hitTest:NSPointToCGPoint(p)];
 
+  act::activity *selection = nullptr;
+
   while (layer != nil && layer != self_layer)
     {
       if ([layer isKindOfClass:[ActWeekView_ActivityLayer class]])
@@ -762,17 +764,16 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
 
 	  if (vec.size() == 1)
 	    {
-	      ActWindowController *c = [_controller controller];
-	      if ([c selectedActivityStorage] != vec[0]->storage())
-		[c setSelectedActivityStorage:vec[0]->storage()];
-	      else
-		[c setSelectedActivityStorage:nullptr];
+	      selection = vec[0];
 	      break;
 	    }
 	}
 
       layer = [layer superlayer];
     }
+
+  [[_controller controller] setSelectedActivityStorage:
+   selection ? selection->storage() : nullptr];
 }
 
 - (void)mouseMoved:(NSEvent *)e
@@ -839,6 +840,7 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
       act::activity *a = [_highlitLayer activities].front();
       NSRect r = NSRectFromCGRect([[self layer] convertRect:
 			[_highlitLayer bounds] fromLayer:_highlitLayer]);
+      r = NSInsetRect(r, -2, -2);
 
       [[_controller controller] showPopoverWithActivityStorage:a->storage()
        relativeToRect:r ofView:self preferredEdge:NSMaxYEdge];
@@ -1451,14 +1453,10 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
 {
   if ([key isEqualToString:@"borderWidth"])
     return @1;
-  else if ([key isEqualToString:@"borderColor"])
-    return (id)[[NSColor colorWithDeviceWhite:0 alpha:.25] CGColor];
   else if ([key isEqualToString:@"shadowOffset"])
     return [NSValue valueWithSize:NSZeroSize];
   else if ([key isEqualToString:@"shadowRadius"])
-    return @8;
-  else if ([key isEqualToString:@"shadowColor"])
-    return (id)[[ActColor alternateSelectedControlColor] CGColor];
+    return @6;
   else if ([key isEqualToString:@"shadowPathIsBounds"])
     return @YES;
 
@@ -1560,21 +1558,18 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
   else
     background_color = [NSColor colorWithDeviceWhite:.85 alpha:1];
 
-  NSColor *border_color = nil;
-  if (!_selected)
-    border_color = color;
-  else
-    border_color = [ActColor alternateSelectedControlColor];
-  
   [(ActWeekViewController *)[self delegate] withAnimationsEnabled:^
     {
       [self setBounds:CGRectMake(0, 0, radius*2, radius*2)];
       [self setCornerRadius:radius];
       [self setBackgroundColor:[background_color CGColor]];
-      [self setBorderColor:[border_color CGColor]];
-      [self setBorderWidth:_selected ? 4 : _activities.size() == 1 ? 1 : 0];
+      [self setBorderColor:[color CGColor]];
+      [self setBorderWidth:_selected ? 5 : _activities.size() == 1 ? 1 : 0];
       [self setShadowOpacity:_highlit ? 1 : 0];
     }];
+
+  if (_highlit)
+    [self setShadowColor:[color CGColor]];
 
   [self setZPosition:_expanded ? 1 : 0];
 

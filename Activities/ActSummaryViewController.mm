@@ -39,6 +39,7 @@
 #define BODY_Y_INSET 10
 #define BODY_SPACING 8
 #define BODY_BOTTOM_BORDER 14
+#define MAX_BODY_WIDTH 560
 #define MIN_BODY_HEIGHT 42
 
 @implementation ActSummaryViewController
@@ -148,9 +149,12 @@
   if (view == _summaryView)
     {
       // See https://developer.apple.com/library/mac/documentation/Cocoa/Conceptual/TextLayout/Tasks/StringHeight.html
- 
-      [_bodyLayoutContainer setContainerSize:
-       NSMakeSize(width - BODY_X_INSET*2, CGFLOAT_MAX)];
+
+      CGFloat body_width = std::min(width - BODY_X_INSET*2,
+				    (CGFloat)MAX_BODY_WIDTH);
+
+      [_bodyLayoutContainer
+       setContainerSize:NSMakeSize(body_width, CGFLOAT_MAX)];
       [_bodyLayoutManager glyphRangeForTextContainer:_bodyLayoutContainer];
  
       CGFloat body_height = ([_bodyLayoutManager usedRectForTextContainer:
@@ -178,10 +182,13 @@
       NSRect bounds = [view bounds];
       NSRect top = NSUnionRect([_statsBox frame], [_courseField frame]);
 
+      CGFloat body_width = std::min(bounds.size.width - BODY_X_INSET*2,
+				    (CGFloat)MAX_BODY_WIDTH);
+
       NSRect frame;
       frame.origin.x = bounds.origin.x + BODY_X_INSET;
       frame.origin.y = bounds.origin.y + BODY_Y_INSET;
-      frame.size.width = bounds.size.width - BODY_X_INSET*2;
+      frame.size.width = body_width;
       frame.size.height = (top.origin.y - BODY_SPACING) - frame.origin.y;
       [_bodyTextView setFrame:frame];
     }

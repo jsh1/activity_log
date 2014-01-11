@@ -654,28 +654,28 @@ DQ
                                     <action selector="toggleActivityPane:" target="-1" id="EVM-a2-qZw"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="Toggle Data Pane" tag="2" keyEquivalent="" id="WXx-cC-a4g">
+                            <menuItem title="Toggle Laps Pane" tag="2" keyEquivalent="" id="FPS-19-NpS">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                                <connections>
+                                    <action selector="toggleActivityPane:" target="-1" id="aVP-De-4KZ"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem title="Toggle Data Pane" tag="3" keyEquivalent="" id="WXx-cC-a4g">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <connections>
                                     <action selector="toggleActivityPane:" target="-1" id="FRX-qr-Hzz"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="Toggle Route Pane" tag="3" keyEquivalent="" id="eE3-tn-0NA">
+                            <menuItem title="Toggle Route Pane" tag="4" keyEquivalent="" id="eE3-tn-0NA">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <connections>
                                     <action selector="toggleActivityPane:" target="-1" id="Kve-R5-p7j"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="Toggle Chart Pane(s)" tag="4" keyEquivalent="" id="RsO-bj-8lD">
+                            <menuItem title="Toggle Chart Pane(s)" tag="5" keyEquivalent="" id="RsO-bj-8lD">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <connections>
                                     <action selector="toggleActivityPane:" target="-1" id="qzY-Nk-5fY"/>
-                                </connections>
-                            </menuItem>
-                            <menuItem title="Toggle Laps Pane" tag="5" keyEquivalent="" id="FPS-19-NpS">
-                                <modifierMask key="keyEquivalentModifierMask"/>
-                                <connections>
-                                    <action selector="toggleActivityPane:" target="-1" id="aVP-De-4KZ"/>
                                 </connections>
                             </menuItem>
                             <menuItem isSeparatorItem="YES" id="mxj-hS-wcz"/>

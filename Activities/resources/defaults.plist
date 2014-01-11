@@ -31,6 +31,10 @@
 		</dict>
 		<dict>
 			<key>className</key>
+			<string>ActLapViewController</string>
+		</dict>
+		<dict>
+			<key>className</key>
 			<string>ActHeaderViewController</string>
 		</dict>
 		<dict>
@@ -40,10 +44,6 @@
 		<dict>
 			<key>className</key>
 			<string>ActChartViewController</string>
-		</dict>
-		<dict>
-			<key>className</key>
-			<string>ActLapViewController</string>
 		</dict>
 	</array>
 

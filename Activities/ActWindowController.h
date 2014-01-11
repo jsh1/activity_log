@@ -63,7 +63,7 @@ enum ActWindowMode
   NSMutableArray *_sourceListItems;
 
   NSMutableArray *_viewControllers;
-  NSMapTable *_splitViews;
+  NSMutableDictionary *_splitViews;
 
   ActFieldEditor *_fieldEditor;
   NSUndoManager *_undoManager;
@@ -111,7 +111,7 @@ enum ActWindowMode
 - (ActViewController *)viewControllerWithClass:(Class)cls;
 
 - (void)addSplitView:(ActSplitView *)view identifier:(NSString *)ident;
-- (void)removeSplitView:(ActSplitView *)view;
+- (void)removeSplitView:(ActSplitView *)view identifier:(NSString *)ident;
 
 - (void)saveWindowState;
 - (void)applySavedWindowState;

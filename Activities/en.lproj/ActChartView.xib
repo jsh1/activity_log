@@ -155,7 +155,6 @@
                         <action selector="configMenuAction:" target="-2" id="aSj-43-rxV"/>
                     </connections>
                 </menuItem>
-                <menuItem isSeparatorItem="YES" id="eIU-Yz-V1l"/>
                 <menuItem title="Vertical Oscillation" tag="12" indentationLevel="1" id="Nj6-PA-Tim">
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <connections>

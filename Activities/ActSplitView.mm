@@ -69,7 +69,7 @@
       [data addObject:[NSNumber numberWithBool:[subview isHidden]]];
     }
 
-   return @{@"values": data};
+  return @{@"values": data};
 }
 
 - (void)applySavedViewState:(NSDictionary *)dict

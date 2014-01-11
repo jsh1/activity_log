@@ -85,7 +85,7 @@
 {
   [super viewDidLoad];
 
-  [_controller addSplitView:_splitView identifier:@"Viewer"];
+  [_controller addSplitView:_splitView identifier:@"1.Viewer"];
   [_splitView setIndexOfResizableSubview:1];
 
   for (ActViewController *controller in [self subviewControllers])
@@ -105,6 +105,7 @@
 - (void)dealloc
 {
   [[NSNotificationCenter defaultCenter] removeObserver:self];
+  [_controller removeSplitView:_splitView identifier:@"1.Viewer"];
   [super dealloc];
 }
 

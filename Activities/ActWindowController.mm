@@ -295,8 +295,7 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
 
   _sourceListItems = [[NSMutableArray alloc] init];
   _viewControllers = [[NSMutableArray alloc] init];
-  _splitViews = [[NSMapTable mapTableWithKeyOptions:NSMapTableStrongMemory
-		  valueOptions:NSMapTableWeakMemory] retain];
+  _splitViews = [[NSMutableDictionary alloc] init];
   _undoManager = [[NSUndoManager alloc] init];
 
   _windowMode = ActWindowMode_Nil;
@@ -333,7 +332,7 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
 
   [[window contentView] setWantsLayer:YES];
 
-  [self addSplitView:_splitView identifier:@"Window"];
+  [self addSplitView:_splitView identifier:@"0.Window"];
   [_splitView setIndexOfResizableSubview:1];
 
   _fieldEditor = [[ActFieldEditor alloc] initWithFrame:NSZeroRect];
@@ -416,12 +415,12 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
 - (void)addSplitView:(ActSplitView *)view identifier:(NSString *)ident
 {
   [view setDelegate:self];
-  [_splitViews setObject:ident forKey:view];
+  [_splitViews setObject:view forKey:ident];
 }
 
-- (void)removeSplitView:(ActSplitView *)view
+- (void)removeSplitView:(ActSplitView *)view identifier:(NSString *)ident
 {
-  [_splitViews removeObjectForKey:view];
+  [_splitViews removeObjectForKey:ident];
   [view setDelegate:nil];
 }
 
@@ -441,9 +440,9 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
 
   NSMutableDictionary *split = [NSMutableDictionary dictionary];
 
-  for (ActSplitView *view in _splitViews)
+  for (NSString *ident in _splitViews)
     {
-      NSString *ident = [_splitViews objectForKey:view];
+      ActSplitView *view = [_splitViews objectForKey:ident];
       NSDictionary *sub = [view savedViewState];
       if ([sub count] != 0)
 	[split setObject:sub forKey:ident];
@@ -476,9 +475,12 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
 
   if (NSDictionary *dict = [state objectForKey:@"ActSplitViews"])
     {
-      for (ActSplitView *view in _splitViews)
+      NSArray *split_keys = [[_splitViews allKeys] sortedArrayUsingSelector:
+			     @selector(caseInsensitiveCompare:)];
+
+      for (NSString *ident in split_keys)
 	{
-	  NSString *ident = [_splitViews objectForKey:view];
+	  ActSplitView *view = [_splitViews objectForKey:ident];
 	  if (NSDictionary *sub = [dict objectForKey:ident])
 	    [view applySavedViewState:sub];
 	}
