@@ -185,6 +185,8 @@ struct location
 
   location();
   location(double lat, double lng);
+
+  bool is_valid() const;
 };
 
 void mix(location &a, const location &b, const location &c, double f);
@@ -250,6 +252,12 @@ location::location(double lat, double lng)
 {
 }
 
+inline bool
+location::is_valid() const
+{
+  return latitude != 0 && longitude != 0;
+}
+
 inline
 location_size::location_size()
 : latitude(0),
@@ -275,13 +283,6 @@ location_region::location_region(const location &cen,
 : center(cen),
   size(sz)
 {
-}
-
-inline void
-mix(location &a, const location &b, const location &c, double f)
-{
-  mix(a.latitude, b.latitude, c.latitude, f);
-  mix(a.longitude, b.longitude, c.longitude, f);
 }
 
 } // namespace act

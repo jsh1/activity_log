@@ -554,4 +554,16 @@ date_interval::append_date(std::string &str, int x) const
     }
 }
 
+void
+mix(location &a, const location &b, const location &c, double f)
+{
+  if (b.is_valid() && c.is_valid())
+    {
+      mix(a.latitude, b.latitude, c.latitude, f);
+      mix(a.longitude, b.longitude, c.longitude, f);
+    }
+  else
+    a.latitude = a.longitude = 0;
+}
+
 } // namespace act
