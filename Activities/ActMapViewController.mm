@@ -384,63 +384,28 @@
 
   NSRect bounds = [view bounds];
 
-  CGContextSaveGState(ctx);
-
-  CGContextSetRGBStrokeColor(ctx, 0, 0.2, 1, .75);
-  CGContextSetLineWidth(ctx, 3);
-  CGContextSetLineJoin(ctx, kCGLineJoinRound);
-
   double xa = bounds.size.width / (loc_ur.longitude - loc_ll.longitude);
   double xb = bounds.origin.x - loc_ll.longitude * xa;
 
   double ya = bounds.size.height / (loc_ur.latitude - loc_ll.latitude);
   double yb = bounds.origin.y - loc_ll.latitude * ya;
 
-  bool in_subpath = false;
+  typedef act::gps::activity::point_vector::const_iterator point_iterator;
 
-  for (const auto &p : gps_a->points())
+  void (^draw_track)(point_iterator begin, point_iterator end,
+	CGFloat min_delta_sq) = ^(point_iterator begin, point_iterator end,
+	CGFloat min_delta_sq)
     {
-      if (p.location.longitude == 0 && p.location.latitude == 0)
-	continue;
-
-      CGFloat px = p.location.longitude * xa + xb;
-      CGFloat py = p.location.latitude * ya + yb;
-
-      if (!in_subpath)
-	{
-	  CGContextBeginPath(ctx);
-	  CGContextMoveToPoint(ctx, px, py);
-	  in_subpath = true;
-	}
-      else
-	CGContextAddLineToPoint(ctx, px, py);
-    }
-
-  if (in_subpath)
-    CGContextStrokePath(ctx);
-
-  int selected_lap = [_controller selectedLapIndex];
-
-  if (selected_lap >= 0)
-    {
-      const auto &lap = gps_a->laps()[selected_lap];
-
-      CGContextSetRGBStrokeColor(ctx, 1, 0, 0.3, 1);
-      CGContextSetLineWidth(ctx, 5);
-      CGContextBeginPath(ctx);
-
       bool in_subpath = false;
+      CGFloat last_px = 0, last_py = 0;
+      CGFloat sum_px = 0, sum_py = 0;
+      CGFloat sum_count = 0;
 
-      auto lap_start = gps_a->lap_begin(lap);
-      auto lap_end = gps_a->lap_end(lap);
-
-      for (auto lap_it = lap_start; lap_it != lap_end; lap_it++)
+      for (point_iterator it = begin; it != end; it++)
 	{
-	  assert(lap_it != gps_a->points().end());
+	  const auto &p = *it;
 
-	  auto p = *lap_it;
-
-	  if (p.location.longitude == 0 && p.location.latitude == 0)
+	  if (!p.location.is_valid())
 	    continue;
 
 	  CGFloat px = p.location.longitude * xa + xb;
@@ -449,15 +414,68 @@
 	  if (!in_subpath)
 	    {
 	      CGContextBeginPath(ctx);
-	      CGContextMoveToPoint(ctx, px, py);
 	      in_subpath = true;
+	      CGContextMoveToPoint(ctx, px, py);
+	      last_px = px;
+	      last_py = py;
 	    }
 	  else
-	    CGContextAddLineToPoint(ctx, px, py);
+	    {
+	      sum_px += px;
+	      sum_py += py;
+	      sum_count += 1;
+
+	      px = sum_px * (1 / sum_count);
+	      py = sum_py * (1 / sum_count);
+
+	      CGFloat delta_sq = ((last_px - px) * (last_px - px)
+				 + (last_py - py) * (last_py - py));
+	      if (delta_sq >= min_delta_sq)
+		{
+		  CGContextAddLineToPoint(ctx, px, py);
+		  last_px = px;
+		  last_py = py;
+		  sum_count = 0;
+		  sum_px = sum_py = 0;
+		}
+	    }
 	}
 
       if (in_subpath)
-	CGContextStrokePath(ctx);
+	{
+	  if (sum_count > 0)
+	    {
+	      CGFloat px = sum_px * (1 / sum_count);
+	      CGFloat py = sum_py * (1 / sum_count);
+	      CGContextAddLineToPoint(ctx, px, py);
+	    }
+
+	  CGContextStrokePath(ctx);
+	}
+    };
+
+  CGContextSaveGState(ctx);
+
+  CGContextSetRGBStrokeColor(ctx, 0, 0.2, 1, .75);
+  CGContextSetLineWidth(ctx, 3);
+  CGContextSetLineJoin(ctx, kCGLineJoinRound);
+
+  draw_track(gps_a->points().begin(), gps_a->points().end(), 9);
+
+  int selected_lap = [_controller selectedLapIndex];
+
+  if (selected_lap >= 0)
+    {
+      CGContextSetRGBStrokeColor(ctx, 1, 0, 0.3, 1);
+      CGContextSetLineWidth(ctx, 5);
+      CGContextBeginPath(ctx);
+
+      const auto &lap = gps_a->laps()[selected_lap];
+
+      auto lap_start = gps_a->lap_begin(lap);
+      auto lap_end = gps_a->lap_end(lap);
+
+      draw_track(lap_start, lap_end, 25);
     }
 
   if (_hasCurrentLocation)
