@@ -78,10 +78,12 @@ tcx_parser::parse_file(FILE *fh)
 
   xmlParseChunk(_ctx, "", 0, true);
 
-  destination().update_summary();
-
   if (!had_error())
-    destination().update_regions();
+    {
+      destination().update_points();
+      destination().update_summary();
+      destination().update_regions();
+    }
 }
 
 namespace {
@@ -104,10 +106,15 @@ parse_time(const std::string &s)
   struct tm tm = {0};
   double seconds_frac = 0;
 
-  if (sscanf_l(s.c_str() + start, nullptr, "%4d-%2d-%2dT%2d:%2d:%2d%lf",
+  if (sscanf_l(s.c_str() + start, nullptr, "%4d-%2d-%2dT%2d:%2d:%2d%lfZ",
 	       &tm.tm_year, &tm.tm_mon, &tm.tm_mday, &tm.tm_hour,
-	       &tm.tm_min, &tm.tm_sec, &seconds_frac) != 7)
-    return 0;
+	       &tm.tm_min, &tm.tm_sec, &seconds_frac) != 7
+      && sscanf_l(s.c_str() + start, nullptr, "%4d-%2d-%2dT%2d:%2d:%2dZ",
+		  &tm.tm_year, &tm.tm_mon, &tm.tm_mday, &tm.tm_hour,
+		  &tm.tm_min, &tm.tm_sec) != 6)
+    {
+      return 0;
+    }
 
   tm.tm_year = tm.tm_year - 1900;
   tm.tm_mon = tm.tm_mon - 1;		// 0..11
@@ -378,6 +385,7 @@ tcx_parser::sax_end_element(void *ctx, const xmlChar *name,
 	  break;
 	case state::TP_DISTANCE:
 	  p->current_point().distance = parse_double(*p->_characters);
+	  p->destination().set_has_distance(true);
 	  break;
 	case state::TP_SPEED:
 	  p->current_point().speed = parse_double(*p->_characters);

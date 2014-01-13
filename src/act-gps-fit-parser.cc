@@ -93,7 +93,10 @@ fit_parser::parse_file(FILE *fh)
   /* FIXME: ignoring CRC. */
 
   if (!had_error())
-    destination().update_regions();
+    {
+      destination().update_points();
+      destination().update_regions();
+    }
 }
 
 /* pass null 'buf' pointer to seek forwards. */
@@ -559,6 +562,8 @@ fit_parser::read_record_message(const message_type &def, uint32_t timestamp)
 
 	case 5:				/* distance */
 	  p.distance = make_distance(read_field(def, it));
+	  if (p.distance != 0)
+	    destination().set_has_distance(true);
 	  break;
 
 	case 6:				/* speed */
@@ -576,6 +581,8 @@ fit_parser::read_record_message(const message_type &def, uint32_t timestamp)
 
 	case 40:			/* stance_time_percent */
 	  p.stance_ratio = make_stance_ratio(read_field(def, it));
+	  if (p.stance_ratio != 0)
+	    destination().set_has_dynamics(true);
 	  break;
 
 	case 41:			/* stance_time */

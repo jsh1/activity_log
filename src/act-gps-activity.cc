@@ -37,6 +37,7 @@ namespace gps {
 activity::activity()
 : _sport(sport_type::unknown),
   _has_location(false),
+  _has_distance(false),
   _has_speed(false),
   _has_heart_rate(false),
   _has_cadence(false),
@@ -130,6 +131,112 @@ activity::read_compressed_tcx_file(const char *path, const char *prog)
     }
   else
     return false;
+}
+
+void
+activity::update_points()
+{
+  if (has_distance() && !has_speed())
+    {
+      point *last_p = nullptr;
+
+      for (auto &p : _points)
+	{
+	  if (p.distance != 0)
+	    {
+	      if (last_p != nullptr
+		  && p.follows_continuously(*last_p))
+		{
+		  p.speed = ((p.distance - last_p->distance)
+			     / (p.elapsed_time - last_p->elapsed_time));
+		  if (last_p->speed == 0 && last_p->distance != 0)
+		    last_p->speed = p.speed;
+		}
+
+	      last_p = &p;
+	    }
+	  else
+	    last_p = nullptr;
+	}
+
+      set_has_distance(true);
+    }
+}
+
+void
+activity::update_regions()
+{
+  /* FIXME: none of this correctly handles regions spanning the wrap point. */
+
+  double min_lat = 0, min_long = 0, max_lat = 0, max_long = 0;
+  bool first = true;
+
+  auto lap = _laps.begin();
+
+  double lap_min_lat = 0, lap_min_long = 0, lap_max_lat = 0, lap_max_long = 0;
+  bool lap_first = true;
+
+  for (const auto &p : _points)
+    {
+      if (p.location.latitude == 0 && p.location.longitude == 0)
+	continue;
+
+      if (first)
+	{
+	  min_lat = max_lat = p.location.latitude;
+	  min_long = max_long = p.location.longitude;
+	  first = false;
+	}
+      else
+	{
+	  min_lat = std::min(min_lat, p.location.latitude);
+	  max_lat = std::max(max_lat, p.location.latitude);
+	  min_long = std::min(min_long, p.location.longitude);
+	  max_long = std::max(max_long, p.location.longitude);
+	}
+
+      if (lap != _laps.end()
+	  && p.elapsed_time > (lap->start_elapsed_time
+			       + lap->total_elapsed_time))
+	{
+	  location cen = location((min_lat + max_lat)*.5,
+				  (min_long + max_long)*.5);
+	  location_size sz = location_size(max_lat - min_lat,
+					   max_long - min_long);
+	  lap->region = location_region(cen, sz);
+	  lap_min_lat = lap_max_lat = 0;
+	  lap_min_long = lap_max_long = 0;
+	  lap_first = true;
+	  lap++;
+	}
+
+      if (lap_first)
+	{
+	  lap_min_lat = lap_max_lat = p.location.latitude;
+	  lap_min_long = lap_max_long = p.location.longitude;
+	  lap_first = false;
+	}
+      else
+	{
+	  lap_min_lat = std::min(lap_min_lat, p.location.latitude);
+	  lap_max_lat = std::max(lap_max_lat, p.location.latitude);
+	  lap_min_long = std::min(lap_min_long, p.location.longitude);
+	  lap_max_long = std::max(lap_max_long, p.location.longitude);
+	}
+    }
+
+  if (lap != _laps.end())
+    {
+      location cen = location((min_lat + max_lat)*.5,
+			      (min_long + max_long)*.5);
+      location_size sz = location_size(max_lat - min_lat,
+				       max_long - min_long);
+      lap->region = location_region(cen, sz);
+    }
+
+  location cen = location((min_lat + max_lat)*.5, (min_long + max_long)*.5);
+  location_size sz = location_size(max_lat - min_lat, max_long - min_long);
+  _region = location_region(cen, sz);
 }
 
 void
@@ -343,6 +450,28 @@ activity::print_laps(FILE *fh) const
     fputc('\n', fh);
 }
 
+void
+activity::print_points(FILE *fh) const
+{
+  if (_points.size() == 0)
+    return;
+
+  fprintf(fh, "    %10s %10s %10s %10s %10s %10s %10s %10s %10s %10s %10s %10s\n",
+	  "Elapsed", "Timer", "Lat", "Long", "Alt", "Dist", "Speed",
+	  "HR", "Cad", "V.O.", "St.T", "St.R");
+
+  for (const auto &p : _points)
+    {
+      fprintf(fh, "    %10g %10g %10g %10g %10g %10g %10g %10g %10g %10g %10g %10g\n",
+	      p.elapsed_time, p.timer_time, p.location.latitude,
+	      p.location.longitude, p.altitude, p.distance, p.speed,
+	      p.heart_rate, p.cadence, p.vertical_oscillation,
+	      p.stance_time, p.stance_ratio);
+    }
+
+  fputc('\n', fh);
+}
+
 activity::point::field_fn
 activity::point::field_function(point_field field)
 {
@@ -488,82 +617,6 @@ activity::get_range(point_field field, float &ret_min, float &ret_max,
 }
 
 void
-activity::update_regions()
-{
-  /* FIXME: none of this correctly handles regions spanning the wrap point. */
-
-  double min_lat = 0, min_long = 0, max_lat = 0, max_long = 0;
-  bool first = true;
-
-  auto lap = _laps.begin();
-
-  double lap_min_lat = 0, lap_min_long = 0, lap_max_lat = 0, lap_max_long = 0;
-  bool lap_first = true;
-
-  for (const auto &p : _points)
-    {
-      if (p.location.latitude == 0 && p.location.longitude == 0)
-	continue;
-
-      if (first)
-	{
-	  min_lat = max_lat = p.location.latitude;
-	  min_long = max_long = p.location.longitude;
-	  first = false;
-	}
-      else
-	{
-	  min_lat = std::min(min_lat, p.location.latitude);
-	  max_lat = std::max(max_lat, p.location.latitude);
-	  min_long = std::min(min_long, p.location.longitude);
-	  max_long = std::max(max_long, p.location.longitude);
-	}
-
-      if (lap != _laps.end()
-	  && p.elapsed_time > (lap->start_elapsed_time
-			       + lap->total_elapsed_time))
-	{
-	  location cen = location((min_lat + max_lat)*.5,
-				  (min_long + max_long)*.5);
-	  location_size sz = location_size(max_lat - min_lat,
-					   max_long - min_long);
-	  lap->region = location_region(cen, sz);
-	  lap_min_lat = lap_max_lat = 0;
-	  lap_min_long = lap_max_long = 0;
-	  lap_first = true;
-	  lap++;
-	}
-
-      if (lap_first)
-	{
-	  lap_min_lat = lap_max_lat = p.location.latitude;
-	  lap_min_long = lap_max_long = p.location.longitude;
-	  lap_first = false;
-	}
-      else
-	{
-	  lap_min_lat = std::min(lap_min_lat, p.location.latitude);
-	  lap_max_lat = std::max(lap_max_lat, p.location.latitude);
-	  lap_min_long = std::min(lap_min_long, p.location.longitude);
-	  lap_max_long = std::max(lap_max_long, p.location.longitude);
-	}
-    }
-
-  if (lap != _laps.end())
-    {
-      location cen = location((min_lat + max_lat)*.5,
-			      (min_long + max_long)*.5);
-      location_size sz = location_size(max_lat - min_lat,
-				       max_long - min_long);
-      lap->region = location_region(cen, sz);
-    }
-
-  location cen = location((min_lat + max_lat)*.5, (min_long + max_long)*.5);
-  location_size sz = location_size(max_lat - min_lat, max_long - min_long);
-  _region = location_region(cen, sz);
-}
-
-void
 activity::copy_summary(const activity &src)
 {
   _activity_id = src._activity_id;
@@ -571,6 +624,7 @@ activity::copy_summary(const activity &src)
   _device = src._device;
 
   _has_location = src._has_location;
+  _has_distance = src._has_distance;
   _has_speed = src._has_speed;
   _has_heart_rate = src._has_heart_rate;
   _has_cadence = src._has_cadence;
@@ -723,8 +777,7 @@ resampler_stream<Stream>::next(activity::point &ret_p)
 	      return true;
 	    }
 
-	  if (fabsf((p1->timer_time - p1->elapsed_time)
-		    - (p0->timer_time - p0->elapsed_time)) > 1e-3f)
+	  if (!p1->follows_continuously(*p0))
 	    {
 	      t = p1->timer_time;
 	      ret_p = *p0;

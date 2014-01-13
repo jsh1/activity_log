@@ -38,11 +38,12 @@ static const struct option long_options[] =
   {"tcx", no_argument, 0, 't'},
   {"print-summary", no_argument, 0, 's'},
   {"print-laps", no_argument, 0, 'l'},
+  {"print-points", no_argument, 0, 'p'},
   {"print-date", optional_argument, 0, 'd'},
   {"global-time", no_argument, 0, 'g'},
 };
 
-static const char short_options[] = "ftsld:g";
+static const char short_options[] = "ftslpd:g";
 
 static void
 usage_and_exit(int ret)
@@ -58,6 +59,7 @@ main(int argc, char **argv)
   bool opt_tcx = false;
   bool opt_print_summary = false;
   bool opt_print_laps = false;
+  bool opt_print_points = false;
   const char *opt_print_date = nullptr;
   bool opt_global_time = false;
 
@@ -83,6 +85,10 @@ main(int argc, char **argv)
 
 	case 'l':
 	  opt_print_laps = true;
+	  break;
+
+	case 'p':
+	  opt_print_points = true;
 	  break;
 
 	case 'd':
@@ -137,6 +143,12 @@ main(int argc, char **argv)
 	{
 	  fputc('\n', stdout);
 	  test_activity.print_laps(stdout);
+	}
+
+      if (opt_print_points)
+	{
+	  fputc('\n', stdout);
+	  test_activity.print_points(stdout);
 	}
     }
 

@@ -29,6 +29,7 @@
 
 #include <string>
 #include <vector>
+#include <math.h>
 
 namespace act {
 namespace gps {
@@ -87,6 +88,10 @@ public:
       void add(const point &x);
       void sub(const point &x);
       void mul(float x);
+
+      /* false if recording was paused between 'pred' and this. */
+
+      bool follows_continuously(const point &pred) const;
     };
 
   typedef std::vector<point> point_vector;
@@ -129,6 +134,7 @@ private:
   std::string _device;
 
   bool _has_location;
+  bool _has_distance;
   bool _has_speed;
   bool _has_heart_rate;
   bool _has_cadence;
@@ -170,10 +176,13 @@ public:
   bool read_tcx_file(const char *path);
   bool read_compressed_tcx_file(const char *file_path, const char *prog_path);
 
+  void update_points();
+  void update_regions();
   void update_summary();
 
   void print_summary(FILE *fh) const;
   void print_laps(FILE *fh) const;
+  void print_points(FILE *fh) const;
 
   void get_range(point_field field, float &ret_min, float &ret_max,
     float &ret_mean, float &ret_sdev) const;
@@ -258,6 +267,9 @@ public:
   void set_has_location(bool x) {_has_location = x;}
   bool has_location() const {return _has_location;}
 
+  void set_has_distance(bool x) {_has_distance = x;}
+  bool has_distance() const {return _has_distance;}
+
   void set_has_speed(bool x) {_has_speed = x;}
   bool has_speed() const {return _has_speed;}
 
@@ -272,8 +284,6 @@ public:
 
   void set_has_dynamics(bool x) {_has_dynamics = x;}
   bool has_dynamics() const {return _has_dynamics;}
-
-  void update_regions();
 
   void smooth(const activity &src, int width);
 
@@ -292,6 +302,13 @@ private:
 };
 
 // implementation details
+
+inline bool
+activity::point::follows_continuously(const point &pred) const
+{
+  return fabsf((pred.timer_time - pred.elapsed_time)
+	       - (timer_time - elapsed_time)) < 1e-3f;
+}
 
 inline activity::point_vector::iterator
 activity::points_from(point_field field, float x)
