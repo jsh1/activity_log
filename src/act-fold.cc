@@ -86,16 +86,29 @@ print_usage(const arguments &args)
   fputs("\n", stderr);
 }
 
-struct string_group
-{
-  const char *field;
+typedef std::vector<activity_accum::accum_field> field_vec;
 
-  typedef std::map<std::string, activity_accum,
-    case_insensitive_string_compare> group_map;
+template<typename Key, typename Compare = std::less<Key>>
+struct group
+{
+  typedef std::map<Key, activity_accum, Compare> group_map;
+  typedef std::pair<Key, activity_accum> group_pair;
 
   group_map map;
 
-  explicit string_group(const char *field);
+  field_vec fields;
+
+  group(const field_vec &fields);
+
+  void add_activity(const Key &key, const activity &a);
+};
+
+struct string_group
+  : public group<std::string, case_insensitive_string_compare>
+{
+  const char *field;
+
+  explicit string_group(const field_vec &fields, const char *field);
 
   void insert(const activity &a);
 
@@ -103,56 +116,62 @@ struct string_group
 };
 
 struct keyword_group
+  : public group<std::string, case_insensitive_string_compare>
 {
   field_id field;
 
-  typedef std::map<std::string, activity_accum,
-    case_insensitive_string_compare> group_map;
-
-  group_map map;
-
-  keyword_group(const char *field);
+  keyword_group(const field_vec &fields, const char *field);
 
   void insert(const activity &a);
 
   void format_key(std::string &buf, const std::string &key) const;
 };
 
-struct value_group
+struct value_group : public group<int>
 {
   const char *field;
   field_id field_id;
   double bucket_size;
   double bucket_scale;
 
-  typedef std::map<int, activity_accum> group_map;
-
-  group_map map;
-
-  explicit value_group(const char *field, double bucket_size);
+  explicit value_group(const field_vec &fields, const char *field,
+    double bucket_size);
 
   void insert(const activity &a);
 
   void format_key(std::string &buf, int key) const;
 };
 
-struct interval_group
+struct interval_group : public group<int>
 {
   date_interval interval;
 
-  typedef std::map<int, activity_accum> group_map;
-
-  group_map map;
-
-  explicit interval_group(const date_interval &interval);
+  explicit interval_group(const field_vec &fields,
+    const date_interval &interval);
 
   void insert(const activity &a);
 
   void format_key(std::string &buf, int key) const;
 };
 
-string_group::string_group(const char *f)
-: field(f)
+template<typename Key, typename Compare>
+group<Key, Compare>::group(const field_vec &vec)
+: fields(vec)
+{
+}
+
+template<typename Key, typename Compare> void
+group<Key, Compare>::add_activity(const Key &key, const activity &a)
+{
+  auto it = map.find(key);
+  if (it == map.end())
+    it = map.insert(map.begin(), group_pair(key, activity_accum(fields)));
+  it->second.add(a);
+}
+
+string_group::string_group(const field_vec &fields, const char *f)
+: group(fields),
+  field(f)
 {
 }
 
@@ -161,7 +180,7 @@ string_group::insert(const activity &a)
 {
   if (const std::string *ptr = a.field_ptr(field))
     {
-      map[*ptr].add(a);
+      add_activity(*ptr, a);
     }
 }
 
@@ -171,8 +190,9 @@ string_group::format_key(std::string &buf, const std::string &key) const
   buf.append(key);
 }
 
-keyword_group::keyword_group(const char *f)
-: field(lookup_field_id(f))
+keyword_group::keyword_group(const field_vec &fields, const char *f)
+: group(fields),
+  field(lookup_field_id(f))
 {
 }
 
@@ -182,7 +202,7 @@ keyword_group::insert(const activity &a)
   if (const std::vector<std::string> *ptr = a.field_keywords_ptr(field))
     {
       for (const auto &it : *ptr)
-	map[it].add(a);
+	add_activity(it, a);
     }
 }
 
@@ -192,8 +212,9 @@ keyword_group::format_key(std::string &buf, const std::string &key) const
   buf.append(key);
 }
 
-value_group::value_group(const char *f, double size)
-: field(f),
+value_group::value_group(const field_vec &fields, const char *f, double size)
+: group(fields),
+  field(f),
   field_id(lookup_field_id(f)),
   bucket_size(size),
   bucket_scale(1 / size)
@@ -213,9 +234,7 @@ value_group::insert(const activity &a)
   if (value == 0)
     return;
 
-  int idx = (int) floor(value * bucket_scale);
-
-  map[idx].add(a);
+  add_activity((int)floor(value * bucket_scale), a);
 }
 
 void
@@ -233,8 +252,9 @@ value_group::format_key(std::string &buf, int key) const
   buf.push_back(')');
 }
 
-interval_group::interval_group(const date_interval &i)
-: interval(i)
+interval_group::interval_group(const field_vec &fields, const date_interval &i)
+: group(fields),
+  interval(i)
 {
 }
 
@@ -245,9 +265,7 @@ interval_group::insert(const activity &a)
   if (date == 0)
     return;
 
-  int idx = interval.date_index(date);
-
-  map[idx].add(a);
+  add_activity(interval.date_index(date), a);
 }
 
 void
@@ -295,8 +313,7 @@ apply_group(T &g, const std::vector<database::item *> &items,
   
   if (format != nullptr)
     output_group_format(g, format);
-
-  if (table_format != nullptr)
+  else if (table_format != nullptr)
     output_group_table(g, table_format);
 }
 
@@ -532,27 +549,30 @@ act_fold(arguments &args)
   std::vector<database::item *> items;
   db.execute_query(query, items);
 
+  std::vector<activity_accum::accum_field> fields
+    = activity_accum::format_fields(format ? format : table_format);
+
   if (group_field.size() != 0)
     {
       if (group_keywords)
 	{
-	  keyword_group g(group_field.c_str());
+	  keyword_group g(fields, group_field.c_str());
 	  apply_group(g, items, format, table_format);
 	}
       else if (group_size > 0)
 	{
-	  value_group g(group_field.c_str(), group_size);
+	  value_group g(fields, group_field.c_str(), group_size);
 	  apply_group(g, items, format, table_format);
 	}
       else
 	{
-	  string_group g(group_field.c_str());
+	  string_group g(fields, group_field.c_str());
 	  apply_group(g, items, format, table_format);
 	}
     }
   else if (interval.count > 0)
     {
-      interval_group g(interval);
+      interval_group g(fields, interval);
       apply_group(g, items, format, table_format);
     }
 

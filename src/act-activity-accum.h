@@ -27,6 +27,8 @@
 
 #include "act-types.h"
 
+#include <vector>
+
 namespace act {
 
 class activity;
@@ -34,27 +36,8 @@ class output_table;
 
 class activity_accum
 {
-  int _count;
-
-  struct value_accum
-    {
-      int samples;
-      double sum;
-      double sum_sq;
-      double min;
-      double max;
-
-      value_accum();
-      void add(double x);
-
-      double get_total() const;
-      double get_mean() const;
-      double get_sdev() const;
-      double get_min() const;
-      double get_max() const;
-    };
-
-  enum class accum_id
+public:
+  enum class accum_field
     {
       distance,
       duration,
@@ -67,8 +50,8 @@ class activity_accum
       max_cadence,
       avg_stance_time,
       avg_stance_ratio,
-      avg_stride_length,
       avg_vertical_oscillation,
+      avg_stride_length,
       calories,
       training_effect,
       weight,
@@ -79,12 +62,37 @@ class activity_accum
       dew_point
     };
 
-  enum {accum_count = static_cast<int>(accum_id::dew_point)+1};
+private:
+  struct value_accum
+    {
+      accum_field field;
+ 
+      int samples;
+      double sum;
+      double sum_sq;
+      double min;
+      double max;
 
-  value_accum _accum[accum_count];
+      value_accum(accum_field field);
+      explicit value_accum(const value_accum &rhs) = default;
+
+      void add(double x);
+
+      double get_total() const;
+      double get_mean() const;
+      double get_sdev() const;
+      double get_min() const;
+      double get_max() const;
+    };
+
+  std::vector<value_accum> _accum;
+  int _count;
 
 public:
-  activity_accum();
+  static bool field_by_name(const char *name, accum_field &ret);
+  static std::vector<accum_field> format_fields(const char *format);
+
+  activity_accum(const std::vector<accum_field> &fields);
 
   void add(const activity &a);
 

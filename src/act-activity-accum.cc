@@ -31,15 +31,17 @@
 #include "act-util.h"
 
 #include <math.h>
+#include <float.h>
 
 namespace act {
 
-activity_accum::value_accum::value_accum()
-: samples(0),
+activity_accum::value_accum::value_accum(accum_field f)
+: field(f),
+  samples(0),
   sum(0),
   sum_sq(0),
-  min(0),
-  max(0)
+  min(DBL_MAX),
+  max(DBL_MIN)
 {
 }
 
@@ -87,9 +89,146 @@ activity_accum::value_accum::get_max() const
   return max;
 }
 
-activity_accum::activity_accum()
+bool
+activity_accum::field_by_name(const char *name, accum_field &ret)
+{
+  field_id f_id = lookup_field_id(name);
+
+  switch (f_id)
+    {
+    case field_id::distance:
+      ret = accum_field::distance;
+      return true;
+    case field_id::duration:
+      ret = accum_field::duration;
+      return true;
+    case field_id::speed:
+    case field_id::pace:
+      ret = accum_field::speed;
+      return true;
+    case field_id::max_speed:
+    case field_id::max_pace:
+      ret = accum_field::max_speed;
+      return true;
+    case field_id::avg_hr:
+      ret = accum_field::avg_hr;
+      return true;
+    case field_id::max_hr:
+      ret = accum_field::max_hr;
+      return true;
+    case field_id::resting_hr:
+      ret = accum_field::resting_hr;
+      return true;
+    case field_id::avg_cadence:
+      ret = accum_field::avg_cadence;
+      return true;
+    case field_id::max_cadence:
+      ret = accum_field::max_cadence;
+      return true;
+    case field_id::avg_stance_time:
+      ret = accum_field::avg_stance_time;
+      return true;
+    case field_id::avg_stance_ratio:
+      ret = accum_field::avg_stance_ratio;
+      return true;
+    case field_id::avg_stride_length:
+      ret = accum_field::avg_stride_length;
+      return true;
+    case field_id::avg_vertical_oscillation:
+      ret = accum_field::avg_vertical_oscillation;
+      return true;
+    case field_id::calories:
+      ret = accum_field::calories;
+      return true;
+    case field_id::training_effect:
+      ret = accum_field::training_effect;
+      return true;
+    case field_id::weight:
+      ret = accum_field::weight;
+      return true;
+    case field_id::effort:
+      ret = accum_field::effort;
+      return true;
+    case field_id::quality:
+      ret = accum_field::quality;
+      return true;
+    case field_id::points:
+      ret = accum_field::points;
+      return true;
+    case field_id::temperature:
+      ret = accum_field::temperature;
+      return true;
+    case field_id::dew_point:
+      ret = accum_field::dew_point;
+      return true;
+    default:
+      return false;
+    }
+}
+
+std::vector<activity_accum::accum_field>
+activity_accum::format_fields(const char *format)
+{
+  std::vector<accum_field> fields;
+
+  if (format != nullptr)
+    {
+      while (*format != 0)
+	{
+	  if (const char *ptr = strchr(format, '%'))
+	    {
+	      ptr++;
+
+	      if (ptr[0] == '@')
+		ptr++;
+	      if (ptr[0] == '-')
+		ptr++;
+	      while (isdigit(*ptr))
+		ptr++;
+
+	      switch (*ptr++)
+		{
+		case 'x':
+		  if (ptr[0] != 0 && ptr[1] != 0)
+		    ptr += 2;
+		  break;
+
+		case '{': {
+		  const char *end = strchr(ptr, '}');
+		  char token[128];
+		  if (end && end - ptr < sizeof(token)-1)
+		    {
+		      memcpy(token, ptr, end - ptr);
+		      token[end - ptr] = 0;
+
+		      char *arg = strchr(token, ':');
+		      if (arg)
+			*arg++ = 0;
+
+		      accum_field field;
+		      if (field_by_name(token, field)
+			  && std::find(fields.begin(), fields.end(),
+				       field) == fields.end())
+			{
+			  fields.push_back(field);
+			}
+		    }
+		  ptr = end ? end + 1 : ptr + strlen(ptr);
+		  break; }
+		}
+	      format = ptr;
+	    }
+	}
+    }
+
+  return fields;
+}
+
+activity_accum::activity_accum(const std::vector<accum_field> &fields)
 : _count(0)
 {
+  for (accum_field field : fields)
+    _accum.push_back(value_accum(field));
 }
 
 void
@@ -97,68 +236,116 @@ activity_accum::add(const activity &a)
 {
   _count++;
 
-  if (double x = a.distance())
-    _accum[static_cast<int>(accum_id::distance)].add(x);
+  for (auto &accum : _accum)
+    {
+      switch(accum.field)
+	{
+	case accum_field::distance:
+	  if (double x = a.distance())
+	    accum.add(x);
+	  break;
 
-  if (double x = a.duration())
-    _accum[static_cast<int>(accum_id::duration)].add(x);
+	case accum_field::duration:
+	  if (double x = a.duration())
+	    accum.add(x);
+	  break;
 
-  if (double x = a.speed())
-    _accum[static_cast<int>(accum_id::speed)].add(x);
+	case accum_field::speed:
+	  if (double x = a.speed())
+	    accum.add(x);
+	  break;
 
-  if (double x = a.max_speed())
-    _accum[static_cast<int>(accum_id::max_speed)].add(x);
+	case accum_field::max_speed:
+	  if (double x = a.max_speed())
+	    accum.add(x);
+	  break;
 
-  if (double x = a.avg_hr())
-    _accum[static_cast<int>(accum_id::avg_hr)].add(x);
+	case accum_field::avg_hr:
+	  if (double x = a.avg_hr())
+	    accum.add(x);
+	  break;
 
-  if (double x = a.max_hr())
-    _accum[static_cast<int>(accum_id::max_hr)].add(x);
+	case accum_field::max_hr:
+	  if (double x = a.max_hr())
+	    accum.add(x);
+	  break;
 
-  if (double x = a.resting_hr())
-    _accum[static_cast<int>(accum_id::resting_hr)].add(x);
+	case accum_field::resting_hr:
+	  if (double x = a.resting_hr())
+	    accum.add(x);
+	  break;
 
-  if (double x = a.avg_cadence())
-    _accum[static_cast<int>(accum_id::avg_cadence)].add(x);
+	case accum_field::avg_cadence:
+	  if (double x = a.avg_cadence())
+	    accum.add(x);
+	  break;
 
-  if (double x = a.max_cadence())
-    _accum[static_cast<int>(accum_id::max_cadence)].add(x);
+	case accum_field::max_cadence:
+	  if (double x = a.max_cadence())
+	    accum.add(x);
+	  break;
 
-  if (double x = a.avg_stance_time())
-    _accum[static_cast<int>(accum_id::avg_stance_time)].add(x);
+	case accum_field::avg_stance_time:
+	  if (double x = a.avg_stance_time())
+	    accum.add(x);
+	  break;
 
-  if (double x = a.avg_stance_ratio())
-    _accum[static_cast<int>(accum_id::avg_stance_ratio)].add(x);
+	case accum_field::avg_stance_ratio:
+	  if (double x = a.avg_stance_ratio())
+	    accum.add(x);
+	  break;
 
-  if (double x = a.avg_vertical_oscillation())
-    _accum[static_cast<int>(accum_id::avg_vertical_oscillation)].add(x);
+	case accum_field::avg_vertical_oscillation:
+	  if (double x = a.avg_vertical_oscillation())
+	    accum.add(x);
+	  break;
 
-  if (double x = a.avg_stride_length())
-    _accum[static_cast<int>(accum_id::avg_stride_length)].add(x);
+	case accum_field::avg_stride_length:
+	  if (double x = a.avg_stride_length())
+	    accum.add(x);
+	  break;
 
-  if (double x = a.calories())
-    _accum[static_cast<int>(accum_id::calories)].add(x);
+	case accum_field::calories:
+	  if (double x = a.calories())
+	    accum.add(x);
+	  break;
 
-  if (double x = a.training_effect())
-    _accum[static_cast<int>(accum_id::training_effect)].add(x);
+	case accum_field::training_effect:
+	  if (double x = a.training_effect())
+	    accum.add(x);
+	  break;
 
-  if (double x = a.weight())
-    _accum[static_cast<int>(accum_id::weight)].add(x);
+	case accum_field::weight:
+	  if (double x = a.weight())
+	    accum.add(x);
+	  break;
 
-  if (double x = a.effort())
-    _accum[static_cast<int>(accum_id::effort)].add(x);
+	case accum_field::effort:
+	  if (double x = a.effort())
+	    accum.add(x);
+	  break;
 
-  if (double x = a.quality())
-    _accum[static_cast<int>(accum_id::quality)].add(x);
+	case accum_field::quality:
+	  if (double x = a.quality())
+	    accum.add(x);
+	  break;
 
-  if (double x = a.points())
-    _accum[static_cast<int>(accum_id::points)].add(x);
+	case accum_field::points:
+	  if (double x = a.points())
+	    accum.add(x);
+	  break;
 
-  if (double x = a.temperature())
-    _accum[static_cast<int>(accum_id::temperature)].add(x);
+	case accum_field::temperature:
+	  if (double x = a.temperature())
+	    accum.add(x);
+	  break;
 
-  if (double x = a.dew_point())
-    _accum[static_cast<int>(accum_id::dew_point)].add(x);
+	case accum_field::dew_point:
+	  if (double x = a.dew_point())
+	    accum.add(x);
+	  break;
+	}
+    }
 }
 
 void
@@ -236,137 +423,74 @@ bool
 activity_accum::get_field_value(const char *name, const char *arg,
 				field_data_type &type, double &value) const
 {
-  field_id f_id = lookup_field_id(name);
+  accum_field field;
+  if (!field_by_name(name, field))
+    return false;
 
-  type = lookup_field_data_type(f_id);
-
-  accum_id a_id;
-  switch (f_id)
+  if (arg == nullptr)
     {
-    case field_id::distance:
-      a_id = accum_id::distance;
-      if (!arg)
-	arg = "total";
-      break;
-    case field_id::duration:
-      a_id = accum_id::duration;
-      if (!arg)
-	arg = "total";
-      break;
-    case field_id::speed:
-    case field_id::pace:
-      a_id = accum_id::speed;
-      if (!arg)
-	arg = "average";
-      break;
-    case field_id::max_speed:
-    case field_id::max_pace:
-      a_id = accum_id::max_speed;
-      if (!arg)
-	arg = "max";
-      break;
-    case field_id::avg_hr:
-      a_id = accum_id::avg_hr;
-      if (!arg)
-	arg = "average";
-      break;
-    case field_id::max_hr:
-      a_id = accum_id::max_hr;
-      if (!arg)
-	arg = "max";
-      break;
-    case field_id::resting_hr:
-      a_id = accum_id::resting_hr;
-      if (!arg)
-	arg = "min";
-      break;
-    case field_id::avg_cadence:
-      a_id = accum_id::avg_cadence;
-      if (!arg)
-	arg = "average";
-      break;
-    case field_id::max_cadence:
-      a_id = accum_id::max_cadence;
-      if (!arg)
-	arg = "max";
-      break;
-    case field_id::avg_stance_time:
-      a_id = accum_id::avg_stance_time;
-      if (!arg)
-	arg = "average";
-      break;
-    case field_id::avg_stance_ratio:
-      a_id = accum_id::avg_stance_ratio;
-      if (!arg)
-	arg = "average";
-      break;
-    case field_id::avg_stride_length:
-      a_id = accum_id::avg_stride_length;
-      if (!arg)
-	arg = "average";
-      break;
-    case field_id::avg_vertical_oscillation:
-      a_id = accum_id::avg_vertical_oscillation;
-      if (!arg)
-	arg = "average";
-      break;
-    case field_id::calories:
-      a_id = accum_id::calories;
-      if (!arg)
-	arg = "total";
-      break;
-    case field_id::training_effect:
-      a_id = accum_id::training_effect;
-      if (!arg)
-	arg = "average";
-      break;
-    case field_id::weight:
-      a_id = accum_id::weight;
-      if (!arg)
-	arg = "average";
-      break;
-    case field_id::effort:
-      a_id = accum_id::effort;
-      if (!arg)
-	arg = "average";
-      break;
-    case field_id::quality:
-      a_id = accum_id::quality;
-      if (!arg)
-	arg = "average";
-      break;
-    case field_id::points:
-      a_id = accum_id::points;
-      if (!arg)
-	arg = "total";
-      break;
-    case field_id::temperature:
-      a_id = accum_id::temperature;
-      if (!arg)
-	arg = "average";
-      break;
-    case field_id::dew_point:
-      a_id = accum_id::dew_point;
-      if (!arg)
-	arg = "average";
-      break;
-    default:
-      return false;
+      switch (field)
+	{
+	case accum_field::calories:
+	case accum_field::distance:
+	case accum_field::duration:
+	case accum_field::points:
+	  arg = "total";
+	  break;
+	case accum_field::avg_cadence:
+	case accum_field::avg_hr:
+	case accum_field::avg_stance_ratio:
+	case accum_field::avg_stance_time:
+	case accum_field::avg_stride_length:
+	case accum_field::avg_vertical_oscillation:
+	case accum_field::dew_point:
+	case accum_field::effort:
+	case accum_field::quality:
+	case accum_field::speed:
+	case accum_field::temperature:
+	case accum_field::training_effect:
+	case accum_field::weight:
+	  arg = "average";
+	  break;
+	case accum_field::max_cadence:
+	case accum_field::max_hr:
+	case accum_field::max_speed:
+	  arg = "max";
+	  break;
+	case accum_field::resting_hr:
+	  arg = "min";
+	  break;
+	}
     }
+
+  const value_accum *accum = nullptr;
+  for (const auto &a : _accum)
+    {
+      if (a.field == field)
+	{
+	  accum = &a;
+	  break;
+	}
+    }
+
+  if (accum == nullptr || arg == nullptr)
+    return false;
 
   value = 0;
   if (strcasecmp(arg, "total") == 0 || strcasecmp(arg, "sum") == 0)
-    value = _accum[static_cast<int>(a_id)].get_total();
+    value = accum->get_total();
   else if (strcasecmp(arg, "average") == 0 || strcasecmp(arg, "mean") == 0)
-    value = _accum[static_cast<int>(a_id)].get_mean();
+    value = accum->get_mean();
   else if (strcasecmp(arg, "sd") == 0 || strcasecmp(arg, "sdev") == 0)
-    value = _accum[static_cast<int>(a_id)].get_sdev();
+    value = accum->get_sdev();
   else if (strcasecmp(arg, "min") == 0 || strcasecmp(arg, "minimum") == 0)
-    value = _accum[static_cast<int>(a_id)].get_min();
+    value = accum->get_min();
   else if (strcasecmp(arg, "max") == 0 || strcasecmp(arg, "maximum") == 0)
-    value = _accum[static_cast<int>(a_id)].get_max();
+    value = accum->get_max();
   else
     return false;
+
+  type = lookup_field_data_type(lookup_field_id(name));
 
   return true;
 }
