@@ -147,10 +147,15 @@ activity::update_points()
 	      if (last_p != nullptr
 		  && p.follows_continuously(*last_p))
 		{
-		  p.speed = ((p.distance - last_p->distance)
-			     / (p.elapsed_time - last_p->elapsed_time));
-		  if (last_p->speed == 0 && last_p->distance != 0)
-		    last_p->speed = p.speed;
+		  float t_delta = p.elapsed_time - last_p->elapsed_time;
+		  if (t_delta > 1e-3f)
+		    {
+		      p.speed = (p.distance - last_p->distance) / t_delta;
+		      if (last_p->speed == 0 && last_p->distance != 0)
+			last_p->speed = p.speed;
+		    }
+		  else
+		    p.speed = last_p->speed;
 		}
 
 	      last_p = &p;
@@ -159,7 +164,7 @@ activity::update_points()
 	    last_p = nullptr;
 	}
 
-      set_has_distance(true);
+      set_has_speed(true);
     }
 }
 
