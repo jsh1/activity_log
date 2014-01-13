@@ -104,26 +104,25 @@ parse_time(const std::string &s)
     return 0;
 
   struct tm tm = {0};
-  double seconds_frac = 0;
+  double seconds = 0;
 
-  if (sscanf_l(s.c_str() + start, nullptr, "%4d-%2d-%2dT%2d:%2d:%2d%lfZ",
+  if (sscanf_l(s.c_str() + start, nullptr, "%4d-%2d-%2dT%2d:%2d:%lfZ",
 	       &tm.tm_year, &tm.tm_mon, &tm.tm_mday, &tm.tm_hour,
-	       &tm.tm_min, &tm.tm_sec, &seconds_frac) != 7
-      && sscanf_l(s.c_str() + start, nullptr, "%4d-%2d-%2dT%2d:%2d:%2dZ",
-		  &tm.tm_year, &tm.tm_mon, &tm.tm_mday, &tm.tm_hour,
-		  &tm.tm_min, &tm.tm_sec) != 6)
+	       &tm.tm_min, &seconds) != 6)
     {
       return 0;
     }
 
   tm.tm_year = tm.tm_year - 1900;
   tm.tm_mon = tm.tm_mon - 1;		// 0..11
+  tm.tm_sec = floor(seconds);
+  seconds = seconds - tm.tm_sec;
 
   time_t epoch_time = timegm(&tm);
   if (epoch_time == -1)
     return 0;
 
-  return epoch_time + seconds_frac;
+  return epoch_time + seconds;
 }
 
 bool
