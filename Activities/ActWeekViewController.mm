@@ -66,7 +66,10 @@
 @class ActWeekView_ActivityLayer, ActWeekView_ActivityGroupLayer;
 
 @interface ActWeekViewController ()
+@property(nonatomic, readonly) ActWeekListView *listView;
 @property(nonatomic, readonly) ActWeekHeaderView *headerView;
+- (void)activityListDidChange:(NSNotification *)note;
+- (void)selectedActivityDidChange:(NSNotification *)note;
 @end
 
 @interface ActWeekListView ()
@@ -134,7 +137,6 @@
 {
   time_t _date;
   std::vector<act::activity *> _activities;
-  BOOL _selected;
   BOOL _highlit;
   BOOL _expanded, _expandable;
 
@@ -144,7 +146,6 @@
 
 @property(nonatomic) time_t date;
 @property(nonatomic) const std::vector<act::activity *> &activities;
-@property(nonatomic, getter=isSelected) BOOL selected;
 @property(nonatomic, getter=isHighlit) BOOL highlit;
 @property(nonatomic, getter=isExpanded) BOOL expanded;
 @property(nonatomic, getter=isExpandable) BOOL expandable;
@@ -211,6 +212,7 @@ activity_radius(double dist, double dur, double pts, int displayMode)
 
 @synthesize interfaceScale = _interfaceScale;
 @synthesize displayMode = _displayMode;
+@synthesize listView = _listView;
 @synthesize headerView = _headerView;
 
 + (NSString *)viewNibName
@@ -264,7 +266,8 @@ activity_radius(double dist, double dur, double pts, int displayMode)
 
 - (void)viewWillAppear
 {
-  [_listView setNeedsDisplay:YES];
+  [self activityListDidChange:nil];
+  [self selectedActivityDidChange:nil];
 }
 
 - (void)dealloc
@@ -292,7 +295,7 @@ activity_radius(double dist, double dur, double pts, int displayMode)
 - (int)weekForActivityStorage:(const act::activity_storage_ref)storage
 {
   if (storage == nullptr)
-    return NSNotFound;
+    return -1;
 
   const auto &activities = [_controller activityList];
 
@@ -330,7 +333,7 @@ activity_radius(double dist, double dur, double pts, int displayMode)
   if (week >= 0)
     {
       NSRect r = [_listView rectForWeek:week];
-      [_listView scrollRectToVisible:r];
+      [_listView scrollRectToVisible:r animated:YES];
     }
 
   [_listView setNeedsDisplay:YES];
@@ -640,12 +643,20 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
 
   if (_selectedLayer != selected_layer)
     {
-      [_selectedLayer setSelected:NO];
-
+      [_selectedLayer setNeedsLayout];
       [_selectedLayer release];
       _selectedLayer = [selected_layer retain];
+      [_selectedLayer setNeedsLayout];
+    }
+}
 
-      [_selectedLayer setSelected:YES];
+- (void)setSelectedLayer:(ActWeekView_ActivityLayer *)layer
+{
+  if (_selectedLayer != layer)
+    {
+      [_selectedLayer setNeedsLayout];
+      [_selectedLayer release];
+      _selectedLayer = [layer retain];
     }
 }
 
@@ -661,8 +672,8 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
 
 - (void)updateLayer
 {
-  [self updateLayersForRect:[self visibleRect]];
   [self updateSelectionState];
+  [self updateLayersForRect:[self visibleRect]];
 }
 
 - (BOOL)isFlipped
@@ -1491,20 +1502,6 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
     }
 }
 
-- (BOOL)isSelected
-{
-  return _selected;
-}
-
-- (void)setSelected:(BOOL)flag
-{
-  if (_selected != flag)
-    {
-      _selected = flag;
-      [self setNeedsLayout];
-    }
-}
-
 - (BOOL)isHighlit
 {
   return _highlit;
@@ -1521,12 +1518,27 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
 
 - (void)layoutSublayers
 {
+  ActWeekViewController *controller = (ActWeekViewController *)[self delegate];
+
   double dist = 0, dur = 0, pts = 0;
   for (const auto &it : _activities)
     {
       dist += it->distance();
       dur += it->duration();
       pts += it->points();
+    }
+
+  /* FIXME: having the layer notify the view when it's selected is a
+     kludge, but we need to handle layers being added and removed, and
+     not existing when -updateLayersForRect: runs. */
+
+  BOOL selected = NO;
+  if (_activities.size() == 1
+      && (_activities.front()->storage()
+	  == [[controller controller] selectedActivityStorage]))
+    {
+      selected = YES;
+      [[controller listView] setSelectedLayer:self];
     }
 
   CGFloat scale = [self interfaceScale];
@@ -1558,13 +1570,13 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
   else
     background_color = [NSColor colorWithDeviceWhite:.85 alpha:1];
 
-  [(ActWeekViewController *)[self delegate] withAnimationsEnabled:^
+  [controller withAnimationsEnabled:^
     {
       [self setBounds:CGRectMake(0, 0, radius*2, radius*2)];
       [self setCornerRadius:radius];
       [self setBackgroundColor:[background_color CGColor]];
       [self setBorderColor:[color CGColor]];
-      [self setBorderWidth:_selected ? 5 : _activities.size() == 1 ? 1 : 0];
+      [self setBorderWidth:selected ? 5 : _activities.size() == 1 ? 1 : 0];
       [self setShadowOpacity:_highlit ? 1 : 0];
     }];
 
