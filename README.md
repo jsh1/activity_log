@@ -8,9 +8,15 @@ with cross references to GPS files and other media (e.g. photos, web
 URLs). Storing the files in a Dropbox directory will sync the ad hoc
 database between systems.
 
-Currently two interfaces are planned, (1) a suite of shell commands
-with a consistent git-like interface, and (2) a Mac application for
-running queries, browsing entries and more complex data analysis.
+Currently two interfaces are planned, (1) a Mac application for
+browsing entries, running queries and more complex data analysis, and
+(2) a suite of shell commands with a consistent git-like interface for
+command-line use.
+
+### Mac UI
+
+![Screenshot](http://unfactored.org/images/act-screen-2014-01-14-1.png)
+![Screenshot](http://unfactored.org/images/act-screen-2014-01-14-2.png)
 
 ### Command Line Interface
 
@@ -219,11 +225,3 @@ Clears the deleted state.
 
 Removes any deleted activities, and does any other cleanup that might
 be needed.
-
-### Mac UI
-
-The Cocoa app is still very unfinished, the image below shows the state
-as of October 2013. It can import TCX and FIT files and edit all
-fields.
-
-![Screenshot](http://unfactored.org/images/act-screen-2013-11-02.png)
