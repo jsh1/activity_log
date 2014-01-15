@@ -22,6 +22,7 @@
    CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
    SOFTWARE. */
 
+#include "act-arguments.h"
 #include "act-gps-activity.h"
 #include "act-gps-parser.h"
 #include "act-gps-fit-parser.h"
@@ -32,123 +33,160 @@
 
 using namespace act;
 
-static const struct option long_options[] =
+enum option_id
 {
-  {"fit", no_argument, 0, 'f'},
-  {"tcx", no_argument, 0, 't'},
-  {"print-summary", no_argument, 0, 's'},
-  {"print-laps", no_argument, 0, 'l'},
-  {"print-points", no_argument, 0, 'p'},
-  {"print-date", optional_argument, 0, 'd'},
-  {"global-time", no_argument, 0, 'g'},
+  opt_fit,
+  opt_tcx,
+  opt_print_summary,
+  opt_print_laps,
+  opt_print_points,
+  opt_print_smoothed,
+  opt_print_date,
+  opt_global_time,
 };
 
-static const char short_options[] = "ftslpd:g";
+static const arguments::option options[] =
+{
+  {opt_fit, "fit", 'f', nullptr, "Treat as FIT data."},
+  {opt_tcx, "tcx", 't', nullptr, "Treat as XML TCX data." },
+  {opt_print_summary, "print-summary", 's', nullptr,
+   "Print activity summary."},
+  {opt_print_laps, "print-laps", 'l', nullptr, "Print lap summaries."},
+  {opt_print_points, "print-points", 'p', nullptr, "Print raw GPS track."},
+  {opt_print_smoothed, "print-smoothed", 'S', "SECONDS",
+   "Print smoothed GPS track."},
+  {opt_print_date, "print-date", 'd', "DATE-FORMAT", "Print activity date."},
+  {opt_global_time, "global-time", 'g', nullptr, "Print date as UTC."},
+  {arguments::opt_eof},
+};
 
 static void
-usage_and_exit(int ret)
+print_usage(const arguments &args)
 {
-  fprintf(stderr, "usage: gps-test [OPTIONS] FILES...\n");
-  exit(ret);
+  fprintf(stderr, "usage: %s [OPTION...] FILE...\n\n", args.program_name());
+  fputs("where OPTION is any of:\n\n", stderr);
+
+  arguments::print_options(options, stderr);
+
+  fputs("\n", stderr);
 }
 
 int
-main(int argc, char **argv)
+main(int argc, const char **argv)
 {
-  bool opt_fit = false;
-  bool opt_tcx = false;
-  bool opt_print_summary = false;
-  bool opt_print_laps = false;
-  bool opt_print_points = false;
-  const char *opt_print_date = nullptr;
-  bool opt_global_time = false;
+  arguments args(argc, argv);
+
+  bool fit_data = false;
+  bool tcx_data = false;
+  bool print_summary = false;
+  bool print_laps = false;
+  bool print_points = false;
+  int print_smoothed = 0;
+  const char *print_date = nullptr;
+  bool global_time = false;
 
   while (1)
     {
-      int opt = getopt_long(argc, argv, short_options, long_options, 0);
-      if (opt == -1)
+      const char *opt_arg = nullptr;
+
+      int opt = args.getopt(options, &opt_arg);
+      if (opt == arguments::opt_eof)
 	break;
 
       switch (opt)
 	{
-	case 'f':
-	  opt_fit = true;
+	case opt_fit:
+	  fit_data = true;
 	  break;
 
-	case 't':
-	  opt_tcx = true;
+	case opt_tcx:
+	  tcx_data = true;
 	  break;
 
-	case 's':
-	  opt_print_summary = true;
+	case opt_print_summary:
+	  print_summary = true;
 	  break;
 
-	case 'l':
-	  opt_print_laps = true;
+	case opt_print_laps:
+	  print_laps = true;
 	  break;
 
-	case 'p':
-	  opt_print_points = true;
+	case opt_print_points:
+	  print_points = true;
 	  break;
 
-	case 'd':
-	  if (optarg)
-	    opt_print_date = optarg;
+	case opt_print_smoothed:
+	  print_smoothed = atoi(opt_arg);
+	  break;
+
+	case opt_print_date:
+	  if (opt_arg != nullptr)
+	    print_date = opt_arg;
 	  else
-	    opt_print_date = "%a, %d %b %Y %H:%M:%S %z";
+	    print_date = "%a, %d %b %Y %H:%M:%S %z";
 	  break;
 
-	case 'g':
-	  opt_global_time = true;
+	case opt_global_time:
+	  global_time = true;
 	  break;
 
 	default:
-	  usage_and_exit(1);
+	  print_usage(args);
+	  exit(1);
 	}
     }
 
-  for (int i = optind; i < argc; i++)
+  for (const std::string &s : args.args())
     {
-      gps::activity test_activity;
+      gps::activity activity;
 
-      if (opt_fit)
-	test_activity.read_fit_file(argv[i]);
-      else if (opt_tcx)
-	test_activity.read_tcx_file(argv[i]);
+      if (fit_data)
+	activity.read_fit_file(s.c_str());
+      else if (tcx_data)
+	activity.read_tcx_file(s.c_str());
       else
-	test_activity.read_file(argv[i]);
+	activity.read_file(s.c_str());
 
-      if (opt_print_date)
+      if (print_date)
 	{
-	  time_t d = (time_t) test_activity.start_time();
+	  time_t d = (time_t) activity.start_time();
 	  if (d == 0)
 	    continue;
 
 	  struct tm tm = {0};
-	  if (opt_global_time)
+	  if (global_time)
 	    gmtime_r(&d, &tm);
 	  else
 	    localtime_r(&d, &tm);
 
 	  char buf[1024];
-	  strftime(buf, sizeof(buf), opt_print_date, &tm);
+	  strftime(buf, sizeof(buf), print_date, &tm);
 
 	  printf("%s\n", buf);
 	}
 
-      if (opt_print_summary)
-	test_activity.print_summary(stdout);
+      if (print_summary)
+	activity.print_summary(stdout);
 
-      if (opt_print_laps)
+      if (print_laps)
 	{
 	  fputc('\n', stdout);
-	  test_activity.print_laps(stdout);
+	  activity.print_laps(stdout);
 	}
 
-      if (opt_print_points)
+      if (print_points)
 	{
-	  fputc('\n', stdout);
-	  test_activity.print_points(stdout);
+	  printf("\nRAW track data:\n\n");
+	  activity.print_points(stdout);
+	}
+
+      if (print_smoothed > 0)
+	{
+	  gps::activity smoothed;
+	  smoothed.smooth(activity, print_smoothed);
+
+	  printf("\nSmoothed track data (%ds):\n\n", print_smoothed);
+	  smoothed.print_points(stdout);
 	}
     }
 
