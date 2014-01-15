@@ -34,7 +34,7 @@
 #import "ActAppKitExtensions.h"
 #import "ActFoundationExtensions.h"
 
-#import <QuartzCore/CoreAnimation.h>
+#import "CoreAnimationExtensions.h"
 
 #define ROW_HEIGHT 80
 #define STATS_WIDTH 100
@@ -283,15 +283,6 @@ activity_radius(double dist, double dur, double pts, int displayMode)
   return _listView;
 }
 
-- (void)withAnimationsEnabled:(void (^)(void))thunk
-{
-  _animationsEnabled++;
-
-  thunk();
-
-  _animationsEnabled--;
-}
-
 - (int)weekForActivityStorage:(const act::activity_storage_ref)storage
 {
   if (storage == nullptr)
@@ -368,13 +359,10 @@ activity_radius(double dist, double dur, double pts, int displayMode)
 	}
 
       if (disableAnimations)
-	_animationsDisabled++;
+	[CATransaction setDisableActions:YES];
 
       [_listView setNeedsDisplay:YES];
       [_headerView setNeedsDisplay:YES];
-
-      if (disableAnimations)
-	dispatch_async(dispatch_get_main_queue(), ^{_animationsDisabled--;});
     }
   else if (sender == _displayModeControl)
     {
@@ -410,7 +398,7 @@ activity_radius(double dist, double dur, double pts, int displayMode)
 
 - (id)actionForLayer:(CALayer *)layer forKey:(NSString *)key
 {
-  return !_animationsEnabled || _animationsDisabled ? [NSNull null] : nil;
+  return [CATransaction actionForLayer:layer forKey:key];
 }
 
 @end
@@ -1421,7 +1409,7 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
       CGFloat px = bounds.origin.x + floor(i * item_width + item_width * .5);
       CGFloat py = bounds.origin.y + floor(ROW_HEIGHT * .5);
 
-      [(ActWeekViewController *)[self delegate] withAnimationsEnabled:^
+      [CATransaction animationBlock:^
         {
 	  [sublayer setPosition:CGPointMake(px, py)];
 	}];
@@ -1570,7 +1558,7 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
   else
     background_color = [NSColor colorWithDeviceWhite:.85 alpha:1];
 
-  [controller withAnimationsEnabled:^
+  [CATransaction animationBlock:^
     {
       [self setBounds:CGRectMake(0, 0, radius*2, radius*2)];
       [self setCornerRadius:radius];
@@ -1683,7 +1671,7 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
       CGFloat px = cx + sin(ang) * hyp;
       CGFloat py = cy + cos(ang) * hyp;
 
-      [(ActWeekViewController *)[self delegate] withAnimationsEnabled:^
+      [CATransaction animationBlock:^
         {
 	  [sublayer setPosition:CGPointMake(px, py)];
 	}];

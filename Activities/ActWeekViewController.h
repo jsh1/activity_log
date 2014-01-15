@@ -44,9 +44,6 @@ enum ActWeekViewDisplayMode
 
   CGFloat _interfaceScale;
   int _displayMode;
-
-  int _animationsEnabled;
-  int _animationsDisabled;
 }
 
 @property(nonatomic) CGFloat interfaceScale;
