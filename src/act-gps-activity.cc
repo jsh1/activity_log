@@ -908,6 +908,14 @@ box_stream<Stream>::next(activity::point &ret_p)
 
       ret_p = sum;
       ret_p.mul(1.f / sum_n);
+
+      /* FIXME: better way to avoid smoothing time/distance fields?
+	 Or perhaps should smooth distance sample deltas? */
+
+      ret_p.elapsed_time = p.elapsed_time;
+      ret_p.timer_time = p.timer_time;
+      ret_p.distance = p.distance;
+
       return true;
     }
   else
