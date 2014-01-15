@@ -305,11 +305,9 @@ chart::chart(const gps::activity &a, x_axis_type xa)
   _selected_lap(-1),
   _current_time(-1)
 {
-  float mean, sdev;
-  a.get_range(gps::activity::point_field::elapsed_time,
-	      _min_time, _max_time, mean, sdev);
+  a.get_range(gps::activity::point_field::elapsed_time, _min_time, _max_time);
   a.get_range(gps::activity::point_field::distance,
-	      _min_distance, _max_distance, mean, sdev);
+	      _min_distance, _max_distance);
 }
 
 void

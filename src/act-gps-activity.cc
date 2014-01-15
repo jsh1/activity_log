@@ -29,6 +29,7 @@
 #include "act-gps-tcx-parser.h"
 #include "act-util.h"
 
+#include <float.h>
 #include <math.h>
 
 namespace act {
@@ -577,6 +578,69 @@ activity::point::mul(float x)
   vertical_oscillation *= x;
   stance_time *= x;
   stance_ratio *= x;
+}
+
+void
+activity::get_range(point_field field, float &ret_min, float &ret_max) const
+{
+  float min = FLT_MAX, max = FLT_MIN;
+
+  if (_points.size() != 0)
+    {
+      bool monotonic;
+      switch (field)
+	{
+	case point_field::elapsed_time:
+	case point_field::timer_time:
+	case point_field::distance:
+	  monotonic = true;
+	  break;
+	default:
+	  monotonic = false;
+	  break;
+	}
+
+      point::field_fn fn = point::field_function(field);
+
+      if (monotonic)
+	{
+	  for (ssize_t i = 0; i < _points.size(); i++)
+	    {
+	      float value = fn(_points[i]);
+	      if (_points[i].distance == 0 || !(value > 0))
+		continue;
+	      min = value;
+	      break;
+	    }
+
+	  for (ssize_t i = _points.size() - 1; i >= 0; i--)
+	    {
+	      float value = fn(_points[i]);
+	      if (_points[i].distance == 0 || !(value > 0))
+		continue;
+	      max = value;
+	      break;
+	    }
+
+	  if (min > max)
+	    std::swap(min, max);
+	}
+      else
+	{
+	  for (const auto &p : _points)
+	    {
+	      float value = fn(p);
+	      if (p.distance == 0 || !(value > 0))
+		continue;
+
+	      min = std::min(min, value);
+	      max = std::max(max, value);
+	    }
+	}
+    }
+
+  ret_min = min;
+  ret_max = max;
 }
 
 void

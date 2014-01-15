@@ -184,6 +184,8 @@ public:
   void print_laps(FILE *fh) const;
   void print_points(FILE *fh) const;
 
+  void get_range(point_field field, float &ret_min, float &ret_max) const;
+
   void get_range(point_field field, float &ret_min, float &ret_max,
     float &ret_mean, float &ret_sdev) const;
 
