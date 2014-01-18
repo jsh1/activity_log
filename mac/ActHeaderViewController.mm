@@ -32,7 +32,7 @@
 
 #import "act-database.h"
 
-#import "ActFoundationExtensions.h"
+#import "FoundationExtensions.h"
 
 #define CORNER_RADIUS 6
 

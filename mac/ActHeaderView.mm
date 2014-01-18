@@ -30,7 +30,7 @@
 #import "ActViewLayout.h"
 #import "ActWindowController.h"
 
-#import "ActFoundationExtensions.h"
+#import "FoundationExtensions.h"
 
 #define FIELD_HEIGHT 12
 #define FIELD_Y_SPACING 2

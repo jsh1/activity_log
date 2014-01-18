@@ -46,7 +46,7 @@
 		571EC4E6188607B000B1B654 /* CoreAnimationExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = 571EC4E5188607B000B1B654 /* CoreAnimationExtensions.m */; };
 		5730789617C56E54002C5B28 /* ActChartViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = 5730789517C56E54002C5B28 /* ActChartViewController.mm */; };
 		5734E189181007EB007BDC1B /* ActColor.mm in Sources */ = {isa = PBXBuildFile; fileRef = 5734E188181007EB007BDC1B /* ActColor.mm */; };
-		5734E18C18103C5D007BDC1B /* ActAppKitExtensions.mm in Sources */ = {isa = PBXBuildFile; fileRef = 5734E18B18103C5D007BDC1B /* ActAppKitExtensions.mm */; };
+		5734E18C18103C5D007BDC1B /* AppKitExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = 5734E18B18103C5D007BDC1B /* AppKitExtensions.m */; };
 		5736AE56187752DC00EAE652 /* ActWeekView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 5736AE54187752DC00EAE652 /* ActWeekView.xib */; };
 		5736AE5918775A8100EAE652 /* ActWeekViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = 5736AE5818775A8100EAE652 /* ActWeekViewController.mm */; };
 		5736AE5B1878272700EAE652 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5736AE5A1878272700EAE652 /* QuartzCore.framework */; };
@@ -70,7 +70,7 @@
 		57921A5A17BEAF48001AD35D /* ActWindowController.mm in Sources */ = {isa = PBXBuildFile; fileRef = 57921A5917BEAF48001AD35D /* ActWindowController.mm */; };
 		579772E517C4F63900AA2E9D /* ActHeaderView.mm in Sources */ = {isa = PBXBuildFile; fileRef = 579772E417C4F63900AA2E9D /* ActHeaderView.mm */; };
 		579772E817C4FB0A00AA2E9D /* ActHeaderFieldView.mm in Sources */ = {isa = PBXBuildFile; fileRef = 579772E717C4FB0A00AA2E9D /* ActHeaderFieldView.mm */; };
-		579772EB17C5015600AA2E9D /* ActFoundationExtensions.mm in Sources */ = {isa = PBXBuildFile; fileRef = 579772EA17C5015600AA2E9D /* ActFoundationExtensions.mm */; };
+		579772EB17C5015600AA2E9D /* FoundationExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = 579772EA17C5015600AA2E9D /* FoundationExtensions.m */; };
 		57A1FE8D187C10CA0077629E /* chart-view-chart.mm in Sources */ = {isa = PBXBuildFile; fileRef = 57A1FE8B187C10CA0077629E /* chart-view-chart.mm */; };
 		57A7352817CF8A3B0054E3EB /* ActLapViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = 57A7352717CF8A3B0054E3EB /* ActLapViewController.mm */; };
 		57B51B09180DFC18004F1A1D /* ActActivityView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 57B51B07180DFC18004F1A1D /* ActActivityView.xib */; };
@@ -120,7 +120,7 @@
 		57193D4417FDFC9D009634B4 /* ActNotesListViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActNotesListViewController.h; sourceTree = "<group>"; };
 		57193D4517FDFC9D009634B4 /* ActNotesListViewController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ActNotesListViewController.mm; sourceTree = "<group>"; };
 		57193D4817FDFCAE009634B4 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/ActNotesListView.xib; sourceTree = "<group>"; };
-		57193D4A17FF2469009634B4 /* objc-ptr.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "objc-ptr.h"; sourceTree = "<group>"; };
+		57193D4A17FF2469009634B4 /* objc-ptr.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "objc-ptr.h"; path = "../common/objc-ptr.h"; sourceTree = "<group>"; };
 		57193D4B1801A4C9009634B4 /* ActHeaderViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActHeaderViewController.h; sourceTree = "<group>"; };
 		57193D4C1801A4C9009634B4 /* ActHeaderViewController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ActHeaderViewController.mm; sourceTree = "<group>"; };
 		57193D511801A514009634B4 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/ActHeaderView.xib; sourceTree = "<group>"; };
@@ -137,53 +137,53 @@
 		571DB9B117BE66A60001514C /* ActListViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActListViewController.h; sourceTree = "<group>"; };
 		571DB9B217BE66A60001514C /* ActListViewController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ActListViewController.mm; sourceTree = "<group>"; };
 		571DB9BD17BE67850001514C /* libact.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libact.a; sourceTree = BUILT_PRODUCTS_DIR; };
-		571DB9C117BE67CD0001514C /* act-activity-accum.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "act-activity-accum.cc"; path = "../src/act-activity-accum.cc"; sourceTree = "<group>"; };
-		571DB9C217BE67CD0001514C /* act-activity-accum.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "act-activity-accum.h"; path = "../src/act-activity-accum.h"; sourceTree = "<group>"; };
-		571DB9C317BE67CD0001514C /* act-activity-storage.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "act-activity-storage.cc"; path = "../src/act-activity-storage.cc"; sourceTree = "<group>"; };
-		571DB9C417BE67CD0001514C /* act-activity-storage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "act-activity-storage.h"; path = "../src/act-activity-storage.h"; sourceTree = "<group>"; };
-		571DB9C517BE67CD0001514C /* act-activity.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "act-activity.cc"; path = "../src/act-activity.cc"; sourceTree = "<group>"; };
-		571DB9C617BE67CD0001514C /* act-activity.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "act-activity.h"; path = "../src/act-activity.h"; sourceTree = "<group>"; };
-		571DB9C717BE67CD0001514C /* act-arguments.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "act-arguments.cc"; path = "../src/act-arguments.cc"; sourceTree = "<group>"; };
-		571DB9C817BE67CD0001514C /* act-arguments.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "act-arguments.h"; path = "../src/act-arguments.h"; sourceTree = "<group>"; };
-		571DB9C917BE67CD0001514C /* act-base.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "act-base.h"; path = "../src/act-base.h"; sourceTree = "<group>"; };
-		571DB9CA17BE67CD0001514C /* act-config.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "act-config.cc"; path = "../src/act-config.cc"; sourceTree = "<group>"; };
-		571DB9CB17BE67CD0001514C /* act-config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "act-config.h"; path = "../src/act-config.h"; sourceTree = "<group>"; };
-		571DB9CC17BE67CD0001514C /* act-database.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "act-database.cc"; path = "../src/act-database.cc"; sourceTree = "<group>"; };
-		571DB9CD17BE67CD0001514C /* act-database.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "act-database.h"; path = "../src/act-database.h"; sourceTree = "<group>"; };
-		571DB9CE17BE67CD0001514C /* act-format.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "act-format.cc"; path = "../src/act-format.cc"; sourceTree = "<group>"; };
-		571DB9CF17BE67CD0001514C /* act-format.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "act-format.h"; path = "../src/act-format.h"; sourceTree = "<group>"; };
-		571DB9D017BE67CD0001514C /* act-gps-activity.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "act-gps-activity.cc"; path = "../src/act-gps-activity.cc"; sourceTree = "<group>"; };
-		571DB9D117BE67CD0001514C /* act-gps-activity.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "act-gps-activity.h"; path = "../src/act-gps-activity.h"; sourceTree = "<group>"; };
-		571DB9D217BE67CD0001514C /* act-gps-fit-parser.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "act-gps-fit-parser.cc"; path = "../src/act-gps-fit-parser.cc"; sourceTree = "<group>"; };
-		571DB9D317BE67CD0001514C /* act-gps-fit-parser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "act-gps-fit-parser.h"; path = "../src/act-gps-fit-parser.h"; sourceTree = "<group>"; };
-		571DB9D417BE67CD0001514C /* act-gps-parser.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "act-gps-parser.cc"; path = "../src/act-gps-parser.cc"; sourceTree = "<group>"; };
-		571DB9D517BE67CD0001514C /* act-gps-parser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "act-gps-parser.h"; path = "../src/act-gps-parser.h"; sourceTree = "<group>"; };
-		571DB9D617BE67CD0001514C /* act-gps-tcx-parser.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "act-gps-tcx-parser.cc"; path = "../src/act-gps-tcx-parser.cc"; sourceTree = "<group>"; };
-		571DB9D717BE67CD0001514C /* act-gps-tcx-parser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "act-gps-tcx-parser.h"; path = "../src/act-gps-tcx-parser.h"; sourceTree = "<group>"; };
-		571DB9D817BE67CD0001514C /* act-output-table.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "act-output-table.cc"; path = "../src/act-output-table.cc"; sourceTree = "<group>"; };
-		571DB9D917BE67CD0001514C /* act-output-table.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "act-output-table.h"; path = "../src/act-output-table.h"; sourceTree = "<group>"; };
-		571DB9DA17BE67CD0001514C /* act-swap-bytes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "act-swap-bytes.h"; path = "../src/act-swap-bytes.h"; sourceTree = "<group>"; };
-		571DB9DB17BE67CD0001514C /* act-types.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "act-types.cc"; path = "../src/act-types.cc"; sourceTree = "<group>"; };
-		571DB9DC17BE67CD0001514C /* act-types.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "act-types.h"; path = "../src/act-types.h"; sourceTree = "<group>"; };
-		571DB9DD17BE67CD0001514C /* act-util.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "act-util.cc"; path = "../src/act-util.cc"; sourceTree = "<group>"; };
-		571DB9DE17BE67CD0001514C /* act-util.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "act-util.h"; path = "../src/act-util.h"; sourceTree = "<group>"; };
+		571DB9C117BE67CD0001514C /* act-activity-accum.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "act-activity-accum.cc"; path = "../lib/act-activity-accum.cc"; sourceTree = "<group>"; };
+		571DB9C217BE67CD0001514C /* act-activity-accum.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "act-activity-accum.h"; path = "../lib/act-activity-accum.h"; sourceTree = "<group>"; };
+		571DB9C317BE67CD0001514C /* act-activity-storage.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "act-activity-storage.cc"; path = "../lib/act-activity-storage.cc"; sourceTree = "<group>"; };
+		571DB9C417BE67CD0001514C /* act-activity-storage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "act-activity-storage.h"; path = "../lib/act-activity-storage.h"; sourceTree = "<group>"; };
+		571DB9C517BE67CD0001514C /* act-activity.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "act-activity.cc"; path = "../lib/act-activity.cc"; sourceTree = "<group>"; };
+		571DB9C617BE67CD0001514C /* act-activity.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "act-activity.h"; path = "../lib/act-activity.h"; sourceTree = "<group>"; };
+		571DB9C717BE67CD0001514C /* act-arguments.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "act-arguments.cc"; path = "../lib/act-arguments.cc"; sourceTree = "<group>"; };
+		571DB9C817BE67CD0001514C /* act-arguments.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "act-arguments.h"; path = "../lib/act-arguments.h"; sourceTree = "<group>"; };
+		571DB9C917BE67CD0001514C /* act-base.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "act-base.h"; path = "../lib/act-base.h"; sourceTree = "<group>"; };
+		571DB9CA17BE67CD0001514C /* act-config.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "act-config.cc"; path = "../lib/act-config.cc"; sourceTree = "<group>"; };
+		571DB9CB17BE67CD0001514C /* act-config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "act-config.h"; path = "../lib/act-config.h"; sourceTree = "<group>"; };
+		571DB9CC17BE67CD0001514C /* act-database.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "act-database.cc"; path = "../lib/act-database.cc"; sourceTree = "<group>"; };
+		571DB9CD17BE67CD0001514C /* act-database.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "act-database.h"; path = "../lib/act-database.h"; sourceTree = "<group>"; };
+		571DB9CE17BE67CD0001514C /* act-format.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "act-format.cc"; path = "../lib/act-format.cc"; sourceTree = "<group>"; };
+		571DB9CF17BE67CD0001514C /* act-format.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "act-format.h"; path = "../lib/act-format.h"; sourceTree = "<group>"; };
+		571DB9D017BE67CD0001514C /* act-gps-activity.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "act-gps-activity.cc"; path = "../lib/act-gps-activity.cc"; sourceTree = "<group>"; };
+		571DB9D117BE67CD0001514C /* act-gps-activity.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "act-gps-activity.h"; path = "../lib/act-gps-activity.h"; sourceTree = "<group>"; };
+		571DB9D217BE67CD0001514C /* act-gps-fit-parser.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "act-gps-fit-parser.cc"; path = "../lib/act-gps-fit-parser.cc"; sourceTree = "<group>"; };
+		571DB9D317BE67CD0001514C /* act-gps-fit-parser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "act-gps-fit-parser.h"; path = "../lib/act-gps-fit-parser.h"; sourceTree = "<group>"; };
+		571DB9D417BE67CD0001514C /* act-gps-parser.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "act-gps-parser.cc"; path = "../lib/act-gps-parser.cc"; sourceTree = "<group>"; };
+		571DB9D517BE67CD0001514C /* act-gps-parser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "act-gps-parser.h"; path = "../lib/act-gps-parser.h"; sourceTree = "<group>"; };
+		571DB9D617BE67CD0001514C /* act-gps-tcx-parser.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "act-gps-tcx-parser.cc"; path = "../lib/act-gps-tcx-parser.cc"; sourceTree = "<group>"; };
+		571DB9D717BE67CD0001514C /* act-gps-tcx-parser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "act-gps-tcx-parser.h"; path = "../lib/act-gps-tcx-parser.h"; sourceTree = "<group>"; };
+		571DB9D817BE67CD0001514C /* act-output-table.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "act-output-table.cc"; path = "../lib/act-output-table.cc"; sourceTree = "<group>"; };
+		571DB9D917BE67CD0001514C /* act-output-table.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "act-output-table.h"; path = "../lib/act-output-table.h"; sourceTree = "<group>"; };
+		571DB9DA17BE67CD0001514C /* act-swap-bytes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "act-swap-bytes.h"; path = "../lib/act-swap-bytes.h"; sourceTree = "<group>"; };
+		571DB9DB17BE67CD0001514C /* act-types.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "act-types.cc"; path = "../lib/act-types.cc"; sourceTree = "<group>"; };
+		571DB9DC17BE67CD0001514C /* act-types.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "act-types.h"; path = "../lib/act-types.h"; sourceTree = "<group>"; };
+		571DB9DD17BE67CD0001514C /* act-util.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "act-util.cc"; path = "../lib/act-util.cc"; sourceTree = "<group>"; };
+		571DB9DE17BE67CD0001514C /* act-util.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "act-util.h"; path = "../lib/act-util.h"; sourceTree = "<group>"; };
 		571DB9FD17BE68090001514C /* libxml2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libxml2.dylib; path = usr/lib/libxml2.dylib; sourceTree = SDKROOT; };
-		571EC4E4188607B000B1B654 /* CoreAnimationExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CoreAnimationExtensions.h; sourceTree = "<group>"; };
-		571EC4E5188607B000B1B654 /* CoreAnimationExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CoreAnimationExtensions.m; sourceTree = "<group>"; };
+		571EC4E4188607B000B1B654 /* CoreAnimationExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CoreAnimationExtensions.h; path = ../common/CoreAnimationExtensions.h; sourceTree = "<group>"; };
+		571EC4E5188607B000B1B654 /* CoreAnimationExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CoreAnimationExtensions.m; path = ../common/CoreAnimationExtensions.m; sourceTree = "<group>"; };
 		5730789417C56E54002C5B28 /* ActChartViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActChartViewController.h; sourceTree = "<group>"; };
 		5730789517C56E54002C5B28 /* ActChartViewController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ActChartViewController.mm; sourceTree = "<group>"; };
 		5734E187181007EB007BDC1B /* ActColor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActColor.h; sourceTree = "<group>"; };
 		5734E188181007EB007BDC1B /* ActColor.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ActColor.mm; sourceTree = "<group>"; };
-		5734E18A18103C5D007BDC1B /* ActAppKitExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActAppKitExtensions.h; sourceTree = "<group>"; };
-		5734E18B18103C5D007BDC1B /* ActAppKitExtensions.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ActAppKitExtensions.mm; sourceTree = "<group>"; };
+		5734E18A18103C5D007BDC1B /* AppKitExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AppKitExtensions.h; path = ../common/AppKitExtensions.h; sourceTree = "<group>"; };
+		5734E18B18103C5D007BDC1B /* AppKitExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AppKitExtensions.m; path = ../common/AppKitExtensions.m; sourceTree = "<group>"; };
 		5736AE55187752DC00EAE652 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/ActWeekView.xib; sourceTree = "<group>"; };
 		5736AE5718775A8100EAE652 /* ActWeekViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActWeekViewController.h; sourceTree = "<group>"; };
 		5736AE5818775A8100EAE652 /* ActWeekViewController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ActWeekViewController.mm; sourceTree = "<group>"; };
 		5736AE5A1878272700EAE652 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
-		573ABAF31823FC05004FAF17 /* PXSourceList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PXSourceList.h; path = PXSourceList/PXSourceList.h; sourceTree = "<group>"; };
-		573ABAF41823FC05004FAF17 /* PXSourceList.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = PXSourceList.m; path = PXSourceList/PXSourceList.m; sourceTree = "<group>"; };
-		573ABAF51823FC05004FAF17 /* PXSourceListDataSource.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PXSourceListDataSource.h; path = PXSourceList/PXSourceListDataSource.h; sourceTree = "<group>"; };
-		573ABAF61823FC05004FAF17 /* PXSourceListDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PXSourceListDelegate.h; path = PXSourceList/PXSourceListDelegate.h; sourceTree = "<group>"; };
+		573ABAF31823FC05004FAF17 /* PXSourceList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PXSourceList.h; path = ../PXSourceList/PXSourceList.h; sourceTree = "<group>"; };
+		573ABAF41823FC05004FAF17 /* PXSourceList.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = PXSourceList.m; path = ../PXSourceList/PXSourceList.m; sourceTree = "<group>"; };
+		573ABAF51823FC05004FAF17 /* PXSourceListDataSource.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PXSourceListDataSource.h; path = ../PXSourceList/PXSourceListDataSource.h; sourceTree = "<group>"; };
+		573ABAF61823FC05004FAF17 /* PXSourceListDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PXSourceListDelegate.h; path = ../PXSourceList/PXSourceListDelegate.h; sourceTree = "<group>"; };
 		575506181824721D00A69209 /* ActSourceListDeviceItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActSourceListDeviceItem.h; sourceTree = "<group>"; };
 		575506191824721D00A69209 /* ActSourceListDeviceItem.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ActSourceListDeviceItem.mm; sourceTree = "<group>"; };
 		5755061A1824721D00A69209 /* ActSourceListItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActSourceListItem.h; sourceTree = "<group>"; };
@@ -193,8 +193,8 @@
 		575B3D77187F6DEB003A94E7 /* ActPopoverViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActPopoverViewController.h; sourceTree = "<group>"; };
 		575B3D78187F6DEB003A94E7 /* ActPopoverViewController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ActPopoverViewController.mm; sourceTree = "<group>"; };
 		575B3D7B18801F12003A94E7 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/ActPopoverView.xib; sourceTree = "<group>"; };
-		57638D4E17DB72EA00BE93AC /* act-intensity-points.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "act-intensity-points.cc"; path = "../src/act-intensity-points.cc"; sourceTree = "<group>"; };
-		57638D4F17DB72EA00BE93AC /* act-intensity-points.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "act-intensity-points.h"; path = "../src/act-intensity-points.h"; sourceTree = "<group>"; };
+		57638D4E17DB72EA00BE93AC /* act-intensity-points.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "act-intensity-points.cc"; path = "../lib/act-intensity-points.cc"; sourceTree = "<group>"; };
+		57638D4F17DB72EA00BE93AC /* act-intensity-points.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "act-intensity-points.h"; path = "../lib/act-intensity-points.h"; sourceTree = "<group>"; };
 		5769E6D81812D2DD00E3D801 /* ActCollapsibleView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActCollapsibleView.h; sourceTree = "<group>"; };
 		5769E6D91812D2DD00E3D801 /* ActCollapsibleView.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ActCollapsibleView.mm; sourceTree = "<group>"; };
 		5769E6DB1812D52D00E3D801 /* ActViewLayout.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActViewLayout.h; sourceTree = "<group>"; };
@@ -218,8 +218,8 @@
 		579772E417C4F63900AA2E9D /* ActHeaderView.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ActHeaderView.mm; sourceTree = "<group>"; };
 		579772E617C4FB0A00AA2E9D /* ActHeaderFieldView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActHeaderFieldView.h; sourceTree = "<group>"; };
 		579772E717C4FB0A00AA2E9D /* ActHeaderFieldView.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ActHeaderFieldView.mm; sourceTree = "<group>"; };
-		579772E917C5015600AA2E9D /* ActFoundationExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActFoundationExtensions.h; sourceTree = "<group>"; };
-		579772EA17C5015600AA2E9D /* ActFoundationExtensions.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ActFoundationExtensions.mm; sourceTree = "<group>"; };
+		579772E917C5015600AA2E9D /* FoundationExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FoundationExtensions.h; path = ../common/FoundationExtensions.h; sourceTree = "<group>"; };
+		579772EA17C5015600AA2E9D /* FoundationExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = FoundationExtensions.m; path = ../common/FoundationExtensions.m; sourceTree = "<group>"; };
 		57A1FE8B187C10CA0077629E /* chart-view-chart.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = "chart-view-chart.mm"; sourceTree = "<group>"; };
 		57A1FE8C187C10CA0077629E /* chart-view-chart.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "chart-view-chart.h"; sourceTree = "<group>"; };
 		57A7352617CF8A3B0054E3EB /* ActLapViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActLapViewController.h; sourceTree = "<group>"; };
@@ -229,8 +229,8 @@
 		57B51B0B180DFC63004F1A1D /* ActActivityViewController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ActActivityViewController.mm; sourceTree = "<group>"; };
 		57C5705A17EB18CB0000AF8D /* ActTableView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActTableView.h; sourceTree = "<group>"; };
 		57C5705B17EB18CB0000AF8D /* ActTableView.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ActTableView.mm; sourceTree = "<group>"; };
-		57C7828417EF2F21003413EA /* act-new.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "act-new.cc"; path = "../src/act-new.cc"; sourceTree = "<group>"; };
-		57C7828517EF2F21003413EA /* act-new.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "act-new.h"; path = "../src/act-new.h"; sourceTree = "<group>"; };
+		57C7828417EF2F21003413EA /* act-new.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "act-new.cc"; path = "../lib/act-new.cc"; sourceTree = "<group>"; };
+		57C7828517EF2F21003413EA /* act-new.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "act-new.h"; path = "../lib/act-new.h"; sourceTree = "<group>"; };
 		57C8663117F096BC00241C7D /* ActTextField.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActTextField.h; sourceTree = "<group>"; };
 		57C8663217F096BC00241C7D /* ActTextField.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ActTextField.mm; sourceTree = "<group>"; };
 		57DB7BA817E0D4790093C735 /* defaults.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = defaults.plist; path = resources/defaults.plist; sourceTree = "<group>"; };
@@ -282,6 +282,7 @@
 			isa = PBXGroup;
 			children = (
 				571DB99817BE615C0001514C /* Source */,
+				57D0CE1E188AD08300EA48FC /* Common */,
 				571DB9B817BE671A0001514C /* Library */,
 				573ABAF21823FBBF004FAF17 /* PXSourceList */,
 				57DB7BB417E0D5300093C735 /* Nibs */,
@@ -384,15 +385,6 @@
 				570E6ACF17F717FB00A5BB4D /* ActURLCache.m */,
 				5769E6DB1812D52D00E3D801 /* ActViewLayout.h */,
 				5769E6DC1812D52D00E3D801 /* ActViewLayout.mm */,
-				579772E917C5015600AA2E9D /* ActFoundationExtensions.h */,
-				579772EA17C5015600AA2E9D /* ActFoundationExtensions.mm */,
-				5734E18A18103C5D007BDC1B /* ActAppKitExtensions.h */,
-				5734E18B18103C5D007BDC1B /* ActAppKitExtensions.mm */,
-				571EC4E4188607B000B1B654 /* CoreAnimationExtensions.h */,
-				571EC4E5188607B000B1B654 /* CoreAnimationExtensions.m */,
-				57A1FE8B187C10CA0077629E /* chart-view-chart.mm */,
-				57A1FE8C187C10CA0077629E /* chart-view-chart.h */,
-				57193D4A17FF2469009634B4 /* objc-ptr.h */,
 			);
 			name = Source;
 			sourceTree = SOURCE_ROOT;
@@ -473,6 +465,22 @@
 			);
 			name = PXSourceList;
 			sourceTree = SOURCE_ROOT;
+		};
+		57D0CE1E188AD08300EA48FC /* Common */ = {
+			isa = PBXGroup;
+			children = (
+				579772E917C5015600AA2E9D /* FoundationExtensions.h */,
+				579772EA17C5015600AA2E9D /* FoundationExtensions.m */,
+				5734E18A18103C5D007BDC1B /* AppKitExtensions.h */,
+				5734E18B18103C5D007BDC1B /* AppKitExtensions.m */,
+				571EC4E4188607B000B1B654 /* CoreAnimationExtensions.h */,
+				571EC4E5188607B000B1B654 /* CoreAnimationExtensions.m */,
+				57A1FE8B187C10CA0077629E /* chart-view-chart.mm */,
+				57A1FE8C187C10CA0077629E /* chart-view-chart.h */,
+				57193D4A17FF2469009634B4 /* objc-ptr.h */,
+			);
+			name = Common;
+			sourceTree = "<group>";
 		};
 		57DB7BB417E0D5300093C735 /* Nibs */ = {
 			isa = PBXGroup;
@@ -623,8 +631,8 @@
 				579772E517C4F63900AA2E9D /* ActHeaderView.mm in Sources */,
 				5755061E1824721D00A69209 /* ActSourceListDeviceItem.mm in Sources */,
 				579772E817C4FB0A00AA2E9D /* ActHeaderFieldView.mm in Sources */,
-				579772EB17C5015600AA2E9D /* ActFoundationExtensions.mm in Sources */,
-				5734E18C18103C5D007BDC1B /* ActAppKitExtensions.mm in Sources */,
+				579772EB17C5015600AA2E9D /* FoundationExtensions.m in Sources */,
+				5734E18C18103C5D007BDC1B /* AppKitExtensions.m in Sources */,
 				5730789617C56E54002C5B28 /* ActChartViewController.mm in Sources */,
 				57E44D161822B6AF006A58B4 /* ActDevice.mm in Sources */,
 				57B51B0C180DFC63004F1A1D /* ActActivityViewController.mm in Sources */,

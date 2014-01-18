@@ -33,7 +33,7 @@
 
 #import "act-database.h"
 
-#import "ActFoundationExtensions.h"
+#import "FoundationExtensions.h"
 
 #define BODY_X_INSET 6
 #define BODY_Y_INSET 10

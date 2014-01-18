@@ -25,14 +25,14 @@
 #import "ActNotesListViewController.h"
 
 #import "ActAppDelegate.h"
-#import "ActAppKitExtensions.h"
 #import "ActColor.h"
 #import "ActWindowController.h"
 
-#import "ActFoundationExtensions.h"
-
 #import "act-config.h"
 #import "act-format.h"
+
+#import "AppKitExtensions.h"
+#import "FoundationExtensions.h"
 
 #import <algorithm>
 

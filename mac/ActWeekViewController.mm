@@ -31,10 +31,9 @@
 #import "act-config.h"
 #import "act-format.h"
 
-#import "ActAppKitExtensions.h"
-#import "ActFoundationExtensions.h"
-
+#import "AppKitExtensions.h"
 #import "CoreAnimationExtensions.h"
+#import "FoundationExtensions.h"
 
 #define ROW_HEIGHT 80
 #define STATS_WIDTH 100

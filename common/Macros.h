@@ -22,26 +22,41 @@
    CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
    SOFTWARE. */
 
-#import <AppKit/AppKit.h>
+/* Useful macros. */
 
-@interface NSView (ActAppKitExtensions)
+#undef N_ELEMENTS
+#define N_ELEMENTS(x) (sizeof(x) / sizeof((x)[0]))
 
-- (void)scrollRectToVisible:(NSRect)rect animated:(BOOL)flag;
+#undef MIN
+#define MIN(a, b) ((a) < (b) ? (a) : (b))
 
-- (void)flashScrollersIfNeeded;
+#undef MAX
+#define MAX(a, b) ((a) > (b) ? (a) : (b))
 
-@end
+#undef CLAMP
+#define CLAMP(a, b, c) MIN(MAX(a, b), c)
 
+#undef ABS
+#define ABS(x) ((a) > 0 ? (a) : -(a))
 
-@interface NSCell (ActAppKitExtensions)
+#undef MIX
+#define MIX(a, b, c) ((a) + ((b) - (a)) * (f))
 
-@property(getter=isVerticallyCentered) BOOL verticallyCentered;
-  
-@end
+#define POINTER_TO_INT(x) ((intptr_t)(x))
+#define INT_TO_POINTER(x) ((void *)(intptr_t)(x))
 
+#define POINTER_TO_UINT(x) ((uintptr_t)(x))
+#define UINT_TO_POINTER(x) ((void *)(uintptr_t)(x))
 
-@interface NSTableView (ActAppKitExtensions)
+/* Will use alloca() if safe, else malloc(). */
 
-- (void)reloadDataForRow:(NSInteger)row;
+#define STACK_ALLOC(type, count) 		\
+  (sizeof(type) * (count) <= 4096 		\
+   ? (type *)alloca(sizeof(type) * (count)) 	\
+   : (type *)malloc(sizeof(type) * (count)))
 
-@end
+#define STACK_FREE(type, count, ptr) 		\
+  do {						\
+    if (sizeof(type) * (count) > 4096)		\
+      free(ptr);				\
+  } while (0)

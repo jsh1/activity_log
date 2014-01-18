@@ -24,7 +24,7 @@
 
 #import "ActGarminDevice.h"
 
-#import "ActFoundationExtensions.h"
+#import "FoundationExtensions.h"
 
 // FIXME: really we should look for and parse the GarminDevice.xml file
 // in the root of the device's filesystem. But that's a lot of work

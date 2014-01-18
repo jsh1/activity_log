@@ -22,10 +22,10 @@
    CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
    SOFTWARE. */
 
-#import "ActAppKitExtensions.h"
+#import "AppKitExtensions.h"
 
 
-@implementation NSView (PDAppKitExtensions)
+@implementation NSView (AppKitExtensions)
 
 /* -[NSView scrollRectToVisible:] seems to randomly pick animated or
    non-animated, I can't figure out how to control it.. */
@@ -68,7 +68,7 @@
 @end
 
 
-@implementation NSCell (ActAppKitExtensions)
+@implementation NSCell (AppKitExtensions)
 
 // vCentered is private, but it's impossible to resist..
 
@@ -85,7 +85,7 @@
 @end
 
 
-@implementation NSTableView (ActAppKitExtensions)
+@implementation NSTableView (AppKitExtensions)
 
 - (void)reloadDataForRow:(NSInteger)row
 {
@@ -94,6 +94,71 @@
 		      NSMakeRange(0, [[self tableColumns] count])];
 
   [self reloadDataForRowIndexes:rows columnIndexes:cols];
+}
+
+@end
+
+@implementation NSOutlineView (AppKitExtensions)
+
+- (NSArray *)selectedItems
+{
+  NSIndexSet *sel = [self selectedRowIndexes];
+
+  if ([sel count] == 0)
+    return [NSArray array];
+
+  NSMutableArray *array = [NSMutableArray array];
+
+  NSInteger idx;
+  for (idx = [sel firstIndex]; idx != NSNotFound;
+       idx = [sel indexGreaterThanIndex:idx])
+    {
+      [array addObject:[self itemAtRow:idx]];
+    }
+
+  return array;
+}
+
+- (void)setSelectedItems:(NSArray *)array
+{
+  if ([array count] == 0)
+    {
+      [self selectRowIndexes:[NSIndexSet indexSet] byExtendingSelection:NO];
+      return;
+    }
+
+  NSMutableIndexSet *sel = [NSMutableIndexSet indexSet];
+
+  for (id item in array)
+    {
+      NSInteger idx = [self rowForItem:item];
+      if (idx >= 0)
+	[sel addIndex:idx];
+    }
+
+  [self selectRowIndexes:sel byExtendingSelection:NO];
+}
+
+- (void)setSelectedRow:(NSInteger)row
+{
+  [self selectRowIndexes:[NSIndexSet indexSetWithIndex:row]
+   byExtendingSelection:NO];
+}
+
+- (void)callPreservingSelectedRows:(void (^)(void))thunk;
+{
+  NSArray *sel = [self selectedItems];
+
+  thunk();
+
+  [self setSelectedItems:sel];
+}
+
+- (void)reloadDataPreservingSelectedRows
+{
+  [self callPreservingSelectedRows:^{
+    [self reloadData];
+  }];
 }
 
 @end

@@ -27,12 +27,13 @@
 #import "ActAppDelegate.h"
 #import "ActDevice.h"
 #import "ActWindowController.h"
-#import "ActAppKitExtensions.h"
 
 #import "act-config.h"
 #import "act-format.h"
 #import "act-gps-activity.h"
 #import "act-new.h"
+
+#import "AppKitExtensions.h"
 
 @interface ActImporterActivity : NSObject
 {

@@ -1,5 +1,5 @@
 
-subdirs = src
+subdirs = lib
 
 all clean install uninstall ::
 	set -e; for d in $(subdirs); do cd $$d && $(MAKE) $@; done
@@ -8,6 +8,6 @@ clean ::
 	rm -f TAGS *~
 
 tags :
-	etags src/*.cc src/*.[ch] Activities/*.mm Activities/*.[chm]
+	etags lib/*.cc lib/*.[ch] mac/*.mm mac/*.[chm]
 
 .PHONY : tags

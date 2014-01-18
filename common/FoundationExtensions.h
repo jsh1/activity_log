@@ -22,41 +22,24 @@
    CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
    SOFTWARE. */
 
-#import "ActFoundationExtensions.h"
+#import <Foundation/Foundation.h>
 
-@implementation NSString (ActFoundationExtensions)
+@interface NSString (FoundationExtensions)
 
-- (void)copyStdString:(std::string &)s
-{
-  s.append([self UTF8String]);
-}
+- (BOOL)isEqualToStringNoCase:(NSString *)str;
 
-- (BOOL)isEqualToStringNoCase:(NSString *)str
-{
-  return [self compare:str options:NSCaseInsensitiveSearch] == NSOrderedSame;
-}
+- (BOOL)hasPathPrefix:(NSString *)path;
 
+- (NSString *)stringByRemovingPathPrefix:(NSString *)path;
+  
 @end
 
-@implementation NSArray (ActFoundationExtensions)
+@interface NSArray (FoundationExtensions)
 
-- (NSInteger)indexOfStringNoCase:(NSString *)str1
-{
-  NSInteger idx = 0;
+- (NSArray *)mappedArray:(id (^)(id))f;
+- (NSArray *)filteredArray:(BOOL (^)(id))f;
 
-  for (NSString *str2 in self)
-    {
-      if ([str1 isEqualToStringNoCase:str2])
-	return idx;
-      idx++;
-    }
-
-  return NSNotFound;
-}
-
-- (BOOL)containsStringNoCase:(NSString *)str
-{
-  return [self indexOfStringNoCase:str] != NSNotFound;
-}
+- (NSInteger)indexOfStringNoCase:(NSString *)str;
+- (BOOL)containsStringNoCase:(NSString *)str;
 
 @end

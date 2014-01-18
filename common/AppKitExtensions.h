@@ -22,21 +22,39 @@
    CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
    SOFTWARE. */
 
-#import <Foundation/Foundation.h>
+#import <AppKit/AppKit.h>
 
-#import <string>
+@interface NSView (AppKitExtensions)
 
-@interface NSString (ActFoundationExtensions)
+- (void)scrollRectToVisible:(NSRect)rect animated:(BOOL)flag;
 
-- (void)copyStdString:(std::string &)s;
+- (void)flashScrollersIfNeeded;
 
-- (BOOL)isEqualToStringNoCase:(NSString *)str;
+@end
+
+
+@interface NSCell (AppKitExtensions)
+
+@property(getter=isVerticallyCentered) BOOL verticallyCentered;
   
 @end
 
-@interface NSArray (ActFoundationExtensions)
 
-- (NSInteger)indexOfStringNoCase:(NSString *)str;
-- (BOOL)containsStringNoCase:(NSString *)str;
+@interface NSTableView (AppKitExtensions)
+
+- (void)reloadDataForRow:(NSInteger)row;
+
+@end
+
+@interface NSOutlineView (AppKitExtensions)
+
+- (NSArray *)selectedItems;
+- (void)setSelectedItems:(NSArray *)array;
+
+- (void)setSelectedRow:(NSInteger)row;
+
+- (void)callPreservingSelectedRows:(void (^)(void))thunk;
+
+- (void)reloadDataPreservingSelectedRows;
 
 @end
