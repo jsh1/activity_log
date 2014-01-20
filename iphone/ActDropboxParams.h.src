@@ -1,0 +1,5 @@
+
+/* Replace these by Dropbox secrets. */
+
+#define DROPBOX_KEY "APP_KEY"
+#define DROPBOX_SECRET "APP_SECRET"

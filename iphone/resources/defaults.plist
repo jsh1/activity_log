@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>ACT_DIR</key>
+	<string>Activities</string>
+	<key>ACT_GPS_DIR</key>
+	<string>Garmin</string>
+
+	<key>ActDefaultDistanceUnit</key>
+	<string>miles</string>
+	<key>ActDefaultPaceUnit</key>
+	<string>seconds_per_mile</string>
+	<key>ActDefaultSpeedUnit</key>
+	<string>miles_per_hour</string>
+	<key>ActDefaultTemperatureUnit</key>
+	<string>celsius</string>
+	<key>ActDefaultWeightUnit</key>
+	<string>kg</string>
+
+	<key>ACT_START_OF_WEEK</key>
+	<integer>1</integer>
+	<key>ACT_RESTING_HR</key>
+	<integer>40</integer>
+	<key>ACT_MAX_HR</key>
+	<integer>178</integer>
+	<key>ACT_VDOT</key>
+	<real>50</real>
+
+	<key>ActActivityColors</key>
+	<dict>
+		<key>run/easy</key>
+		<string>.33 .82 .03</string>
+		<key>run/easy+strides</key>
+		<string>.49 .82 .02</string>
+		<key>run/easy+hills</key>
+		<string>.49 .82 .02</string>
+		<key>run/recovery</key>
+		<string>.26 .65 .02</string>
+		<key>run/trail</key>
+		<string>.59 .41 .11</string>
+		<key>run/long</key>
+		<string>.30 .69 1</string>
+		<key>run/medium</key>
+		<string>.85 .82 .02</string>
+		<key>run/tempo</key>
+		<string>1 .5 0</string>
+		<key>run/fartlek</key>
+		<string>.70 .17 .95</string>
+		<key>run/hill</key>
+		<string>.70 .17 .95</string>
+		<key>run/interval</key>
+		<string>.90 0 .89</string>
+		<key>run/race</key>
+		<string>.87 0 .02</string>
+	</dict>
+</dict>
+</plist>

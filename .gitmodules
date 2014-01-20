@@ -1,0 +1,3 @@
+[submodule "dropbox-sdk-ios"]
+	path = dropbox-sdk-ios
+	url = ../dropbox-sdk-ios
