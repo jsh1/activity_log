@@ -74,7 +74,7 @@ tcx_parser::parse_file(FILE *fh)
 
   char buffer[BUFSIZ];
   while (size_t size = fread(buffer, 1, BUFSIZ, fh))
-    xmlParseChunk(_ctx, buffer, size, false);
+    xmlParseChunk(_ctx, buffer, (int)size, false);
 
   xmlParseChunk(_ctx, "", 0, true);
 

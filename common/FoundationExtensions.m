@@ -74,7 +74,7 @@
   if (count == 0)
     return [NSArray array];
 
-  id *objects = STACK_ALLOC(id, count);
+  __strong id *objects = STACK_ALLOC(id, count);
 
   NSInteger i = 0;
   for (id obj in self)
@@ -93,7 +93,7 @@
   if (count == 0)
     return [NSArray array];
   
-  id *objects = STACK_ALLOC(id, count);
+  __strong id *objects = STACK_ALLOC(id, count);
 
   NSInteger idx = 0;
   for (id obj in self)

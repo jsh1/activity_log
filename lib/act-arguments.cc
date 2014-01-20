@@ -184,7 +184,7 @@ arguments::getopt(const struct option *opts,
 
 	  if (opts[i].arg_name != nullptr)
 	    {
-	      int offset = _short_opt_offset;
+	      ptrdiff_t offset = _short_opt_offset;
 
 	      _args.erase(_args.begin());
 	      _short_opt_offset = 1;

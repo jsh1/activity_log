@@ -153,7 +153,7 @@ activity_storage::field_index(const char *name) const
   for (const auto &it : _header)
     {
       if (strcasecmp_l(it.first.c_str(), name, nullptr) == 0)
-	return &it - &_header[0];
+	return (int)(&it - &_header[0]);
     }
 
   return -1;
@@ -166,7 +166,7 @@ activity_storage::operator[](const char *name)
 
   if (idx < 0)
     {
-      idx = _header.size();
+      idx = (int)_header.size();
       _header.resize(idx+1);
       _header[idx].first = name;
       increment_seed();

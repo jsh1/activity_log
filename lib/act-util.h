@@ -44,7 +44,7 @@ public:
 
   T get() {return _ptr;}
 
-  T &operator[](int i) {return _ptr[i];}
+  T &operator[](ptrdiff_t i) {return _ptr[i];}
   T *operator->() {return _ptr;}
   T &operator*() {return *_ptr;}
 

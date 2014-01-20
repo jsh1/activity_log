@@ -59,7 +59,7 @@ output_table::print()
   std::vector<double> values;
   values.resize(total_columns);
 
-  size_t total_width = 0;
+  int total_width = 0;
   size_t bar_count = 0;
 
   for (size_t i = 0; i < total_columns; i++)
@@ -88,10 +88,10 @@ output_table::print()
 
   if (bar_count != 0)
     {
-      const size_t min_bar_width = 16;
-      const size_t output_width = 72;
+      const int min_bar_width = 16;
+      const int output_width = 72;
 
-      size_t bar_width;
+      int bar_width;
 
       if (total_width + bar_count * min_bar_width < output_width)
 	bar_width = (output_width - total_width) / bar_count;
@@ -125,7 +125,7 @@ output_table::print()
 
 	  int cell_width = 0;
 	  if (cell.type == cell_type::STRING)
-	    cell_width = cell.string.size();
+	    cell_width = (int) cell.string.size();
 	  else if (cell.type == cell_type::BAR_VALUE)
 	    cell_width = (int) ((cell.value / values[i]) * width + .5);
 

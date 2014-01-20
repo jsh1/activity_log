@@ -52,7 +52,7 @@ public:
   const std::vector<const char *> args() const;
 
   const char *const *argv() const;
-  int argc() const;
+  size_t argc() const;
 
   bool program_name_p(const char *name) const;
 
@@ -110,7 +110,7 @@ arguments::argv() const
   return &_args[0];
 }
 
-inline int
+inline size_t
 arguments::argc() const
 {
   return _args.size();

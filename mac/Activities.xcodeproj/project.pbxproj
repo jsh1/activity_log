@@ -57,7 +57,6 @@
 		575B3D79187F6DEB003A94E7 /* ActPopoverViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = 575B3D78187F6DEB003A94E7 /* ActPopoverViewController.mm */; };
 		575B3D7C18801F12003A94E7 /* ActPopoverView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 575B3D7A18801F12003A94E7 /* ActPopoverView.xib */; };
 		57638D5017DB72EA00BE93AC /* act-intensity-points.cc in Sources */ = {isa = PBXBuildFile; fileRef = 57638D4E17DB72EA00BE93AC /* act-intensity-points.cc */; };
-		57638D5117DB72EA00BE93AC /* act-intensity-points.h in Headers */ = {isa = PBXBuildFile; fileRef = 57638D4F17DB72EA00BE93AC /* act-intensity-points.h */; };
 		5769E6DA1812D2DD00E3D801 /* ActCollapsibleView.mm in Sources */ = {isa = PBXBuildFile; fileRef = 5769E6D91812D2DD00E3D801 /* ActCollapsibleView.mm */; };
 		5769E6DD1812D52D00E3D801 /* ActViewLayout.mm in Sources */ = {isa = PBXBuildFile; fileRef = 5769E6DC1812D52D00E3D801 /* ActViewLayout.mm */; };
 		57707AE817DFBC4C009BAC5D /* ActMapSource.mm in Sources */ = {isa = PBXBuildFile; fileRef = 57707AE317DFBC4C009BAC5D /* ActMapSource.mm */; };
@@ -281,7 +280,7 @@
 		571DB98617BE615C0001514C = {
 			isa = PBXGroup;
 			children = (
-				571DB99817BE615C0001514C /* Source */,
+				571DB99817BE615C0001514C /* Classes */,
 				57D0CE1E188AD08300EA48FC /* Common */,
 				571DB9B817BE671A0001514C /* Library */,
 				573ABAF21823FBBF004FAF17 /* PXSourceList */,
@@ -314,7 +313,7 @@
 			name = Frameworks;
 			sourceTree = SOURCE_ROOT;
 		};
-		571DB99817BE615C0001514C /* Source */ = {
+		571DB99817BE615C0001514C /* Classes */ = {
 			isa = PBXGroup;
 			children = (
 				571DB9A417BE615C0001514C /* ActAppDelegate.h */,
@@ -386,7 +385,7 @@
 				5769E6DB1812D52D00E3D801 /* ActViewLayout.h */,
 				5769E6DC1812D52D00E3D801 /* ActViewLayout.mm */,
 			);
-			name = Source;
+			name = Classes;
 			sourceTree = SOURCE_ROOT;
 		};
 		571DB99917BE615C0001514C /* Supporting Files */ = {
@@ -510,7 +509,6 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				57638D5117DB72EA00BE93AC /* act-intensity-points.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -906,7 +906,7 @@ parse_date(const std::string &str, size_t &idx,
 
 		  if (n > 0)
 		    {
-		      tm->tm_mday = n;
+		      tm->tm_mday = (int)n;
 		      *range_ptr = SECONDS_PER_DAY;
 		      return true;
 		    }
