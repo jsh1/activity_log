@@ -24,33 +24,14 @@
 
 #import <UIKit/UIKit.h>
 
-#import "act-database.h"
+#import "act-activity.h"
 
-enum
+@interface ActActivityTableViewCell : UITableViewCell
 {
-  ActActivitiesViewList,
-  ActActivitiesViewWeek,
-};
-
-@interface ActActivitiesViewController : UITableViewController
-    <UITableViewDataSource, UITableViewDelegate>
-{
-  act::database::query _query;
-  NSInteger _viewMode;
-
-  std::vector<act::database::item *> _items;
-  BOOL _moreItems;
-
-  UIBarButtonItem *_addItem;
-  UIBarButtonItem *_weekItem;
+  std::unique_ptr<act::activity> _activity;
 }
 
-+ (ActActivitiesViewController *)instantiate;
-
-@property(nonatomic) const act::database::query &query;
-
-@property(nonatomic) NSInteger viewMode;
-
-- (void)reloadData;
+- (id)initWithActivityStorage:(act::activity_storage_ref)storage
+    reuseIdentifier:(NSString *)ident;
 
 @end

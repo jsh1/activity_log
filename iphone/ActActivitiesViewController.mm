@@ -24,6 +24,9 @@
 
 #import "ActActivitiesViewController.h"
 
+#import "ActActivityTableViewCell.h"
+#import "ActDatabaseManager.h"
+
 @implementation ActActivitiesViewController
 
 + (ActActivitiesViewController *)instantiate
@@ -79,7 +82,25 @@
 
 - (void)reloadData
 {
-  /* FIXME: implement this. */
+  ActDatabaseManager *db = [ActDatabaseManager sharedManager];
+
+  std::vector<act::database::item *> items;
+  [db database]->execute_query(_query, items);
+
+  if (_items != items)
+    {
+      using std::swap;
+      swap(_items, items);
+
+      /* FIXME: pull activities into our cache. */
+
+      [[self tableView] reloadData];
+    }
+}
+
+- (void)loadMoreData
+{
+  /* FIXME: something. */
 }
 
 - (IBAction)addActivityAction:(id)sender
@@ -94,24 +115,15 @@
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tv
 {
-  return 1;
-}
-
-- (NSString *)tableView:(UITableView *)tv
-    titleForHeaderInSection:(NSInteger)sec
-{
-  return @"Section Title";
-}
-
-- (NSString *)tableView:(UITableView *)tv
-    titleForFooterInSection:(NSInteger)sec
-{
-  return nil;
+  return !_moreItems ? 1 : 2;
 }
 
 - (NSInteger)tableView:(UITableView *)tv numberOfRowsInSection:(NSInteger)sec
 {
-  return 1;
+  if (sec == 0)
+    return _items.size();
+  else
+    return _moreItems ? 1 : 0;
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tv
@@ -120,18 +132,56 @@
   NSString *ident;
   UITableViewCell *cell;
 
-  ident = _viewMode == ActActivitiesViewList ? @"listCell" : @"weekCell";
+  switch (path.section)
+    {
+    case 0:
+      if (_viewMode == ActActivitiesViewList)
+	ident = @"activityCell";
+      else
+	ident = @"weekCell";
+      break;
+
+    case 1:
+      ident = @"moreCell";
+      break;
+    }
 
   cell = [tv dequeueReusableCellWithIdentifier:ident];
 
   if (cell == nil)
     {
-      cell = [[UITableViewCell alloc] initWithStyle:
-	      UITableViewCellStyleDefault reuseIdentifier:ident];
-      [[cell textLabel] setText:@"Test Item"];
+      if ([ident isEqualToString:@"activityCell"])
+	{
+	  cell = [[ActActivityTableViewCell alloc]
+		  initWithActivityStorage:_items[path.row]->storage()
+		  reuseIdentifier:ident];
+	}
+      else if ([ident isEqualToString:@"weekCell"])
+	{
+	  /* FIXME: implement this. */
+
+	  cell = [[UITableViewCell alloc] initWithStyle:
+		  UITableViewCellStyleDefault reuseIdentifier:ident];
+	  [[cell textLabel] setText:@"Week Cell"];
+	}
+      else if ([ident isEqualToString:@"moreCell"])
+	{
+	  cell = [[UITableViewCell alloc] initWithStyle:
+		  UITableViewCellStyleDefault reuseIdentifier:ident];
+	  [[cell textLabel] setText:@"More Data"];
+	}
     }
 
   return cell;
+}
+
+- (void)tableView:(UITableView *)tv willDisplayCell:(UITableViewCell *)cell
+    forRowAtIndexPath:(NSIndexPath *)path
+{
+  if ([[cell reuseIdentifier] isEqualToString:@"moreCell"])
+    {
+      [self loadMoreData];
+    }
 }
 
 @end

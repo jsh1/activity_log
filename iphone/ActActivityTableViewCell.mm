@@ -22,35 +22,28 @@
    CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
    SOFTWARE. */
 
-#import <UIKit/UIKit.h>
+#import "ActActivityTableViewCell.h"
 
-#import "act-database.h"
+@implementation ActActivityTableViewCell
 
-enum
+- (id)initWithActivityStorage:(act::activity_storage_ref)storage
+    reuseIdentifier:(NSString *)ident
 {
-  ActActivitiesViewList,
-  ActActivitiesViewWeek,
-};
+  self = [super initWithStyle:UITableViewCellStyleDefault
+	  reuseIdentifier:ident];
+  if (self == nil)
+    return nil;
 
-@interface ActActivitiesViewController : UITableViewController
-    <UITableViewDataSource, UITableViewDelegate>
-{
-  act::database::query _query;
-  NSInteger _viewMode;
+  _activity.reset(new act::activity(storage));
 
-  std::vector<act::database::item *> _items;
-  BOOL _moreItems;
+  [self setNeedsDisplay];
 
-  UIBarButtonItem *_addItem;
-  UIBarButtonItem *_weekItem;
+  return self;
 }
 
-+ (ActActivitiesViewController *)instantiate;
-
-@property(nonatomic) const act::database::query &query;
-
-@property(nonatomic) NSInteger viewMode;
-
-- (void)reloadData;
+- (void)drawRect:(CGRect)clip
+{
+  /* FIXME: implement this. */
+}
 
 @end
