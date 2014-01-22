@@ -79,7 +79,7 @@ class FILE_ptr
 
 public:
   explicit FILE_ptr(FILE *f) : fh(f) {}
-  ~FILE_ptr() {fclose(fh);}
+  ~FILE_ptr() {if (fh != nullptr) fclose(fh);}
 
   operator bool() const {return fh != nullptr;}
   bool operator!() const {return fh == nullptr;}
@@ -93,7 +93,7 @@ class DIR_ptr
 
 public:
   explicit DIR_ptr(DIR *d) : dir(d) {}
-  ~DIR_ptr() {closedir(dir);}
+  ~DIR_ptr() {if (dir != nullptr) closedir(dir);}
 
   operator bool() const {return dir != nullptr;}
   bool operator!() const {return dir == nullptr;}
