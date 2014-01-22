@@ -36,12 +36,13 @@
 namespace act {
 
 database::database()
+: _activity_dir(shared_config().activity_dir())
 {
-  reload();
 }
 
 database::database(const database &rhs)
-: _items(rhs._items)
+: _activity_dir(rhs._activity_dir),
+  _items(rhs._items)
 {
 }
 
@@ -50,7 +51,7 @@ database::reload()
 {
   _items.clear();
 
-  map_directory_files(shared_config().activity_dir(), reload_callback, this);
+  map_directory_files(_activity_dir.c_str(), reload_callback, this);
 
   std::sort(_items.begin(), _items.end(),
 	    [] (const item &a, const item &b) {
@@ -81,6 +82,42 @@ database::reload_callback(const char *path, void *ctx)
 
   using std::swap;
   swap(it._storage, storage);
+}
+
+bool
+database::add_activity(const char *path)
+{
+  item new_item;
+
+  new_item._storage = std::make_shared<activity_storage> ();
+
+  if (!new_item._storage->read_file(path))
+    return false;
+
+  new_item._storage->set_path(path);
+
+  const std::string *date = new_item._storage->field_ptr("Date");
+  if (date == nullptr)
+    return false;
+
+  parse_date_time(*date, &new_item._date, nullptr);
+
+  auto it = std::lower_bound(_items.begin(), _items.end(), new_item._date,
+			     [] (const item &a, time_t d) {
+			       return d < a._date;
+			     });
+
+  if (it == _items.end())
+    _items.push_back(new_item);
+  else if (it->_date != new_item._date)
+    _items.insert(it, new_item);
+  else
+    {
+      using std::swap;
+      swap(*it, new_item);
+    }
+
+  return true;
 }
 
 void

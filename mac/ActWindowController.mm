@@ -551,7 +551,10 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
 - (act::database *)database
 {
   if (!_database)
-    _database.reset (new act::database());
+    {
+      _database.reset (new act::database());
+      _database->reload();
+    }
 
   return _database.get();
 }

@@ -545,6 +545,7 @@ act_fold(arguments &args)
     query.add_date_range(date_range::infinity());
 
   database db;
+  db.reload();
 
   std::vector<database::item *> items;
   db.execute_query(query, items);
