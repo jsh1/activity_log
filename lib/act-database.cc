@@ -47,6 +47,12 @@ database::database(const database &rhs)
 }
 
 void
+database::clear()
+{
+  _items.clear();
+}
+
+void
 database::reload()
 {
   _items.clear();

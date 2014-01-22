@@ -43,6 +43,7 @@ public:
   const std::string &activity_dir() const;
   void set_activity_dir(const std::string &s);
 
+  void clear();
   void reload();
   bool add_activity(const char *path);
   void synchronize() const;
