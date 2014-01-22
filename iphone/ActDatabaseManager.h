@@ -62,6 +62,8 @@ extern NSString *const ActActivityDidChangeBody;
 
 @property(nonatomic, readonly) BOOL needsSynchronize;
 
+- (void)reset;
+
 - (void)synchronize;
 
 - (void)invalidate;
@@ -72,13 +74,10 @@ extern NSString *const ActActivityDidChangeBody;
 - (DBMetadata *)metadataForRemotePath:(NSString *)path;
 - (DBMetadata *)activityMetadataForPath:(NSString *)path;
 
-- (void)resetMetadataCache;
+/* ActActivityDatabaseDidChange will be posted once the file is in
+   the database. */
 
-/* Returns true if the file is already up to date, false if it's being
-   asynchronously loaded, in which case ActActivityDatabaseDidChange
-   will be posted when the load finishes. */
-
-- (BOOL)loadActivityFromPath:(NSString *)path revision:(NSString *)rev;
+- (void)loadActivityFromPath:(NSString *)path revision:(NSString *)rev;
 
 @property(nonatomic, readonly) act::database *database;
 

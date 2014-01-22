@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="5037.2" systemVersion="13B42" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" initialViewController="pv5-bg-suo">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="5037.3" systemVersion="13B42" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" initialViewController="pv5-bg-suo">
     <dependencies>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="3733"/>
     </dependencies>
     <scenes>
-        <!--Act Settings View Controller-->
+        <!--Act Settings View Controller - Settings-->
         <scene sceneID="gSb-F4-wjs">
             <objects>
                 <tableViewController storyboardIdentifier="tableViewController" id="pv5-bg-suo" customClass="ActSettingsViewController" sceneMemberID="viewController">
@@ -17,7 +17,7 @@
                             <tableViewSection headerTitle="Dropbox" id="BwE-GH-TsK">
                                 <cells>
                                     <tableViewCell contentMode="scaleToFill" selectionStyle="none" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" id="0F6-EH-Hb4">
-                                        <rect key="frame" x="0.0" y="55" width="320" height="44"/>
+                                        <rect key="frame" x="0.0" y="119" width="320" height="44"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="0F6-EH-Hb4" id="3GB-jy-APW">
                                             <rect key="frame" x="0.0" y="0.0" width="320" height="43"/>
@@ -45,7 +45,7 @@
                             <tableViewSection headerTitle="Activities Directory" id="GdA-77-Jl7">
                                 <cells>
                                     <tableViewCell contentMode="scaleToFill" selectionStyle="none" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" id="f0U-cS-BPq">
-                                        <rect key="frame" x="0.0" y="147" width="320" height="44"/>
+                                        <rect key="frame" x="0.0" y="211" width="320" height="44"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="f0U-cS-BPq" id="lep-0a-xgv">
                                             <rect key="frame" x="0.0" y="0.0" width="320" height="43"/>
@@ -68,7 +68,7 @@
                             <tableViewSection headerTitle="GPS Directory" id="jBV-fn-eGl">
                                 <cells>
                                     <tableViewCell contentMode="scaleToFill" selectionStyle="none" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" id="DYb-hJ-ssI">
-                                        <rect key="frame" x="0.0" y="239" width="320" height="44"/>
+                                        <rect key="frame" x="0.0" y="303" width="320" height="44"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="DYb-hJ-ssI" id="Be1-o2-VYB">
                                             <rect key="frame" x="0.0" y="0.0" width="320" height="43"/>
@@ -91,7 +91,7 @@
                             <tableViewSection headerTitle="Physiology" id="2Fb-sp-eVL">
                                 <cells>
                                     <tableViewCell contentMode="scaleToFill" selectionStyle="none" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" id="zIf-CG-Qvq">
-                                        <rect key="frame" x="0.0" y="331" width="320" height="44"/>
+                                        <rect key="frame" x="0.0" y="395" width="320" height="44"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="zIf-CG-Qvq" id="n9o-Yk-S4h">
                                             <rect key="frame" x="0.0" y="0.0" width="320" height="43"/>
@@ -114,7 +114,7 @@
                                         </tableViewCellContentView>
                                     </tableViewCell>
                                     <tableViewCell contentMode="scaleToFill" selectionStyle="none" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" id="Gv6-A0-z30">
-                                        <rect key="frame" x="0.0" y="375" width="320" height="44"/>
+                                        <rect key="frame" x="0.0" y="439" width="320" height="44"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="Gv6-A0-z30" id="dFV-4Q-Afm">
                                             <rect key="frame" x="0.0" y="0.0" width="320" height="43"/>
@@ -137,7 +137,7 @@
                                         </tableViewCellContentView>
                                     </tableViewCell>
                                     <tableViewCell contentMode="scaleToFill" selectionStyle="none" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" id="LQb-5K-Za3">
-                                        <rect key="frame" x="0.0" y="419" width="320" height="44"/>
+                                        <rect key="frame" x="0.0" y="483" width="320" height="44"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="LQb-5K-Za3" id="64l-og-0lr">
                                             <rect key="frame" x="0.0" y="0.0" width="320" height="43"/>
@@ -167,6 +167,14 @@
                             <outlet property="delegate" destination="pv5-bg-suo" id="CZj-ye-wVU"/>
                         </connections>
                     </tableView>
+                    <navigationItem key="navigationItem" title="Settings" id="xnF-sG-DZo">
+                        <barButtonItem key="rightBarButtonItem" systemItem="done" id="eBR-Ct-SNd">
+                            <connections>
+                                <action selector="doneAction:" destination="pv5-bg-suo" id="8CS-58-nxX"/>
+                            </connections>
+                        </barButtonItem>
+                    </navigationItem>
+                    <simulatedNavigationBarMetrics key="simulatedTopBarMetrics" prompted="NO"/>
                     <connections>
                         <outlet property="_activitiesDirectoryField" destination="jBt-Dc-uoi" id="Evh-SM-JBY"/>
                         <outlet property="_gpsDirectoryField" destination="AMO-sE-90J" id="G8i-dP-nRd"/>
@@ -175,7 +183,7 @@
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="o7P-Wi-y1k" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="107" y="-443"/>
+            <point key="canvasLocation" x="91" y="-927"/>
         </scene>
     </scenes>
     <simulatedMetricsContainer key="defaultSimulatedMetrics">

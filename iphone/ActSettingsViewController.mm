@@ -59,6 +59,11 @@
   [sender setOn:[delegate isDropboxLinked]];
 }
 
+- (IBAction)doneAction:(id)sender
+{
+  [self dismissViewControllerAnimated:YES completion:nil];
+}
+
 /* UITextFieldDelegate methods. */
 
 - (void)textFieldDidBeginEditing:(UITextField *)field

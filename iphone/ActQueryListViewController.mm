@@ -24,59 +24,148 @@
 
 #import "ActQueryListViewController.h"
 
+#import "ActActivitiesViewController.h"
+#import "ActDatabaseManager.h"
+#import "ActSettingsViewController.h"
+
+#import "act-util.h"
+
+#import "DropboxSDK.h"
+
+#import <xlocale.h>
+
 @implementation ActQueryListViewController
 
-@synthesize queryMode = _queryMode;
-@synthesize queryYear = _queryYear;
-@synthesize queryActivity = _queryActivity;
++ (ActQueryListViewController *)instantiate
+{
+  return [[[NSBundle mainBundle] loadNibNamed:
+	   @"QueryListView" owner:self options:nil] firstObject];
+}
+
+- (void)viewDidLoad
+{
+  [super viewDidLoad];
+
+  ActDatabaseManager *db = [ActDatabaseManager sharedManager];
+
+  [[NSNotificationCenter defaultCenter]
+   addObserver:self selector:@selector(metadataDatabaseDidChange:)
+   name:ActMetadataDatabaseDidChange object:db];
+
+  [[NSNotificationCenter defaultCenter]
+   addObserver:self selector:@selector(activityDatabaseDidChange:)
+   name:ActActivityDatabaseDidChange object:db];
+}
+
+- (void)viewWillAppear:(BOOL)animated
+{
+  [self reloadData];
+}
+
+- (void)dealloc
+{
+  [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
+- (int)year
+{
+  return _year;
+}
+
+- (void)setYear:(int)x
+{
+  if (_year != x)
+    {
+      _year = x;
+      _rowData = nil;
+      [self reloadData];
+    }
+}
+
+static NSInteger
+reverse_compare(id a, id b, void *ctx)
+{
+  return [b compare:a];
+}
 
 - (void)reloadData
 {
-  /* FIXME: use ActDatabaseManager to query and asynchronously update
-     local store of what's visible. */
+  ActDatabaseManager *db = [ActDatabaseManager sharedManager];
+
+  NSString *path = @"";
+
+  if (_year != 0)
+    {
+      char buf[64];
+      snprintf_l(buf, sizeof(buf), nullptr, "%d", _year);
+      path = [NSString stringWithUTF8String:buf];
+    }
+
+  DBMetadata *meta = [db activityMetadataForPath:path];
+
+  if (meta != nil)
+    {
+      NSMutableArray *array = [NSMutableArray array];
+
+      for (DBMetadata *submeta in [meta contents])
+	{
+	  if (![submeta isDirectory])
+	    continue;
+
+	  int value = [[[submeta path] lastPathComponent] intValue];
+	  if (value > 0)
+	    {
+	      if (_year != 0)
+		value--;		/* month is 0.. indexed */
+
+	      [array addObject:@(value)];
+	    }
+	}
+      [array sortUsingFunction:reverse_compare context:nullptr];
+
+      if (![_rowData isEqual:array])
+	{
+	  _rowData = array;
+
+	  [[self tableView] reloadData];
+	}
+    }
+}
+
+- (void)metadataDatabaseDidChange:(NSNotification *)note
+{
+  [self reloadData];
+}
+
+- (void)activityDatabaseDidChange:(NSNotification *)note
+{
+  [self reloadData];
+}
+
+- (IBAction)configAction:(id)sender
+{
+  UINavigationController *settings_nav
+    = [[UINavigationController alloc]
+       initWithRootViewController:[ActSettingsViewController instantiate]];
+
+  UINavigationController *main_nav = (id)[self parentViewController];
+
+  [main_nav presentViewController:settings_nav animated:YES completion:nil];
 }
 
 /* UITableViewDataSource methods. */
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tv
 {
-  switch (_queryMode)
-    {
-    case ActQueryListTopLevel:
-      return 3;
-
-    case ActQueryListYear:
-    case ActQueryListActivity:
-      return 2;
-
-    default:
-      return 0;
-    }
-}
-
-- (NSString *)tableView:(UITableView *)tv
-    titleForHeaderInSection:(NSInteger)sec
-{
-  if (sec == 0)
-    return nil;
-
-  if (_queryMode == ActQueryListTopLevel)
-    return sec == 1 ? @"Activities" : @"Year";
-  else if (_queryMode == ActQueryListYear)
-    return @"Month";
-  else if (_queryMode == ActQueryListActivity)
-    return @"Activity Type";
-
-  return nil;
+  return 2;
 }
 
 - (NSInteger)tableView:(UITableView *)tv numberOfRowsInSection:(NSInteger)sec
 {
   if (sec == 0)
     return 1;
-
-  /* FIXME: implement this. */
-  return 0;
+  else
+    return [_rowData count];
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tv
@@ -94,8 +183,21 @@
 
   if (path.section == 0)
     [[cell textLabel] setText:@"All Activities"];
-
-  /* FIXME: implement other sections. */
+  else
+    {
+      NSNumber *value = _rowData[path.row];
+      if (_year == 0)
+	[[cell textLabel] setText:[value stringValue]];
+      else
+	{
+	  static NSDateFormatter *formatter;
+	  if (formatter == nil)
+	    formatter = [[NSDateFormatter alloc] init];
+	  NSArray *names = [formatter standaloneMonthSymbols];
+	  int month = [value intValue];
+	  [[cell textLabel] setText:names[month]];
+	}
+    }
 
   return cell;
 }
@@ -104,7 +206,59 @@
 
 - (void)tableView:(UITableView *)tv didSelectRowAtIndexPath:(NSIndexPath *)path
 {
-  /* FIXME: implement this. */
+  UIViewController *next_controller = nil;
+
+  if (path.section == 0 || _year != 0)
+    {
+      using act::year_time;
+      using act::month_time;
+
+      time_t start = 0, end = 0;
+
+      if (path.section == 0)
+	{
+	  if (_year == 0)
+	    start = year_time(1990), end = year_time(2100);
+	  else
+	    start = year_time(_year), end = year_time(_year + 1);
+	}
+      else
+	{
+	  int arg = [_rowData[path.row] intValue];
+	  if (_year == 0)
+	    start = year_time(arg), end = year_time(arg + 1);
+	  else
+	    start = month_time(_year, arg), end = month_time(_year, arg + 1);
+	}
+    
+      act::database::query query;
+      query.add_date_range(act::date_range(start, end));
+
+      ActActivitiesViewController *activities
+	= [ActActivitiesViewController instantiate];
+
+      [activities setQuery:query];
+
+      next_controller = activities;
+    }
+  else
+    {
+      ActQueryListViewController *query
+	= [ActQueryListViewController instantiate];
+
+      [query setYear:[_rowData[path.row] intValue]];
+
+      next_controller = query;
+    }
+
+  [next_controller setTitle:
+   [[[tv cellForRowAtIndexPath:path] textLabel] text]];
+
+  UINavigationController *nav = (id)[self parentViewController];
+
+  [nav pushViewController:next_controller animated:YES];
+
+  [tv deselectRowAtIndexPath:path animated:NO];
 }
 
 @end

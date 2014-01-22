@@ -26,6 +26,12 @@
 
 @implementation ActActivitiesViewController
 
++ (ActActivitiesViewController *)instantiate
+{
+  return [[[NSBundle mainBundle] loadNibNamed:
+	   @"ActivitiesView" owner:self options:nil] firstObject];
+}
+
 - (NSString *)title
 {
   return @"Activities";
@@ -44,6 +50,18 @@
   [[self navigationItem] setRightBarButtonItems:@[_addItem, _weekItem]];
 }
 
+- (const act::database::query &)query
+{
+  return _query;
+}
+
+- (void)setQuery:(const act::database::query &)q
+{
+  _query = q;
+
+  [self reloadData];
+}
+
 - (NSInteger)viewMode
 {
   return _viewMode;
@@ -54,7 +72,14 @@
   if (_viewMode != mode)
     {
       _viewMode = mode;
+
+      [self reloadData];
     }
+}
+
+- (void)reloadData
+{
+  /* FIXME: implement this. */
 }
 
 - (IBAction)addActivityAction:(id)sender

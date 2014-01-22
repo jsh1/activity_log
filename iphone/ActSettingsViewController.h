@@ -34,4 +34,7 @@
 
 + (ActSettingsViewController *)instantiate;
 
+- (IBAction)linkAction:(id)sender;
+- (IBAction)doneAction:(id)sender;
+
 @end

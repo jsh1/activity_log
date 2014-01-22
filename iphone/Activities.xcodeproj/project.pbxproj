@@ -38,6 +38,7 @@
 		57830CBD188D7C38001056B5 /* act-types.cc in Sources */ = {isa = PBXBuildFile; fileRef = 57830C74188D7B6E001056B5 /* act-types.cc */; };
 		57830CBE188D7C38001056B5 /* act-util.cc in Sources */ = {isa = PBXBuildFile; fileRef = 57830C76188D7B6E001056B5 /* act-util.cc */; };
 		5792BAE4188DB25D0011A069 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5792BAE3188DB25D0011A069 /* Security.framework */; };
+		57CA435A18901570008693CA /* QueryListView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 57CA435818901570008693CA /* QueryListView.xib */; };
 		57F9572A188DC140000EF638 /* ActSettingsViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = 57F95729188DC140000EF638 /* ActSettingsViewController.mm */; };
 		57F95730188DC70D000EF638 /* Settings.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 57F9572E188DC70D000EF638 /* Settings.storyboard */; };
 		57F95733188ED836000EF638 /* ActDatabaseManager.mm in Sources */ = {isa = PBXBuildFile; fileRef = 57F95732188ED836000EF638 /* ActDatabaseManager.mm */; };
@@ -161,6 +162,7 @@
 		57830C77188D7B6E001056B5 /* act-util.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "act-util.h"; path = "../lib/act-util.h"; sourceTree = "<group>"; };
 		57830C8C188D7BC2001056B5 /* libact.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libact.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		5792BAE3188DB25D0011A069 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
+		57CA435918901570008693CA /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = resources/en.lproj/QueryListView.xib; sourceTree = "<group>"; };
 		57F95725188DBA2F000EF638 /* DropboxSDK.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = DropboxSDK.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		57F95728188DC140000EF638 /* ActSettingsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActSettingsViewController.h; sourceTree = "<group>"; };
 		57F95729188DC140000EF638 /* ActSettingsViewController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ActSettingsViewController.mm; sourceTree = "<group>"; };
@@ -433,6 +435,7 @@
 			children = (
 				571A093B188D70A70066B572 /* Main.xib */,
 				57830C49188D7AD2001056B5 /* ActivitiesView.xib */,
+				57CA435818901570008693CA /* QueryListView.xib */,
 				57F9572E188DC70D000EF638 /* Settings.storyboard */,
 			);
 			name = Nibs;
@@ -656,6 +659,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				57830C4B188D7AD2001056B5 /* ActivitiesView.xib in Resources */,
+				57CA435A18901570008693CA /* QueryListView.xib in Resources */,
 				571A0913188D69200066B572 /* Images.xcassets in Resources */,
 				57F95730188DC70D000EF638 /* Settings.storyboard in Resources */,
 				571A093D188D70A70066B572 /* Main.xib in Resources */,
@@ -788,6 +792,14 @@
 				57830C4A188D7AD2001056B5 /* en */,
 			);
 			name = ActivitiesView.xib;
+			sourceTree = "<group>";
+		};
+		57CA435818901570008693CA /* QueryListView.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				57CA435918901570008693CA /* en */,
+			);
+			name = QueryListView.xib;
 			sourceTree = "<group>";
 		};
 		57F9572E188DC70D000EF638 /* Settings.storyboard */ = {

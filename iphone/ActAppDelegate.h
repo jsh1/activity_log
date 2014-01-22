@@ -24,14 +24,12 @@
 
 #import <UIKit/UIKit.h>
 
-@class ActActivitiesViewController;
 @class DBSession;
 
 @interface ActAppDelegate : NSObject <UIApplicationDelegate>
 {
   UIWindow *_window;
   UINavigationController *_navigationController;
-  ActActivitiesViewController *_activitiesViewController;
   DBSession *_dropboxSession;
   BOOL _dropboxLinked;
 }

@@ -97,8 +97,11 @@ static ActDatabaseManager *_sharedManager;
   NSString *act_dir = [NSString stringWithUTF8String:
 		       act::shared_config().activity_dir()];
 
-  /* FIXME: hack, dropbox loves to downcase everything. */
-  act_dir = [act_dir lowercaseString];
+  /* FIXME: hack, dropbox loves to downcase everything.
+     FIXME:^2 not actually needed!? */
+
+  if (false)
+    act_dir = [act_dir lowercaseString];
 
   _remoteActivityPath = [@"/" stringByAppendingPathComponent:act_dir];
 
@@ -183,14 +186,25 @@ static ActDatabaseManager *_sharedManager;
     }
 }
 
-- (void)resetMetadataCache
+- (void)reset
 {
-  if ([_metadata count] != 0)
-    {
-      [_metadata removeAllObjects];
+  BOOL metadata_empty = [_metadata count] == 0;
+  BOOL db_empty = _database->items().size() == 0;
 
+  [_metadata removeAllObjects];
+
+  _database->clear();
+
+  if (!metadata_empty)
+    {
       [[NSNotificationCenter defaultCenter]
        postNotificationName:ActMetadataDatabaseDidChange object:self];
+    }
+
+  if (!db_empty)
+    {
+      [[NSNotificationCenter defaultCenter]
+       postNotificationName:ActActivityDatabaseDidChange object:self];
     }
 }
 
@@ -239,7 +253,7 @@ static ActDatabaseManager *_sharedManager;
   NSLog(@"metadata error %@", err);
 }
 
-- (BOOL)loadActivityFromPath:(NSString *)path revision:(NSString *)rev
+- (void)loadActivityFromPath:(NSString *)path revision:(NSString *)rev
 {
   NSString *src_path
     = [_remoteActivityPath stringByAppendingPathComponent:path];
@@ -252,31 +266,40 @@ static ActDatabaseManager *_sharedManager;
       && rev != nil
       && [[_activityRevisions objectForKey:path] isEqual:rev])
     {
-      return YES;
+      /* File is already cached and up to date. */
+
+      if (_database->add_activity([dest_path UTF8String]))
+	{
+	  [[NSNotificationCenter defaultCenter]
+	   postNotificationName:ActActivityDatabaseDidChange object:self];
+	}
     }
+  else
+    {
+      /* File needs to be brought into our cache. */
 
-  [fm removeItemAtPath:dest_path error:nil];
+      [fm removeItemAtPath:dest_path error:nil];
 
-  NSString *parent = [dest_path stringByDeletingLastPathComponent];
-  [fm createDirectoryAtPath:parent withIntermediateDirectories:YES
-   attributes:nil error:nil];
+      NSString *parent = [dest_path stringByDeletingLastPathComponent];
+      [fm createDirectoryAtPath:parent withIntermediateDirectories:YES
+       attributes:nil error:nil];
 
-  NSLog(@"loading activity %@ from %@ (%@) to %@",
-	path, src_path, rev, dest_path);
+      NSLog(@"loading activity %@ from %@ (%@) to %@",
+	    path, src_path, rev, dest_path);
 
-  [_activityRevisions setObject:rev forKey:path];
-  _activityRevisionsNeedsSynchronize = YES;
+      [_activityRevisions setObject:rev forKey:path];
+      _activityRevisionsNeedsSynchronize = YES;
 
 #if 0
-  /* FIXME: specifying the revision I got back from the loaded metadata
-     gives me a "404 - trying to load a directory" error!? */
+      /* FIXME: specifying the revision I got back from the loaded
+	 metadata gives me a "404 - trying to load a directory"
+	 error!? */
 
-  [_dbClient loadFile:src_path atRev:rev intoPath:dest_path];
+      [_dbClient loadFile:src_path atRev:rev intoPath:dest_path];
 #else
-  [_dbClient loadFile:src_path intoPath:dest_path];
+      [_dbClient loadFile:src_path intoPath:dest_path];
 #endif
-
-  return NO;
+    }
 }
 
 - (void)restClient:(DBRestClient *)client loadedFile:(NSString *)destPath

@@ -24,28 +24,24 @@
 
 #import <UIKit/UIKit.h>
 
-enum
-{
-  ActQueryListTopLevel,
-  ActQueryListYear,
-  ActQueryListActivity,
-};
-
 @interface ActQueryListViewController : UITableViewController
     <UITableViewDataSource, UITableViewDelegate>
 {
-  NSInteger _queryMode;
+  IBOutlet UIBarButtonItem *_configButton;
 
-  int _queryYear;
-  NSString *_queryActivity;
+  int _year;
+
+  NSArray *_rowData;
 }
 
-@property(nonatomic) NSInteger queryMode;
-@property(nonatomic) int queryYear;
-@property(nonatomic, copy) NSString *queryActivity;
++ (ActQueryListViewController *)instantiate;
 
-/* Must be called after changing queryX properties. */
+/* Year "0" means top-level menu that displays all known years. */
+
+@property(nonatomic) int year;
 
 - (void)reloadData;
+
+- (IBAction)configAction:(id)sender;
 
 @end

@@ -24,9 +24,10 @@
 
 #import "ActAppDelegate.h"
 
+#import "ActActivitiesViewController.h"
 #import "ActDatabaseManager.h"
 #import "ActDropboxParams.h"
-#import "ActActivitiesViewController.h"
+#import "ActQueryListViewController.h"
 
 #import "act-config.h"
 
@@ -75,12 +76,15 @@ defaults_getenv(const char *key)
 
   [[NSBundle mainBundle] loadNibNamed:@"Main" owner:self options:nil];
 
-  _activitiesViewController = [[[NSBundle mainBundle] loadNibNamed:
-				@"ActivitiesView" owner:self options:nil]
-			       firstObject];
+  ActQueryListViewController *controller
+    = [ActQueryListViewController instantiate];
 
-  [_navigationController
-   pushViewController:_activitiesViewController animated:NO];
+  [controller setTitle:@"Activities"];
+
+  [_navigationController pushViewController:controller animated:NO];
+
+  if (![self isDropboxLinked])
+    [controller configAction:self];
 
   return YES;
 }
@@ -135,7 +139,7 @@ defaults_getenv(const char *key)
 
 - (void)applicationWillEnterForeground:(UIApplication *)app
 {
-  [[ActDatabaseManager sharedManager] resetMetadataCache];
+  [[ActDatabaseManager sharedManager] reset];
 }
 
 - (void)applicationDidBecomeActive:(UIApplication *)app

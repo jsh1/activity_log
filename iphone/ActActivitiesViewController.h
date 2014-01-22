@@ -24,6 +24,8 @@
 
 #import <UIKit/UIKit.h>
 
+#import "act-database.h"
+
 enum
 {
   ActActivitiesViewList,
@@ -33,12 +35,19 @@ enum
 @interface ActActivitiesViewController : UITableViewController
     <UITableViewDataSource, UITableViewDelegate>
 {
+  act::database::query _query;
   NSInteger _viewMode;
 
   UIBarButtonItem *_addItem;
   UIBarButtonItem *_weekItem;
 }
 
++ (ActActivitiesViewController *)instantiate;
+
+@property(nonatomic) const act::database::query &query;
+
 @property(nonatomic) NSInteger viewMode;
+
+- (void)reloadData;
 
 @end
