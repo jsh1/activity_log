@@ -745,7 +745,7 @@ activity::make_filename(std::string &filename) const
     filename.push_back('/');
 
   char buf[256];
-  strftime(buf, sizeof(buf), "%Y/%m/%d-%H%M.txt", &tm);
+  strftime_l(buf, sizeof(buf), "%Y/%m/%d-%H%M.txt", &tm, nullptr);
   filename.append(buf);
 
   return make_path(filename.c_str());
