@@ -35,6 +35,8 @@ namespace act {
 
 class config
 {
+  static const char *(*_getenv)(const char *key);
+
   std::string _activity_dir;
   std::string _gps_file_dir;
   std::vector<std::string> _gps_file_path;
@@ -58,6 +60,8 @@ class config
   bool _verbose;
 
 public:
+  static void set_getenv(const char *(*fun)(const char *key));
+
   config();
   ~config();
 
@@ -91,6 +95,8 @@ public:
   void edit_file(const char *filename) const;
 
 private:
+  static const char *getenv(const char *key);
+
   void read_config_file(const char *path);
   void set_start_of_week(const char *value);
   void append_gps_file_path(const char *path_str, bool tilde_expand);
@@ -99,6 +105,12 @@ private:
 const config &shared_config();
 
 // implementation details
+
+inline void
+config::set_getenv(const char *(*fun)(const char *key))
+{
+  _getenv = fun;
+}
 
 inline const char *
 config::activity_dir() const

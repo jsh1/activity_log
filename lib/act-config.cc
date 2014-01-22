@@ -31,6 +31,17 @@
 
 namespace act {
 
+const char *(*config::_getenv)(const char *key);
+
+const char *
+config::getenv(const char *key)
+{
+  if (_getenv != nullptr)
+    return _getenv(key);
+  else
+    return ::getenv(key);
+}
+
 config::config()
 : _default_distance_unit(unit_type::miles),
   _default_height_unit(unit_type::metres),
@@ -48,7 +59,7 @@ config::config()
 {
   if (const char *file = getenv("ACT_CONFIG"))
     read_config_file(file);
-  else if (const char *home = getenv("HOME"))
+  else if (const char *home = ::getenv("HOME"))
     {
       std::string file(home);
       file.append("/.actconfig");
@@ -57,7 +68,7 @@ config::config()
 
   if (const char *dir = getenv("ACT_DIR"))
     _activity_dir = dir;
-  else if (const char *home = getenv("HOME"))
+  else if (const char *home = ::getenv("HOME"))
     {
       _activity_dir = home;
 #if defined(__APPLE__) && __APPLE__
@@ -75,7 +86,7 @@ config::config()
   if (const char *dir = getenv("ACT_GPS_DIR"))
     _gps_file_dir = dir;
 #if defined(__APPLE__) && __APPLE__
-  else if (const char *home = getenv("HOME"))
+  else if (const char *home = ::getenv("HOME"))
     {
       _gps_file_dir = home;
       _gps_file_dir.append("/Documents/Garmin");
@@ -319,9 +330,9 @@ config::edit_file(const char *filename) const
 {
   const char *editor = getenv("ACT_EDITOR");
   if (!editor)
-    editor = getenv("VISUAL");
+    editor = ::getenv("VISUAL");
   if (!editor)
-    editor = getenv("EDITOR");
+    editor = ::getenv("EDITOR");
 
   char *command = nullptr;
   asprintf(&command, "\'%s\' '%s'", editor, filename);
