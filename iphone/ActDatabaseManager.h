@@ -44,7 +44,11 @@ extern NSString *const ActActivityDidChangeBody;
   std::unique_ptr<act::database> _database;
 
   NSMutableSet *_pendingMetadata;
-  NSMutableDictionary *_metadata;		/* path -> DBMetadata */
+  NSMutableDictionary *_metadataCache;		/* path -> NSDictionary */
+  NSMutableDictionary *_oldMetadataCache;
+
+  NSString *_metadataCachePath;
+  BOOL _metadataCacheNeedsSynchronize;
 
   NSMutableDictionary *_activityRevisions;	/* path -> NSNumber<int> */
 
@@ -71,8 +75,11 @@ extern NSString *const ActActivityDidChangeBody;
 /* These return nil if loading asynchronously, in which case will post
    ActMetadataDatabaseDidChange when the metadata-read finishes. */
 
-- (DBMetadata *)metadataForRemotePath:(NSString *)path;
-- (DBMetadata *)activityMetadataForPath:(NSString *)path;
+- (NSDictionary *)metadataForRemotePath:(NSString *)path;
+- (NSDictionary *)activityMetadataForPath:(NSString *)path;
+
+- (BOOL)isLoadingMetadataForRemotePath:(NSString *)path;
+- (BOOL)isLoadingActivityMetadataForPath:(NSString *)path;
 
 /* ActActivityDatabaseDidChange will be posted once the file is in
    the database. */

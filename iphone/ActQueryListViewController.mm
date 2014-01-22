@@ -101,18 +101,13 @@ reverse_compare(id a, id b, void *ctx)
       path = [NSString stringWithUTF8String:buf];
     }
 
-  DBMetadata *meta = [db activityMetadataForPath:path];
-
-  if (meta != nil)
+  if (NSDictionary *dict = [db activityMetadataForPath:path])
     {
       NSMutableArray *array = [NSMutableArray array];
 
-      for (DBMetadata *submeta in [meta contents])
+      for (NSString *name in [dict objectForKey:@"contents"])
 	{
-	  if (![submeta isDirectory])
-	    continue;
-
-	  int value = [[[submeta path] lastPathComponent] intValue];
+	  int value = [name intValue];
 	  if (value > 0)
 	    {
 	      if (_year != 0)

@@ -111,21 +111,30 @@ static ActDatabaseManager *_sharedManager;
      include files that no longer exist in the master store, we'll
      manually call add_activity() for every file. */
 
-  _pendingMetadata = [[NSMutableSet alloc] init];
-  _metadata = [[NSMutableDictionary alloc] init];
+  _pendingMetadata = [NSMutableSet set];
+
+  _metadataCachePath = [cache_dir stringByAppendingPathComponent:
+			@"metadata-cache.json"];
+
+  _metadataCache = [NSMutableDictionary dictionary];
+
+  if (NSData *data = [NSData dataWithContentsOfFile:_metadataCachePath])
+    {
+      _oldMetadataCache = [[NSJSONSerialization JSONObjectWithData:data
+			    options:0 error:nil] mutableCopy];
+    }
 
   _activityRevisionsPath = [cache_dir stringByAppendingPathComponent:
 			    @"activity-revisions.json"];
 
-  NSData *data = [NSData dataWithContentsOfFile:_activityRevisionsPath];
-  if (data != nil)
+  if (NSData *data = [NSData dataWithContentsOfFile:_activityRevisionsPath])
     {
       _activityRevisions = [[NSJSONSerialization JSONObjectWithData:data
 			     options:0 error:nil] mutableCopy];
     }
 
   if (_activityRevisions == nil)
-    _activityRevisions = [[NSMutableDictionary alloc] init];
+    _activityRevisions = [NSMutableDictionary dictionary];
 
   return self;
 }
@@ -146,15 +155,36 @@ static ActDatabaseManager *_sharedManager;
 
 - (BOOL)needsSynchronize
 {
-  return _activityRevisionsNeedsSynchronize;
+  return _metadataCacheNeedsSynchronize || _activityRevisionsNeedsSynchronize;
 }
 
 - (void)synchronize
 {
+  if (_metadataCacheNeedsSynchronize)
+    {
+      NSMutableDictionary *dict = [_metadataCache mutableCopy];
+      if (_oldMetadataCache != nil)
+	[dict addEntriesFromDictionary:_oldMetadataCache];
+
+      NSData *data = [NSJSONSerialization dataWithJSONObject:dict
+		      options:0 error:nil];
+
+      if ([data writeToFile:_metadataCachePath atomically:YES])
+	{
+	  _metadataCacheNeedsSynchronize = NO;
+	}
+      else
+	{
+	  [[NSFileManager defaultManager]
+	   removeItemAtPath:_metadataCachePath error:nil];
+	}
+    }
+
   if (_activityRevisionsNeedsSynchronize)
     {
       NSData *data = [NSJSONSerialization dataWithJSONObject:
 		      _activityRevisions options:0 error:nil];
+
       if ([data writeToFile:_activityRevisionsPath atomically:YES])
 	{
 	  _activityRevisionsNeedsSynchronize = NO;
@@ -172,28 +202,64 @@ static ActDatabaseManager *_sharedManager;
   return _database.get();
 }
 
-- (void)loadMetadataForPath:(NSString *)path
+- (NSDictionary *)metadataForRemotePath:(NSString *)path
 {
-  if (![_pendingMetadata containsObject:path])
+  NSDictionary *dict = [_metadataCache objectForKey:path];
+
+  BOOL need_load = dict == nil;
+
+  if (dict == nil)
+    dict = [_oldMetadataCache objectForKey:path];
+
+  if (![dict isKindOfClass:[NSDictionary class]])
+    dict = nil;
+
+  if (need_load && ![_pendingMetadata containsObject:path])
     {
-      DBMetadata *meta = [_metadata objectForKey:path];
+      NSString *hash = [dict objectForKey:@"hash"];
 
-      NSLog(@"loading metadata for %@ (%@)", path, [meta hash]);
-
-      [_dbClient loadMetadata:path withHash:[meta hash]];
+      [_dbClient loadMetadata:path withHash:hash];
 
       [_pendingMetadata addObject:path];
+
+      NSLog(@"loading metadata for %@ (hash = %@)", path, hash);
     }
+
+  return dict;
+}
+
+- (NSDictionary *)activityMetadataForPath:(NSString *)path
+{
+  return [self metadataForRemotePath:
+	  [_remoteActivityPath stringByAppendingPathComponent:path]];
+}
+
+- (BOOL)isLoadingMetadataForRemotePath:(NSString *)path
+{
+  return [_pendingMetadata containsObject:path];
+}
+
+- (BOOL)isLoadingActivityMetadataForPath:(NSString *)path
+{
+  return [self isLoadingMetadataForRemotePath:
+	  [_remoteActivityPath stringByAppendingPathComponent:path]];
 }
 
 - (void)reset
 {
-  BOOL metadata_empty = [_metadata count] == 0;
+  BOOL metadata_empty = [_metadataCache count] == 0;
   BOOL db_empty = _database->items().size() == 0;
 
-  [_metadata removeAllObjects];
+  if (!metadata_empty)
+    {
+      if (_oldMetadataCache == nil)
+	_oldMetadataCache = [NSMutableDictionary dictionary];
+      [_oldMetadataCache addEntriesFromDictionary:_metadataCache];
+      _metadataCache = [NSMutableDictionary dictionary];
+    }
 
-  _database->clear();
+  if (!db_empty)
+    _database->clear();
 
   if (!metadata_empty)
     {
@@ -208,41 +274,96 @@ static ActDatabaseManager *_sharedManager;
     }
 }
 
+static NSDictionary *
+metadata_dictionary(DBMetadata *meta)
+{
+  if ([meta isDeleted])
+    return nil;
+
+  NSMutableDictionary *dict = [NSMutableDictionary dictionary];
+
+  [dict setObject:[meta hash] forKey:@"hash"];
+  [dict setObject:[meta rev] forKey:@"rev"];
+
+  if ([meta isDirectory])
+    {
+      NSMutableArray *contents = [NSMutableArray array];
+
+      for (DBMetadata *sub in [meta contents])
+	{
+	  if ([sub isDeleted])
+	    continue;
+
+	  [contents addObject:[[sub path] lastPathComponent]];
+	}
+
+      [dict setObject:contents forKey:@"contents"];
+    }
+
+  return dict;
+}
+
 - (void)restClient:(DBRestClient *)client loadedMetadata:(DBMetadata *)meta
 {
   NSString *path = [meta path];
 
   [_pendingMetadata removeObject:path];
-  [_metadata setObject:meta forKey:path];
 
-  /* FIXME: should we load activities automatically? They'll usually
-     be cached so this will tend to no-ops.. */
-
-  if ([meta isDirectory] && [path hasPathPrefix:_remoteActivityPath])
+  if (NSDictionary *dict = metadata_dictionary(meta))
     {
-      for (DBMetadata *submeta in [meta contents])
+      [_metadataCache setObject:dict forKey:path];
+      [_oldMetadataCache removeObjectForKey:path];
+
+      if ([meta isDirectory])
 	{
-	  if ([submeta isDirectory])
-	    continue;
+	  /* We also were handed the full metadata for all files in
+	     this directory, so may as well add it to the cache. */
 
-	  NSString *path = [submeta path];
-	  if (![[path pathExtension] isEqual:@"txt"])
-	    continue;
+	  for (DBMetadata *sub in [meta contents])
+	    {
+	      if ([sub isDirectory])
+		continue;
 
-	  path = [path stringByRemovingPathPrefix:_remoteActivityPath];
-	  [self loadActivityFromPath:path revision:[meta rev]];
+	      NSString *path = [meta path];
+
+	      if (NSDictionary *dict = metadata_dictionary(sub))
+		[_metadataCache setObject:dict forKey:path];
+	      else
+		[_metadataCache removeObjectForKey:path];
+
+	      [_oldMetadataCache removeObjectForKey:path];
+	    }
+
+	  /* FIXME: remove cache items under path that no longer exist? */
 	}
     }
+  else
+    [_metadataCache setObject:[NSNull null] forKey:path];
+
+  _metadataCacheNeedsSynchronize = YES;
 
   [[NSNotificationCenter defaultCenter]
-   postNotificationName:ActMetadataDatabaseDidChange object:self
-   userInfo:@{@"remotePath": [meta path]}];
+   postNotificationName:ActMetadataDatabaseDidChange object:self];
 }
 
 - (void)restClient:(DBRestClient *)client
     metadataUnchangedAtPath:(NSString *)path
 {
   NSLog(@"metadata %@ unchanged", path);
+
+  if ([_metadataCache objectForKey:path] == nil)
+    {
+      id obj = [_oldMetadataCache objectForKey:path];
+
+      if (obj == nil)
+	{
+	  obj = [NSNull null];
+	  _metadataCacheNeedsSynchronize = YES;
+	}
+
+      [_metadataCache setObject:obj forKey:path];
+      [_oldMetadataCache removeObjectForKey:path];
+    }
 
   [_pendingMetadata removeObject:path];
 }
@@ -334,22 +455,6 @@ static ActDatabaseManager *_sharedManager;
     }
 
   NSLog(@"load file error %@", err);
-}
-
-- (DBMetadata *)metadataForRemotePath:(NSString *)path
-{
-  DBMetadata *meta = [_metadata objectForKey:path];
-
-  if (meta == nil)
-    [self loadMetadataForPath:path];
-
-  return meta;
-}
-
-- (DBMetadata *)activityMetadataForPath:(NSString *)path
-{
-  return [self metadataForRemotePath:
-	  [_remoteActivityPath stringByAppendingPathComponent:path]];
 }
 
 - (void)showQueryResults:(const act::database::query &)query
