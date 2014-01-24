@@ -347,7 +347,7 @@
   if (row == NSNotFound)
     return;
 
-  if ([field isEqualToStringNoCase:@"Date"])
+  if ([field isEqualToString:@"Date" caseInsensitive:YES])
     _activities[row].valid_date = false;
 
   _activities[row].valid_height = false;

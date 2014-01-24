@@ -28,12 +28,30 @@
 
 @implementation NSString (FoundationExtensions)
 
-- (BOOL)isEqualToStringNoCase:(NSString *)str
+- (BOOL)isEqualToString:(NSString *)str caseInsensitive:(BOOL)flag
 {
-  return [self compare:str options:NSCaseInsensitiveSearch] == NSOrderedSame;
+  NSStringCompareOptions opts = flag ? NSCaseInsensitiveSearch : 0;
+
+  return [self compare:str options:opts] == NSOrderedSame;
+}
+
+- (BOOL)hasPrefix:(NSString *)str caseInsensitive:(BOOL)flag
+{
+  if (!flag)
+    return [self hasPrefix:str];
+
+  NSStringCompareOptions opts
+    = NSAnchoredSearch | (flag ? NSCaseInsensitiveSearch : 0);
+
+  return [self rangeOfString:str options:opts].length != 0;
 }
 
 - (BOOL)hasPathPrefix:(NSString *)path
+{
+  return [self hasPathPrefix:path caseInsensitive:NO];
+}
+
+- (BOOL)hasPathPrefix:(NSString *)path caseInsensitive:(BOOL)flag
 {
   NSInteger l1 = [self length];
   NSInteger l2 = [path length];
@@ -41,14 +59,21 @@
   if (l2 == 0)
     return YES;
   else if (l1 == l2)
-    return [self isEqualToString:path];
+    return [self isEqualToString:path caseInsensitive:flag];
   else if (l2 > l1)
     return NO;
   else
-    return [self characterAtIndex:l2] == '/' && [self hasPrefix:path];
+    return ([self characterAtIndex:l2] == '/'
+	    && [self hasPrefix:path caseInsensitive:flag]);
 }
 
 - (NSString *)stringByRemovingPathPrefix:(NSString *)path
+{
+  return [self stringByRemovingPathPrefix:path caseInsensitive:NO];
+}
+
+- (NSString *)stringByRemovingPathPrefix:(NSString *)path
+    caseInsensitive:(BOOL)flag
 {
   NSInteger l1 = [self length];
   NSInteger l2 = [path length];
@@ -56,11 +81,12 @@
   if (l2 == 0)
     return self;
   else if (l1 == l2)
-    return [self isEqualToString:path] ? @"" : self;
+    return [self isEqualToString:path caseInsensitive:flag] ? @"" : self;
   else if (l2 > l1)
     return self;
   else
-    return ([self characterAtIndex:l2] == '/' && [self hasPrefix:path]
+    return (([self characterAtIndex:l2] == '/'
+	     && [self hasPrefix:path caseInsensitive:flag])
 	    ? [self substringFromIndex:l2+1] : self);
 }
 
@@ -113,13 +139,13 @@
   return ret;
 }
 
-- (NSInteger)indexOfStringNoCase:(NSString *)str1
+- (NSInteger)indexOfString:(NSString *)str1 caseInsensitive:(BOOL)flag
 {
   NSInteger idx = 0;
 
   for (NSString *str2 in self)
     {
-      if ([str1 isEqualToStringNoCase:str2])
+      if ([str1 isEqualToString:str2 caseInsensitive:flag])
 	return idx;
       idx++;
     }
@@ -127,9 +153,9 @@
   return NSNotFound;
 }
 
-- (BOOL)containsStringNoCase:(NSString *)str
+- (BOOL)containsString:(NSString *)str caseInsensitive:(BOOL)flag
 {
-  return [self indexOfStringNoCase:str] != NSNotFound;
+  return [self indexOfString:str caseInsensitive:flag] != NSNotFound;
 }
 
 @end

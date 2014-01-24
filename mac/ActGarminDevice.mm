@@ -76,7 +76,7 @@
 
   for (NSString *file in [fm contentsOfDirectoryAtPath:path error:nullptr])
     {
-      if ([[file pathExtension] isEqualToStringNoCase:@"fit"])
+      if ([[file pathExtension] isEqualToString:@"fit" caseInsensitive:YES])
 	{
 	  NSURL *url = [NSURL fileURLWithPath:
 			[path stringByAppendingPathComponent:file]];

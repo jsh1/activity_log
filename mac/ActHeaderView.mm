@@ -96,7 +96,8 @@
       NSInteger old_idx = 0;
       for (ActHeaderFieldView *old_subview in old_subviews)
 	{
-	  if ([[old_subview fieldName] isEqualToStringNoCase:field])
+	  if ([[old_subview fieldName]
+	       isEqualToString:field caseInsensitive:YES])
 	    {
 	      new_subview = old_subview;
 	      [old_subviews removeObjectAtIndex:old_idx];
@@ -126,7 +127,7 @@
 {
   for (ActHeaderFieldView *subview in [self subviews])
     {
-      if ([[subview fieldName] isEqualToStringNoCase:name])
+      if ([[subview fieldName] isEqualToString:name caseInsensitive:YES])
 	return subview;
     }
 
@@ -146,7 +147,7 @@
 {
   for (ActHeaderFieldView *subview in [self subviews])
     {
-      if ([[subview fieldName] isEqualToStringNoCase:name])
+      if ([[subview fieldName] isEqualToString:name caseInsensitive:YES])
 	return YES;
     }
 
@@ -162,7 +163,7 @@
 {
   for (ActHeaderFieldView *subview in [self subviews])
     {
-      if ([[subview fieldName] isEqualToStringNoCase:name])
+      if ([[subview fieldName] isEqualToString:name caseInsensitive:YES])
 	{
 	  [subview removeFromSuperview];
 	  return;

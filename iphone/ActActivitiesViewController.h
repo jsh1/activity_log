@@ -26,6 +26,8 @@
 
 #import "act-database.h"
 
+#import "act-activity-list-item.h"
+
 enum
 {
   ActActivitiesViewList,
@@ -39,7 +41,13 @@ enum
   NSInteger _viewMode;
 
   std::vector<act::database::item *> _items;
+  std::vector<act::activity_list_item_ref> _listItems;
+
+  time_t _earliestTime;
   BOOL _moreItems;
+  BOOL _needReloadView;
+
+  int _ignoreNotifications;
 
   UIBarButtonItem *_addItem;
   UIBarButtonItem *_weekItem;

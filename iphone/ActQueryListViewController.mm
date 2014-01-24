@@ -42,6 +42,11 @@
 	   @"QueryListView" owner:self options:nil] firstObject];
 }
 
+- (void)dealloc
+{
+  [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
 - (void)viewDidLoad
 {
   [super viewDidLoad];
@@ -62,9 +67,22 @@
   [self reloadData];
 }
 
-- (void)dealloc
+- (void)pushAllActivitiesAnimated:(BOOL)flag
 {
-  [[NSNotificationCenter defaultCenter] removeObserver:self];
+  time_t start = 0;
+  time_t end = time(nullptr);
+
+  act::database::query query;
+  query.add_date_range(act::date_range(start, end - start));
+
+  ActActivitiesViewController *activities
+    = [ActActivitiesViewController instantiate];
+
+  [activities setQuery:query];
+
+  UINavigationController *nav = (id)[self parentViewController];
+
+  [nav pushViewController:activities animated:flag];
 }
 
 - (int)year
@@ -213,7 +231,7 @@ reverse_compare(id a, id b, void *ctx)
       if (path.section == 0)
 	{
 	  if (_year == 0)
-	    start = year_time(1990), end = year_time(2100);
+	    start = 0, end = time(nullptr);
 	  else
 	    start = year_time(_year), end = year_time(_year + 1);
 	}
@@ -227,7 +245,7 @@ reverse_compare(id a, id b, void *ctx)
 	}
     
       act::database::query query;
-      query.add_date_range(act::date_range(start, end));
+      query.add_date_range(act::date_range(start, end - start));
 
       ActActivitiesViewController *activities
 	= [ActActivitiesViewController instantiate];

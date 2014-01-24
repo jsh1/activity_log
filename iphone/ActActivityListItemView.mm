@@ -22,29 +22,32 @@
    CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
    SOFTWARE. */
 
-#import <Foundation/Foundation.h>
+#import "ActActivityListItemView.h"
 
-@interface NSString (FoundationExtensions)
+@implementation ActActivityListItemView
 
-- (BOOL)isEqualToString:(NSString *)str caseInsensitive:(BOOL)flag;
+- (act::activity_list_item_ref)listItem
+{
+  return _listItem;
+}
 
-- (BOOL)hasPrefix:(NSString *)path caseInsensitive:(BOOL)flag;
+- (void)setListItem:(act::activity_list_item_ref)x
+{
+  if (_listItem != x)
+    {
+      _listItem = x;
+      [self setNeedsDisplay];
+    }
+}
 
-- (BOOL)hasPathPrefix:(NSString *)path;
-- (BOOL)hasPathPrefix:(NSString *)path caseInsensitive:(BOOL)flag;
+- (void)drawRect:(CGRect)clip
+{
+  _listItem->draw([self bounds]);
+}
 
-- (NSString *)stringByRemovingPathPrefix:(NSString *)path;
-- (NSString *)stringByRemovingPathPrefix:(NSString *)path
-    caseInsensitive:(BOOL)flag;
-  
-@end
-
-@interface NSArray (FoundationExtensions)
-
-- (NSArray *)mappedArray:(id (^)(id))f;
-- (NSArray *)filteredArray:(BOOL (^)(id))f;
-
-- (NSInteger)indexOfString:(NSString *)str caseInsensitive:(BOOL)flag;
-- (BOOL)containsString:(NSString *)str caseInsensitive:(BOOL)flag;
+- (BOOL)isOpaque
+{
+  return NO;
+}
 
 @end

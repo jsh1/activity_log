@@ -83,6 +83,8 @@ defaults_getenv(const char *key)
 
   [_navigationController pushViewController:controller animated:NO];
 
+  [controller pushAllActivitiesAnimated:NO];
+
   if (![self isDropboxLinked])
     [controller configAction:self];
 

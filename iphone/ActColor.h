@@ -22,29 +22,24 @@
    CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
    SOFTWARE. */
 
-#import <Foundation/Foundation.h>
+#import <UIKit/UIColor.h>
 
-@interface NSString (FoundationExtensions)
+#import "act-activity.h"
 
-- (BOOL)isEqualToString:(NSString *)str caseInsensitive:(BOOL)flag;
+@interface ActColor : UIColor
 
-- (BOOL)hasPrefix:(NSString *)path caseInsensitive:(BOOL)flag;
++ (UIColor *)controlTextColor;
++ (UIColor *)disabledControlTextColor;
++ (UIColor *)controlTextColor:(BOOL)disabled;
 
-- (BOOL)hasPathPrefix:(NSString *)path;
-- (BOOL)hasPathPrefix:(NSString *)path caseInsensitive:(BOOL)flag;
++ (UIColor *)controlDetailTextColor;
++ (UIColor *)disabledControlDetailTextColor;
++ (UIColor *)controlDetailTextColor:(BOOL)disabled;
 
-- (NSString *)stringByRemovingPathPrefix:(NSString *)path;
-- (NSString *)stringByRemovingPathPrefix:(NSString *)path
-    caseInsensitive:(BOOL)flag;
-  
-@end
++ (UIColor *)controlBackgroundColor;
++ (UIColor *)darkControlBackgroundColor;
++ (UIColor *)midControlBackgroundColor;
 
-@interface NSArray (FoundationExtensions)
-
-- (NSArray *)mappedArray:(id (^)(id))f;
-- (NSArray *)filteredArray:(BOOL (^)(id))f;
-
-- (NSInteger)indexOfString:(NSString *)str caseInsensitive:(BOOL)flag;
-- (BOOL)containsString:(NSString *)str caseInsensitive:(BOOL)flag;
++ (UIColor *)activityColor:(const act::activity &)activity;
 
 @end

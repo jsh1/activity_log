@@ -24,8 +24,19 @@
 
 #import "ActActivitiesViewController.h"
 
-#import "ActActivityTableViewCell.h"
+#import "ActActivityListItemView.h"
 #import "ActDatabaseManager.h"
+
+#import "act-util.h"
+
+#import <xlocale.h>
+
+@interface ActActivityLoadMoreCell : UITableViewCell
+{
+  time_t _earliestTime;
+}
+@property(nonatomic) time_t earliestTime;
+@end
 
 @implementation ActActivitiesViewController
 
@@ -42,6 +53,18 @@
 
 - (void)viewDidLoad
 {
+  [super viewDidLoad];
+
+  ActDatabaseManager *db = [ActDatabaseManager sharedManager];
+
+  [[NSNotificationCenter defaultCenter]
+   addObserver:self selector:@selector(metadataDatabaseDidChange:)
+   name:ActMetadataDatabaseDidChange object:db];
+
+  [[NSNotificationCenter defaultCenter]
+   addObserver:self selector:@selector(activityDatabaseDidChange:)
+   name:ActActivityDatabaseDidChange object:db];
+
   _addItem = [[UIBarButtonItem alloc]
 	initWithBarButtonSystemItem:UIBarButtonSystemItemAdd
 	target:self action:@selector(addActivityAction:)];
@@ -61,6 +84,7 @@
 - (void)setQuery:(const act::database::query &)q
 {
   _query = q;
+  _earliestTime = 0;
 
   [self reloadData];
 }
@@ -76,13 +100,78 @@
     {
       _viewMode = mode;
 
-      [self reloadData];
+      [[self tableView] reloadData];
+      _needReloadView = NO;
     }
 }
 
 - (void)reloadData
 {
   ActDatabaseManager *db = [ActDatabaseManager sharedManager];
+
+  /* Pull activity files spanning the query's partial date range into
+     the database. */
+
+  _ignoreNotifications++;
+
+  act::date_range range;
+  for (const auto &it : _query.date_ranges())
+    range.merge(it);
+
+  if (!range.is_empty())
+    {
+      struct tm tm = {0};
+      time_t last = range.start + range.length - 1;
+      localtime_r(&last, &tm);
+
+      int year = tm.tm_year + 1900;
+      int month = tm.tm_mon;
+
+      if (_earliestTime == 0)
+	_earliestTime = act::month_time(year, month - 1);
+
+      time_t min_time = std::max(_earliestTime, range.start);
+
+      while (1)
+	{
+	  act::standardize_month(year, month);
+
+	  time_t month_start = act::month_time(year, month);
+	  time_t month_end = month_start + act::seconds_in_month(year, month);
+
+	  if (!(month_end > min_time))
+	    break;
+
+	  char buf[64];
+	  snprintf_l(buf, sizeof(buf), nullptr, "%d/%02d", year, month + 1);
+
+	  NSString *dir = [NSString stringWithUTF8String:buf];
+
+	  NSDictionary *dict = [db activityMetadataForPath:dir];
+
+	  /* Sort files into reverse order, as that's how we display. */
+
+	  NSArray *contents = [dict objectForKey:@"contents"];
+	  contents = [contents sortedArrayUsingComparator:^
+		      NSComparisonResult (id a, id b) {return [b compare:a];}];
+
+	  for (NSString *name in contents)
+	    {
+	      NSString *rev = [dict objectForKey:@"rev"];
+	      NSString *path = [dir stringByAppendingPathComponent:name];
+
+	      [db loadActivityFromPath:path revision:rev];
+	    }
+
+	  month--;
+	}
+
+      _moreItems = _earliestTime > range.start;
+    }
+
+  _ignoreNotifications--;
+
+  /* Reload the query results and update the table view. */
 
   std::vector<act::database::item *> items;
   [db database]->execute_query(_query, items);
@@ -91,16 +180,53 @@
     {
       using std::swap;
       swap(_items, items);
+      _needReloadView = YES;
+    }
 
-      /* FIXME: pull activities into our cache. */
-
+  if (_needReloadView)
+    {
       [[self tableView] reloadData];
+      _needReloadView = NO;
     }
 }
 
-- (void)loadMoreData
+- (void)loadMoreData:(time_t)earliest
 {
-  /* FIXME: something. */
+  struct tm tm = {0};
+  localtime_r(&earliest, &tm);
+
+  earliest = act::month_time(tm.tm_year + 1900, tm.tm_mon - 1);
+
+  if (earliest < _earliestTime)
+    {
+      _earliestTime = earliest;
+      _needReloadView = YES;
+      [self reloadData];
+    }
+}
+
+- (act::activity_list_item_ref)listItemForIndex:(size_t)idx
+{
+  if (_listItems.size() != _items.size())
+    _listItems.resize(_items.size());
+
+  if (!_listItems[idx]
+      || _listItems[idx]->activity->storage() != _items[idx]->storage())
+    _listItems[idx].reset(new act::activity_list_item(_items[idx]->storage()));
+
+  return _listItems[idx];
+}
+
+- (void)metadataDatabaseDidChange:(NSNotification *)note
+{
+  if (_ignoreNotifications == 0)
+    [self reloadData];
+}
+
+- (void)activityDatabaseDidChange:(NSNotification *)note
+{
+  if (_ignoreNotifications == 0)
+    [self reloadData];
 }
 
 - (IBAction)addActivityAction:(id)sender
@@ -142,7 +268,7 @@
       break;
 
     case 1:
-      ident = @"moreCell";
+      ident = @"loadMoreCell";
       break;
     }
 
@@ -152,36 +278,89 @@
     {
       if ([ident isEqualToString:@"activityCell"])
 	{
-	  cell = [[ActActivityTableViewCell alloc]
-		  initWithActivityStorage:_items[path.row]->storage()
-		  reuseIdentifier:ident];
+	  cell = [[UITableViewCell alloc] initWithStyle:
+		  UITableViewCellStyleDefault reuseIdentifier:ident];
+
+	  ActActivityListItemView *view
+	    = [[ActActivityListItemView alloc] init];
+
+	  [view setFrame:[cell.contentView bounds]];
+	  [view setAutoresizingMask:
+	   UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight];
+	  [cell.contentView addSubview:view];
 	}
       else if ([ident isEqualToString:@"weekCell"])
 	{
 	  /* FIXME: implement this. */
-
 	  cell = [[UITableViewCell alloc] initWithStyle:
 		  UITableViewCellStyleDefault reuseIdentifier:ident];
 	  [[cell textLabel] setText:@"Week Cell"];
 	}
-      else if ([ident isEqualToString:@"moreCell"])
+      else if ([ident isEqualToString:@"loadMoreCell"])
 	{
-	  cell = [[UITableViewCell alloc] initWithStyle:
+	  cell = [[ActActivityLoadMoreCell alloc] initWithStyle:
 		  UITableViewCellStyleDefault reuseIdentifier:ident];
-	  [[cell textLabel] setText:@"More Data"];
+	  [[cell textLabel] setText:@"Load More Activities"];
 	}
+    }
+
+  if ([ident isEqualToString:@"activityCell"])
+    {
+      ActActivityListItemView *view
+        = (id)[[cell.contentView subviews] firstObject];
+      [view setListItem:[self listItemForIndex:path.row]];
+    }
+  else if ([ident isEqualToString:@"weekCell"])
+    {
+    }
+  else if ([ident isEqualToString:@"loadMoreCell"])
+    {
+      [(ActActivityLoadMoreCell *)cell setEarliestTime:_earliestTime];
     }
 
   return cell;
 }
 
-- (void)tableView:(UITableView *)tv willDisplayCell:(UITableViewCell *)cell
-    forRowAtIndexPath:(NSIndexPath *)path
+/* UITableViewDelegate methods. */
+
+- (CGFloat)tableView:(UITableView *)tv
+    heightForRowAtIndexPath:(NSIndexPath *)path
 {
-  if ([[cell reuseIdentifier] isEqualToString:@"moreCell"])
+  if (path.section == 0 && _viewMode == ActActivitiesViewList)
     {
-      [self loadMoreData];
+      act::activity_list_item_ref item = [self listItemForIndex:path.row];
+      CGFloat width = [tv bounds].size.width;
+      item->update_height(width);
+      return item->height;
     }
+  else
+    return [tv rowHeight];
 }
 
+- (void)tableView:(UITableView *)tv didSelectRowAtIndexPath:(NSIndexPath *)path
+{
+  UITableViewCell *cell = [tv cellForRowAtIndexPath:path];
+
+  NSString *ident = [cell reuseIdentifier];
+
+  if ([ident isEqualToString:@"activityCell"])
+    {
+      /* FIXME: something? */
+    }
+  else if ([ident isEqualToString:@"weekCell"])
+    {
+      /* FIXME: something? */
+    }
+  else if ([ident isEqualToString:@"loadMoreCell"])
+    {
+      [self loadMoreData:[(ActActivityLoadMoreCell *)cell earliestTime]];
+    }
+
+  [tv deselectRowAtIndexPath:path animated:NO];
+}
+
+@end
+
+@implementation ActActivityLoadMoreCell
+@synthesize earliestTime = _earliestTime;
 @end

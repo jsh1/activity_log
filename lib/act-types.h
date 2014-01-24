@@ -155,11 +155,16 @@ struct date_range
   time_t start;
   time_t length;
 
+  date_range();
   date_range(time_t s, time_t l);
+  date_range(const date_range &rhs) = default;
 
   static date_range infinity();
 
+  bool is_empty() const;
   bool contains(time_t t) const;
+
+  void merge(const date_range &rhs);
 };
 
 struct date_interval
@@ -212,6 +217,13 @@ struct location_region
 // implementation
 
 inline
+date_range::date_range()
+: start(0),
+  length(0)
+{
+}
+
+inline
 date_range::date_range(time_t s, time_t l)
 : start(s),
   length(l)
@@ -221,7 +233,13 @@ date_range::date_range(time_t s, time_t l)
 inline date_range
 date_range::infinity()
 {
-  return date_range(0, LONG_MAX);
+  return date_range(0, (time_t)LONG_MAX);
+}
+
+inline bool
+date_range::is_empty() const
+{
+  return length == 0;
 }
 
 inline bool

@@ -51,6 +51,8 @@ extern NSString *const ActActivityDidChangeBody;
   BOOL _metadataCacheNeedsSynchronize;
 
   NSMutableDictionary *_activityRevisions;	/* path -> NSNumber<int> */
+  NSMutableDictionary *_pendingActivityRevisions;
+  NSMutableDictionary *_addedActivityRevisions;
 
   NSString *_activityRevisionsPath;
   BOOL _activityRevisionsNeedsSynchronize;

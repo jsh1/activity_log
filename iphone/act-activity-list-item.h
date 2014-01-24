@@ -22,28 +22,44 @@
    CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
    SOFTWARE. */
 
-#import "ActActivityTableViewCell.h"
+#import <UIKit/UIKit.h>
 
-@implementation ActActivityTableViewCell
+#import "act-activity.h"
 
-- (id)initWithActivityStorage:(act::activity_storage_ref)storage
-    reuseIdentifier:(NSString *)ident
+namespace act {
+
+struct activity_list_item
 {
-  self = [super initWithStyle:UITableViewCellStyleDefault
-	  reuseIdentifier:ident];
-  if (self == nil)
-    return nil;
+  std::unique_ptr<activity> activity;
 
-  _activity.reset(new act::activity(storage));
+  NSString *body;
 
-  [self setNeedsDisplay];
+  CGFloat body_width;
+  CGFloat body_height;
+  CGFloat height;
+  bool valid_height;
 
-  return self;
-}
+  activity_list_item();
+  explicit activity_list_item(act::activity_storage_ref storage);
+  explicit activity_list_item(const activity_list_item &rhs);
 
-- (void)drawRect:(CGRect)clip
-{
-  /* FIXME: implement this. */
-}
+  void draw(const CGRect &bounds);
 
-@end
+  void update_body();
+  void update_body_height(CGFloat width);
+  void update_height(CGFloat width);
+
+private:
+  static bool initialized;
+  static NSDictionary *title_attrs;
+  static NSDictionary *body_attrs;
+  static NSDictionary *time_attrs;
+  static NSDictionary *stats_attrs;
+  static NSDateFormatter *time_formatter;
+
+  static void initialize();
+};
+
+typedef std::shared_ptr<activity_list_item> activity_list_item_ref;
+
+} // namespace act

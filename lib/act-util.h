@@ -150,10 +150,18 @@ void tilde_expand_file_name(std::string &dest, const char *src);
 
 // misc date utility functions
 
+void standardize_month(int &year, int &month);
+
 bool leap_year_p(int year);
 
 time_t seconds_in_year(int year);
 time_t seconds_in_month(int year, int month);
+
+// returns number of days or seconds since Jan 1 1970. Year is
+// absolute, month is 0..11, day is 1..31.
+
+unsigned int make_day(unsigned int year, unsigned int month, unsigned int day);
+time_t make_time(unsigned int year, unsigned int month, unsigned int day);
 
 time_t year_time(int year);
 time_t month_time(int year, int month);

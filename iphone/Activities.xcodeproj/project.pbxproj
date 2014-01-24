@@ -7,7 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		57001E9D1890763300611F26 /* ActActivityTableViewCell.mm in Sources */ = {isa = PBXBuildFile; fileRef = 57001E9C1890763300611F26 /* ActActivityTableViewCell.mm */; };
+		57001E9D1890763300611F26 /* ActActivityListItemView.mm in Sources */ = {isa = PBXBuildFile; fileRef = 57001E9C1890763300611F26 /* ActActivityListItemView.mm */; };
+		57001EA01891BCFA00611F26 /* ActColor.mm in Sources */ = {isa = PBXBuildFile; fileRef = 57001E9F1891BCFA00611F26 /* ActColor.mm */; };
+		57001EA31891C4C200611F26 /* act-activity-list-item.mm in Sources */ = {isa = PBXBuildFile; fileRef = 57001EA21891C4C200611F26 /* act-activity-list-item.mm */; };
 		571A08F8188D691F0066B572 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 571A08F7188D691F0066B572 /* Foundation.framework */; };
 		571A08FA188D691F0066B572 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 571A08F9188D691F0066B572 /* CoreGraphics.framework */; };
 		571A08FC188D691F0066B572 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 571A08FB188D691F0066B572 /* UIKit.framework */; };
@@ -104,8 +106,12 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		57001E9B1890763300611F26 /* ActActivityTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActActivityTableViewCell.h; sourceTree = "<group>"; };
-		57001E9C1890763300611F26 /* ActActivityTableViewCell.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ActActivityTableViewCell.mm; sourceTree = "<group>"; };
+		57001E9B1890763300611F26 /* ActActivityListItemView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActActivityListItemView.h; sourceTree = "<group>"; };
+		57001E9C1890763300611F26 /* ActActivityListItemView.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ActActivityListItemView.mm; sourceTree = "<group>"; };
+		57001E9E1891BCFA00611F26 /* ActColor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActColor.h; sourceTree = "<group>"; };
+		57001E9F1891BCFA00611F26 /* ActColor.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ActColor.mm; sourceTree = "<group>"; };
+		57001EA11891C4C200611F26 /* act-activity-list-item.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "act-activity-list-item.h"; sourceTree = "<group>"; };
+		57001EA21891C4C200611F26 /* act-activity-list-item.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = "act-activity-list-item.mm"; sourceTree = "<group>"; };
 		571A08F4188D691F0066B572 /* Activities.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Activities.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		571A08F7188D691F0066B572 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		571A08F9188D691F0066B572 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
@@ -354,8 +360,8 @@
 		571A0933188D6BFB0066B572 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
-				57F95734188EE0F4000EF638 /* defaults.plist */,
 				571A0912188D69200066B572 /* Images.xcassets */,
+				57F95734188EE0F4000EF638 /* defaults.plist */,
 				571A08FF188D691F0066B572 /* Activities-Info.plist */,
 				571A0900188D691F0066B572 /* InfoPlist.strings */,
 			);
@@ -373,10 +379,14 @@
 				57F95738188EE585000EF638 /* ActQueryListViewController.mm */,
 				57830C40188D7A7C001056B5 /* ActActivitiesViewController.h */,
 				57830C41188D7A7C001056B5 /* ActActivitiesViewController.mm */,
-				57001E9B1890763300611F26 /* ActActivityTableViewCell.h */,
-				57001E9C1890763300611F26 /* ActActivityTableViewCell.mm */,
+				57001E9B1890763300611F26 /* ActActivityListItemView.h */,
+				57001E9C1890763300611F26 /* ActActivityListItemView.mm */,
+				57001EA11891C4C200611F26 /* act-activity-list-item.h */,
+				57001EA21891C4C200611F26 /* act-activity-list-item.mm */,
 				57F95728188DC140000EF638 /* ActSettingsViewController.h */,
 				57F95729188DC140000EF638 /* ActSettingsViewController.mm */,
+				57001E9E1891BCFA00611F26 /* ActColor.h */,
+				57001E9F1891BCFA00611F26 /* ActColor.mm */,
 			);
 			name = Classes;
 			sourceTree = "<group>";
@@ -681,11 +691,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				571A0904188D691F0066B572 /* main.m in Sources */,
-				57001E9D1890763300611F26 /* ActActivityTableViewCell.mm in Sources */,
+				57001E9D1890763300611F26 /* ActActivityListItemView.mm in Sources */,
 				57830C54188D7B26001056B5 /* FoundationExtensions.m in Sources */,
+				57001EA31891C4C200611F26 /* act-activity-list-item.mm in Sources */,
 				57F95733188ED836000EF638 /* ActDatabaseManager.mm in Sources */,
 				57830C53188D7B26001056B5 /* CoreAnimationExtensions.m in Sources */,
 				57F9572A188DC140000EF638 /* ActSettingsViewController.mm in Sources */,
+				57001EA01891BCFA00611F26 /* ActColor.mm in Sources */,
 				57830C44188D7A7C001056B5 /* ActActivitiesViewController.mm in Sources */,
 				57F95739188EE585000EF638 /* ActQueryListViewController.mm in Sources */,
 				571A093A188D6F320066B572 /* ActAppDelegate.mm in Sources */,

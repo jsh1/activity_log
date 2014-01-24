@@ -151,7 +151,7 @@
 	  NSString *str = [[NSString alloc]
 			   initWithUTF8String:it.first.c_str()];
 	  if (![_headerView displaysField:str]
-	      && ![ignoredFields containsStringNoCase:str])
+	      && ![ignoredFields containsString:str caseInsensitive:YES])
 	    [_headerView addDisplayedField:str];
 	  [str release];
 	}

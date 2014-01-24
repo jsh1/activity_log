@@ -42,6 +42,8 @@
 
 - (void)reloadData;
 
+- (void)pushAllActivitiesAnimated:(BOOL)flag;
+
 - (IBAction)configAction:(id)sender;
 
 @end

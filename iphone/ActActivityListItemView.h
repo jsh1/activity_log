@@ -24,14 +24,13 @@
 
 #import <UIKit/UIKit.h>
 
-#import "act-activity.h"
+#import "act-activity-list-item.h"
 
-@interface ActActivityTableViewCell : UITableViewCell
+@interface ActActivityListItemView : UIView
 {
-  std::unique_ptr<act::activity> _activity;
+  act::activity_list_item_ref _listItem;
 }
 
-- (id)initWithActivityStorage:(act::activity_storage_ref)storage
-    reuseIdentifier:(NSString *)ident;
+@property(nonatomic) act::activity_list_item_ref listItem;
 
 @end

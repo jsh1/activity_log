@@ -458,21 +458,6 @@ canonicalize_field_string(field_data_type type, std::string &str)
 
 namespace {
 
-int
-days_since_1970(const struct tm &tm)
-{
-  /* Adapted from Linux kernel's mktime(). */
-
-  int year = tm.tm_year + 1900;
-  int month = tm.tm_mon - 1;	/* 0..11 -> 11,12,1..10 */
-  if (month < 0)
-    month += 12, year -= 1;
-  int day = tm.tm_mday;
-
-  return ((year/4 - year/100 + year/400 + 367*month/12 + day)
-	  + year*365 - 719499);
-}
-
 void
 append_days_date(std::string &str, int days)
 {
@@ -487,6 +472,20 @@ append_days_date(std::string &str, int days)
 
 } // anonymous namespace
 
+void
+date_range::merge(const date_range &rhs)
+{
+  if (length == 0)
+    *this = rhs;
+  else if (rhs.length != 0)
+    {
+      time_t d0 = std::min(start, rhs.start);
+      time_t d1 = std::max(start + length, rhs.start + rhs.length);
+      start = d0;
+      length = d1 - d0;
+    }
+}
+
 int
 date_interval::date_index(time_t date) const
 {
@@ -498,12 +497,13 @@ date_interval::date_index(time_t date) const
   switch (unit)
     {
     case unit_type::days:
-      return days_since_1970(tm) / count;
+      return make_day(tm.tm_year + 1900, tm.tm_mon, tm.tm_mday) / count;
 
     case unit_type::weeks: {
       // 1970-01-01 was a thursday.
       static int week_offset = 4 - shared_config().start_of_week();
-      x = (days_since_1970(tm) + week_offset) / 7;
+      x = (make_day(tm.tm_year + 1900,
+		    tm.tm_mon, tm.tm_mday) + week_offset) / 7;
       break; }
 
     case unit_type::months:

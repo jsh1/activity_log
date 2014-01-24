@@ -289,9 +289,7 @@ seconds_in_year(int year)
   return !leap_year_p(year) ? 365*SECONDS_PER_DAY : 366*SECONDS_PER_DAY;
 }
 
-namespace {
-
-inline void
+void
 standardize_month(int &year, int &month)
 {
   while (month < 0)
@@ -300,18 +298,23 @@ standardize_month(int &year, int &month)
     year++, month -= 12;
 }
 
-inline time_t
-make_time(unsigned int year, unsigned int month, unsigned int day)
+unsigned int
+make_day(unsigned int year, unsigned int month, unsigned int day)
 {
+  /* Adapted from Linux kernel's mktime(). */
+
   month = month - 1;
   if ((int)month <= 0)
     month += 12, year -= 1;
 
-  return ((time_t)(year/4 - year/100 + year/400 + 367*month/12 + day)
-	  + year*365 - 719499) * SECONDS_PER_DAY;
+  return year/4 - year/100 + year/400 + 367*month/12 + day + year*365 - 719499;
 }
 
-} // anonymous namespace
+time_t
+make_time(unsigned int year, unsigned int month, unsigned int day)
+{
+  return make_day(year, month, day) * SECONDS_PER_DAY;
+}
 
 time_t
 seconds_in_month(int year, int month)
