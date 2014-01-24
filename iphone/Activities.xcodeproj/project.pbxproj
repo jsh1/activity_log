@@ -20,6 +20,8 @@
 		571A0932188D6A310066B572 /* libxml2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 571A0931188D6A310066B572 /* libxml2.dylib */; };
 		571A093A188D6F320066B572 /* ActAppDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = 571A0939188D6F320066B572 /* ActAppDelegate.mm */; };
 		571A093D188D70A70066B572 /* Main.xib in Resources */ = {isa = PBXBuildFile; fileRef = 571A093B188D70A70066B572 /* Main.xib */; };
+		576FF5981892DCF100C0C3CF /* ActActivityViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = 576FF5971892DCF100C0C3CF /* ActActivityViewController.mm */; };
+		576FF59B1892DE4900C0C3CF /* ActivityView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 576FF5991892DE4900C0C3CF /* ActivityView.xib */; };
 		57830C44188D7A7C001056B5 /* ActActivitiesViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = 57830C41188D7A7C001056B5 /* ActActivitiesViewController.mm */; };
 		57830C4B188D7AD2001056B5 /* ActivitiesView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 57830C49188D7AD2001056B5 /* ActivitiesView.xib */; };
 		57830C53188D7B26001056B5 /* CoreAnimationExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = 57830C4E188D7B26001056B5 /* CoreAnimationExtensions.m */; };
@@ -126,6 +128,9 @@
 		571A0938188D6F320066B572 /* ActAppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActAppDelegate.h; sourceTree = "<group>"; };
 		571A0939188D6F320066B572 /* ActAppDelegate.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ActAppDelegate.mm; sourceTree = "<group>"; };
 		571A093C188D70A70066B572 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = resources/en.lproj/Main.xib; sourceTree = "<group>"; };
+		576FF5961892DCF100C0C3CF /* ActActivityViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActActivityViewController.h; sourceTree = "<group>"; };
+		576FF5971892DCF100C0C3CF /* ActActivityViewController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ActActivityViewController.mm; sourceTree = "<group>"; };
+		576FF59A1892DE4900C0C3CF /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = resources/en.lproj/ActivityView.xib; sourceTree = "<group>"; };
 		57830C40188D7A7C001056B5 /* ActActivitiesViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActActivitiesViewController.h; sourceTree = "<group>"; };
 		57830C41188D7A7C001056B5 /* ActActivitiesViewController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ActActivitiesViewController.mm; sourceTree = "<group>"; };
 		57830C4A188D7AD2001056B5 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = resources/en.lproj/ActivitiesView.xib; sourceTree = "<group>"; };
@@ -383,6 +388,8 @@
 				57001E9C1890763300611F26 /* ActActivityListItemView.mm */,
 				57001EA11891C4C200611F26 /* act-activity-list-item.h */,
 				57001EA21891C4C200611F26 /* act-activity-list-item.mm */,
+				576FF5961892DCF100C0C3CF /* ActActivityViewController.h */,
+				576FF5971892DCF100C0C3CF /* ActActivityViewController.mm */,
 				57F95728188DC140000EF638 /* ActSettingsViewController.h */,
 				57F95729188DC140000EF638 /* ActSettingsViewController.mm */,
 				57001E9E1891BCFA00611F26 /* ActColor.h */,
@@ -450,6 +457,7 @@
 			children = (
 				571A093B188D70A70066B572 /* Main.xib */,
 				57830C49188D7AD2001056B5 /* ActivitiesView.xib */,
+				576FF5991892DE4900C0C3CF /* ActivityView.xib */,
 				57CA435818901570008693CA /* QueryListView.xib */,
 				57F9572E188DC70D000EF638 /* Settings.storyboard */,
 			);
@@ -674,6 +682,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				57830C4B188D7AD2001056B5 /* ActivitiesView.xib in Resources */,
+				576FF59B1892DE4900C0C3CF /* ActivityView.xib in Resources */,
 				57CA435A18901570008693CA /* QueryListView.xib in Resources */,
 				571A0913188D69200066B572 /* Images.xcassets in Resources */,
 				57F95730188DC70D000EF638 /* Settings.storyboard in Resources */,
@@ -698,6 +707,7 @@
 				57830C53188D7B26001056B5 /* CoreAnimationExtensions.m in Sources */,
 				57F9572A188DC140000EF638 /* ActSettingsViewController.mm in Sources */,
 				57001EA01891BCFA00611F26 /* ActColor.mm in Sources */,
+				576FF5981892DCF100C0C3CF /* ActActivityViewController.mm in Sources */,
 				57830C44188D7A7C001056B5 /* ActActivitiesViewController.mm in Sources */,
 				57F95739188EE585000EF638 /* ActQueryListViewController.mm in Sources */,
 				571A093A188D6F320066B572 /* ActAppDelegate.mm in Sources */,
@@ -802,6 +812,14 @@
 				571A093C188D70A70066B572 /* en */,
 			);
 			name = Main.xib;
+			sourceTree = "<group>";
+		};
+		576FF5991892DE4900C0C3CF /* ActivityView.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				576FF59A1892DE4900C0C3CF /* en */,
+			);
+			name = ActivityView.xib;
 			sourceTree = "<group>";
 		};
 		57830C49188D7AD2001056B5 /* ActivitiesView.xib */ = {

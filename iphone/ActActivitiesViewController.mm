@@ -25,6 +25,7 @@
 #import "ActActivitiesViewController.h"
 
 #import "ActActivityListItemView.h"
+#import "ActActivityViewController.h"
 #import "ActDatabaseManager.h"
 
 #import "act-util.h"
@@ -353,7 +354,16 @@
 
   if ([ident isEqualToString:@"activityCell"])
     {
-      /* FIXME: something? */
+      act::activity_list_item_ref item = [self listItemForIndex:path.row];
+
+      ActActivityViewController *controller
+        = [ActActivityViewController instantiate];
+
+      controller.activityStorage = item->activity->storage();
+
+      UINavigationController *nav = (id)[self parentViewController];
+
+      [nav pushViewController:controller animated:YES];
     }
   else if ([ident isEqualToString:@"weekCell"])
     {

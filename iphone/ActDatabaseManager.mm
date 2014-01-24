@@ -91,6 +91,8 @@ static ActDatabaseManager *_sharedManager;
     = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory,
 					   NSUserDomainMask, YES) firstObject];
 
+  cache_dir = [cache_dir stringByAppendingPathComponent:@"ActDatabaseManager"];
+
   _localActivityPath
     = [cache_dir stringByAppendingPathComponent:@"activities"];
 
@@ -297,8 +299,8 @@ metadata_dictionary(DBMetadata *meta)
 
       sub_dict[@"name"] = [[sub path] lastPathComponent];
 
-      if (id hash = [meta hash])
-	sub_dict[@"hash"] = hash;
+      /* Note: not including hash field, we only use it to avoid
+	 receiving directory metadata redundantly. */
 
       if (id rev = [sub rev])
 	sub_dict[@"rev"] = rev;

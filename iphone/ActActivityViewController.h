@@ -22,63 +22,42 @@
    CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
    SOFTWARE. */
 
-#import "ActSettingsViewController.h"
+#import <UIKit/UIKit.h>
 
-#import "ActAppDelegate.h"
+#import "act-activity.h"
 
-@implementation ActSettingsViewController
-
-+ (ActSettingsViewController *)instantiate
+@interface ActActivityViewController : UIViewController
 {
-  UIStoryboard *sb = [UIStoryboard storyboardWithName:@"Settings" bundle:nil];
-  return [sb instantiateViewControllerWithIdentifier:@"tableViewController"];
+  std::unique_ptr<act::activity> _activity;
+
+  IBOutlet UILabel *_courseLabel;
+  IBOutlet UILabel *_activityLabel;
+  IBOutlet UILabel *_dateLabel;
+  IBOutlet UILabel *_timeLabel;
+
+  IBOutlet UILabel *_distanceLabel;
+  IBOutlet UILabel *_durationLabel;
+  IBOutlet UILabel *_paceLabel;
+  IBOutlet UILabel *_avgHRLabel;
+  IBOutlet UILabel *_cadenceLabel;
+  IBOutlet UILabel *_pointsLabel;
+
+  IBOutlet NSLayoutConstraint *_distanceHeightConstraint;
+  IBOutlet NSLayoutConstraint *_durationHeightConstraint;
+  IBOutlet NSLayoutConstraint *_paceHeightConstraint;
+  IBOutlet NSLayoutConstraint *_avgHRHeightConstraint;
+  IBOutlet NSLayoutConstraint *_cadenceHeightConstraint;
+  IBOutlet NSLayoutConstraint *_pointsHeightConstraint;
+
+  IBOutlet NSLayoutConstraint *_separator1HeightConstraint;
+  IBOutlet NSLayoutConstraint *_separator2HeightConstraint;
+  IBOutlet NSLayoutConstraint *_separator3HeightConstraint;
+
+  IBOutlet UILabel *_notesLabel;
 }
 
-- (NSString *)title
-{
-  return @"Settings";
-}
++ (ActActivityViewController *)instantiate;
 
-- (void)viewDidLoad
-{
-  NSLog(@"loaded %@", self);
-}
-
-- (void)viewWillAppear:(BOOL)animated
-{
-  ActAppDelegate *delegate = (id)[[UIApplication sharedApplication] delegate];
-
-  [_linkedSwitch setOn:[delegate isDropboxLinked]];
-}
-
-- (IBAction)linkAction:(id)sender
-{
-  ActAppDelegate *delegate = (id)[[UIApplication sharedApplication] delegate];
-
-  [delegate setDropboxLinked:[sender isOn]];
-  [sender setOn:[delegate isDropboxLinked]];
-}
-
-- (IBAction)doneAction:(id)sender
-{
-  [self dismissViewControllerAnimated:YES completion:nil];
-}
-
-/* UITextFieldDelegate methods. */
-
-- (void)textFieldDidBeginEditing:(UITextField *)field
-{
-}
-
-- (BOOL)textFieldShouldClear:(UITextField *)field
-{
-  return YES;
-}
-
-- (BOOL)textFieldShouldReturn:(UITextField *)field
-{
-  [field resignFirstResponder];
-  return YES;
-}
+@property(nonatomic) act::activity_storage_ref activityStorage;
 
 @end

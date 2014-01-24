@@ -24,14 +24,16 @@
 
 #import <UIKit/UIKit.h>
 
-@class DBSession;
+#import "DropboxSDK.h"
 
-@interface ActAppDelegate : NSObject <UIApplicationDelegate>
+@interface ActAppDelegate : NSObject
+  <UIApplicationDelegate, DBNetworkRequestDelegate>
 {
   UIWindow *_window;
   UINavigationController *_navigationController;
   DBSession *_dropboxSession;
   BOOL _dropboxLinked;
+  int _dropboxRequests;
 }
 
 @property(nonatomic, strong) IBOutlet UIWindow *window;

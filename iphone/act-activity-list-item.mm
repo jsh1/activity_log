@@ -32,6 +32,7 @@
 #define X_INSET_LEFT 16
 #define X_INSET_RIGHT 5
 #define Y_INSET 5
+#define BODY_RIGHT_INSET 11
 #define TIME_WIDTH 74
 #define STATS_Y_SPACING 2
 
@@ -187,6 +188,8 @@ activity_list_item::draw(const CGRect &bounds)
 
   // draw body
 
+  subR.size.width -= BODY_RIGHT_INSET;
+
   update_body_height(subR.size.width);
 
   if (body)
@@ -238,6 +241,8 @@ activity_list_item::update_body()
 void
 activity_list_item::update_body_height(CGFloat width)
 {
+  width = width - BODY_RIGHT_INSET;
+
   if (body_width != width)
     {
       CGFloat old_body_height = body_height;
@@ -256,7 +261,7 @@ activity_list_item::update_body_height(CGFloat width)
 	  CGRect bounds = [body boundingRectWithSize:size
 			   options:NSStringDrawingUsesLineFragmentOrigin
 			   attributes:body_attrs context:nil];
-	  body_height = ceil(bounds.size.height);
+	  body_height = bounds.size.height;
 	}
 
       body_width = width;
@@ -279,6 +284,7 @@ activity_list_item::update_height(CGFloat width)
       height += text_attrs_leading(stats_attrs) + STATS_Y_SPACING;
       height += body_height;
       height += Y_INSET;
+      height = ceil(height);
 
       valid_height = true;
     }

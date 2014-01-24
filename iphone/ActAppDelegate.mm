@@ -31,8 +31,6 @@
 
 #import "act-config.h"
 
-#import "DropboxSDK.h"
-
 @implementation ActAppDelegate
 
 @synthesize window = _window;
@@ -68,6 +66,8 @@ defaults_getenv(const char *key)
      variables. */
 
   act::config::set_getenv(defaults_getenv);
+
+  [DBRequest setNetworkRequestDelegate:self];
 
   _dropboxSession = [[DBSession alloc] initWithAppKey:@DROPBOX_KEY
 		     appSecret:@DROPBOX_SECRET root:kDBRootDropbox];
@@ -149,6 +149,20 @@ defaults_getenv(const char *key)
 - (void)applicationWillTerminate:(UIApplication *)app
 {
   [ActDatabaseManager shutdownSharedManager];
+}
+
+/* DBNetworkRequestDelegate methods. */
+
+- (void)networkRequestStarted
+{
+  if (_dropboxRequests++ == 0)
+    [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
+}
+
+- (void)networkRequestStopped
+{
+  if (--_dropboxRequests == 0)
+    [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
 }
 
 @end
