@@ -40,7 +40,7 @@ enum
   act::database::query _query;
   NSInteger _viewMode;
 
-  std::vector<act::database::item *> _items;
+  std::vector<act::database::item> _items;
   std::vector<act::activity_list_item_ref> _listItems;
 
   time_t _earliestTime;

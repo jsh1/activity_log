@@ -54,8 +54,8 @@
   ActDatabaseManager *db = [ActDatabaseManager sharedManager];
 
   [[NSNotificationCenter defaultCenter]
-   addObserver:self selector:@selector(metadataDatabaseDidChange:)
-   name:ActMetadataDatabaseDidChange object:db];
+   addObserver:self selector:@selector(metadataCacheDidChange:)
+   name:ActMetadataCacheDidChange object:db];
 
   [[NSNotificationCenter defaultCenter]
    addObserver:self selector:@selector(activityDatabaseDidChange:)
@@ -79,6 +79,7 @@
     = [ActActivitiesViewController instantiate];
 
   [activities setQuery:query];
+  [activities setTitle:@"All Activities"];
 
   UINavigationController *nav = (id)[self parentViewController];
 
@@ -123,9 +124,13 @@ reverse_compare(id a, id b, void *ctx)
     {
       NSMutableArray *array = [NSMutableArray array];
 
-      for (NSString *name in [dict objectForKey:@"contents"])
+      for (NSDictionary *sub_dict in dict[@"contents"])
 	{
-	  int value = [name intValue];
+	  if (![sub_dict[@"directory"] boolValue])
+	    continue;
+
+	  int value = [sub_dict[@"name"] intValue];
+
 	  if (value > 0)
 	    {
 	      if (_year != 0)
@@ -145,7 +150,7 @@ reverse_compare(id a, id b, void *ctx)
     }
 }
 
-- (void)metadataDatabaseDidChange:(NSNotification *)note
+- (void)metadataCacheDidChange:(NSNotification *)note
 {
   [self reloadData];
 }

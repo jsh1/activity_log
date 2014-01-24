@@ -37,7 +37,7 @@
 
 - (NSInteger)badgeValue
 {
-  std::vector<act::database::item *> items;
+  std::vector<act::database::item> items;
   [_controller database]->execute_query(_query, items);
 
   return (NSInteger)items.size();

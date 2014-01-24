@@ -305,11 +305,11 @@ output_group_table(T &g, const char *format)
 }
 
 template<typename T> void
-apply_group(T &g, const std::vector<database::item *> &items,
+apply_group(T &g, const std::vector<database::item> &items,
 	    const char *format, const char *table_format)
 {
   for (const auto &it : items)
-    g.insert(activity(it->storage()));
+    g.insert(activity(it.storage()));
   
   if (format != nullptr)
     output_group_format(g, format);
@@ -547,7 +547,7 @@ act_fold(arguments &args)
   database db;
   db.reload();
 
-  std::vector<database::item *> items;
+  std::vector<database::item> items;
   db.execute_query(query, items);
 
   std::vector<activity_accum::accum_field> fields

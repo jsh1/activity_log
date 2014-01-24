@@ -36,13 +36,11 @@
 namespace act {
 
 database::database()
-: _activity_dir(shared_config().activity_dir())
 {
 }
 
 database::database(const database &rhs)
-: _activity_dir(rhs._activity_dir),
-  _items(rhs._items)
+: _items(rhs._items)
 {
 }
 
@@ -55,9 +53,15 @@ database::clear()
 void
 database::reload()
 {
+  reload(shared_config().activity_dir());
+}
+
+void
+database::reload(const char *path)
+{
   _items.clear();
 
-  map_directory_files(_activity_dir.c_str(), reload_callback, this);
+  map_directory_files(path, reload_callback, this);
 
   std::sort(_items.begin(), _items.end(),
 	    [] (const item &a, const item &b) {
@@ -127,7 +131,7 @@ database::add_activity(const char *path)
 }
 
 void
-database::execute_query(const query &q, std::vector<item *> &result)
+database::execute_query(const query &q, std::vector<item> &result)
 {
   result.clear();
 
@@ -170,7 +174,7 @@ database::execute_query(const query &q, std::vector<item *> &result)
 	  continue;
 	}
 
-      result.push_back(&it);
+      result.push_back(it);
 
       if (--to_add == 0)
 	break;

@@ -35,16 +35,16 @@
 
 #define BODY_WRAP_COLUMN 72
 
+NSString *const ActMetadataCacheDidChange = @"ActMetadataCacheDidChange";
 NSString *const ActActivityDatabaseDidChange = @"ActActivityDatabaseDidChange";
-NSString *const ActMetadataDatabaseDidChange = @"ActMetadataDatabaseDidChange";
-NSString *const ActActivityListDidChange = @"ActActivityListDidChange";
-NSString *const ActSelectedActivityDidChange = @"ActSelectedActivityDidChange";
 NSString *const ActActivityDidChangeField = @"ActActivityDidChangeField";
 NSString *const ActActivityDidChangeBody = @"ActActivityDidChangeBody";
 
-@interface ActDatabaseManager ()
-- (void)selectedActivityDidChange;
-@end
+#if DEBUG && !defined(VERBOSE)
+# define VERBOSE 1
+#endif
+
+#define LOG(x) do {if (VERBOSE) NSLog x;} while (0)
 
 @implementation ActDatabaseManager
 
@@ -204,25 +204,25 @@ static ActDatabaseManager *_sharedManager;
   /* Dropbox is case-insensitive and case-mutilating. */
   path = [path lowercaseString];
 
-  NSDictionary *dict = [_metadataCache objectForKey:path];
+  NSDictionary *dict = _metadataCache[path];
 
   BOOL need_load = dict == nil;
 
   if (dict == nil)
-    dict = [_oldMetadataCache objectForKey:path];
+    dict = _oldMetadataCache[path];
 
   if (![dict isKindOfClass:[NSDictionary class]])
     dict = nil;
 
   if (need_load && ![_pendingMetadata containsObject:path])
     {
-      NSString *hash = [dict objectForKey:@"hash"];
+      NSString *hash = dict[@"hash"];
 
       [_dbClient loadMetadata:path withHash:hash];
 
       [_pendingMetadata addObject:path];
 
-      NSLog(@"loading metadata for %@ (hash = %@)", path, hash);
+      LOG((@"loading %@ metadata.", path));
     }
 
   return dict;
@@ -249,28 +249,21 @@ static ActDatabaseManager *_sharedManager;
 
 - (void)reset
 {
-  BOOL metadata_empty = [_metadataCache count] == 0;
+  if (_oldMetadataCache == nil)
+    _oldMetadataCache = [NSMutableDictionary dictionary];
+
+  [_oldMetadataCache addEntriesFromDictionary:_metadataCache];
+
+  [_metadataCache removeAllObjects];
+
   BOOL db_empty = _database->items().size() == 0;
 
-  if (!metadata_empty)
-    {
-      if (_oldMetadataCache == nil)
-	_oldMetadataCache = [NSMutableDictionary dictionary];
-      [_oldMetadataCache addEntriesFromDictionary:_metadataCache];
-      [_metadataCache removeAllObjects];
-    }
+  _database->clear();
 
-  if (!db_empty)
-    {
-      _database->clear();
-      [_addedActivityRevisions removeAllObjects];
-    }
+  [_addedActivityRevisions removeAllObjects];
 
-  if (!metadata_empty)
-    {
-      [[NSNotificationCenter defaultCenter]
-       postNotificationName:ActMetadataDatabaseDidChange object:self];
-    }
+  [[NSNotificationCenter defaultCenter]
+   postNotificationName:ActMetadataCacheDidChange object:self];
 
   if (!db_empty)
     {
@@ -282,32 +275,41 @@ static ActDatabaseManager *_sharedManager;
 static NSDictionary *
 metadata_dictionary(DBMetadata *meta)
 {
-  if ([meta isDeleted])
+  if ([meta isDeleted] || ![meta isDirectory])
     return nil;
 
   NSMutableDictionary *dict = [NSMutableDictionary dictionary];
 
   if (id hash = [meta hash])
-    [dict setObject:hash forKey:@"hash"];
+    dict[@"hash"] = hash;
 
   if (id rev = [meta rev])
-    [dict setObject:rev forKey:@"rev"];
+    dict[@"rev"] = rev;
 
-  if ([meta isDirectory])
+  NSMutableArray *contents = [NSMutableArray array];
+
+  for (DBMetadata *sub in [meta contents])
     {
-      NSMutableArray *contents = [NSMutableArray array];
+      if ([sub isDeleted])
+	continue;
 
-      for (DBMetadata *sub in [meta contents])
-	{
-	  if ([sub isDeleted])
-	    continue;
+      NSMutableDictionary *sub_dict = [NSMutableDictionary dictionary];
 
-	  [contents addObject:
-	   [[[sub path] lastPathComponent] lowercaseString]];
-	}
+      sub_dict[@"name"] = [[sub path] lastPathComponent];
 
-      [dict setObject:contents forKey:@"contents"];
+      if (id hash = [meta hash])
+	sub_dict[@"hash"] = hash;
+
+      if (id rev = [sub rev])
+	sub_dict[@"rev"] = rev;
+
+      if ([sub isDirectory])
+	sub_dict[@"directory"] = @YES;
+
+      [contents addObject:sub_dict];
     }
+
+  dict[@"contents"] = contents;
 
   return dict;
 }
@@ -320,39 +322,18 @@ metadata_dictionary(DBMetadata *meta)
 
   if (NSDictionary *dict = metadata_dictionary(meta))
     {
-      [_metadataCache setObject:dict forKey:path];
+      _metadataCache[path] = dict;
       [_oldMetadataCache removeObjectForKey:path];
 
-      if ([meta isDirectory])
-	{
-	  /* We also were handed the full metadata for all files in
-	     this directory, so may as well add it to the cache. */
-
-	  for (DBMetadata *sub in [meta contents])
-	    {
-	      if ([sub isDirectory])
-		continue;
-
-	      NSString *path = [[sub path] lowercaseString];
-
-	      if (NSDictionary *dict = metadata_dictionary(sub))
-		[_metadataCache setObject:dict forKey:path];
-	      else
-		[_metadataCache removeObjectForKey:path];
-
-	      [_oldMetadataCache removeObjectForKey:path];
-	    }
-
-	  /* FIXME: remove cache items under path that no longer exist? */
-	}
+      /* FIXME: remove cached sub-directories that no longer exist? */
     }
   else
-    [_metadataCache setObject:[NSNull null] forKey:path];
+    _metadataCache[path] = [NSNull null];
 
   _metadataCacheNeedsSynchronize = YES;
 
   [[NSNotificationCenter defaultCenter]
-   postNotificationName:ActMetadataDatabaseDidChange object:self];
+   postNotificationName:ActMetadataCacheDidChange object:self];
 }
 
 - (void)restClient:(DBRestClient *)client
@@ -360,11 +341,11 @@ metadata_dictionary(DBMetadata *meta)
 {
   path = [path lowercaseString];
 
-  NSLog(@"metadata %@ unchanged", path);
+  LOG((@"%@ metadata unchanged.", path));
 
-  if ([_metadataCache objectForKey:path] == nil)
+  if (_metadataCache[path] == nil)
     {
-      id obj = [_oldMetadataCache objectForKey:path];
+      id obj = _oldMetadataCache[path];
 
       if (obj == nil)
 	{
@@ -372,7 +353,7 @@ metadata_dictionary(DBMetadata *meta)
 	  _metadataCacheNeedsSynchronize = YES;
 	}
 
-      [_metadataCache setObject:obj forKey:path];
+      _metadataCache[path] = obj;
       [_oldMetadataCache removeObjectForKey:path];
     }
 
@@ -382,7 +363,7 @@ metadata_dictionary(DBMetadata *meta)
 - (void)restClient:(DBRestClient *)client
     loadMetadataFailedWithError:(NSError *)err
 {
-  NSLog(@"ERROR: load metadata %@", err);
+  LOG((@"ERROR: metadata %@.", [[err userInfo] objectForKey:@"path"]));
 }
 
 - (void)loadActivityFromPath:(NSString *)path revision:(NSString *)rev
@@ -397,16 +378,16 @@ metadata_dictionary(DBMetadata *meta)
   NSFileManager *fm = [NSFileManager defaultManager];
 
   if ([fm fileExistsAtPath:dest_path] && rev != nil
-      && [[_activityRevisions objectForKey:path] isEqualToString:rev])
+      && [_activityRevisions[path] isEqualToString:rev])
     {
       /* File is already cached and up to date. Add it to database
 	 if not already done so. */
 
-      NSString *added_rev = [_addedActivityRevisions objectForKey:path];
+      NSString *added_rev = _addedActivityRevisions[path];
 
       if (![added_rev isEqualToString:rev])
 	{
-	  [_addedActivityRevisions setObject:rev forKey:path];
+	  _addedActivityRevisions[path] = rev;
 
 	  if (_database->add_activity([dest_path UTF8String]))
 	    {
@@ -415,30 +396,22 @@ metadata_dictionary(DBMetadata *meta)
 	    }
 	}
     }
-  else if ([_pendingActivityRevisions objectForKey:path] == nil)
+  else if (_pendingActivityRevisions[path] == nil)
     {
       /* File needs to be brought into our cache. */
 
       [fm removeItemAtPath:dest_path error:nil];
+      [_addedActivityRevisions removeObjectForKey:path];
 
       NSString *parent = [dest_path stringByDeletingLastPathComponent];
       [fm createDirectoryAtPath:parent withIntermediateDirectories:YES
        attributes:nil error:nil];
 
-      NSLog(@"loading activity %@ from %@ (%@) to %@",
-	    path, src_path, rev, dest_path);
-
-      [_pendingActivityRevisions setObject:rev forKey:path];
-
-#if 0
-      /* FIXME: specifying the revision I got back from the loaded
-	 metadata gives me a "404 - trying to load a directory"
-	 error!? */
+      _pendingActivityRevisions[path] = rev;
 
       [_dbClient loadFile:src_path atRev:rev intoPath:dest_path];
-#else
-      [_dbClient loadFile:src_path intoPath:dest_path];
-#endif
+
+      LOG((@"loading activity %@.", path));
     }
 }
 
@@ -449,18 +422,18 @@ metadata_dictionary(DBMetadata *meta)
       NSString *path
         = [destPath stringByRemovingPathPrefix:_localActivityPath];
 
-      NSString *rev = [_pendingActivityRevisions objectForKey:path];
+      NSString *rev = _pendingActivityRevisions[path];
 
-      NSLog(@"loaded activity %@ to %@", path, destPath);
+      LOG((@"loaded activity %@.", path));
 
       if (rev != nil)
 	{
 	  [_pendingActivityRevisions removeObjectForKey:path];
 
-	  [_activityRevisions setObject:rev forKey:path];
+	  _activityRevisions[path] = rev;
 	  _activityRevisionsNeedsSynchronize = YES;
 
-	  [_addedActivityRevisions setObject:rev forKey:path];
+	  _addedActivityRevisions[path] = rev;
 
 	  if (_database->add_activity([destPath UTF8String]))
 	    {
@@ -469,7 +442,7 @@ metadata_dictionary(DBMetadata *meta)
 	    }
 	}
       else
-	NSLog(@"ERROR: unexpected activity file: %@ (rev = %@)", path, rev);
+	LOG((@"ERROR: unexpected activity %@.", path));
     }
 }
 
@@ -484,76 +457,11 @@ metadata_dictionary(DBMetadata *meta)
         = [destPath stringByRemovingPathPrefix:_localActivityPath];
 
       [_pendingActivityRevisions removeObjectForKey:path];
+
+      LOG((@"ERROR: activity %@.", [[err userInfo] objectForKey:@"path"]));
     }
-
-  NSLog(@"ERROR: load file %@", err);
-}
-
-- (void)showQueryResults:(const act::database::query &)query
-{
-  std::vector<act::database::item *> items;
-  [self database]->execute_query(query, items);
-
-  BOOL selection = NO;
-
-  _activityList.clear();
-
-  for (auto &it : items)
-    {
-      _activityList.push_back(*it);
-
-      if (it->storage() == _selectedActivityStorage)
-	selection = YES;
-    }
-
-  [[NSNotificationCenter defaultCenter]
-   postNotificationName:ActActivityListDidChange object:self];
-
-  if (!selection)
-    [self setSelectedActivityStorage:nullptr];
-}
-
-- (const std::vector<act::database::item> &)activityList
-{
-  return _activityList;
-}
-
-- (void)setActivityList:(const std::vector<act::database::item> &)vec
-{
-  _activityList = vec;
-
-  [[NSNotificationCenter defaultCenter]
-   postNotificationName:ActActivityListDidChange object:self];
-}
-
-- (act::activity_storage_ref)selectedActivityStorage
-{
-  return _selectedActivityStorage;
-}
-
-- (void)setSelectedActivityStorage:(act::activity_storage_ref)storage
-{
-  if (_selectedActivityStorage != storage)
-    {
-      _selectedActivityStorage = storage;
-      _selectedActivity.reset();
-
-      [self selectedActivityDidChange];
-    }
-}
-
-- (act::activity *)selectedActivity
-{
-  if (_selectedActivity == nullptr && _selectedActivityStorage != nullptr)
-    _selectedActivity.reset(new act::activity(_selectedActivityStorage));
-
-  return _selectedActivity.get();
-}
-
-- (void)selectedActivityDidChange
-{
-  [[NSNotificationCenter defaultCenter]
-   postNotificationName:ActSelectedActivityDidChange object:self];
+  else
+    LOG((@"ERROR: file %@.", [[err userInfo] objectForKey:@"path"]));
 }
 
 - (void)activity:(const act::activity_storage_ref)a
@@ -575,49 +483,9 @@ metadata_dictionary(DBMetadata *meta)
    userInfo:@{@"activity": [NSValue valueWithPointer:&a]}];
 }
 
-- (NSString *)bodyString
-{
-  if (const act::activity *a = [self selectedActivity])
-    return [self bodyStringOfActivity:*a];
-  else
-    return @"";
-}
+@end
 
-- (void)setBodyString:(NSString *)str
-{
-  if (act::activity *a = [self selectedActivity])
-    [self setBodyString:str ofActivity:*a];
-}
-
-- (NSDate *)dateField
-{
-  if (const act::activity *a = [self selectedActivity])
-    return [NSDate dateWithTimeIntervalSince1970:a->date()];
-  else
-    return nil;
-}
-
-- (void)setDateField:(NSDate *)date
-{
-  NSString *value = nil;
-
-  if (date != nil)
-    {
-      std::string str;
-      act::format_date_time(str, (time_t) [date timeIntervalSince1970]);
-      value = [NSString stringWithUTF8String:str.c_str()];
-    }
-
-  [self setString:value forField:@"Date"];
-}
-
-- (NSString *)stringForField:(NSString *)name
-{
-  if (const act::activity *a = [self selectedActivity])
-    return [self stringForField:name ofActivity:*a];
-  else
-    return nil;
-}
+@implementation ActDatabaseManager (ActivityFields)
 
 - (NSString *)stringForField:(NSString *)name
     ofActivity:(const act::activity &)a
@@ -655,23 +523,9 @@ metadata_dictionary(DBMetadata *meta)
   return [NSString stringWithUTF8String:ret.c_str()];
 }
 
-- (BOOL)isFieldReadOnly:(NSString *)name
-{
-  if (const act::activity *a = [self selectedActivity])
-    return [self isFieldReadOnly:name ofActivity:*a];
-  else
-    return YES;
-}
-
 - (BOOL)isFieldReadOnly:(NSString *)name ofActivity:(const act::activity &)a
 {
   return a.storage()->field_read_only_p([name UTF8String]);
-}
-
-- (void)setString:(NSString *)str forField:(NSString *)name
-{
-  if (act::activity *a = [self selectedActivity])
-    [self setString:str forField:name ofActivity:*a];
 }
 
 - (void)setString:(NSString *)str forField:(NSString *)name
@@ -700,21 +554,9 @@ metadata_dictionary(DBMetadata *meta)
   [self activity:a.storage() didChangeField:name];
 }
 
-- (void)deleteField:(NSString *)name
-{
-  if (act::activity *a = [self selectedActivity])
-    [self deleteField:name ofActivity:*a];
-}
-
 - (void)deleteField:(NSString *)name ofActivity:(act::activity &)a
 {
   [self setString:nil forField:name ofActivity:a];
-}
-
-- (void)renameField:(NSString *)oldName to:(NSString *)newName
-{
-  if (act::activity *a = [self selectedActivity])
-    [self renameField:oldName to:newName ofActivity:*a];
 }
 
 - (void)renameField:(NSString *)oldName to:(NSString *)newName

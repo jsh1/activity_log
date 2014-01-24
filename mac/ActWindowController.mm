@@ -49,6 +49,7 @@
 #import <set>
 
 #define BODY_WRAP_COLUMN 72
+#define SYNC_DELAY_NS (10LL*NSEC_PER_SEC)
 
 enum ActSourceListSections
 {
@@ -561,19 +562,17 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
 
 - (void)showQueryResults:(const act::database::query &)query
 {
-  std::vector<act::database::item *> items;
-  [self database]->execute_query(query, items);
+  _activityList.clear();
+  [self database]->execute_query(query, _activityList);
 
   BOOL selection = NO;
-
-  _activityList.clear();
-
-  for (auto &it : items)
+  for (auto &it : _activityList)
     {
-      _activityList.push_back(*it);
-
-      if (it->storage() == _selectedActivityStorage)
-	selection = YES;
+      if (it.storage() == _selectedActivityStorage)
+	{
+	  selection = YES;
+	  break;
+	}
     }
 
   [[NSNotificationCenter defaultCenter]
@@ -689,7 +688,7 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
     {
       _needsSynchronize = YES;
 
-      dispatch_time_t t = dispatch_time(DISPATCH_TIME_NOW, 2LL * NSEC_PER_SEC);
+      dispatch_time_t t = dispatch_time(DISPATCH_TIME_NOW, SYNC_DELAY_NS);
       dispatch_after(t, dispatch_get_main_queue(), ^{
 	[self synchronizeIfNeeded];
       });

@@ -58,8 +58,8 @@
   ActDatabaseManager *db = [ActDatabaseManager sharedManager];
 
   [[NSNotificationCenter defaultCenter]
-   addObserver:self selector:@selector(metadataDatabaseDidChange:)
-   name:ActMetadataDatabaseDidChange object:db];
+   addObserver:self selector:@selector(metadataCacheDidChange:)
+   name:ActMetadataCacheDidChange object:db];
 
   [[NSNotificationCenter defaultCenter]
    addObserver:self selector:@selector(activityDatabaseDidChange:)
@@ -151,14 +151,22 @@
 
 	  /* Sort files into reverse order, as that's how we display. */
 
-	  NSArray *contents = [dict objectForKey:@"contents"];
+	  NSArray *contents = dict[@"contents"];
 	  contents = [contents sortedArrayUsingComparator:^
-		      NSComparisonResult (id a, id b) {return [b compare:a];}];
+		      NSComparisonResult (id a, id b)
+		        {
+			  return [[b objectForKey:@"name"]
+				  compare:[a objectForKey:@"name"]];
+			}];
 
-	  for (NSString *name in contents)
+	  for (NSDictionary *sub_dict in contents)
 	    {
-	      NSString *rev = [dict objectForKey:@"rev"];
+	      if ([sub_dict[@"directory"] boolValue])
+		continue;
+
+	      NSString *name = sub_dict[@"name"];
 	      NSString *path = [dir stringByAppendingPathComponent:name];
+	      NSString *rev = sub_dict[@"rev"];
 
 	      [db loadActivityFromPath:path revision:rev];
 	    }
@@ -173,7 +181,7 @@
 
   /* Reload the query results and update the table view. */
 
-  std::vector<act::database::item *> items;
+  std::vector<act::database::item> items;
   [db database]->execute_query(_query, items);
 
   if (_items != items)
@@ -211,13 +219,13 @@
     _listItems.resize(_items.size());
 
   if (!_listItems[idx]
-      || _listItems[idx]->activity->storage() != _items[idx]->storage())
-    _listItems[idx].reset(new act::activity_list_item(_items[idx]->storage()));
+      || _listItems[idx]->activity->storage() != _items[idx].storage())
+    _listItems[idx].reset(new act::activity_list_item(_items[idx].storage()));
 
   return _listItems[idx];
 }
 
-- (void)metadataDatabaseDidChange:(NSNotification *)note
+- (void)metadataCacheDidChange:(NSNotification *)note
 {
   if (_ignoreNotifications == 0)
     [self reloadData];

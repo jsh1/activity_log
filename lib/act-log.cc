@@ -278,22 +278,22 @@ act_log(arguments &args, const char *format)
   database db;
   db.reload();
 
-  std::vector<database::item *> items;
+  std::vector<database::item> items;
   db.execute_query(query, items);
 
   for (const auto &it : items)
     {
       if (print_path)
-	printf("%s\n", it->storage()->path());
+	printf("%s\n", it.storage()->path());
 
       if (print_raw_contents)
 	{
-	  cat_file(it->storage()->path());
+	  cat_file(it.storage()->path());
 	  fputc('\n', stdout);
 	}
 
       if (format != nullptr)
-	activity(it->storage()).printf(format);
+	activity(it.storage()).printf(format);
     }
 
   return 0;

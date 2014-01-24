@@ -40,12 +40,13 @@ public:
   database();
   database(const database &rhs);
 
-  const std::string &activity_dir() const;
-  void set_activity_dir(const std::string &s);
-
   void clear();
+
   void reload();
+  void reload(const char *path);
+
   bool add_activity(const char *path);
+
   void synchronize() const;
 
   void complete_field_name(const char *prefix,
@@ -227,28 +228,15 @@ public:
       const const_query_term_ref &term() const {return _term;}
     };
 
-  void execute_query(const query &q, std::vector<item *> &result);
+  void execute_query(const query &q, std::vector<item> &result);
 
 private:
-  std::string _activity_dir;
   std::vector<item> _items;
 
   static void reload_callback(const char *path, void *ctx);
 };
 
 // implementation details
-
-inline const std::string &
-database::activity_dir() const
-{
-  return _activity_dir;
-}
-
-inline void
-database::set_activity_dir(const std::string &s)
-{
-  _activity_dir = s;
-}
 
 inline
 database::item::item()
@@ -265,13 +253,13 @@ database::items() const
 inline bool
 database::item::operator==(const item &rhs) const
 {
-  return _date == rhs._date;
+  return _date == rhs._date && _storage == rhs._storage;
 }
 
 inline bool
 database::item::operator!=(const item &rhs) const
 {
-  return _date != rhs._date;
+  return _date != rhs._date || _storage != rhs._storage;
 }
 
 } // namespace act

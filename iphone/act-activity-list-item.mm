@@ -32,7 +32,7 @@
 #define X_INSET_LEFT 16
 #define X_INSET_RIGHT 5
 #define Y_INSET 5
-#define TIME_WIDTH 60
+#define TIME_WIDTH 74
 #define STATS_Y_SPACING 2
 
 namespace act {
@@ -73,13 +73,13 @@ activity_list_item::initialize()
   };
 
   stats_attrs = @{
-    NSFontAttributeName: [UIFont boldSystemFontOfSize:[UIFont systemFontSize]],
+    NSFontAttributeName: [UIFont boldSystemFontOfSize:[UIFont systemFontSize]+2],
     NSForegroundColorAttributeName: redColor
   };
 
   time_formatter = [[NSDateFormatter alloc] init];
   [time_formatter setDateFormat:
-   [NSDateFormatter dateFormatFromTemplate:@"ha" options:0 locale:nil]];
+   [NSDateFormatter dateFormatFromTemplate:@"Eha" options:0 locale:nil]];
 
   initialized = true;
 }
@@ -104,10 +104,10 @@ activity_list_item::activity_list_item(const activity_list_item &rhs)
 
 namespace {
 
-CGFloat
+inline CGFloat
 text_attrs_leading(NSDictionary *attrs)
 {
-  return [[attrs objectForKey:NSFontAttributeName] leading];
+  return [attrs[NSFontAttributeName] leading];
 }
 
 } // anonymous namespace

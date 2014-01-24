@@ -33,7 +33,6 @@
   static UIColor *color;
 
   if (color == nil)
-//    color = [UIColor colorWithWhite:.25 alpha:1];
     color = [UIColor colorWithWhite:0 alpha:1];
 
   return color;
@@ -59,7 +58,7 @@
   static UIColor *color;
 
   if (color == nil)
-    color = [UIColor colorWithRed:197/255. green:56/255. blue:51/255. alpha:1];
+    color = [UIColor colorWithRed:1 green:60/255. blue:47/255. alpha:1];
 
   return color;
 }
@@ -69,7 +68,7 @@
   static UIColor *color;
 
   if (color == nil)
-    color = [UIColor colorWithRed:197/255. green:121/255. blue:118/255. alpha:1];
+    color = [UIColor colorWithRed:1 green:130/255. blue:122/255. alpha:1];
 
   return color;
 }
@@ -122,7 +121,7 @@
 
       for (NSString *name in strings)
 	{
-	  NSString *desc = [strings objectForKey:name];
+	  NSString *desc = strings[name];
 	  NSArray *strings = [desc componentsSeparatedByCharactersInSet:
 			      [NSCharacterSet whitespaceCharacterSet]];
 	  if ([strings count] == 3)
@@ -131,7 +130,7 @@
 	      CGFloat green = [[strings objectAtIndex:1] doubleValue];
 	      CGFloat blue = [[strings objectAtIndex:2] doubleValue];
 	      UIColor *c = [UIColor colorWithRed:red green:green blue:blue alpha:1];
-	      [dict setObject:c forKey:name];
+	      dict[name] = c;
 	    }
 	}
 
@@ -150,8 +149,7 @@
   if (type2 != nullptr)
     type.append(*type2);
 
-  UIColor *c = [colors objectForKey:
-		[NSString stringWithUTF8String:type.c_str()]];
+  UIColor *c = colors[[NSString stringWithUTF8String:type.c_str()]];
   if (c == nil)
     c = [UIColor colorWithWhite:.5 alpha:1];
 

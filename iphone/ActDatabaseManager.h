@@ -27,10 +27,8 @@
 #import "DBRestClient.h"
 #import <memory>
 
+extern NSString *const ActMetadataCacheDidChange;
 extern NSString *const ActActivityDatabaseDidChange;
-extern NSString *const ActMetadataDatabaseDidChange;
-extern NSString *const ActActivityListDidChange;
-extern NSString *const ActSelectedActivityDidChange;
 extern NSString *const ActActivityDidChangeField;
 extern NSString *const ActActivityDidChangeBody;
 
@@ -56,10 +54,6 @@ extern NSString *const ActActivityDidChangeBody;
 
   NSString *_activityRevisionsPath;
   BOOL _activityRevisionsNeedsSynchronize;
-
-  std::vector<act::database::item> _activityList;
-  act::activity_storage_ref _selectedActivityStorage;
-  std::unique_ptr<act::activity> _selectedActivity;
 }
 
 + (ActDatabaseManager *)sharedManager;
@@ -75,7 +69,7 @@ extern NSString *const ActActivityDidChangeBody;
 - (void)invalidate;
 
 /* These return nil if loading asynchronously, in which case will post
-   ActMetadataDatabaseDidChange when the metadata-read finishes. */
+   ActMetadataCacheDidChange when the metadata-read finishes. */
 
 - (NSDictionary *)metadataForRemotePath:(NSString *)path;
 - (NSDictionary *)activityMetadataForPath:(NSString *)path;
@@ -90,38 +84,29 @@ extern NSString *const ActActivityDidChangeBody;
 
 @property(nonatomic, readonly) act::database *database;
 
-- (void)showQueryResults:(const act::database::query &)query;
-
-@property(nonatomic) const std::vector<act::database::item> &activityList;
-@property(nonatomic) act::activity_storage_ref selectedActivityStorage;
-@property(nonatomic, readonly) act::activity *selectedActivity;
+- (void)activityDidChangeBody:(const act::activity_storage_ref)storage;
 
 - (void)activity:(const act::activity_storage_ref)storage
     didChangeField:(NSString *)name;
-- (void)activityDidChangeBody:(const act::activity_storage_ref)storage;
 
-// these operate on the selected activity
+@end
 
-- (NSString *)bodyString;
-- (void)setBodyString:(NSString *)str;
-- (NSDate *)dateField;
-- (void)setDateField:(NSDate *)date;
-- (NSString *)stringForField:(NSString *)name;
-- (BOOL)isFieldReadOnly:(NSString *)name;
-- (void)setString:(NSString *)str forField:(NSString *)name;
-- (void)deleteField:(NSString *)name;
-- (void)renameField:(NSString *)oldName to:(NSString *)newName;
-
-// these operate on the specified activity
+@interface ActDatabaseManager (ActivityFields)
 
 - (NSString *)bodyStringOfActivity:(const act::activity &)a;
+
 - (void)setBodyString:(NSString *)str ofActivity:(act::activity &)a;
+
 - (NSString *)stringForField:(NSString *)name
     ofActivity:(const act::activity &)a;
+
 - (BOOL)isFieldReadOnly:(NSString *)name ofActivity:(const act::activity &)a;
+
 - (void)setString:(NSString *)str forField:(NSString *)name
     ofActivity:(act::activity &)a;
+
 - (void)deleteField:(NSString *)name ofActivity:(act::activity &)a;
+
 - (void)renameField:(NSString *)oldName to:(NSString *)newName
     ofActivity:(act::activity &)a;
 

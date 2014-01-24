@@ -317,7 +317,7 @@ copyFileToGPSDirectory(std::string &gps_path)
   act::database::query q;
   q.set_term(term);
 
-  std::vector<act::database::item *> results;
+  std::vector<act::database::item> results;
   [[_controller controller] database]->execute_query(q, results);
 
   _exists = results.size() != 0;

@@ -117,11 +117,9 @@ defaults_getenv(const char *key)
     {
       if ([_dropboxSession isLinked])
 	{
-	  /* This should make view controllers update? */
+	  /* This should make view controllers update. */
 
-	  [[NSNotificationCenter defaultCenter]
-	   postNotificationName:ActMetadataDatabaseDidChange
-	   object:[ActDatabaseManager sharedManager]];
+	  [[ActDatabaseManager sharedManager] reset];
 	}
 
       return YES;
