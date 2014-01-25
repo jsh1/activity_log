@@ -79,13 +79,13 @@ defaults_getenv(const char *key)
   ActQueryListViewController *controller
     = [ActQueryListViewController instantiate];
 
-  [controller setTitle:@"Activities"];
+  controller.title = @"Activities";
 
   [_navigationController pushViewController:controller animated:NO];
 
   [controller pushAllActivitiesAnimated:NO];
 
-  if (![self isDropboxLinked])
+  if (!self.dropboxLinked)
     [controller configAction:self];
 
   return YES;

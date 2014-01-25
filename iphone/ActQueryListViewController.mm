@@ -78,10 +78,10 @@
   ActActivitiesViewController *activities
     = [ActActivitiesViewController instantiate];
 
-  [activities setQuery:query];
-  [activities setTitle:@"All Activities"];
+  activities.query = query;
+  activities.title = @"All Activities";
 
-  UINavigationController *nav = (id)[self parentViewController];
+  UINavigationController *nav = (id)self.parentViewController;
 
   [nav pushViewController:activities animated:flag];
 }
@@ -145,7 +145,7 @@ reverse_compare(id a, id b, void *ctx)
 	{
 	  _rowData = array;
 
-	  [[self tableView] reloadData];
+	  [self.tableView reloadData];
 	}
     }
 }
@@ -166,7 +166,7 @@ reverse_compare(id a, id b, void *ctx)
     = [[UINavigationController alloc]
        initWithRootViewController:[ActSettingsViewController instantiate]];
 
-  UINavigationController *main_nav = (id)[self parentViewController];
+  UINavigationController *main_nav = (id)self.parentViewController;
 
   [main_nav presentViewController:settings_nav animated:YES completion:nil];
 }
@@ -200,12 +200,12 @@ reverse_compare(id a, id b, void *ctx)
     }
 
   if (path.section == 0)
-    [[cell textLabel] setText:@"All Activities"];
+    cell.textLabel.text = @"All Activities";
   else
     {
       NSNumber *value = _rowData[path.row];
       if (_year == 0)
-	[[cell textLabel] setText:[value stringValue]];
+	cell.textLabel.text = [value stringValue];
       else
 	{
 	  static NSDateFormatter *formatter;
@@ -213,7 +213,7 @@ reverse_compare(id a, id b, void *ctx)
 	    formatter = [[NSDateFormatter alloc] init];
 	  NSArray *names = [formatter standaloneMonthSymbols];
 	  int month = [value intValue];
-	  [[cell textLabel] setText:names[month]];
+	  cell.textLabel.text = names[month];
 	}
     }
 
@@ -255,7 +255,7 @@ reverse_compare(id a, id b, void *ctx)
       ActActivitiesViewController *activities
 	= [ActActivitiesViewController instantiate];
 
-      [activities setQuery:query];
+      activities.query = query;
 
       next_controller = activities;
     }
@@ -264,15 +264,14 @@ reverse_compare(id a, id b, void *ctx)
       ActQueryListViewController *query
 	= [ActQueryListViewController instantiate];
 
-      [query setYear:[_rowData[path.row] intValue]];
+      query.year = [_rowData[path.row] intValue];
 
       next_controller = query;
     }
 
-  [next_controller setTitle:
-   [[[tv cellForRowAtIndexPath:path] textLabel] text]];
+  next_controller.title = [tv cellForRowAtIndexPath:path].textLabel.text;
 
-  UINavigationController *nav = (id)[self parentViewController];
+  UINavigationController *nav = (id)self.parentViewController;
 
   [nav pushViewController:next_controller animated:YES];
 

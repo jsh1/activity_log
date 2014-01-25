@@ -31,8 +31,10 @@
 
 #define X_INSET_LEFT 16
 #define X_INSET_RIGHT 5
-#define Y_INSET 5
+#define Y_INSET_TOP 5
+#define Y_INSET_BOTTOM 16
 #define BODY_RIGHT_INSET 11
+#define BODY_MAX_CHARS 200
 #define TIME_WIDTH 74
 #define STATS_Y_SPACING 2
 
@@ -49,8 +51,8 @@ void
 activity_list_item::initialize()
 {
   UIColor *greyColor = [ActColor controlTextColor];
-  UIColor *redColor = [ActColor controlDetailTextColor];
-  UIColor *blueColor = [ActColor colorWithRed:0 green:0.478431 blue:1 alpha:1];
+  UIColor *redColor = [ActColor redTextColor];
+  UIColor *blueColor = [ActColor blueTextColor];
 
   NSMutableParagraphStyle *rightStyle
     = [[NSParagraphStyle defaultParagraphStyle] mutableCopy];
@@ -108,7 +110,7 @@ namespace {
 inline CGFloat
 text_attrs_leading(NSDictionary *attrs)
 {
-  return [attrs[NSFontAttributeName] leading];
+  return ((UIFont *)attrs[NSFontAttributeName]).leading;
 }
 
 } // anonymous namespace
@@ -121,9 +123,9 @@ activity_list_item::draw(const CGRect &bounds)
 
   CGRect itemR = bounds;
   itemR.origin.x += X_INSET_LEFT;
-  itemR.origin.y += Y_INSET;
+  itemR.origin.y += Y_INSET_TOP;
   itemR.size.width -= X_INSET_LEFT + X_INSET_RIGHT;
-  itemR.size.height -= Y_INSET*2;
+  itemR.size.height -= Y_INSET_TOP + Y_INSET_BOTTOM;
 
   CGRect subR = itemR;
 
@@ -203,26 +205,44 @@ activity_list_item::draw(const CGRect &bounds)
 void
 activity_list_item::update_body()
 {
+  static NSString *ellipsis;
+  if (ellipsis == nil)
+    {
+      unichar c = 0x2026;
+      ellipsis = [NSString stringWithCharacters:&c length:1];
+    }
+
   if (!body)
     {
       const std::string &s = activity->body();
 
       if (s.size() != 0)
 	{
-	  NSMutableString *str = [[NSMutableString alloc] init];
+	  NSMutableString *str = [NSMutableString string];
 
 	  const char *ptr = s.c_str();
 	  bool finished = false;
 
 	  while (const char *eol = strchr(ptr, '\n'))
 	    {
+	      /* FIXME: this sucks, do proper n-line truncation. */
+
+	      if ([str length] + eol-ptr >= BODY_MAX_CHARS)
+		{
+		  [str appendString:ellipsis];
+		  finished = true;
+		  break;
+		}
+
 	      NSString *tem = [[NSString alloc] initWithBytes:ptr
 			       length:eol-ptr encoding:NSUTF8StringEncoding];
 	      [str appendString:tem];
 	      ptr = eol + 1;
+
 	      if (eol[1] == '\n')
 		{
-		  [str appendString:@" ..."];
+		  [str appendString:@" "];
+		  [str appendString:ellipsis];
 		  finished = true;
 		  break;
 		}
@@ -256,7 +276,7 @@ activity_list_item::update_body_height(CGFloat width)
 	  if (!initialized)
 	    initialize();
 
-	  CGSize size = CGSizeMake(width, 100000);
+	  CGSize size = CGSizeMake(width, 10000);
 
 	  CGRect bounds = [body boundingRectWithSize:size
 			   options:NSStringDrawingUsesLineFragmentOrigin
@@ -279,11 +299,11 @@ activity_list_item::update_height(CGFloat width)
   if (!valid_height)
     {
       height = 0;
-      height += Y_INSET;
+      height += Y_INSET_TOP;
       height += text_attrs_leading(title_attrs);
       height += text_attrs_leading(stats_attrs) + STATS_Y_SPACING;
       height += body_height;
-      height += Y_INSET;
+      height += Y_INSET_BOTTOM;
       height = ceil(height);
 
       valid_height = true;

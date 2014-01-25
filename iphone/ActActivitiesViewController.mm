@@ -101,7 +101,7 @@
     {
       _viewMode = mode;
 
-      [[self tableView] reloadData];
+      [self.tableView reloadData];
       _needReloadView = NO;
     }
 }
@@ -154,11 +154,9 @@
 
 	  NSArray *contents = dict[@"contents"];
 	  contents = [contents sortedArrayUsingComparator:^
-		      NSComparisonResult (id a, id b)
-		        {
-			  return [[b objectForKey:@"name"]
-				  compare:[a objectForKey:@"name"]];
-			}];
+		      NSComparisonResult (id a, id b) {
+			return [b[@"name"] compare:a[@"name"]];
+		      }];
 
 	  for (NSDictionary *sub_dict in contents)
 	    {
@@ -183,7 +181,7 @@
   /* Reload the query results and update the table view. */
 
   std::vector<act::database::item> items;
-  [db database]->execute_query(_query, items);
+  db.database->execute_query(_query, items);
 
   if (_items != items)
     {
@@ -194,7 +192,7 @@
 
   if (_needReloadView)
     {
-      [[self tableView] reloadData];
+      [self.tableView reloadData];
       _needReloadView = NO;
     }
 }
@@ -293,9 +291,9 @@
 	  ActActivityListItemView *view
 	    = [[ActActivityListItemView alloc] init];
 
-	  [view setFrame:[cell.contentView bounds]];
-	  [view setAutoresizingMask:
-	   UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight];
+	  view.frame = cell.contentView.bounds;
+	  view.autoresizingMask = (UIViewAutoresizingFlexibleWidth
+				   | UIViewAutoresizingFlexibleHeight);
 	  [cell.contentView addSubview:view];
 	}
       else if ([ident isEqualToString:@"weekCell"])
@@ -303,28 +301,29 @@
 	  /* FIXME: implement this. */
 	  cell = [[UITableViewCell alloc] initWithStyle:
 		  UITableViewCellStyleDefault reuseIdentifier:ident];
-	  [[cell textLabel] setText:@"Week Cell"];
+	  cell.textLabel.text = @"Week Cell";
 	}
       else if ([ident isEqualToString:@"loadMoreCell"])
 	{
 	  cell = [[ActActivityLoadMoreCell alloc] initWithStyle:
 		  UITableViewCellStyleDefault reuseIdentifier:ident];
-	  [[cell textLabel] setText:@"Load More Activities"];
+	  cell.textLabel.text = @"Load More Activities";
 	}
     }
 
   if ([ident isEqualToString:@"activityCell"])
     {
       ActActivityListItemView *view
-        = (id)[[cell.contentView subviews] firstObject];
-      [view setListItem:[self listItemForIndex:path.row]];
+        = (id)[cell.contentView.subviews firstObject];
+      view.listItem = [self listItemForIndex:path.row];
     }
   else if ([ident isEqualToString:@"weekCell"])
     {
     }
   else if ([ident isEqualToString:@"loadMoreCell"])
     {
-      [(ActActivityLoadMoreCell *)cell setEarliestTime:_earliestTime];
+      ActActivityLoadMoreCell *mc = (id)cell;
+      mc.earliestTime = _earliestTime;
     }
 
   return cell;
@@ -338,19 +337,19 @@
   if (path.section == 0 && _viewMode == ActActivitiesViewList)
     {
       act::activity_list_item_ref item = [self listItemForIndex:path.row];
-      CGFloat width = [tv bounds].size.width;
+      CGFloat width = tv.bounds.size.width;
       item->update_height(width);
       return item->height;
     }
   else
-    return [tv rowHeight];
+    return tv.rowHeight;
 }
 
 - (void)tableView:(UITableView *)tv didSelectRowAtIndexPath:(NSIndexPath *)path
 {
   UITableViewCell *cell = [tv cellForRowAtIndexPath:path];
 
-  NSString *ident = [cell reuseIdentifier];
+  NSString *ident = cell.reuseIdentifier;
 
   if ([ident isEqualToString:@"activityCell"])
     {
@@ -361,7 +360,7 @@
 
       controller.activityStorage = item->activity->storage();
 
-      UINavigationController *nav = (id)[self parentViewController];
+      UINavigationController *nav = (id)self.parentViewController;
 
       [nav pushViewController:controller animated:YES];
     }
@@ -371,7 +370,8 @@
     }
   else if ([ident isEqualToString:@"loadMoreCell"])
     {
-      [self loadMoreData:[(ActActivityLoadMoreCell *)cell earliestTime]];
+      ActActivityLoadMoreCell *mc = (id)cell;
+      [self loadMoreData:mc.earliestTime];
     }
 
   [tv deselectRowAtIndexPath:path animated:NO];

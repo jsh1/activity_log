@@ -53,7 +53,7 @@
   return !disabled ? [self controlTextColor] : [self disabledControlTextColor];
 }
 
-+ (UIColor *)controlDetailTextColor
++ (UIColor *)redTextColor
 {
   static UIColor *color;
 
@@ -63,19 +63,14 @@
   return color;
 }
 
-+ (UIColor *)disabledControlDetailTextColor
++ (UIColor *)blueTextColor
 {
   static UIColor *color;
 
   if (color == nil)
-    color = [UIColor colorWithRed:1 green:130/255. blue:122/255. alpha:1];
+    color = [UIColor colorWithRed:8/255. green:107/255. blue:1 alpha:1];
 
   return color;
-}
-
-+ (UIColor *)controlDetailTextColor:(BOOL)disabled
-{
-  return !disabled ? [self controlDetailTextColor] : [self disabledControlDetailTextColor];
 }
 
 + (UIColor *)controlBackgroundColor

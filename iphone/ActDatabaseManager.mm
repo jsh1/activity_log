@@ -55,9 +55,9 @@ static ActDatabaseManager *_sharedManager;
   if (_sharedManager == nil)
     {
       ActAppDelegate *delegate
-        = (ActAppDelegate *)[[UIApplication sharedApplication] delegate];
+        = (ActAppDelegate *)[UIApplication sharedApplication].delegate;
 
-      if (![delegate isDropboxLinked])
+      if (!delegate.dropboxLinked)
 	return nil;
 
       _sharedManager = [[self alloc] init];
@@ -79,9 +79,9 @@ static ActDatabaseManager *_sharedManager;
     return nil;
 
   ActAppDelegate *delegate
-    = (ActAppDelegate *)[[UIApplication sharedApplication] delegate];
+    = (ActAppDelegate *)[UIApplication sharedApplication].delegate;
 
-  _dbClient = [[DBRestClient alloc] initWithSession:[delegate dropboxSession]];
+  _dbClient = [[DBRestClient alloc] initWithSession:delegate.dropboxSession];
   if (_dbClient == nil)
     return nil;
 
@@ -277,35 +277,35 @@ static ActDatabaseManager *_sharedManager;
 static NSDictionary *
 metadata_dictionary(DBMetadata *meta)
 {
-  if ([meta isDeleted] || ![meta isDirectory])
+  if (meta.isDeleted || !meta.isDirectory)
     return nil;
 
   NSMutableDictionary *dict = [NSMutableDictionary dictionary];
 
-  if (id hash = [meta hash])
+  if (id hash = meta.hash)
     dict[@"hash"] = hash;
 
-  if (id rev = [meta rev])
+  if (id rev = meta.rev)
     dict[@"rev"] = rev;
 
   NSMutableArray *contents = [NSMutableArray array];
 
-  for (DBMetadata *sub in [meta contents])
+  for (DBMetadata *sub in meta.contents)
     {
-      if ([sub isDeleted])
+      if (sub.isDeleted)
 	continue;
 
       NSMutableDictionary *sub_dict = [NSMutableDictionary dictionary];
 
-      sub_dict[@"name"] = [[sub path] lastPathComponent];
+      sub_dict[@"name"] = [sub.path lastPathComponent];
 
       /* Note: not including hash field, we only use it to avoid
 	 receiving directory metadata redundantly. */
 
-      if (id rev = [sub rev])
+      if (id rev = sub.rev)
 	sub_dict[@"rev"] = rev;
 
-      if ([sub isDirectory])
+      if (sub.isDirectory)
 	sub_dict[@"directory"] = @YES;
 
       [contents addObject:sub_dict];
@@ -318,7 +318,7 @@ metadata_dictionary(DBMetadata *meta)
 
 - (void)restClient:(DBRestClient *)client loadedMetadata:(DBMetadata *)meta
 {
-  NSString *path = [[meta path] lowercaseString];
+  NSString *path = [meta.path lowercaseString];
 
   [_pendingMetadata removeObject:path];
 

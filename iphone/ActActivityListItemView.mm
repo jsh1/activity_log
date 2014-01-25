@@ -42,7 +42,7 @@
 
 - (void)drawRect:(CGRect)clip
 {
-  _listItem->draw([self bounds]);
+  _listItem->draw(self.bounds);
 }
 
 - (BOOL)isOpaque

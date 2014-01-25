@@ -41,22 +41,21 @@
 
 - (void)viewDidLoad
 {
-  NSLog(@"loaded %@", self);
 }
 
 - (void)viewWillAppear:(BOOL)animated
 {
-  ActAppDelegate *delegate = (id)[[UIApplication sharedApplication] delegate];
+  ActAppDelegate *delegate = (id)[UIApplication sharedApplication].delegate;
 
-  [_linkedSwitch setOn:[delegate isDropboxLinked]];
+  _linkedSwitch.on = delegate.dropboxLinked;
 }
 
 - (IBAction)linkAction:(id)sender
 {
-  ActAppDelegate *delegate = (id)[[UIApplication sharedApplication] delegate];
+  ActAppDelegate *delegate = (id)[UIApplication sharedApplication].delegate;
 
-  [delegate setDropboxLinked:[sender isOn]];
-  [sender setOn:[delegate isDropboxLinked]];
+  delegate.dropboxLinked = _linkedSwitch.on;
+  _linkedSwitch.on = delegate.dropboxLinked;
 }
 
 - (IBAction)doneAction:(id)sender

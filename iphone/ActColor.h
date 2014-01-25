@@ -32,9 +32,8 @@
 + (UIColor *)disabledControlTextColor;
 + (UIColor *)controlTextColor:(BOOL)disabled;
 
-+ (UIColor *)controlDetailTextColor;
-+ (UIColor *)disabledControlDetailTextColor;
-+ (UIColor *)controlDetailTextColor:(BOOL)disabled;
++ (UIColor *)redTextColor;
++ (UIColor *)blueTextColor;
 
 + (UIColor *)controlBackgroundColor;
 + (UIColor *)darkControlBackgroundColor;

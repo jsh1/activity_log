@@ -24,6 +24,7 @@
 
 #import "ActActivityViewController.h"
 
+#import "ActColor.h"
 #import "ActDatabaseManager.h"
 
 @interface ActActivityViewController ()
@@ -48,6 +49,13 @@
 {
   [super viewDidLoad];
 
+  UIColor *red = [ActColor redTextColor];
+  _distanceLabel.textColor = red;
+  _durationLabel.textColor = red;
+  _avgHRLabel.textColor = red;
+  _cadenceLabel.textColor = red;
+  _pointsLabel.textColor = red;
+
   /* Make hairline separators. */
 
   CGFloat separator_height = 1 / [UIScreen mainScreen].scale;
@@ -61,14 +69,14 @@
 
 - (void)viewWillAppear:(BOOL)flag
 {
-  UINavigationController *nav = (id)[self parentViewController];
+  UINavigationController *nav = (id)self.parentViewController;
 
   [nav setToolbarHidden:NO animated:flag];
 }
 
 - (void)viewWillDisappear:(BOOL)flag
 {
-  UINavigationController *nav = (id)[self parentViewController];
+  UINavigationController *nav = (id)self.parentViewController;
 
   [nav setToolbarHidden:YES animated:flag];
 }
@@ -89,16 +97,21 @@
 
   if (const act::activity *a = _activity.get())
     {
-      static NSDateFormatter *date_formatter, *time_formatter;
+      static NSDateFormatter *date_formatter;
+      static NSDateFormatter *time_formatter;
+      static NSDateFormatter *weekday_formatter;
 
       if (date_formatter == nil)
 	{
 	  date_formatter = [[NSDateFormatter alloc] init];
-	  [date_formatter setDateStyle:NSDateFormatterFullStyle];
+	  [date_formatter setDateStyle:NSDateFormatterLongStyle];
 	  [date_formatter setTimeStyle:NSDateFormatterNoStyle];
 	  time_formatter = [[NSDateFormatter alloc] init];
 	  [time_formatter setDateStyle:NSDateFormatterNoStyle];
-	  [time_formatter setTimeStyle:NSDateFormatterMediumStyle];
+	  [time_formatter setTimeStyle:NSDateFormatterShortStyle];
+	  weekday_formatter = [[NSDateFormatter alloc] init];
+	  [weekday_formatter setDateFormat:
+	   [NSDateFormatter dateFormatFromTemplate:@"EEEE" options:0 locale:nil]];
 	}
 
       _courseLabel.text = [db stringForField:@"Course" ofActivity:*a];
@@ -108,7 +121,9 @@
 			     activity ? [activity capitalizedString] : @"",
 			     type ? type : @""];
       NSDate *date = [NSDate dateWithTimeIntervalSince1970:(time_t)a->date()];
-      _dateLabel.text = [date_formatter stringFromDate:date];
+      _dateLabel.text = [NSString stringWithFormat:@"%@, %@",
+			 [weekday_formatter stringFromDate:date],
+			 [date_formatter stringFromDate:date]];
       _timeLabel.text = [@"at " stringByAppendingString:
 			 [time_formatter stringFromDate:date]];
       _distanceLabel.text = [db stringForField:@"Distance" ofActivity:*a];
@@ -140,7 +155,7 @@
 static inline void
 update_constraint(NSLayoutConstraint *constraint, UILabel *label)
 {
-  const CGFloat spacing = 8;
+  const CGFloat spacing = 6;
   constraint.constant = [label.text length] == 0 ? 0 : spacing;
 }
 
