@@ -35,7 +35,9 @@ namespace act {
 
 activity::activity(activity_storage_ref storage)
 : _storage(storage),
+  _gps_data_reader(nullptr),
   _invalid_groups(group_all),
+  _gps_dependent_groups(0),
   _seed(0)
 {
 }
@@ -118,7 +120,7 @@ activity::validate_cached_values(unsigned int groups) const
 
       // Pull values out of the file
 
-      bool use_gps = false;
+      uint32_t gps_groups = 0;
 
       if (groups & group_date)
 	{
@@ -126,7 +128,7 @@ activity::validate_cached_values(unsigned int groups) const
 	    parse_date_time(*s, &_date, nullptr);
 
 	  if (_date == 0)
-	    use_gps = true;
+	    gps_groups |= group_date;
 	}
 
       if (groups & group_timing)
@@ -143,7 +145,7 @@ activity::validate_cached_values(unsigned int groups) const
 	    parse_speed(*s, &_speed, &_speed_unit);
 
 	  if (_duration != 0 + _distance != 0 + _speed != 0 < 2)
-	    use_gps = true;
+	    gps_groups |= group_timing;
 	}
 
       if (groups & group_physiological)
@@ -164,7 +166,7 @@ activity::validate_cached_values(unsigned int groups) const
 
 	  if (_resting_hr == 0 || _avg_hr == 0 || _max_hr == 0
 	      || _calories == 0 || _training_effect == 0)
-	    use_gps = true;
+	    gps_groups |= group_physiological;
 	}
 
       if (groups & group_gps_extended)
@@ -182,7 +184,7 @@ activity::validate_cached_values(unsigned int groups) const
 
 	  if (_elapsed_time == 0 || _ascent == 0
 	      || _descent == 0 || _max_speed == 0)
-	    use_gps = true;
+	    gps_groups |= group_gps_extended;
 	}
 
       if (groups & group_dynamics)
@@ -201,7 +203,7 @@ activity::validate_cached_values(unsigned int groups) const
 	  if (_avg_cadence == 0 || _max_cadence == 0
 	      || _avg_stance_time == 0 || _avg_stance_ratio == 0
 	      || _avg_vertical_oscillation == 0)
-	    use_gps = true;
+	    gps_groups |= group_dynamics;
 	}
 
       if (groups & group_other)
@@ -229,8 +231,10 @@ activity::validate_cached_values(unsigned int groups) const
 
       // Look in GPS file for other missing values
 
-      if (use_gps)
+      if (gps_groups != 0)
 	{
+	  _gps_dependent_groups |= gps_groups;
+
 	  if (const gps::activity *data = gps_data())
 	    {
 	      if (groups & group_date)
@@ -985,7 +989,13 @@ activity::gps_data() const
 {
   if (_gps_data == nullptr)
     {
-      if (const std::string *str = field_ptr("gps-file"))
+      if (_gps_data_reader != nullptr)
+	{
+	  gps::activity *a = _gps_data_reader->read_gps_file(*this);
+	  if (a != nullptr)
+	    _gps_data.reset(a);
+	}
+      else if (const std::string *str = field_ptr("gps-file"))
 	{
 	  std::string path(*str);
 	  if (shared_config().find_gps_file(path))
@@ -1001,6 +1011,15 @@ activity::gps_data() const
     }
 
   return _gps_data.get();
+}
+
+void
+activity::invalidate_gps_data()
+{
+  _gps_data.reset();
+
+  _invalid_groups |= _gps_dependent_groups;
+  _gps_dependent_groups = 0;
 }
 
 } // namespace act

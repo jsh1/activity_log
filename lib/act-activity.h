@@ -58,7 +58,16 @@ public:
   const std::vector<std::string> *field_keywords_ptr(field_id id) const;
   unit_type field_unit(field_id id) const;
 
+  struct gps_data_reader
+    {
+      virtual gps::activity *read_gps_file(const activity &a) const = 0;
+    };
+
+  void set_gps_data_reader (const gps_data_reader *reader);
+
   const gps::activity *gps_data() const;
+
+  void invalidate_gps_data();
 
   time_t date() const;
   double duration() const;
@@ -126,6 +135,7 @@ public:
 private:
   activity_storage_ref _storage;
 
+  const gps_data_reader *_gps_data_reader;
   mutable std::unique_ptr<gps::activity> _gps_data;
 
   // Split the properties into groups, helps avoid parsing the GPS
@@ -194,6 +204,7 @@ private:
   mutable std::vector<std::string> _keywords;
 
   mutable unsigned int _invalid_groups;
+  mutable unsigned int _gps_dependent_groups;
   mutable uint32_t _seed;
 
   void validate_cached_values(unsigned int groups) const;
@@ -251,6 +262,12 @@ inline const std::string *
 activity::field_ptr(const std::string &name) const
 {
   return _storage->field_ptr(name);
+}
+
+inline void
+activity::set_gps_data_reader(const gps_data_reader *reader)
+{
+  _gps_data_reader = reader;
 }
 
 } // namespace act
