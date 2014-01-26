@@ -27,6 +27,11 @@
 #import "ActColor.h"
 #import "ActDatabaseManager.h"
 
+#import "FoundationExtensions.h"
+
+#import <time.h>
+#import <xlocale.h>
+
 @interface ActActivityViewController ()
 - (void)reloadData;
 - (void)updateConstraints;
@@ -40,6 +45,11 @@
 	   @"ActivityView" owner:self options:nil] firstObject];
 }
 
+- (void)dealloc
+{
+  [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
 - (const act::activity_storage_ref)activityStorage
 {
   return _activity ? _activity->storage() : nullptr;
@@ -49,19 +59,33 @@
 {
   [super viewDidLoad];
 
-  UIColor *red = [ActColor redTextColor];
-  _distanceLabel.textColor = red;
-  _durationLabel.textColor = red;
-  _avgHRLabel.textColor = red;
-  _cadenceLabel.textColor = red;
-  _pointsLabel.textColor = red;
+  ActDatabaseManager *db = [ActDatabaseManager sharedManager];
+
+  [[NSNotificationCenter defaultCenter]
+   addObserver:self selector:@selector(metadataCacheDidChange:)
+   name:ActMetadataCacheDidChange object:db];
+  [[NSNotificationCenter defaultCenter]
+   addObserver:self selector:@selector(fileCacheDidChange:)
+   name:ActFileCacheDidChange object:db];
 
   /* Make hairline separators. */
 
   CGFloat separator_height = 1 / [UIScreen mainScreen].scale;
   _separator1HeightConstraint.constant = separator_height;
   _separator2HeightConstraint.constant = separator_height;
-  _separator3HeightConstraint.constant = separator_height;
+
+  UIFont *font = [UIFont fontWithDescriptor:
+		  [[UIFontDescriptor preferredFontDescriptorWithTextStyle:
+		    UIFontTextStyleSubheadline]
+		   fontDescriptorWithSymbolicTraits:UIFontDescriptorTraitBold]
+		  size:0];
+
+  _distanceLabel.font = font;
+  _durationLabel.font = font;
+  _paceLabel.font = font;
+  _avgHRLabel.font = font;
+  _cadenceLabel.font = font;
+  _pointsLabel.font = font;
 
   if (_activity)
     [self reloadData];
@@ -81,11 +105,126 @@
   [nav setToolbarHidden:YES animated:flag];
 }
 
+namespace {
+
+struct gps_reader : public act::activity::gps_data_reader
+{
+  ActActivityViewController *_controller;
+
+  gps_reader(ActActivityViewController *controller)
+  : _controller(controller) {}
+
+  virtual act::gps::activity *read_gps_file(const act::activity &a) const;
+};
+
+} // anonymous namespace
+
+act::gps::activity *
+gps_reader::read_gps_file(const act::activity &a) const
+{
+  if (_controller->_activity.get() != &a)
+    return nullptr;
+
+  NSString *path = _controller->_activityGPSPath;
+  if (path == nil)
+    return nullptr;
+
+  ActDatabaseManager *db = [ActDatabaseManager sharedManager];
+  
+  NSDictionary *meta = [db metadataForRemotePath:
+			[path stringByDeletingLastPathComponent]];
+  if (meta == nil)
+    return nullptr;
+
+  NSString *file = [path lastPathComponent];
+
+  for (NSDictionary *sub in meta[@"contents"])
+    {
+      NSString *name = sub[@"name"];
+      if (![name isEqualToString:file caseInsensitive:YES])
+	continue;
+
+      NSString *rev = sub[@"rev"];
+      NSString *local_path = [db localPathForRemotePath:path revision:rev];
+
+      if (local_path != nil)
+	{
+	  act::gps::activity *gps_data = new act::gps::activity;
+
+	  if (gps_data->read_file([local_path fileSystemRepresentation]))
+	    {
+	      _controller->_activityGPSRev = rev;
+	      return gps_data;
+	    }
+
+	  delete gps_data;
+	}
+
+      break;
+    }
+
+  return nullptr;
+}
+
+- (void)metadataCacheDidChange:(NSNotification *)note
+{
+  NSString *remote_path = [note userInfo][@"remotePath"];
+
+  if ([[_activityGPSPath stringByDeletingLastPathComponent]
+       isEqualToString:remote_path caseInsensitive:YES])
+    {
+      /* FIXME: check revision for our file. */
+
+      _activity->invalidate_gps_data();
+      _activityGPSRev = nil;
+
+      [self reloadData];
+    }
+}
+
+- (void)fileCacheDidChange:(NSNotification *)note
+{
+  NSString *remote_path = [note userInfo][@"remotePath"];
+
+  if ([_activityGPSPath isEqualToString:remote_path caseInsensitive:YES])
+    {
+      _activity->invalidate_gps_data();
+      _activityGPSRev = nil;
+
+      [self reloadData];
+    }
+}
+
 - (void)setActivityStorage:(const act::activity_storage_ref)storage
 {
   if (self.activityStorage != storage)
     {
+      ActDatabaseManager *db = [ActDatabaseManager sharedManager];
+
       _activity.reset(new act::activity(storage));
+
+      _activityGPSPath = nil;
+      if (const std::string *str = _activity->field_ptr("gps-file"))
+	{
+	  time_t date = _activity->date();
+	  struct tm tm = {0};
+	  localtime_r(&date, &tm);
+	  char buf[128];
+	  snprintf_l(buf, sizeof(buf), nullptr, "%d/%02d/",
+		     tm.tm_year + 1900, tm.tm_mon + 1);
+
+	  std::string tem(buf);
+	  tem.append(*str);
+
+	  _activityGPSPath = [db remoteGPSPath:
+			      [NSString stringWithUTF8String:tem.c_str()]];
+	}
+
+      _activityGPSReader.reset(new gps_reader(self));
+      _activity->set_gps_data_reader(_activityGPSReader.get());
+
+      _activity->invalidate_gps_data();
+      _activityGPSRev = nil;
 
       [self reloadData];
     }

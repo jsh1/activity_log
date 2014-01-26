@@ -24,42 +24,30 @@
 
 #import <UIKit/UIKit.h>
 
-#import "act-database.h"
-
 #import "act-activity-list-item.h"
-#import "act-activity-list-section.h"
 
-enum
+namespace act {
+
+struct activity_list_item;
+
+struct activity_list_section
 {
-  ActActivitiesViewList,
-  ActActivitiesViewWeek,
+  time_t date;
+  std::vector<activity_list_item_ref> items;
+
+  activity_list_section() = delete;
+  explicit activity_list_section(time_t date);
+  explicit activity_list_section(const activity_list_section &rhs);
+
+  void configure_view(UITableViewHeaderFooterView *view);
+
+private:
+  static bool initialized;
+  static NSDateFormatter *date_formatter;
+
+  static void initialize();
 };
 
-@interface ActActivitiesViewController : UITableViewController
-    <UITableViewDataSource, UITableViewDelegate>
-{
-  act::database::query _query;
-  NSInteger _viewMode;
+typedef std::shared_ptr<activity_list_section> activity_list_section_ref;
 
-  std::vector<act::database::item> _items;
-  std::vector<act::activity_list_section> _listData;
-
-  time_t _earliestTime;
-  BOOL _moreItems;
-  BOOL _needReloadView;
-
-  int _ignoreNotifications;
-
-  UIBarButtonItem *_addItem;
-  UIBarButtonItem *_weekItem;
-}
-
-+ (ActActivitiesViewController *)instantiate;
-
-@property(nonatomic) const act::database::query &query;
-
-@property(nonatomic) NSInteger viewMode;
-
-- (void)reloadData;
-
-@end
+} // namespace act

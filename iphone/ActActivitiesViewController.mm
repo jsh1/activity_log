@@ -30,6 +30,7 @@
 
 #import "act-util.h"
 
+#import <time.h>
 #import <xlocale.h>
 
 @interface ActActivityLoadMoreCell : UITableViewCell
@@ -47,9 +48,9 @@
 	   @"ActivitiesView" owner:self options:nil] firstObject];
 }
 
-- (NSString *)title
+- (void)dealloc
 {
-  return @"Activities";
+  [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
 - (void)viewDidLoad
@@ -61,7 +62,9 @@
   [[NSNotificationCenter defaultCenter]
    addObserver:self selector:@selector(metadataCacheDidChange:)
    name:ActMetadataCacheDidChange object:db];
-
+  [[NSNotificationCenter defaultCenter]
+   addObserver:self selector:@selector(fileCacheDidChange:)
+   name:ActFileCacheDidChange object:db];
   [[NSNotificationCenter defaultCenter]
    addObserver:self selector:@selector(activityDatabaseDidChange:)
    name:ActActivityDatabaseDidChange object:db];
@@ -148,7 +151,8 @@
 
 	  NSString *dir = [NSString stringWithUTF8String:buf];
 
-	  NSDictionary *dict = [db activityMetadataForPath:dir];
+	  NSDictionary *dict = [db metadataForRemotePath:
+				[db remoteActivityPath:dir]];
 
 	  /* Sort files into reverse order, as that's how we display. */
 
@@ -187,6 +191,7 @@
     {
       using std::swap;
       swap(_items, items);
+      _listData.clear();
       _needReloadView = YES;
     }
 
@@ -212,19 +217,36 @@
     }
 }
 
-- (act::activity_list_item_ref)listItemForIndex:(size_t)idx
+- (void)updateListData
 {
-  if (_listItems.size() != _items.size())
-    _listItems.resize(_items.size());
+  if (_listData.size() != 0)
+    return;
 
-  if (!_listItems[idx]
-      || _listItems[idx]->activity->storage() != _items[idx].storage())
-    _listItems[idx].reset(new act::activity_list_item(_items[idx].storage()));
+  time_t month_start = LONG_MAX;
 
-  return _listItems[idx];
+  for (const auto &it : _items)
+    {
+      time_t date = it.date();
+
+      if (date < month_start)
+	{
+	  struct tm tm = {0};
+	  localtime_r(&date, &tm);
+	  month_start = act::month_time(tm.tm_year + 1900, tm.tm_mon);
+	  _listData.emplace_back(month_start);
+	}
+
+      _listData.back().items.emplace_back(new act::activity_list_item(it.storage()));
+    }
 }
 
 - (void)metadataCacheDidChange:(NSNotification *)note
+{
+  if (_ignoreNotifications == 0)
+    [self reloadData];
+}
+
+- (void)fileCacheDidChange:(NSNotification *)note
 {
   if (_ignoreNotifications == 0)
     [self reloadData];
@@ -248,15 +270,31 @@
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tv
 {
-  return !_moreItems ? 1 : 2;
+  if (_viewMode == ActActivitiesViewList)
+    {
+      if (_listData.size() == 0)
+	[self updateListData];
+
+      return _listData.size() + (_moreItems ? 1 : 0);
+    }
+  else
+    return 0;
 }
 
 - (NSInteger)tableView:(UITableView *)tv numberOfRowsInSection:(NSInteger)sec
 {
-  if (sec == 0)
-    return _items.size();
+  if (_viewMode == ActActivitiesViewList)
+    {
+      if (_listData.size() == 0)
+	[self updateListData];
+
+      if (sec < _listData.size())
+	return _listData[sec].items.size();
+      else
+	return 1;
+    }
   else
-    return _moreItems ? 1 : 0;
+    return 0;
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tv
@@ -265,19 +303,21 @@
   NSString *ident;
   UITableViewCell *cell;
 
-  switch (path.section)
+  if (_viewMode == ActActivitiesViewList)
     {
-    case 0:
-      if (_viewMode == ActActivitiesViewList)
+      if (_listData.size() == 0)
+	[self updateListData];
+
+      if (path.section < _listData.size())
 	ident = @"activityCell";
       else
-	ident = @"weekCell";
-      break;
-
-    case 1:
-      ident = @"loadMoreCell";
-      break;
+	ident = @"loadMoreCell";
     }
+  else
+    ident = nil;
+
+  if (ident == nil)
+    return nil;
 
   cell = [tv dequeueReusableCellWithIdentifier:ident];
 
@@ -296,13 +336,6 @@
 				   | UIViewAutoresizingFlexibleHeight);
 	  [cell.contentView addSubview:view];
 	}
-      else if ([ident isEqualToString:@"weekCell"])
-	{
-	  /* FIXME: implement this. */
-	  cell = [[UITableViewCell alloc] initWithStyle:
-		  UITableViewCellStyleDefault reuseIdentifier:ident];
-	  cell.textLabel.text = @"Week Cell";
-	}
       else if ([ident isEqualToString:@"loadMoreCell"])
 	{
 	  cell = [[ActActivityLoadMoreCell alloc] initWithStyle:
@@ -315,10 +348,7 @@
     {
       ActActivityListItemView *view
         = (id)[cell.contentView.subviews firstObject];
-      view.listItem = [self listItemForIndex:path.row];
-    }
-  else if ([ident isEqualToString:@"weekCell"])
-    {
+      view.listItem = _listData[path.section].items[path.row];
     }
   else if ([ident isEqualToString:@"loadMoreCell"])
     {
@@ -334,15 +364,68 @@
 - (CGFloat)tableView:(UITableView *)tv
     heightForRowAtIndexPath:(NSIndexPath *)path
 {
-  if (path.section == 0 && _viewMode == ActActivitiesViewList)
+  if (_viewMode == ActActivitiesViewList)
     {
-      act::activity_list_item_ref item = [self listItemForIndex:path.row];
-      CGFloat width = tv.bounds.size.width;
-      item->update_height(width);
-      return item->height;
+      if (_listData.size() == 0)
+	[self updateListData];
+
+      NSInteger sec = path.section;
+      if (sec < _listData.size())
+	{
+	  act::activity_list_item_ref item = _listData[sec].items[path.row];
+	  /* FIXME: not actually width of cell's contentView? */
+	  CGFloat width = tv.bounds.size.width;
+	  item->update_height(width);
+	  return item->height;
+	}
     }
-  else
-    return tv.rowHeight;
+
+  return tv.rowHeight;
+}
+
+- (CGFloat)tableView:(UITableView *)tv heightForHeaderInSection:(NSInteger)sec
+{
+  if (_viewMode == ActActivitiesViewList)
+    {
+      if (_listData.size() == 0)
+	[self updateListData];
+
+      if (sec < _listData.size())
+	return tv.sectionHeaderHeight;
+      else
+	return 0;
+    }
+
+  return tv.sectionHeaderHeight;
+}
+
+- (UIView *)tableView:(UITableView *)tv viewForHeaderInSection:(NSInteger)sec
+{
+  if (_viewMode == ActActivitiesViewList)
+    {
+      if (_listData.size() == 0)
+	[self updateListData];
+
+      if (sec < _listData.size())
+	{
+	  NSString *ident = @"listHeader";
+
+	  UITableViewHeaderFooterView *view
+	    = [tv dequeueReusableHeaderFooterViewWithIdentifier:ident];
+
+	  if (view == nil)
+	    {
+	      view = [[UITableViewHeaderFooterView alloc]
+		      initWithReuseIdentifier:ident];
+	    }
+
+	  _listData[sec].configure_view(view);
+
+	  return view;
+	}
+    }
+
+  return nil;
 }
 
 - (void)tableView:(UITableView *)tv didSelectRowAtIndexPath:(NSIndexPath *)path
@@ -353,20 +436,20 @@
 
   if ([ident isEqualToString:@"activityCell"])
     {
-      act::activity_list_item_ref item = [self listItemForIndex:path.row];
+      if (_listData.size() == 0)
+	[self updateListData];
+
+      act::activity_list_item_ref item
+	= _listData[path.section].items[path.row];
 
       ActActivityViewController *controller
-        = [ActActivityViewController instantiate];
+	= [ActActivityViewController instantiate];
 
       controller.activityStorage = item->activity->storage();
 
       UINavigationController *nav = (id)self.parentViewController;
 
       [nav pushViewController:controller animated:YES];
-    }
-  else if ([ident isEqualToString:@"weekCell"])
-    {
-      /* FIXME: something? */
     }
   else if ([ident isEqualToString:@"loadMoreCell"])
     {

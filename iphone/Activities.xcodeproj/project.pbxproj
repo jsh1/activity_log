@@ -10,6 +10,7 @@
 		57001E9D1890763300611F26 /* ActActivityListItemView.mm in Sources */ = {isa = PBXBuildFile; fileRef = 57001E9C1890763300611F26 /* ActActivityListItemView.mm */; };
 		57001EA01891BCFA00611F26 /* ActColor.mm in Sources */ = {isa = PBXBuildFile; fileRef = 57001E9F1891BCFA00611F26 /* ActColor.mm */; };
 		57001EA31891C4C200611F26 /* act-activity-list-item.mm in Sources */ = {isa = PBXBuildFile; fileRef = 57001EA21891C4C200611F26 /* act-activity-list-item.mm */; };
+		570D9EF21895AEB600406927 /* act-activity-list-section.mm in Sources */ = {isa = PBXBuildFile; fileRef = 570D9EF11895AEB600406927 /* act-activity-list-section.mm */; };
 		571A08F8188D691F0066B572 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 571A08F7188D691F0066B572 /* Foundation.framework */; };
 		571A08FA188D691F0066B572 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 571A08F9188D691F0066B572 /* CoreGraphics.framework */; };
 		571A08FC188D691F0066B572 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 571A08FB188D691F0066B572 /* UIKit.framework */; };
@@ -114,6 +115,8 @@
 		57001E9F1891BCFA00611F26 /* ActColor.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ActColor.mm; sourceTree = "<group>"; };
 		57001EA11891C4C200611F26 /* act-activity-list-item.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "act-activity-list-item.h"; sourceTree = "<group>"; };
 		57001EA21891C4C200611F26 /* act-activity-list-item.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = "act-activity-list-item.mm"; sourceTree = "<group>"; };
+		570D9EF01895AEB600406927 /* act-activity-list-section.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "act-activity-list-section.h"; sourceTree = "<group>"; };
+		570D9EF11895AEB600406927 /* act-activity-list-section.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = "act-activity-list-section.mm"; sourceTree = "<group>"; };
 		571A08F4188D691F0066B572 /* Activities.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Activities.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		571A08F7188D691F0066B572 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		571A08F9188D691F0066B572 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
@@ -388,6 +391,8 @@
 				57001E9C1890763300611F26 /* ActActivityListItemView.mm */,
 				57001EA11891C4C200611F26 /* act-activity-list-item.h */,
 				57001EA21891C4C200611F26 /* act-activity-list-item.mm */,
+				570D9EF01895AEB600406927 /* act-activity-list-section.h */,
+				570D9EF11895AEB600406927 /* act-activity-list-section.mm */,
 				576FF5961892DCF100C0C3CF /* ActActivityViewController.h */,
 				576FF5971892DCF100C0C3CF /* ActActivityViewController.mm */,
 				57F95728188DC140000EF638 /* ActSettingsViewController.h */,
@@ -703,6 +708,7 @@
 				57001E9D1890763300611F26 /* ActActivityListItemView.mm in Sources */,
 				57830C54188D7B26001056B5 /* FoundationExtensions.m in Sources */,
 				57001EA31891C4C200611F26 /* act-activity-list-item.mm in Sources */,
+				570D9EF21895AEB600406927 /* act-activity-list-section.mm in Sources */,
 				57F95733188ED836000EF638 /* ActDatabaseManager.mm in Sources */,
 				57830C53188D7B26001056B5 /* CoreAnimationExtensions.m in Sources */,
 				57F9572A188DC140000EF638 /* ActSettingsViewController.mm in Sources */,

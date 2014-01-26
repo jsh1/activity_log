@@ -22,44 +22,49 @@
    CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
    SOFTWARE. */
 
-#import <UIKit/UIKit.h>
-
-#import "act-database.h"
-
-#import "act-activity-list-item.h"
 #import "act-activity-list-section.h"
 
-enum
+#import "act-config.h"
+#import "act-format.h"
+
+#import "ActColor.h"
+
+namespace act {
+
+bool activity_list_section::initialized;
+NSDateFormatter *activity_list_section::date_formatter;
+
+void
+activity_list_section::initialize()
 {
-  ActActivitiesViewList,
-  ActActivitiesViewWeek,
-};
+  date_formatter = [[NSDateFormatter alloc] init];
+  [date_formatter setDateFormat:
+   [NSDateFormatter dateFormatFromTemplate:@"MMMMYYYY" options:0 locale:nil]];
 
-@interface ActActivitiesViewController : UITableViewController
-    <UITableViewDataSource, UITableViewDelegate>
-{
-  act::database::query _query;
-  NSInteger _viewMode;
-
-  std::vector<act::database::item> _items;
-  std::vector<act::activity_list_section> _listData;
-
-  time_t _earliestTime;
-  BOOL _moreItems;
-  BOOL _needReloadView;
-
-  int _ignoreNotifications;
-
-  UIBarButtonItem *_addItem;
-  UIBarButtonItem *_weekItem;
+  initialized = true;
 }
 
-+ (ActActivitiesViewController *)instantiate;
+activity_list_section::activity_list_section(time_t date)
+: date(date)
+{
+}
 
-@property(nonatomic) const act::database::query &query;
+activity_list_section::activity_list_section(const activity_list_section &rhs)
+: date(rhs.date),
+  items(rhs.items)
+{
+}
 
-@property(nonatomic) NSInteger viewMode;
+void
+activity_list_section::configure_view(UITableViewHeaderFooterView *view)
+{
+  if (!initialized)
+    initialize();
 
-- (void)reloadData;
+  UILabel *label = view.textLabel;
 
-@end
+  label.text = [date_formatter stringFromDate:
+		[NSDate dateWithTimeIntervalSince1970:date]];
+}
+
+} // namespace act

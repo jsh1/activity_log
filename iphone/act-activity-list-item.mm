@@ -50,34 +50,35 @@ NSDateFormatter *activity_list_item::time_formatter;
 void
 activity_list_item::initialize()
 {
-  UIColor *greyColor = [ActColor controlTextColor];
-  UIColor *redColor = [ActColor redTextColor];
-  UIColor *blueColor = [ActColor blueTextColor];
-
   NSMutableParagraphStyle *rightStyle
     = [[NSParagraphStyle defaultParagraphStyle] mutableCopy];
   [rightStyle setAlignment:NSTextAlignmentRight];
 
   title_attrs = @{
-    NSFontAttributeName: [UIFont boldSystemFontOfSize:[UIFont buttonFontSize]],
-    NSForegroundColorAttributeName: greyColor
+    NSFontAttributeName:
+      [UIFont preferredFontForTextStyle:UIFontTextStyleHeadline],
+    NSForegroundColorAttributeName: [UIColor blackColor]
   };
 
+  UIColor *gray_color = [UIColor colorWithWhite:.5 alpha:1];
+
   body_attrs = @{
-    NSFontAttributeName: [UIFont systemFontOfSize:[UIFont systemFontSize]+1],
-    NSForegroundColorAttributeName: greyColor
+    NSFontAttributeName:
+      [UIFont preferredFontForTextStyle:UIFontTextStyleSubheadline],
+    NSForegroundColorAttributeName: gray_color
   };
 
   time_attrs = @{
     NSFontAttributeName:
-      [UIFont systemFontOfSize:[UIFont smallSystemFontSize]],
-    NSForegroundColorAttributeName: blueColor,
+      [UIFont preferredFontForTextStyle:UIFontTextStyleFootnote],
+    NSForegroundColorAttributeName: gray_color,
     NSParagraphStyleAttributeName: rightStyle
   };
 
   stats_attrs = @{
-    NSFontAttributeName: [UIFont boldSystemFontOfSize:[UIFont systemFontSize]+2],
-    NSForegroundColorAttributeName: redColor
+    NSFontAttributeName:
+      [UIFont preferredFontForTextStyle:UIFontTextStyleSubheadline],
+    NSForegroundColorAttributeName: [UIColor blackColor]
   };
 
   time_formatter = [[NSDateFormatter alloc] init];
@@ -88,7 +89,8 @@ activity_list_item::initialize()
 }
 
 activity_list_item::activity_list_item()
-: body_width(0),
+: body(nil),
+  body_width(0),
   body_height(0),
   valid_height(false)
 {
@@ -111,6 +113,12 @@ inline CGFloat
 text_attrs_leading(NSDictionary *attrs)
 {
   return ((UIFont *)attrs[NSFontAttributeName]).leading;
+}
+
+inline CGFloat
+text_attrs_ascender(NSDictionary *attrs)
+{
+  return ((UIFont *)attrs[NSFontAttributeName]).ascender;
 }
 
 } // anonymous namespace
@@ -138,8 +146,11 @@ activity_list_item::draw(const CGRect &bounds)
       // draw time
 
       CGRect ssubR = subR;
+
       ssubR.origin.x += ssubR.size.width - TIME_WIDTH;
+      ssubR.origin.y += text_attrs_ascender(title_attrs) - text_attrs_ascender(time_attrs);
       ssubR.size.width = TIME_WIDTH;
+      ssubR.size.height = text_attrs_leading(time_attrs);
 
       [[time_formatter stringFromDate:
 	[NSDate dateWithTimeIntervalSince1970:(time_t)activity->date()]]
@@ -147,8 +158,9 @@ activity_list_item::draw(const CGRect &bounds)
 
       // draw title
 
-      ssubR.size.width = subR.size.width - TIME_WIDTH;
+      ssubR = subR;
       ssubR.origin.x = subR.origin.x;
+      ssubR.size.width = subR.size.width - TIME_WIDTH;
 
       const std::string *s = activity->field_ptr("Course");
 
@@ -163,23 +175,43 @@ activity_list_item::draw(const CGRect &bounds)
   // draw stats
 
   std::string buf;
+  const char *pending_separator = nullptr;
+
+  if (const std::string *s = activity->field_ptr("Activity"))
+    {
+      std::string copy(*s);
+      copy[0] = toupper(copy[0]);
+      buf.append(copy);
+      pending_separator = ", ";
+    }
 
   if (activity->distance() != 0)
     {
       // FIXME: use one decimal place and suppress default units?
 
+      if (pending_separator != nullptr)
+	buf.append(pending_separator);
+
       act::format_distance(buf, activity->distance(),
 			   activity->distance_unit());
-      buf.push_back(' ');
+      pending_separator = " ";
     }
   else if (activity->duration() != 0)
     {
+      if (pending_separator != nullptr)
+	buf.append(pending_separator);
+
       act::format_duration(buf, activity->duration());
-      buf.push_back(' ');
+      pending_separator = " ";
     }
 
   if (const std::string *s = activity->field_ptr("Type"))
-    buf.append(*s);
+    {
+      if (pending_separator != nullptr)
+	buf.append(pending_separator);
+
+      buf.append(*s);
+    }
 
   subR.size.height = text_attrs_leading(stats_attrs);
 

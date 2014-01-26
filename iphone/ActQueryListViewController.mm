@@ -79,7 +79,6 @@
     = [ActActivitiesViewController instantiate];
 
   activities.query = query;
-  activities.title = @"All Activities";
 
   UINavigationController *nav = (id)self.parentViewController;
 
@@ -120,7 +119,8 @@ reverse_compare(id a, id b, void *ctx)
       path = [NSString stringWithUTF8String:buf];
     }
 
-  if (NSDictionary *dict = [db activityMetadataForPath:path])
+  if (NSDictionary *dict = [db metadataForRemotePath:
+			    [db remoteActivityPath:path]])
     {
       NSMutableArray *array = [NSMutableArray array];
 
@@ -265,11 +265,10 @@ reverse_compare(id a, id b, void *ctx)
 	= [ActQueryListViewController instantiate];
 
       query.year = [_rowData[path.row] intValue];
+      query.title = [tv cellForRowAtIndexPath:path].textLabel.text;
 
       next_controller = query;
     }
-
-  next_controller.title = [tv cellForRowAtIndexPath:path].textLabel.text;
 
   UINavigationController *nav = (id)self.parentViewController;
 

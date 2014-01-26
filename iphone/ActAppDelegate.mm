@@ -25,6 +25,7 @@
 #import "ActAppDelegate.h"
 
 #import "ActActivitiesViewController.h"
+#import "ActColor.h"
 #import "ActDatabaseManager.h"
 #import "ActDropboxParams.h"
 #import "ActQueryListViewController.h"
@@ -75,6 +76,8 @@ defaults_getenv(const char *key)
   [DBSession setSharedSession:_dropboxSession];
 
   [[NSBundle mainBundle] loadNibNamed:@"Main" owner:self options:nil];
+
+  _window.tintColor = [ActColor redTextColor];
 
   ActQueryListViewController *controller
     = [ActQueryListViewController instantiate];

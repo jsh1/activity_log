@@ -29,6 +29,9 @@
 @interface ActActivityViewController : UIViewController
 {
   std::unique_ptr<act::activity> _activity;
+  NSString *_activityGPSPath;
+  NSString *_activityGPSRev;
+  std::unique_ptr<act::activity::gps_data_reader> _activityGPSReader;
 
   IBOutlet UILabel *_courseLabel;
   IBOutlet UILabel *_activityLabel;
@@ -51,7 +54,6 @@
 
   IBOutlet NSLayoutConstraint *_separator1HeightConstraint;
   IBOutlet NSLayoutConstraint *_separator2HeightConstraint;
-  IBOutlet NSLayoutConstraint *_separator3HeightConstraint;
 
   IBOutlet UILabel *_notesLabel;
 }
