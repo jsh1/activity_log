@@ -143,7 +143,7 @@ copyFileToGPSDirectory(std::string &gps_path)
       // FIXME: make the directory layout configurable?
 
       char buf[128];
-      strftime(buf, sizeof(buf), "/%Y/", &tm);
+      strftime(buf, sizeof(buf), "/%Y/%m/", &tm);
 
       std::string dst_path(dir);
       dst_path.append(buf);
@@ -156,6 +156,9 @@ copyFileToGPSDirectory(std::string &gps_path)
 
 	  NSString *src = [NSString stringWithUTF8String:gps_path.c_str()];
 	  NSString *dst = [NSString stringWithUTF8String:dst_path.c_str()];
+
+	  [fm createDirectoryAtPath:[dst stringByDeletingLastPathComponent]
+	   withIntermediateDirectories:YES attributes:nil error:nil];
 
 	  if ([fm copyItemAtPath:src toPath:dst error:nil])
 	    {
