@@ -947,14 +947,9 @@ ActNotesItem::update_date() const
 
       year = 1900 + tm.tm_year;
       month = tm.tm_mon;
+      week = week_index(date);
       day_of_week = tm.tm_wday;
       day_of_month = tm.tm_mday;
-
-      // days since Jan 1, 1970 (a thursday); adjust, and into weeks:
-      // (date / (24 * 60 * 60) + 4 - start_of_week) / 7, equiv. to:
-
-      int start_of_week = act::shared_config().start_of_week();
-      week = (date + 345600 + start_of_week * -86400) / 604800;
 
       valid_date = true;
     }

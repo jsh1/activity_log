@@ -166,6 +166,8 @@ time_t make_time(unsigned int year, unsigned int month, unsigned int day);
 time_t year_time(int year);
 time_t month_time(int year, int month);
 
+int week_index(time_t date);
+
 int day_of_week_index(const char *str);
 int month_index(const char *str);
 

@@ -24,6 +24,8 @@
 
 #include "act-util.h"
 
+#include "act-config.h"
+
 #include <errno.h>
 #include <fcntl.h>
 #include <sys/stat.h>
@@ -289,6 +291,25 @@ seconds_in_year(int year)
   return !leap_year_p(year) ? 365*SECONDS_PER_DAY : 366*SECONDS_PER_DAY;
 }
 
+time_t
+seconds_in_month(int year, int month)
+{
+  static const int seconds_in_month[12] =
+    {
+      31*SECONDS_PER_DAY, 0, 31*SECONDS_PER_DAY,
+      30*SECONDS_PER_DAY, 31*SECONDS_PER_DAY, 30*SECONDS_PER_DAY,
+      31*SECONDS_PER_DAY, 31*SECONDS_PER_DAY, 30*SECONDS_PER_DAY,
+      31*SECONDS_PER_DAY, 30*SECONDS_PER_DAY, 31*SECONDS_PER_DAY
+    };
+
+  standardize_month(year, month);
+
+  if (month != 1)
+    return seconds_in_month[month];
+  else
+    return !leap_year_p(year) ? 28*SECONDS_PER_DAY : 29*SECONDS_PER_DAY;
+}
+
 void
 standardize_month(int &year, int &month)
 {
@@ -317,25 +338,6 @@ make_time(unsigned int year, unsigned int month, unsigned int day)
 }
 
 time_t
-seconds_in_month(int year, int month)
-{
-  static const int seconds_in_month[12] =
-    {
-      31*SECONDS_PER_DAY, 0, 31*SECONDS_PER_DAY,
-      30*SECONDS_PER_DAY, 31*SECONDS_PER_DAY, 30*SECONDS_PER_DAY,
-      31*SECONDS_PER_DAY, 31*SECONDS_PER_DAY, 30*SECONDS_PER_DAY,
-      31*SECONDS_PER_DAY, 30*SECONDS_PER_DAY, 31*SECONDS_PER_DAY
-    };
-
-  standardize_month(year, month);
-
-  if (month != 1)
-    return seconds_in_month[month];
-  else
-    return !leap_year_p(year) ? 28*SECONDS_PER_DAY : 29*SECONDS_PER_DAY;
-}
-
-time_t
 year_time(int year)
 {
   return make_time(year, 0, 1);
@@ -347,6 +349,17 @@ month_time(int year, int month)
   standardize_month(year, month);
 
   return make_time(year, month, 1);
+}
+
+int
+week_index(time_t date)
+{
+  // days since Jan 1, 1970 (a thursday); adjust, and into weeks:
+  // (date / (24 * 60 * 60) + 4 - start_of_week) / 7, equiv. to:
+
+  int start_of_week = act::shared_config().start_of_week();
+
+  return (date + 345600 + start_of_week * -86400) / 604800;
 }
 
 int
