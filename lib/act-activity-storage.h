@@ -54,15 +54,19 @@ public:
   activity_storage();
   activity_storage(const activity_storage &rhs);
 
+  uint32_t seed() const;
+  void increment_seed();
+
   void set_path(const char *path);
   const char *path() const;
 
-  uint32_t seed() const;
-  void increment_seed();
+  uint32_t path_seed() const;
+  void set_path_seed(uint32_t seed);
 
   bool read_file(const char *path);
   bool write_file(const char *path) const;
 
+  bool needs_synchronize() const;
   void synchronize_file() const;
 
   void canonicalize_field_order();
@@ -117,6 +121,24 @@ inline void
 activity_storage::increment_seed()
 {
   _seed++;
+}
+
+inline uint32_t
+activity_storage::path_seed() const
+{
+  return _path_seed;
+}
+
+inline void
+activity_storage::set_path_seed(uint32_t seed)
+{
+  _path_seed = seed;
+}
+
+inline bool
+activity_storage::needs_synchronize() const
+{
+  return _path.size() != 0 && _path_seed != _seed;
 }
 
 inline const std::string &

@@ -35,9 +35,13 @@ enum
   ActActivitiesViewWeek,
 };
 
+@class ActDatabaseManager;
+
 @interface ActActivitiesViewController : UITableViewController
     <UITableViewDataSource, UITableViewDelegate>
 {
+  ActDatabaseManager *_database;
+
   act::database::query _query;
   NSInteger _viewMode;
 

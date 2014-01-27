@@ -25,7 +25,8 @@
 #import "ActQueryListViewController.h"
 
 #import "ActActivitiesViewController.h"
-#import "ActDatabaseManager.h"
+#import "ActAppDelegate.h"
+#import "ActFileManager.h"
 #import "ActSettingsViewController.h"
 
 #import "act-util.h"
@@ -51,19 +52,17 @@
 {
   [super viewDidLoad];
 
-  ActDatabaseManager *db = [ActDatabaseManager sharedManager];
+  ActFileManager *fm = [ActFileManager sharedManager];
 
   [[NSNotificationCenter defaultCenter]
    addObserver:self selector:@selector(metadataCacheDidChange:)
-   name:ActMetadataCacheDidChange object:db];
-
-  [[NSNotificationCenter defaultCenter]
-   addObserver:self selector:@selector(activityDatabaseDidChange:)
-   name:ActActivityDatabaseDidChange object:db];
+   name:ActMetadataCacheDidChange object:fm];
 }
 
 - (void)viewWillAppear:(BOOL)animated
 {
+  [super viewWillAppear:animated];
+
   [self reloadData];
 }
 
@@ -80,9 +79,7 @@
 
   activities.query = query;
 
-  UINavigationController *nav = (id)self.parentViewController;
-
-  [nav pushViewController:activities animated:flag];
+  [self.navigationController pushViewController:activities animated:flag];
 }
 
 - (int)year
@@ -108,7 +105,8 @@ reverse_compare(id a, id b, void *ctx)
 
 - (void)reloadData
 {
-  ActDatabaseManager *db = [ActDatabaseManager sharedManager];
+  ActAppDelegate *delegate = (id)[UIApplication sharedApplication].delegate;
+  ActFileManager *fm = [ActFileManager sharedManager];
 
   NSString *path = @"";
 
@@ -119,8 +117,8 @@ reverse_compare(id a, id b, void *ctx)
       path = [NSString stringWithUTF8String:buf];
     }
 
-  if (NSDictionary *dict = [db metadataForRemotePath:
-			    [db remoteActivityPath:path]])
+  if (NSDictionary *dict = [fm metadataForRemotePath:
+			    [delegate remoteActivityPath:path]])
     {
       NSMutableArray *array = [NSMutableArray array];
 
@@ -155,20 +153,14 @@ reverse_compare(id a, id b, void *ctx)
   [self reloadData];
 }
 
-- (void)activityDatabaseDidChange:(NSNotification *)note
-{
-  [self reloadData];
-}
-
 - (IBAction)configAction:(id)sender
 {
-  UINavigationController *settings_nav
+  UINavigationController *settings
     = [[UINavigationController alloc]
        initWithRootViewController:[ActSettingsViewController instantiate]];
 
-  UINavigationController *main_nav = (id)self.parentViewController;
-
-  [main_nav presentViewController:settings_nav animated:YES completion:nil];
+  [self.navigationController presentViewController:settings animated:YES
+   completion:nil];
 }
 
 /* UITableViewDataSource methods. */
@@ -270,9 +262,7 @@ reverse_compare(id a, id b, void *ctx)
       next_controller = query;
     }
 
-  UINavigationController *nav = (id)self.parentViewController;
-
-  [nav pushViewController:next_controller animated:YES];
+  [self.navigationController pushViewController:next_controller animated:YES];
 
   [tv deselectRowAtIndexPath:path animated:NO];
 }

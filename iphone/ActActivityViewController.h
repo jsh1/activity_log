@@ -26,13 +26,10 @@
 
 #import "act-activity.h"
 
+@class ActDatabaseManager;
+
 @interface ActActivityViewController : UIViewController
 {
-  std::unique_ptr<act::activity> _activity;
-  NSString *_activityGPSPath;
-  NSString *_activityGPSRev;
-  std::unique_ptr<act::activity::gps_data_reader> _activityGPSReader;
-
   IBOutlet UILabel *_courseLabel;
   IBOutlet UILabel *_activityLabel;
   IBOutlet UILabel *_dateLabel;
@@ -56,9 +53,18 @@
   IBOutlet NSLayoutConstraint *_separator2HeightConstraint;
 
   IBOutlet UILabel *_notesLabel;
+
+  ActDatabaseManager *_database;
+
+  std::unique_ptr<act::activity> _activity;
+  NSString *_activityGPSPath;
+  NSString *_activityGPSRev;
+  std::unique_ptr<act::activity::gps_data_reader> _activityGPSReader;
 }
 
 + (ActActivityViewController *)instantiate;
+
+@property(nonatomic) ActDatabaseManager *database;
 
 @property(nonatomic) act::activity_storage_ref activityStorage;
 

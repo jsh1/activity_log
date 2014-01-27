@@ -127,7 +127,7 @@ activity_storage::write_file(const char *path) const
 void
 activity_storage::synchronize_file() const
 {
-  if (_path.size() == 0 || _path_seed == _seed)
+  if (!needs_synchronize())
     return;
 
   if (!write_file(_path.c_str()))

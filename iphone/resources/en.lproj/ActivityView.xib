@@ -12,7 +12,7 @@
                 <viewControllerLayoutGuide type="bottom" id="ZbK-Je-7Cx"/>
             </layoutGuides>
             <scrollView key="view" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" id="fAc-Bl-iB8">
-                <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
+                <rect key="frame" x="0.0" y="64" width="320" height="460"/>
                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                 <subviews>
                     <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Course" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="J6x-Sd-WKr">
@@ -313,11 +313,12 @@
                 </constraints>
             </scrollView>
             <navigationItem key="navigationItem" id="wsb-0U-w9I">
+                <barButtonItem key="backBarButtonItem" title="Activities" id="Zmg-cP-EOv"/>
                 <barButtonItem key="rightBarButtonItem" systemItem="edit" id="ff5-n4-B83"/>
             </navigationItem>
             <simulatedStatusBarMetrics key="simulatedStatusBarMetrics"/>
-            <nil key="simulatedTopBarMetrics"/>
-            <nil key="simulatedBottomBarMetrics"/>
+            <simulatedNavigationBarMetrics key="simulatedTopBarMetrics" translucent="NO" prompted="NO"/>
+            <simulatedToolbarMetrics key="simulatedBottomBarMetrics" translucent="NO"/>
             <simulatedOrientationMetrics key="simulatedOrientationMetrics"/>
             <simulatedScreenMetrics key="simulatedDestinationMetrics" type="retina4"/>
             <connections>

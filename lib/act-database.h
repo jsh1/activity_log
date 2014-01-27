@@ -73,6 +73,7 @@ public:
       bool operator!=(const item &rhs) const;
     };
 
+  std::vector<item> &items();
   const std::vector<item> &items() const;
 
   class query_term
@@ -214,7 +215,9 @@ public:
     public:
       query() : _max_count(SIZE_T_MAX), _skip_count(0) {}
 
-      const std::vector<date_range> date_ranges() const {return _dates;};
+      std::vector<date_range> &date_ranges() {return _dates;};
+      const std::vector<date_range> &date_ranges() const {return _dates;};
+
       void set_date_ranges(const std::vector<date_range> &vec) {_dates = vec;}
       void add_date_range(const date_range &r) {_dates.push_back(r);}
 
@@ -242,6 +245,12 @@ inline
 database::item::item()
 : _date(0)
 {
+}
+
+inline std::vector<database::item> &
+database::items()
+{
+  return _items;
 }
 
 inline const std::vector<database::item> &

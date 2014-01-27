@@ -31,9 +31,13 @@
 {
   UIWindow *_window;
   UINavigationController *_navigationController;
+
   DBSession *_dropboxSession;
   BOOL _dropboxLinked;
   int _dropboxRequests;
+
+  NSString *_remoteActivityPath;
+  NSString *_remoteGPSPath;
 }
 
 @property(nonatomic, strong) IBOutlet UIWindow *window;
@@ -41,5 +45,13 @@
 
 @property(nonatomic, strong) DBSession *dropboxSession;
 @property(nonatomic, getter=isDropboxLinked) BOOL dropboxLinked;
+
+@property(nonatomic, readonly) NSString *remoteActivityPath;
+@property(nonatomic, readonly) NSString *remoteGPSPath;
+
+- (NSString *)remoteActivityPath:(NSString *)rel_path;
+- (NSString *)remoteGPSPath:(NSString *)rel_path;
+
+- (NSString *)temporaryLocalFile;
 
 @end

@@ -25,19 +25,17 @@
 #import "ActDatabaseManager.h"
 
 #import "ActAppDelegate.h"
+#import "ActFileManager.h"
 
 #import "act-config.h"
 #import "act-format.h"
 #import "act-gps-activity.h"
 
-#import "DropboxSDK.h"
-
 #import "FoundationExtensions.h"
 
 #define BODY_WRAP_COLUMN 72
+#define SYNC_DELAY_NS (10LL*NSEC_PER_SEC)
 
-NSString *const ActMetadataCacheDidChange = @"ActMetadataCacheDidChange";
-NSString *const ActFileCacheDidChange = @"ActFileCacheDidChange";
 NSString *const ActActivityDatabaseDidChange = @"ActActivityDatabaseDidChange";
 NSString *const ActActivityDidChangeField = @"ActActivityDidChangeField";
 NSString *const ActActivityDidChangeBody = @"ActActivityDidChangeBody";
@@ -50,90 +48,25 @@ NSString *const ActActivityDidChangeBody = @"ActActivityDidChangeBody";
 
 @implementation ActDatabaseManager
 
-static ActDatabaseManager *_sharedManager;
+@synthesize fileManager = _fileManager;
 
-+ (ActDatabaseManager *)sharedManager
-{
-  if (_sharedManager == nil)
-    {
-      ActAppDelegate *delegate
-        = (ActAppDelegate *)[UIApplication sharedApplication].delegate;
-
-      if (!delegate.dropboxLinked)
-	return nil;
-
-      _sharedManager = [[self alloc] init];
-    }
-
-  return _sharedManager;
-}
-
-+ (void)shutdownSharedManager
-{
-  [_sharedManager invalidate];
-  _sharedManager = nil;
-}
-
-- (id)init
+- (id)initWithFileManager:(ActFileManager *)file_manager
 {
   self = [super init];
   if (self == nil)
     return nil;
 
-  ActAppDelegate *delegate
-    = (ActAppDelegate *)[UIApplication sharedApplication].delegate;
+  _fileManager = file_manager;
 
-  _dbClient = [[DBRestClient alloc] initWithSession:delegate.dropboxSession];
-  if (_dbClient == nil)
-    return nil;
-
-  [_dbClient setDelegate:self];
+  [[NSNotificationCenter defaultCenter]
+   addObserver:self selector:@selector(fileCacheDidChange:)
+   name:ActFileCacheDidChange object:_fileManager];
 
   /* Can't just reload() the entire cached database directory, it may
      include files that no longer exist in the master store, we'll
      manually call add_activity() for every file. */
 
   _database.reset(new act::database());
-
-  NSString *cache_dir
-    = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory,
-					   NSUserDomainMask, YES) firstObject];
-
-  cache_dir = [cache_dir stringByAppendingPathComponent:@"ActDatabaseManager"];
-
-  _localFilePath = [cache_dir stringByAppendingPathComponent:@"file-cache"];
-
-  _remoteActivityPath = [@"/" stringByAppendingPathComponent:
-			 [NSString stringWithUTF8String:
-			  act::shared_config().activity_dir()]];
-  _remoteGPSPath = [@"/" stringByAppendingPathComponent:
-			[NSString stringWithUTF8String:
-			 act::shared_config().gps_file_dir()]];
-
-  _pendingMetadata = [NSMutableSet set];
-  _metadataCache = [NSMutableDictionary dictionary];
-  _metadataCachePath = [cache_dir stringByAppendingPathComponent:
-			@"metadata-cache.json"];
-
-  if (NSData *data = [NSData dataWithContentsOfFile:_metadataCachePath])
-    {
-      _oldMetadataCache = [[NSJSONSerialization JSONObjectWithData:data
-			    options:0 error:nil] mutableCopy];
-    }
-
-  _fileCacheRevisionsPath = [cache_dir stringByAppendingPathComponent:
-			     @"file-cache-revisions.json"];
-
-  if (NSData *data = [NSData dataWithContentsOfFile:_fileCacheRevisionsPath])
-    {
-      _fileCacheRevisions = [[NSJSONSerialization JSONObjectWithData:data
-			      options:0 error:nil] mutableCopy];
-    }
-
-  if (_fileCacheRevisions == nil)
-    _fileCacheRevisions = [NSMutableDictionary dictionary];
-
-  _pendingFileCacheRevisions = [NSMutableDictionary dictionary];
 
   _addedActivityRevisions = [NSMutableDictionary dictionary];
 
@@ -144,9 +77,9 @@ static ActDatabaseManager *_sharedManager;
 {
   [self synchronize];
 
-  [_dbClient cancelAllRequests];
-  [_dbClient setDelegate:nil];
-  _dbClient = nil;
+  [[NSNotificationCenter defaultCenter] removeObserver:self];
+
+  _fileManager = nil;
 }
 
 - (void)dealloc
@@ -156,46 +89,53 @@ static ActDatabaseManager *_sharedManager;
 
 - (BOOL)needsSynchronize
 {
-  return _metadataCacheNeedsSynchronize || _fileCacheRevisionsNeedsSynchronize;
+  return _databaseNeedsSynchronize || _fileManager.needsSynchronize;
 }
 
 - (void)synchronize
 {
-  if (_metadataCacheNeedsSynchronize)
+  if (_databaseNeedsSynchronize)
     {
-      NSMutableDictionary *dict = [_metadataCache mutableCopy];
-      if (_oldMetadataCache != nil)
-	[dict addEntriesFromDictionary:_oldMetadataCache];
+      ActAppDelegate *delegate
+	= (id)[UIApplication sharedApplication].delegate;
 
-      NSData *data = [NSJSONSerialization dataWithJSONObject:dict
-		      options:0 error:nil];
+      for (auto &it : _database->items())
+	{
+	  act::activity_storage_ref storage = it.storage();
 
-      if ([data writeToFile:_metadataCachePath atomically:YES])
-	{
-	  _metadataCacheNeedsSynchronize = NO;
-	}
-      else
-	{
-	  [[NSFileManager defaultManager]
-	   removeItemAtPath:_metadataCachePath error:nil];
+	  if (storage->seed() != storage->path_seed())
+	    {
+	      NSString *src = [delegate temporaryLocalFile];
+
+	      if (storage->write_file([src fileSystemRepresentation]))
+		{
+		  NSString *local_path = [NSString stringWithUTF8String:
+					  it.storage()->path()];
+		  NSString *path = [local_path stringByRemovingPathPrefix:
+				    delegate.remoteActivityPath];
+		  NSString *rev = _addedActivityRevisions[path];
+
+		  BOOL ret = [_fileManager copyItemAtLocalPath:src
+			      toRemotePath:path previousRevision:rev
+			      completion:^(NSString *rev)
+			        {
+				  [[NSFileManager defaultManager]
+				   removeItemAtPath:src error:nil];
+
+				  if (rev != nil)
+				    _addedActivityRevisions[path] = rev;
+				  else
+				    storage->increment_seed();
+				}];
+
+		  if (ret)
+		    storage->set_path_seed(storage->seed());
+		}
+	    }
 	}
     }
 
-  if (_fileCacheRevisionsNeedsSynchronize)
-    {
-      NSData *data = [NSJSONSerialization dataWithJSONObject:
-		      _fileCacheRevisions options:0 error:nil];
-
-      if ([data writeToFile:_fileCacheRevisionsPath atomically:YES])
-	{
-	  _fileCacheRevisionsNeedsSynchronize = NO;
-	}
-      else
-	{
-	  [[NSFileManager defaultManager]
-	   removeItemAtPath:_fileCacheRevisionsPath error:nil];
-	}
-    }
+  [_fileManager synchronize];
 }
 
 - (act::database *)database
@@ -203,63 +143,15 @@ static ActDatabaseManager *_sharedManager;
   return _database.get();
 }
 
-- (NSString *)remoteActivityPath:(NSString *)rel_path
-{
-  /* Dropbox is case-insensitive and case-mutilating, so work in lower-case. */
-
-  return [[_remoteActivityPath stringByAppendingPathComponent:rel_path]
-	  lowercaseString];
-}
-
-- (NSString *)remoteGPSPath:(NSString *)rel_path
-{
-  return [[_remoteGPSPath stringByAppendingPathComponent:rel_path]
-	  lowercaseString];
-}
-
-- (NSDictionary *)metadataForRemotePath:(NSString *)path
-{
-  NSDictionary *dict = _metadataCache[path];
-
-  BOOL need_load = dict == nil;
-
-  if (dict == nil)
-    dict = _oldMetadataCache[path];
-
-  if (![dict isKindOfClass:[NSDictionary class]])
-    dict = nil;
-
-  if (need_load && ![_pendingMetadata containsObject:path])
-    {
-      NSString *hash = dict[@"hash"];
-
-      [_dbClient loadMetadata:path withHash:hash];
-
-      [_pendingMetadata addObject:path];
-
-      LOG((@"loading %@ metadata.", path));
-    }
-
-  return dict;
-}
-
 - (void)reset
 {
-  if (_oldMetadataCache == nil)
-    _oldMetadataCache = [NSMutableDictionary dictionary];
-
-  [_oldMetadataCache addEntriesFromDictionary:_metadataCache];
-
-  [_metadataCache removeAllObjects];
-
   BOOL db_empty = _database->items().size() == 0;
 
   _database->clear();
 
   [_addedActivityRevisions removeAllObjects];
 
-  [[NSNotificationCenter defaultCenter]
-   postNotificationName:ActMetadataCacheDidChange object:self];
+  [_fileManager reset];
 
   if (!db_empty)
     {
@@ -268,139 +160,15 @@ static ActDatabaseManager *_sharedManager;
     }
 }
 
-static NSDictionary *
-metadata_dictionary(DBMetadata *meta)
-{
-  if (meta.isDeleted || !meta.isDirectory)
-    return nil;
-
-  NSMutableDictionary *dict = [NSMutableDictionary dictionary];
-
-  if (id hash = meta.hash)
-    dict[@"hash"] = hash;
-
-  if (id rev = meta.rev)
-    dict[@"rev"] = rev;
-
-  NSMutableArray *contents = [NSMutableArray array];
-
-  for (DBMetadata *sub in meta.contents)
-    {
-      if (sub.isDeleted)
-	continue;
-
-      NSMutableDictionary *sub_dict = [NSMutableDictionary dictionary];
-
-      sub_dict[@"name"] = [sub.path lastPathComponent];
-
-      /* Note: not including hash field, we only use it to avoid
-	 receiving directory metadata redundantly. */
-
-      if (id rev = sub.rev)
-	sub_dict[@"rev"] = rev;
-
-      if (sub.isDirectory)
-	sub_dict[@"directory"] = @YES;
-
-      [contents addObject:sub_dict];
-    }
-
-  dict[@"contents"] = contents;
-
-  return dict;
-}
-
-- (void)restClient:(DBRestClient *)client loadedMetadata:(DBMetadata *)meta
-{
-  NSString *path = [meta.path lowercaseString];
-
-  [_pendingMetadata removeObject:path];
-
-  if (NSDictionary *dict = metadata_dictionary(meta))
-    {
-      _metadataCache[path] = dict;
-      [_oldMetadataCache removeObjectForKey:path];
-
-      /* FIXME: remove cached sub-directories that no longer exist? */
-    }
-  else
-    _metadataCache[path] = [NSNull null];
-
-  _metadataCacheNeedsSynchronize = YES;
-
-  [[NSNotificationCenter defaultCenter]
-   postNotificationName:ActMetadataCacheDidChange object:self
-   userInfo:@{@"remotePath": path}];
-}
-
-- (void)restClient:(DBRestClient *)client
-    metadataUnchangedAtPath:(NSString *)path
-{
-  path = [path lowercaseString];
-
-  LOG((@"%@ metadata unchanged.", path));
-
-  if (_metadataCache[path] == nil)
-    {
-      id obj = _oldMetadataCache[path];
-
-      if (obj == nil)
-	{
-	  obj = [NSNull null];
-	  _metadataCacheNeedsSynchronize = YES;
-	}
-
-      _metadataCache[path] = obj;
-      [_oldMetadataCache removeObjectForKey:path];
-    }
-
-  [_pendingMetadata removeObject:path];
-}
-
-- (void)restClient:(DBRestClient *)client
-    loadMetadataFailedWithError:(NSError *)err
-{
-  LOG((@"ERROR: metadata %@.", [[err userInfo] objectForKey:@"path"]));
-}
-
-- (NSString *)localPathForRemotePath:(NSString *)path revision:(NSString *)rev
-{
-  NSString *dest_path = [_localFilePath stringByAppendingPathComponent:path];
-
-  NSFileManager *fm = [NSFileManager defaultManager];
-
-  if ([fm fileExistsAtPath:dest_path] && rev != nil
-      && [_fileCacheRevisions[path] isEqualToString:rev])
-    {
-      /* File is already cached and up to date, return it's local path */
-
-      return dest_path;
-    }
-  else if (_pendingFileCacheRevisions[path] == nil)
-    {
-      /* File needs to be brought into our cache. */
-
-      [fm removeItemAtPath:dest_path error:nil];
-      [fm createDirectoryAtPath:[dest_path stringByDeletingLastPathComponent]
-       withIntermediateDirectories:YES attributes:nil error:nil];
-
-      [_dbClient loadFile:path atRev:rev intoPath:dest_path];
-
-      _pendingFileCacheRevisions[path] = rev;
-
-      LOG((@"loading file %@.", path));
-    }
-
-  return nil;
-}
-
 - (void)loadActivityFromPath:(NSString *)rel_path revision:(NSString *)rev
 {
-  NSString *path = [self remoteActivityPath:rel_path];
+  ActAppDelegate *delegate = (id)[UIApplication sharedApplication].delegate;
 
-  NSString *dest_path = [self localPathForRemotePath:path revision:rev];
+  NSString *path = [delegate remoteActivityPath:rel_path];
 
-  if (dest_path != nil)
+  NSString *dest = [_fileManager localPathForRemotePath:path revision:rev];
+
+  if (dest != nil)
     {
       /* File is already cached and up to date. Add it to database
 	 if not already done so. */
@@ -411,7 +179,7 @@ metadata_dictionary(DBMetadata *meta)
 	{
 	  _addedActivityRevisions[path] = rev;
 
-	  if (_database->add_activity([dest_path UTF8String]))
+	  if (_database->add_activity([dest UTF8String]))
 	    {
 	      [[NSNotificationCenter defaultCenter]
 	       postNotificationName:ActActivityDatabaseDidChange object:self];
@@ -426,46 +194,31 @@ metadata_dictionary(DBMetadata *meta)
     }
 }
 
-- (void)restClient:(DBRestClient *)client loadedFile:(NSString *)destPath
+- (void)fileCacheDidChange:(NSNotification *)note
 {
-  /* FIXME: ugly way to go back to the remote path..  */
+  ActAppDelegate *delegate = (id)[UIApplication sharedApplication].delegate;
 
-  NSString *path = [@"/" stringByAppendingPathComponent:
-		    [destPath stringByRemovingPathPrefix:_localFilePath]];
+  NSDictionary *info = [note userInfo];
+  NSString *path = info[@"remotePath"];
+  NSString *rev = info[@"rev"];
 
-  LOG((@"loaded file %@.", path));
-
-  NSString *rev = _pendingFileCacheRevisions[path];
-
-  if (rev != nil)
+  if ([path hasPathPrefix:delegate.remoteActivityPath caseInsensitive:YES])
     {
-      [_pendingFileCacheRevisions removeObjectForKey:path];
+      _addedActivityRevisions[path] = rev;
 
-      _fileCacheRevisions[path] = rev;
-      _fileCacheRevisionsNeedsSynchronize = YES;
-
-      [[NSNotificationCenter defaultCenter]
-       postNotificationName:ActFileCacheDidChange object:self
-       userInfo:@{@"remotePath": path, @"localPath": destPath}];
+      NSString *dest = info[@"localPath"];
+      if (_database->add_activity([dest fileSystemRepresentation]))
+	{
+	  [[NSNotificationCenter defaultCenter]
+	   postNotificationName:ActActivityDatabaseDidChange object:self];
+	}
     }
-  else
-    LOG((@"ERROR: unexpected file %@.", path));
-}
-
-- (void)restClient:(DBRestClient *)client
-    loadFileFailedWithError:(NSError *)err
-{
-  NSString *path = [[[err userInfo] objectForKey:@"path"] lowercaseString];
-
-  [_pendingFileCacheRevisions removeObjectForKey:path];
-
-  LOG((@"ERROR: file %@.", [[err userInfo] objectForKey:@"path"]));
 }
 
 - (void)activity:(const act::activity_storage_ref)a
     didChangeField:(NSString *)name;
 {
-//  [self setNeedsSynchronize:YES];
+  _databaseNeedsSynchronize = YES;
 
   [[NSNotificationCenter defaultCenter]
    postNotificationName:ActActivityDidChangeField object:self
@@ -474,7 +227,7 @@ metadata_dictionary(DBMetadata *meta)
 
 - (void)activityDidChangeBody:(const act::activity_storage_ref)a
 {
-//  [self setNeedsSynchronize:YES];
+  _databaseNeedsSynchronize = YES;
 
   [[NSNotificationCenter defaultCenter]
    postNotificationName:ActActivityDidChangeBody object:self

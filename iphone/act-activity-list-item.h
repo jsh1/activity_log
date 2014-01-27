@@ -39,7 +39,6 @@ struct activity_list_item
   CGFloat height;
   bool valid_height;
 
-  activity_list_item();
   explicit activity_list_item(act::activity_storage_ref storage);
   explicit activity_list_item(const activity_list_item &rhs);
 
@@ -50,6 +49,8 @@ struct activity_list_item
   void update_height(CGFloat width);
 
 private:
+  activity_list_item();
+
   static bool initialized;
   static NSDictionary *title_attrs;
   static NSDictionary *body_attrs;

@@ -24,52 +24,30 @@
 
 #import <Foundation/Foundation.h>
 #import "act-database.h"
-#import "DBRestClient.h"
 #import <memory>
 
-extern NSString *const ActMetadataCacheDidChange;
-extern NSString *const ActFileCacheDidChange;
 extern NSString *const ActActivityDatabaseDidChange;
 extern NSString *const ActActivityDidChangeField;
 extern NSString *const ActActivityDidChangeBody;
 
-@interface ActDatabaseManager : NSObject <DBRestClientDelegate>
+@class ActFileManager;
+
+@interface ActDatabaseManager : NSObject
 {
-  DBRestClient *_dbClient;
+  ActFileManager *_fileManager;
 
   std::unique_ptr<act::database> _database;
 
-  NSString *_localFilePath;
-
-  NSString *_remoteActivityPath;
-  NSString *_remoteGPSPath;
-
-  /* Dropbox metadata caching. */
-
-  NSMutableSet *_pendingMetadata;
-  NSMutableDictionary *_metadataCache;		/* path -> NSDictionary */
-  NSMutableDictionary *_oldMetadataCache;
-
-  NSString *_metadataCachePath;
-  BOOL _metadataCacheNeedsSynchronize;
-
-  /* Dropbox file caching. */
-
-  NSMutableDictionary *_fileCacheRevisions;	/* path -> NSNumber<int> */
-  NSMutableDictionary *_pendingFileCacheRevisions;
-
-  NSString *_fileCacheRevisionsPath;
-  BOOL _fileCacheRevisionsNeedsSynchronize;
+  BOOL _databaseNeedsSynchronize;
 
   /* Activity database contents. */
 
   NSMutableDictionary *_addedActivityRevisions;
 }
 
-+ (ActDatabaseManager *)sharedManager;
+- (id)initWithFileManager:(ActFileManager *)fileManager;
 
-+ (void)shutdownSharedManager;
-
+@property(nonatomic, readonly) ActFileManager *fileManager;
 @property(nonatomic, readonly) BOOL needsSynchronize;
 
 - (void)reset;
@@ -78,24 +56,10 @@ extern NSString *const ActActivityDidChangeBody;
 
 - (void)invalidate;
 
-- (NSString *)remoteActivityPath:(NSString *)rel_path;
-- (NSString *)remoteGPSPath:(NSString *)rel_path;
-
-/* These return nil if loading asynchronously, in which case will post
-   ActMetadataCacheDidChange when the metadata-read finishes. */
-
-- (NSDictionary *)metadataForRemotePath:(NSString *)path;
-
-/* Returns the local path of the file, or nil if it's still being
-   loaded, in which case ActFileCacheDidChange will be posted once it's
-   available. */
-
-- (NSString *)localPathForRemotePath:(NSString *)path revision:(NSString *)rev;
-
 /* ActActivityDatabaseDidChange will be posted once the file is in
-   the database. */
+   the database (i.e. may be asynchronous to the call). */
 
-- (void)loadActivityFromPath:(NSString *)rel_path revision:(NSString *)rev;
+- (void)loadActivityFromPath:(NSString *)path revision:(NSString *)rev;
 
 @property(nonatomic, readonly) act::database *database;
 

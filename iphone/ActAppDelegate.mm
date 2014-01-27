@@ -26,7 +26,7 @@
 
 #import "ActActivitiesViewController.h"
 #import "ActColor.h"
-#import "ActDatabaseManager.h"
+#import "ActFileManager.h"
 #import "ActDropboxParams.h"
 #import "ActQueryListViewController.h"
 
@@ -37,6 +37,8 @@
 @synthesize window = _window;
 @synthesize navigationController = _navigationController;
 @synthesize dropboxSession = _dropboxSession;
+@synthesize remoteActivityPath = _remoteActivityPath;
+@synthesize remoteGPSPath = _remoteGPSPath;
 
 static const char *
 defaults_getenv(const char *key)
@@ -67,6 +69,13 @@ defaults_getenv(const char *key)
      variables. */
 
   act::config::set_getenv(defaults_getenv);
+
+  _remoteActivityPath = [@"/" stringByAppendingPathComponent:
+			 [NSString stringWithUTF8String:
+			  act::shared_config().activity_dir()]];
+  _remoteGPSPath = [@"/" stringByAppendingPathComponent:
+			[NSString stringWithUTF8String:
+			 act::shared_config().gps_file_dir()]];
 
   [DBRequest setNetworkRequestDelegate:self];
 
@@ -109,9 +118,40 @@ defaults_getenv(const char *key)
     }
   else if (!state && linked)
     {
-      [ActDatabaseManager shutdownSharedManager];
+      [ActFileManager shutdownSharedManager];
       [_dropboxSession unlinkAll];
     }
+}
+
+- (NSString *)remoteActivityPath:(NSString *)rel_path
+{
+  /* Dropbox is case-insensitive and case-mutilating, so work in lower-case. */
+
+  return [[_remoteActivityPath stringByAppendingPathComponent:rel_path]
+	  lowercaseString];
+}
+
+- (NSString *)remoteGPSPath:(NSString *)rel_path
+{
+  return [[_remoteGPSPath stringByAppendingPathComponent:rel_path]
+	  lowercaseString];
+}
+
+- (NSString *)temporaryLocalFile
+{
+  NSString *tmp_dir = NSTemporaryDirectory();
+  NSFileManager *fm = [NSFileManager defaultManager];
+
+  while (1)
+    {
+      NSString *path = [tmp_dir stringByAppendingPathComponent:
+			[NSString stringWithFormat:@"%08x", arc4random()]];
+
+      if (![fm fileExistsAtPath:path])
+	return path;
+    }
+
+  /* not reached. */
 }
 
 - (BOOL)application:(UIApplication *)app handleOpenURL:(NSURL *)url
@@ -122,7 +162,7 @@ defaults_getenv(const char *key)
 	{
 	  /* This should make view controllers update. */
 
-	  [[ActDatabaseManager sharedManager] reset];
+	  [[ActFileManager sharedManager] reset];
 	}
 
       return YES;
@@ -137,12 +177,12 @@ defaults_getenv(const char *key)
 
 - (void)applicationDidEnterBackground:(UIApplication *)app
 {
-  [[ActDatabaseManager sharedManager] synchronize];
+  [[ActFileManager sharedManager] synchronize];
 }
 
 - (void)applicationWillEnterForeground:(UIApplication *)app
 {
-  [[ActDatabaseManager sharedManager] reset];
+  [[ActFileManager sharedManager] reset];
 }
 
 - (void)applicationDidBecomeActive:(UIApplication *)app
@@ -151,7 +191,7 @@ defaults_getenv(const char *key)
 
 - (void)applicationWillTerminate:(UIApplication *)app
 {
-  [ActDatabaseManager shutdownSharedManager];
+  [ActFileManager shutdownSharedManager];
 }
 
 /* DBNetworkRequestDelegate methods. */

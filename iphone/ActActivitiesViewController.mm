@@ -26,7 +26,9 @@
 
 #import "ActActivityListItemView.h"
 #import "ActActivityViewController.h"
+#import "ActAppDelegate.h"
 #import "ActDatabaseManager.h"
+#import "ActFileManager.h"
 
 #import "act-util.h"
 
@@ -57,22 +59,19 @@
 {
   [super viewDidLoad];
 
-  ActDatabaseManager *db = [ActDatabaseManager sharedManager];
+  _database = [[ActDatabaseManager alloc]
+	       initWithFileManager:[ActFileManager sharedManager]];
 
   [[NSNotificationCenter defaultCenter]
    addObserver:self selector:@selector(metadataCacheDidChange:)
-   name:ActMetadataCacheDidChange object:db];
-  [[NSNotificationCenter defaultCenter]
-   addObserver:self selector:@selector(fileCacheDidChange:)
-   name:ActFileCacheDidChange object:db];
+   name:ActMetadataCacheDidChange object:_database.fileManager];
   [[NSNotificationCenter defaultCenter]
    addObserver:self selector:@selector(activityDatabaseDidChange:)
-   name:ActActivityDatabaseDidChange object:db];
+   name:ActActivityDatabaseDidChange object:_database];
 
   _addItem = [[UIBarButtonItem alloc]
 	initWithBarButtonSystemItem:UIBarButtonSystemItemAdd
 	target:self action:@selector(addActivityAction:)];
-
   _weekItem = [[UIBarButtonItem alloc]
 	initWithTitle:@"Week" style:UIBarButtonItemStylePlain
 	target:self action:@selector(toggleWeekAction:)];
@@ -111,8 +110,6 @@
 
 - (void)reloadData
 {
-  ActDatabaseManager *db = [ActDatabaseManager sharedManager];
-
   /* Pull activity files spanning the query's partial date range into
      the database. */
 
@@ -124,6 +121,9 @@
 
   if (!range.is_empty())
     {
+      ActAppDelegate *delegate
+	= (id)[UIApplication sharedApplication].delegate;
+
       struct tm tm = {0};
       time_t last = range.start + range.length - 1;
       localtime_r(&last, &tm);
@@ -151,8 +151,8 @@
 
 	  NSString *dir = [NSString stringWithUTF8String:buf];
 
-	  NSDictionary *dict = [db metadataForRemotePath:
-				[db remoteActivityPath:dir]];
+	  NSDictionary *dict = [_database.fileManager metadataForRemotePath:
+				[delegate remoteActivityPath:dir]];
 
 	  /* Sort files into reverse order, as that's how we display. */
 
@@ -171,7 +171,7 @@
 	      NSString *path = [dir stringByAppendingPathComponent:name];
 	      NSString *rev = sub_dict[@"rev"];
 
-	      [db loadActivityFromPath:path revision:rev];
+	      [_database loadActivityFromPath:path revision:rev];
 	    }
 
 	  month--;
@@ -182,10 +182,19 @@
 
   _ignoreNotifications--;
 
-  /* Reload the query results and update the table view. */
+  /* Reload the query results and update the table view. Restrict 
+     the query to only return results until _earliestTime, to avoid
+     over-filling the table initially. */
+
+  act::database::query query_copy(_query);
+  time_t now = time(nullptr);
+  act::date_range query_range(_earliestTime, now - _earliestTime);
+
+  for (auto &it : query_copy.date_ranges())
+    it.intersect(query_range);
 
   std::vector<act::database::item> items;
-  db.database->execute_query(_query, items);
+  _database.database->execute_query(query_copy, items);
 
   if (_items != items)
     {
@@ -224,7 +233,7 @@
 
   time_t month_start = LONG_MAX;
 
-  for (const auto &it : _items)
+  for (auto &it : _items)
     {
       time_t date = it.date();
 
@@ -241,12 +250,6 @@
 }
 
 - (void)metadataCacheDidChange:(NSNotification *)note
-{
-  if (_ignoreNotifications == 0)
-    [self reloadData];
-}
-
-- (void)fileCacheDidChange:(NSNotification *)note
 {
   if (_ignoreNotifications == 0)
     [self reloadData];
@@ -362,6 +365,21 @@
 /* UITableViewDelegate methods. */
 
 - (CGFloat)tableView:(UITableView *)tv
+    estimatedHeightForRowAtIndexPath:(NSIndexPath *)path
+{
+  if (_viewMode == ActActivitiesViewList)
+    {
+      if (_listData.size() == 0)
+	[self updateListData];
+
+      if (path.section < _listData.size())
+	return UITableViewAutomaticDimension;
+    }
+
+  return tv.rowHeight;
+}
+
+- (CGFloat)tableView:(UITableView *)tv
     heightForRowAtIndexPath:(NSIndexPath *)path
 {
   if (_viewMode == ActActivitiesViewList)
@@ -445,11 +463,10 @@
       ActActivityViewController *controller
 	= [ActActivityViewController instantiate];
 
+      controller.database = _database;
       controller.activityStorage = item->activity->storage();
 
-      UINavigationController *nav = (id)self.parentViewController;
-
-      [nav pushViewController:controller animated:YES];
+      [self.navigationController pushViewController:controller animated:YES];
     }
   else if ([ident isEqualToString:@"loadMoreCell"])
     {

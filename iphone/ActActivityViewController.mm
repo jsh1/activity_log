@@ -24,8 +24,10 @@
 
 #import "ActActivityViewController.h"
 
+#import "ActAppDelegate.h"
 #import "ActColor.h"
 #import "ActDatabaseManager.h"
+#import "ActFileManager.h"
 
 #import "FoundationExtensions.h"
 
@@ -38,6 +40,8 @@
 @end
 
 @implementation ActActivityViewController
+
+@synthesize database = _database;
 
 + (ActActivityViewController *)instantiate
 {
@@ -59,14 +63,14 @@
 {
   [super viewDidLoad];
 
-  ActDatabaseManager *db = [ActDatabaseManager sharedManager];
+  ActFileManager *fm = [ActFileManager sharedManager];
 
   [[NSNotificationCenter defaultCenter]
    addObserver:self selector:@selector(metadataCacheDidChange:)
-   name:ActMetadataCacheDidChange object:db];
+   name:ActMetadataCacheDidChange object:fm];
   [[NSNotificationCenter defaultCenter]
    addObserver:self selector:@selector(fileCacheDidChange:)
-   name:ActFileCacheDidChange object:db];
+   name:ActFileCacheDidChange object:fm];
 
   /* Make hairline separators. */
 
@@ -93,16 +97,16 @@
 
 - (void)viewWillAppear:(BOOL)flag
 {
-  UINavigationController *nav = (id)self.parentViewController;
+  [super viewWillAppear:flag];
 
-  [nav setToolbarHidden:NO animated:flag];
+  [self.navigationController setToolbarHidden:NO animated:flag];
 }
 
 - (void)viewWillDisappear:(BOOL)flag
 {
-  UINavigationController *nav = (id)self.parentViewController;
+  [super viewWillDisappear:flag];
 
-  [nav setToolbarHidden:YES animated:flag];
+  [self.navigationController setToolbarHidden:YES animated:flag];
 }
 
 namespace {
@@ -129,9 +133,9 @@ gps_reader::read_gps_file(const act::activity &a) const
   if (path == nil)
     return nullptr;
 
-  ActDatabaseManager *db = [ActDatabaseManager sharedManager];
+  ActFileManager *fm = [ActFileManager sharedManager];
   
-  NSDictionary *meta = [db metadataForRemotePath:
+  NSDictionary *meta = [fm metadataForRemotePath:
 			[path stringByDeletingLastPathComponent]];
   if (meta == nil)
     return nullptr;
@@ -145,7 +149,7 @@ gps_reader::read_gps_file(const act::activity &a) const
 	continue;
 
       NSString *rev = sub[@"rev"];
-      NSString *local_path = [db localPathForRemotePath:path revision:rev];
+      NSString *local_path = [fm localPathForRemotePath:path revision:rev];
 
       if (local_path != nil)
 	{
@@ -199,7 +203,8 @@ gps_reader::read_gps_file(const act::activity &a) const
 {
   if (self.activityStorage != storage)
     {
-      ActDatabaseManager *db = [ActDatabaseManager sharedManager];
+      ActAppDelegate *delegate
+	= (id)[UIApplication sharedApplication].delegate;
 
       _activity.reset(new act::activity(storage));
 
@@ -216,7 +221,7 @@ gps_reader::read_gps_file(const act::activity &a) const
 	  std::string tem(buf);
 	  tem.append(*str);
 
-	  _activityGPSPath = [db remoteGPSPath:
+	  _activityGPSPath = [delegate remoteGPSPath:
 			      [NSString stringWithUTF8String:tem.c_str()]];
 	}
 
@@ -232,8 +237,6 @@ gps_reader::read_gps_file(const act::activity &a) const
 
 - (void)reloadData
 {
-  ActDatabaseManager *db = [ActDatabaseManager sharedManager];
-
   if (const act::activity *a = _activity.get())
     {
       static NSDateFormatter *date_formatter;
@@ -253,9 +256,9 @@ gps_reader::read_gps_file(const act::activity &a) const
 	   [NSDateFormatter dateFormatFromTemplate:@"EEEE" options:0 locale:nil]];
 	}
 
-      _courseLabel.text = [db stringForField:@"Course" ofActivity:*a];
-      NSString *activity = [db stringForField:@"Activity" ofActivity:*a];
-      NSString *type = [db stringForField:@"Type" ofActivity:*a];
+      _courseLabel.text = [_database stringForField:@"Course" ofActivity:*a];
+      NSString *activity = [_database stringForField:@"Activity" ofActivity:*a];
+      NSString *type = [_database stringForField:@"Type" ofActivity:*a];
       _activityLabel.text = [NSString stringWithFormat:@"%@, %@",
 			     activity ? [activity capitalizedString] : @"",
 			     type ? type : @""];
@@ -265,13 +268,13 @@ gps_reader::read_gps_file(const act::activity &a) const
 			 [date_formatter stringFromDate:date]];
       _timeLabel.text = [@"at " stringByAppendingString:
 			 [time_formatter stringFromDate:date]];
-      _distanceLabel.text = [db stringForField:@"Distance" ofActivity:*a];
-      _durationLabel.text = [db stringForField:@"Duration" ofActivity:*a];
-      _paceLabel.text = [db stringForField:@"Pace" ofActivity:*a];
-      _avgHRLabel.text = [db stringForField:@"Avg-HR" ofActivity:*a];
-      _cadenceLabel.text = [db stringForField:@"Avg-Cadence" ofActivity:*a];
-      _pointsLabel.text = [db stringForField:@"Points" ofActivity:*a];
-      _notesLabel.text = [db bodyStringOfActivity:*a];
+      _distanceLabel.text = [_database stringForField:@"Distance" ofActivity:*a];
+      _durationLabel.text = [_database stringForField:@"Duration" ofActivity:*a];
+      _paceLabel.text = [_database stringForField:@"Pace" ofActivity:*a];
+      _avgHRLabel.text = [_database stringForField:@"Avg-HR" ofActivity:*a];
+      _cadenceLabel.text = [_database stringForField:@"Avg-Cadence" ofActivity:*a];
+      _pointsLabel.text = [_database stringForField:@"Points" ofActivity:*a];
+      _notesLabel.text = [_database bodyStringOfActivity:*a];
     }
   else
     {
