@@ -24,6 +24,7 @@
 
 #import "ActActivityViewController.h"
 
+#import "ActActivityEditorViewController.h"
 #import "ActAppDelegate.h"
 #import "ActColor.h"
 #import "ActDatabaseManager.h"
@@ -52,11 +53,6 @@
 - (void)dealloc
 {
   [[NSNotificationCenter defaultCenter] removeObserver:self];
-}
-
-- (const act::activity_storage_ref)activityStorage
-{
-  return _activity ? _activity->storage() : nullptr;
 }
 
 - (void)viewDidLoad
@@ -90,9 +86,6 @@
   _avgHRLabel.font = font;
   _cadenceLabel.font = font;
   _pointsLabel.font = font;
-
-  if (_activity)
-    [self reloadData];
 }
 
 - (void)viewWillAppear:(BOOL)flag
@@ -100,6 +93,9 @@
   [super viewWillAppear:flag];
 
   [self.navigationController setToolbarHidden:NO animated:flag];
+
+  if (_activity)
+    [self reloadData];
 }
 
 - (void)viewWillDisappear:(BOOL)flag
@@ -199,7 +195,12 @@ gps_reader::read_gps_file(const act::activity &a) const
     }
 }
 
-- (void)setActivityStorage:(const act::activity_storage_ref)storage
+- (act::activity_storage_ref)activityStorage
+{
+  return _activity ? _activity->storage() : nullptr;
+}
+
+- (void)setActivityStorage:(act::activity_storage_ref)storage
 {
   if (self.activityStorage != storage)
     {
@@ -317,6 +318,20 @@ update_constraint(NSLayoutConstraint *constraint, UILabel *label)
   update_constraint(_avgHRHeightConstraint, _avgHRLabel);
   update_constraint(_cadenceHeightConstraint, _cadenceLabel);
   update_constraint(_pointsHeightConstraint, _pointsLabel);
+}
+
+- (IBAction)editAction:(id)sender
+{
+  ActActivityEditorViewController *controller
+    = [ActActivityEditorViewController instantiate];
+
+  controller.database = _database;
+  controller.activityStorage = _activity->storage();
+
+  UINavigationController *inner_nav
+    = [[UINavigationController alloc] initWithRootViewController:controller];
+
+  [self presentViewController:inner_nav animated:YES completion:nil];
 }
 
 @end

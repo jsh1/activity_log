@@ -1,6 +1,6 @@
 /* -*- c-style: gnu -*-
 
-   Copyright (c) 2013 John Harper <jsh@unfactored.org>
+   Copyright (c) 2014 John Harper <jsh@unfactored.org>
 
    Permission is hereby granted, free of charge, to any person
    obtaining a copy of this software and associated documentation files
@@ -24,50 +24,23 @@
 
 #import <UIKit/UIKit.h>
 
-#import "act-activity.h"
+#import "act-activity-storage.h"
 
 @class ActDatabaseManager;
 
-@interface ActActivityViewController : UIViewController
+@interface ActActivityEditorViewController : UITableViewController
+    <UITableViewDataSource, UITableViewDelegate>
 {
-  IBOutlet UILabel *_courseLabel;
-  IBOutlet UILabel *_activityLabel;
-  IBOutlet UILabel *_dateLabel;
-  IBOutlet UILabel *_timeLabel;
-
-  IBOutlet UILabel *_distanceLabel;
-  IBOutlet UILabel *_durationLabel;
-  IBOutlet UILabel *_paceLabel;
-  IBOutlet UILabel *_avgHRLabel;
-  IBOutlet UILabel *_cadenceLabel;
-  IBOutlet UILabel *_pointsLabel;
-
-  IBOutlet NSLayoutConstraint *_distanceHeightConstraint;
-  IBOutlet NSLayoutConstraint *_durationHeightConstraint;
-  IBOutlet NSLayoutConstraint *_paceHeightConstraint;
-  IBOutlet NSLayoutConstraint *_avgHRHeightConstraint;
-  IBOutlet NSLayoutConstraint *_cadenceHeightConstraint;
-  IBOutlet NSLayoutConstraint *_pointsHeightConstraint;
-
-  IBOutlet NSLayoutConstraint *_separator1HeightConstraint;
-  IBOutlet NSLayoutConstraint *_separator2HeightConstraint;
-
-  IBOutlet UILabel *_notesLabel;
-
   ActDatabaseManager *_database;
-
-  std::unique_ptr<act::activity> _activity;
-  NSString *_activityGPSPath;
-  NSString *_activityGPSRev;
-  std::unique_ptr<act::activity::gps_data_reader> _activityGPSReader;
+  act::activity_storage_ref _activityStorage;
 }
 
-+ (ActActivityViewController *)instantiate;
++ (ActActivityEditorViewController *)instantiate;
 
 @property(nonatomic) ActDatabaseManager *database;
 
 @property(nonatomic) act::activity_storage_ref activityStorage;
 
-- (IBAction)editAction:(id)sender;
+- (IBAction)doneAction:(id)sender;
 
 @end

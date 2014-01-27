@@ -45,6 +45,8 @@
 		57830CBE188D7C38001056B5 /* act-util.cc in Sources */ = {isa = PBXBuildFile; fileRef = 57830C76188D7B6E001056B5 /* act-util.cc */; };
 		5792BAE4188DB25D0011A069 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5792BAE3188DB25D0011A069 /* Security.framework */; };
 		57B0268518968C0E006440AF /* ActFileManager.mm in Sources */ = {isa = PBXBuildFile; fileRef = 57B0268418968C0E006440AF /* ActFileManager.mm */; };
+		57B0268B189711CB006440AF /* ActivityEditorView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 57B02689189711CB006440AF /* ActivityEditorView.xib */; };
+		57B0268E18971200006440AF /* ActActivityEditorViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = 57B0268D18971200006440AF /* ActActivityEditorViewController.mm */; };
 		57CA435A18901570008693CA /* QueryListView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 57CA435818901570008693CA /* QueryListView.xib */; };
 		57F9572A188DC140000EF638 /* ActSettingsViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = 57F95729188DC140000EF638 /* ActSettingsViewController.mm */; };
 		57F95730188DC70D000EF638 /* Settings.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 57F9572E188DC70D000EF638 /* Settings.storyboard */; };
@@ -182,6 +184,9 @@
 		5792BAE3188DB25D0011A069 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
 		57B0268318968C0E006440AF /* ActFileManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActFileManager.h; sourceTree = "<group>"; };
 		57B0268418968C0E006440AF /* ActFileManager.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ActFileManager.mm; sourceTree = "<group>"; };
+		57B0268A189711CB006440AF /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = resources/en.lproj/ActivityEditorView.xib; sourceTree = "<group>"; };
+		57B0268C18971200006440AF /* ActActivityEditorViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActActivityEditorViewController.h; sourceTree = "<group>"; };
+		57B0268D18971200006440AF /* ActActivityEditorViewController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ActActivityEditorViewController.mm; sourceTree = "<group>"; };
 		57CA435918901570008693CA /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = resources/en.lproj/QueryListView.xib; sourceTree = "<group>"; };
 		57F95725188DBA2F000EF638 /* DropboxSDK.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = DropboxSDK.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		57F95728188DC140000EF638 /* ActSettingsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActSettingsViewController.h; sourceTree = "<group>"; };
@@ -400,6 +405,8 @@
 				570D9EF11895AEB600406927 /* act-activity-list-section.mm */,
 				576FF5961892DCF100C0C3CF /* ActActivityViewController.h */,
 				576FF5971892DCF100C0C3CF /* ActActivityViewController.mm */,
+				57B0268C18971200006440AF /* ActActivityEditorViewController.h */,
+				57B0268D18971200006440AF /* ActActivityEditorViewController.mm */,
 				57F95728188DC140000EF638 /* ActSettingsViewController.h */,
 				57F95729188DC140000EF638 /* ActSettingsViewController.mm */,
 				57001E9E1891BCFA00611F26 /* ActColor.h */,
@@ -468,6 +475,7 @@
 				571A093B188D70A70066B572 /* Main.xib */,
 				57830C49188D7AD2001056B5 /* ActivitiesView.xib */,
 				576FF5991892DE4900C0C3CF /* ActivityView.xib */,
+				57B02689189711CB006440AF /* ActivityEditorView.xib */,
 				57CA435818901570008693CA /* QueryListView.xib */,
 				57F9572E188DC70D000EF638 /* Settings.storyboard */,
 			);
@@ -699,6 +707,7 @@
 				571A093D188D70A70066B572 /* Main.xib in Resources */,
 				57F95735188EE0F5000EF638 /* defaults.plist in Resources */,
 				571A0902188D691F0066B572 /* InfoPlist.strings in Resources */,
+				57B0268B189711CB006440AF /* ActivityEditorView.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -714,6 +723,7 @@
 				57830C54188D7B26001056B5 /* FoundationExtensions.m in Sources */,
 				57001EA31891C4C200611F26 /* act-activity-list-item.mm in Sources */,
 				570D9EF21895AEB600406927 /* act-activity-list-section.mm in Sources */,
+				57B0268E18971200006440AF /* ActActivityEditorViewController.mm in Sources */,
 				57F95733188ED836000EF638 /* ActDatabaseManager.mm in Sources */,
 				57B0268518968C0E006440AF /* ActFileManager.mm in Sources */,
 				57830C53188D7B26001056B5 /* CoreAnimationExtensions.m in Sources */,
@@ -840,6 +850,14 @@
 				57830C4A188D7AD2001056B5 /* en */,
 			);
 			name = ActivitiesView.xib;
+			sourceTree = "<group>";
+		};
+		57B02689189711CB006440AF /* ActivityEditorView.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				57B0268A189711CB006440AF /* en */,
+			);
+			name = ActivityEditorView.xib;
 			sourceTree = "<group>";
 		};
 		57CA435818901570008693CA /* QueryListView.xib */ = {
