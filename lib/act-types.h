@@ -165,6 +165,7 @@ struct date_range
   bool contains(time_t t) const;
 
   void merge(const date_range &rhs);
+  void intersect(const date_range &rhs);
 };
 
 struct date_interval

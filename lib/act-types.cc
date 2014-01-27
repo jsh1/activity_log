@@ -486,6 +486,29 @@ date_range::merge(const date_range &rhs)
     }
 }
 
+void
+date_range::intersect(const date_range &rhs)
+{
+  if (length != 0)
+    {
+      if (rhs.length == 0)
+	start = length = 0;
+      else
+	{
+	  time_t d0 = std::max(start, rhs.start);
+	  time_t d1 = std::min(start + length, rhs.start + rhs.length);
+
+	  if (d1 > d0)
+	    {
+	      start = d0;
+	      length = d1 - d0;
+	    }
+	  else
+	    start = length = 0;
+	}
+    }
+}
+
 int
 date_interval::date_index(time_t date) const
 {
