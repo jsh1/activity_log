@@ -359,7 +359,7 @@ week_index(time_t date)
 
   int start_of_week = act::shared_config().start_of_week();
 
-  return (date + 345600 + start_of_week * -86400) / 604800;
+  return (int)((date + 345600 + start_of_week * -86400) / 604800);
 }
 
 int
