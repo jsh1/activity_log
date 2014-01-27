@@ -30,6 +30,7 @@
 
 #import "act-config.h"
 #import "act-format.h"
+#import "act-util.h"
 
 #import "AppKitExtensions.h"
 #import "FoundationExtensions.h"
@@ -947,7 +948,7 @@ ActNotesItem::update_date() const
 
       year = 1900 + tm.tm_year;
       month = tm.tm_mon;
-      week = week_index(date);
+      week = act::week_index(date);
       day_of_week = tm.tm_wday;
       day_of_month = tm.tm_mday;
 
