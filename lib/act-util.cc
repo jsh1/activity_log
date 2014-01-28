@@ -362,6 +362,14 @@ week_index(time_t date)
   return (int)((date + 345600 + start_of_week * -86400) / 604800);
 }
 
+time_t
+week_date(int week_index)
+{
+  int offset = 4 - act::shared_config().start_of_week();
+
+  return (week_index * 7 - offset) * (time_t)86400;
+}
+
 int
 day_of_week_index(const char *str)
 {

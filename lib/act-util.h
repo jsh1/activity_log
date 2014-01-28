@@ -167,6 +167,7 @@ time_t year_time(int year);
 time_t month_time(int year, int month);
 
 int week_index(time_t date);
+time_t week_date(int week_index);
 
 int day_of_week_index(const char *str);
 int month_index(const char *str);
