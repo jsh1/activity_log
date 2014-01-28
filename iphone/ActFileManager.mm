@@ -39,8 +39,8 @@ NSString *const ActFileCacheDidChange = @"ActFileCacheDidChange";
 
 #define SYNC_DELAY_NS (10LL*NSEC_PER_SEC)
 
-#if DEBUG && !defined(VERBOSE)
-# define VERBOSE 1
+#ifndef VERBOSE
+# define VERBOSE 0
 #endif
 
 #define LOG(x) do {if (VERBOSE) NSLog x;} while (0)
