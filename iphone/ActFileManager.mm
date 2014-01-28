@@ -345,11 +345,14 @@ metadata_dictionary(DBMetadata *meta)
 
 - (NSString *)localPathForRemotePath:(NSString *)path revision:(NSString *)rev
 {
+  if (rev == nil)
+    return nil;
+
   NSString *dest_path = [_localFilePath stringByAppendingPathComponent:path];
 
   NSFileManager *fm = [NSFileManager defaultManager];
 
-  if ([fm fileExistsAtPath:dest_path] && rev != nil
+  if ([fm fileExistsAtPath:dest_path]
       && [_fileCacheRevisions[path] isEqualToString:rev])
     {
       /* File is already cached and up to date, return it's local path */
