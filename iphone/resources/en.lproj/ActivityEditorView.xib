@@ -16,8 +16,13 @@
                     <outlet property="delegate" destination="Y33-QY-jYb" id="TK2-9Y-bqb"/>
                 </connections>
             </tableView>
-            <navigationItem key="navigationItem" title="Edit Activity" id="33V-Oj-sEk">
-                <barButtonItem key="rightBarButtonItem" style="plain" systemItem="done" id="Loy-tl-gCe">
+            <navigationItem key="navigationItem" id="33V-Oj-sEk">
+                <barButtonItem key="leftBarButtonItem" systemItem="cancel" id="eOx-Mg-X6C">
+                    <connections>
+                        <action selector="cancelAction:" destination="Y33-QY-jYb" id="mK9-Va-Fq0"/>
+                    </connections>
+                </barButtonItem>
+                <barButtonItem key="rightBarButtonItem" systemItem="done" id="Loy-tl-gCe">
                     <connections>
                         <action selector="doneAction:" destination="Y33-QY-jYb" id="wF6-jh-342"/>
                     </connections>

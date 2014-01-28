@@ -28,9 +28,12 @@
 #import "ActColor.h"
 #import "ActDatabaseManager.h"
 
+#define BODY_ROW_HEIGHT 150
+
 @implementation ActActivityEditorViewController
 
 @synthesize database = _database;
+@synthesize doneHandler = _doneHandler;
 
 + (ActActivityEditorViewController *)instantiate
 {
@@ -53,6 +56,13 @@
   if (_activityStorage != storage)
     {
       _activityStorage = storage;
+
+      /* making a copy in _activity so we can cancel if asked to. */
+
+      act::activity_storage_ref copy(new act::activity_storage(*storage));
+
+      _activity.reset(new act::activity(copy));
+
       [self reloadData];
     }
 }
@@ -71,6 +81,17 @@
 
 - (IBAction)doneAction:(id)sender
 {
+  if (_activityModified)
+    {
+      *_activityStorage = *_activity->storage();
+      [_database activityDidChange:_activityStorage];
+    }
+
+  [self dismissViewControllerAnimated:YES completion:nil];
+}
+
+- (IBAction)cancelAction:(id)sender
+{
   [self dismissViewControllerAnimated:YES completion:nil];
 }
 
@@ -78,12 +99,26 @@
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tv
 {
-  return 0;
+  return 4;
 }
 
 - (NSInteger)tableView:(UITableView *)tv numberOfRowsInSection:(NSInteger)sec
 {
-  return 0;
+  if (sec == 0)
+    return _activity->storage()->field_count();
+  else
+    return 1;
+}
+
+- (NSString *)tableView:(UITableView *)tv
+    titleForHeaderInSection:(NSInteger)sec
+{
+  if (sec == 0)
+    return @"Data Fields";
+  else if (sec == 2)
+    return @"Notes";
+  else
+    return nil;
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tv
@@ -92,26 +127,74 @@
   NSString *ident;
   UITableViewCell *cell;
 
-  ident = @"XXX";
-
-  if (ident == nil)
-    return nil;
+  switch (path.section)
+    {
+    case 0:
+      ident = @"fieldCell";
+      break;
+    case 1:
+      ident = @"addFieldCell";
+      break;
+    case 2:
+      ident = @"bodyCell";
+      break;
+    case 3:
+      ident = @"deleteCell";
+      break;
+    default:
+      return nil;
+    }
 
   cell = [tv dequeueReusableCellWithIdentifier:ident];
 
   if (cell == nil)
     {
-      if ([ident isEqualToString:@"XXX"])
+      if ([ident isEqualToString:@"fieldCell"])
+	{
+	  cell = [[UITableViewCell alloc] initWithStyle:
+		  UITableViewCellStyleValue1 reuseIdentifier:ident];
+	  cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
+	}
+      else if ([ident isEqualToString:@"addFieldCell"])
 	{
 	  cell = [[UITableViewCell alloc] initWithStyle:
 		  UITableViewCellStyleDefault reuseIdentifier:ident];
+	  cell.textLabel.text = @"Add Field";
+	  cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
+	}
+      else if ([ident isEqualToString:@"bodyCell"])
+	{
+	  cell = [[UITableViewCell alloc] initWithStyle:
+		  UITableViewCellStyleDefault reuseIdentifier:ident];
+	  cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
+	}
+      else if ([ident isEqualToString:@"deleteCell"])
+	{
+	  cell = [[UITableViewCell alloc] initWithStyle:
+		  UITableViewCellStyleDefault reuseIdentifier:ident];
+	  cell.textLabel.text = @"Delete Activity";
+	  cell.textLabel.textColor = [tv tintColor];
 	}
     }
 
-  if ([ident isEqualToString:@"XXX"])
+  if ([ident isEqualToString:@"fieldCell"])
     {
+      size_t idx = path.row;
+      act::activity_storage_ref storage = _activity->storage();
+      cell.textLabel.text = [NSString stringWithUTF8String:
+			     storage->field_name(idx).c_str()];
+      cell.detailTextLabel.text = [NSString stringWithUTF8String:
+				   storage->field_value(idx).c_str()];
     }
-
+  else if ([ident isEqualToString:@"bodyCell"])
+    {
+      UILabel *label = cell.textLabel;
+      label.lineBreakMode = NSLineBreakByWordWrapping;
+      label.numberOfLines = 10;
+      label.text = [_database bodyStringOfActivity:*_activity];
+      label.textColor = [UIColor colorWithWhite:.6 alpha:1];
+    }
+  
   return cell;
 }
 
@@ -120,20 +203,28 @@
 - (CGFloat)tableView:(UITableView *)tv
     heightForRowAtIndexPath:(NSIndexPath *)path
 {
-  return tv.rowHeight;
+  if (path.section == 2)
+    return BODY_ROW_HEIGHT;
+  else
+    return tv.rowHeight;
 }
 
 - (void)tableView:(UITableView *)tv didSelectRowAtIndexPath:(NSIndexPath *)path
 {
-#if 0
-  UITableViewCell *cell = [tv cellForRowAtIndexPath:path];
-
-  NSString *ident = cell.reuseIdentifier;
-
-  if ([ident isEqualToString:@"XXX"])
+  switch (path.section)
     {
+    case 0:
+      /* FIXME: edit this field. */
+      break;
+
+    case 1:
+      /* FIXME: add new field. */
+      break;
+
+    case 2:
+      /* FIXME: edit body text. */
+      break;
     }
-#endif
 
   [tv deselectRowAtIndexPath:path animated:NO];
 }

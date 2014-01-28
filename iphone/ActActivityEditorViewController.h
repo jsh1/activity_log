@@ -24,7 +24,9 @@
 
 #import <UIKit/UIKit.h>
 
-#import "act-activity-storage.h"
+#import "act-activity.h"
+
+typedef void (^ActActivityEditorDoneHandler)(const act::activity_storage_ref &storage);
 
 @class ActDatabaseManager;
 
@@ -33,14 +35,24 @@
 {
   ActDatabaseManager *_database;
   act::activity_storage_ref _activityStorage;
+
+  /* Has a copy of _activityStorage, not the original. */
+
+  std::unique_ptr<act::activity> _activity;
+  BOOL _activityModified;
 }
 
 + (ActActivityEditorViewController *)instantiate;
 
 @property(nonatomic) ActDatabaseManager *database;
 
+/* Setter copies the passed in object. */
+
 @property(nonatomic) act::activity_storage_ref activityStorage;
 
+@property(nonatomic, copy) ActActivityEditorDoneHandler doneHandler;
+
 - (IBAction)doneAction:(id)sender;
+- (IBAction)cancelAction:(id)sender;
 
 @end

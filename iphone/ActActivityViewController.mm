@@ -331,6 +331,8 @@ update_constraint(NSLayoutConstraint *constraint, UILabel *label)
   UINavigationController *inner_nav
     = [[UINavigationController alloc] initWithRootViewController:controller];
 
+  inner_nav.modalTransitionStyle = UIModalTransitionStyleCrossDissolve;
+
   [self presentViewController:inner_nav animated:YES completion:nil];
 }
 
