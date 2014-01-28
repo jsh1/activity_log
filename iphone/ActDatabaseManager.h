@@ -27,8 +27,7 @@
 #import <memory>
 
 extern NSString *const ActActivityDatabaseDidChange;
-extern NSString *const ActActivityDidChangeField;
-extern NSString *const ActActivityDidChangeBody;
+extern NSString *const ActActivityDidChange;
 
 @class ActFileManager;
 
@@ -63,10 +62,7 @@ extern NSString *const ActActivityDidChangeBody;
 
 @property(nonatomic, readonly) act::database *database;
 
-- (void)activityDidChangeBody:(const act::activity_storage_ref)storage;
-
-- (void)activity:(const act::activity_storage_ref)storage
-    didChangeField:(NSString *)name;
+- (void)activityDidChange:(const act::activity_storage_ref)storage;
 
 @end
 

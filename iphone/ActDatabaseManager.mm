@@ -37,8 +37,7 @@
 #define SYNC_DELAY_NS (10LL*NSEC_PER_SEC)
 
 NSString *const ActActivityDatabaseDidChange = @"ActActivityDatabaseDidChange";
-NSString *const ActActivityDidChangeField = @"ActActivityDidChangeField";
-NSString *const ActActivityDidChangeBody = @"ActActivityDidChangeBody";
+NSString *const ActActivityDidChange = @"ActActivityDidChange";
 
 #if DEBUG && !defined(VERBOSE)
 # define VERBOSE 1
@@ -215,22 +214,12 @@ NSString *const ActActivityDidChangeBody = @"ActActivityDidChangeBody";
     }
 }
 
-- (void)activity:(const act::activity_storage_ref)a
-    didChangeField:(NSString *)name;
+- (void)activityDidChange:(const act::activity_storage_ref)a
 {
   _databaseNeedsSynchronize = YES;
 
   [[NSNotificationCenter defaultCenter]
-   postNotificationName:ActActivityDidChangeField object:self
-   userInfo:@{@"activity": [NSValue valueWithPointer:&a], @"field": name}];
-}
-
-- (void)activityDidChangeBody:(const act::activity_storage_ref)a
-{
-  _databaseNeedsSynchronize = YES;
-
-  [[NSNotificationCenter defaultCenter]
-   postNotificationName:ActActivityDidChangeBody object:self
+   postNotificationName:ActActivityDidChange object:self
    userInfo:@{@"activity": [NSValue valueWithPointer:&a]}];
 }
 
@@ -302,7 +291,7 @@ NSString *const ActActivityDidChangeBody = @"ActActivityDidChangeBody";
   else
     a.storage()->delete_field(field_name);
 
-  [self activity:a.storage() didChangeField:name];
+  [self activityDidChange:a.storage()];
 }
 
 - (void)deleteField:(NSString *)name ofActivity:(act::activity &)a
@@ -318,8 +307,8 @@ NSString *const ActActivityDidChangeBody = @"ActActivityDidChangeBody";
 
   a.storage()->set_field_name([oldName UTF8String], [newName UTF8String]);
 
-  [self activity:a.storage() didChangeField:oldName];
-  [self activity:a.storage() didChangeField:newName];
+  [self activityDidChange:a.storage()];
+  [self activityDidChange:a.storage()];
 }
 
 - (NSString *)bodyStringOfActivity:(const act::activity &)a
@@ -424,7 +413,7 @@ NSString *const ActActivityDidChangeBody = @"ActActivityDidChangeBody";
       std::swap(a.storage()->body(), wrapped);
       a.storage()->increment_seed();
 
-      [self activityDidChangeBody:a.storage()];
+      [self activityDidChange:a.storage()];
     }
 }
 
