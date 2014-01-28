@@ -109,7 +109,7 @@ namespace {
 
 struct gps_reader : public act::activity::gps_data_reader
 {
-  ActActivityViewController *_controller;
+  __weak ActActivityViewController *_controller;
 
   gps_reader(ActActivityViewController *controller)
   : _controller(controller) {}
