@@ -26,8 +26,6 @@
 
 #import "act-activity.h"
 
-typedef void (^ActActivityEditorDoneHandler)(const act::activity_storage_ref &storage);
-
 @class ActDatabaseManager;
 
 @interface ActActivityEditorViewController : UITableViewController
@@ -49,8 +47,6 @@ typedef void (^ActActivityEditorDoneHandler)(const act::activity_storage_ref &st
 /* Setter copies the passed in object. */
 
 @property(nonatomic) act::activity_storage_ref activityStorage;
-
-@property(nonatomic, copy) ActActivityEditorDoneHandler doneHandler;
 
 - (IBAction)doneAction:(id)sender;
 - (IBAction)cancelAction:(id)sender;

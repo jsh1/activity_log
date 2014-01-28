@@ -33,7 +33,6 @@
 @implementation ActActivityEditorViewController
 
 @synthesize database = _database;
-@synthesize doneHandler = _doneHandler;
 
 + (ActActivityEditorViewController *)instantiate
 {
