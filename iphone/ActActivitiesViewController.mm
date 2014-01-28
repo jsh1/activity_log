@@ -231,18 +231,17 @@
   if (_listData.size() != 0)
     return;
 
-  time_t month_start = LONG_MAX;
+  time_t week_start = LONG_MAX;
 
   for (auto &it : _items)
     {
       time_t date = it.date();
 
-      if (date < month_start)
+      if (date < week_start)
 	{
-	  struct tm tm = {0};
-	  localtime_r(&date, &tm);
-	  month_start = act::month_time(tm.tm_year + 1900, tm.tm_mon);
-	  _listData.emplace_back(month_start);
+	  int week = act::week_index(date);
+	  week_start = act::week_date(week);
+	  _listData.emplace_back(week_start);
 	}
 
       _listData.back().items.emplace_back(new act::activity_list_item(it.storage()));

@@ -43,7 +43,8 @@ struct activity_list_section
 
 private:
   static bool initialized;
-  static NSDateFormatter *date_formatter;
+  static NSDateFormatter *week_formatter;
+  static NSString *en_dash;
 
   static void initialize();
 };

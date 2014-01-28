@@ -32,14 +32,18 @@
 namespace act {
 
 bool activity_list_section::initialized;
-NSDateFormatter *activity_list_section::date_formatter;
+NSDateFormatter *activity_list_section::week_formatter;
+NSString *activity_list_section::en_dash;
 
 void
 activity_list_section::initialize()
 {
-  date_formatter = [[NSDateFormatter alloc] init];
-  [date_formatter setDateFormat:
-   [NSDateFormatter dateFormatFromTemplate:@"MMMMYYYY" options:0 locale:nil]];
+  week_formatter = [[NSDateFormatter alloc] init];
+  [week_formatter setDateStyle:NSDateFormatterMediumStyle];
+  [week_formatter setTimeStyle:NSDateFormatterNoStyle];
+
+  unichar c = 0x2013;
+  en_dash = [[NSString alloc] initWithCharacters:&c length:1];
 
   initialized = true;
 }
@@ -61,10 +65,15 @@ activity_list_section::configure_view(UITableViewHeaderFooterView *view)
   if (!initialized)
     initialize();
 
-  UILabel *label = view.textLabel;
+  time_t start_date = date;
+  time_t end_date = date + 6 * 24 * 60 * 60;
 
-  label.text = [date_formatter stringFromDate:
-		[NSDate dateWithTimeIntervalSince1970:date]];
+  view.textLabel.text = [NSString stringWithFormat:@"%@ %@ %@",
+			 [week_formatter stringFromDate:
+			  [NSDate dateWithTimeIntervalSince1970:start_date]],
+			 en_dash,
+			 [week_formatter stringFromDate:
+			  [NSDate dateWithTimeIntervalSince1970:end_date]]];
 }
 
 } // namespace act
