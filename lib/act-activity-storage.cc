@@ -46,6 +46,17 @@ activity_storage::activity_storage(const activity_storage &rhs)
 {
 }
 
+activity_storage &
+activity_storage::operator= (const activity_storage &rhs)
+{
+  _header = rhs._header;
+  _body = rhs._body;
+
+  increment_seed();
+
+  return *this;
+}
+
 void
 activity_storage::set_path(const char *path)
 {

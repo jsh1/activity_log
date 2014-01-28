@@ -54,6 +54,10 @@ public:
   activity_storage();
   activity_storage(const activity_storage &rhs);
 
+  // only copies the contents, not the seeds and path.
+
+  activity_storage &operator= (const activity_storage &rhs);
+
   uint32_t seed() const;
   void increment_seed();
 
@@ -73,6 +77,10 @@ public:
 
   std::string &body();
   const std::string &body() const;
+
+  size_t field_count() const;
+  const std::string &field_name(size_t idx) const;
+  const std::string &field_value(size_t idx) const;
 
   std::string &operator[] (const char *name);
   std::string &operator[] (const std::string &name);
@@ -151,6 +159,24 @@ inline std::string &
 activity_storage::body()
 {
   return _body;
+}
+
+inline size_t
+activity_storage::field_count() const
+{
+  return _header.size();
+}
+
+inline const std::string &
+activity_storage::field_name(size_t idx) const
+{
+  return _header[idx].first;
+}
+
+inline const std::string &
+activity_storage::field_value(size_t idx) const
+{
+  return _header[idx].second;
 }
 
 inline std::string &
