@@ -55,6 +55,9 @@ public:
   size_t field_count() const;
   const std::string &field_name(size_t idx) const;
 
+  int field_index(const char *name) const;
+  int field_index(const std::string &name) const;
+
   std::string &operator[] (size_t idx);
   const std::string &operator[](size_t idx) const;
 
@@ -272,6 +275,18 @@ inline const std::string &
 activity::field_name(size_t idx) const
 {
   return _storage->field_name(idx);
+}
+
+inline int
+activity::field_index(const char *name) const
+{
+  return _storage->field_index(name);
+}
+
+inline int
+activity::field_index(const std::string &name) const
+{
+  return _storage->field_index(name);
 }
 
 inline std::string &

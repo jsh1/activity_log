@@ -193,6 +193,16 @@ activity_storage::field_ptr(const char *name) const
   return idx >= 0 ? &_header[idx].second : nullptr;
 }
 
+void
+activity_storage::delete_field(size_t idx)
+{
+  if (idx < _header.size())
+    {
+      _header.erase(_header.begin() + idx);
+      increment_seed();
+    }
+}
+
 bool
 activity_storage::delete_field(const char *name)
 {
@@ -200,10 +210,41 @@ activity_storage::delete_field(const char *name)
   if (idx < 0)
     return false;
 
-  _header.erase(_header.begin() + idx);
-  increment_seed();
+  delete_field((size_t)idx);
 
   return true;
+}
+
+namespace {
+
+inline bool
+empty_string_p(const std::string &str)
+{
+  return str.find_first_not_of(" \t\n\v\f\r") == std::string::npos;
+}
+
+} // anonymous namespace
+
+void
+activity_storage::delete_empty_fields()
+{
+  bool modified = false;
+
+  size_t idx = 0;
+  while (idx < _header.size())
+    {
+      if (empty_string_p(_header[idx].first)
+	  || empty_string_p(_header[idx].second))
+	{
+	  _header.erase(_header.begin() + idx);
+	  modified = true;
+	}
+      else
+	idx++;
+    }
+
+  if (modified)
+    increment_seed();
 }
 
 bool

@@ -48,8 +48,6 @@ class activity_storage : public uncopyable
   field_map _header;
   std::string _body;
 
-  int field_index(const char *name) const;
-
 public:
   activity_storage();
   activity_storage(const activity_storage &rhs);
@@ -81,6 +79,11 @@ public:
   size_t field_count() const;
   const std::string &field_name(size_t idx) const;
 
+  /* returns -1 if no such field. */
+
+  int field_index(const char *name) const;
+  int field_index(const std::string &name) const;
+
   std::string &operator[] (size_t idx);
   const std::string &operator[](size_t idx) const;
 
@@ -90,8 +93,11 @@ public:
   const std::string *field_ptr(const char *name) const;
   const std::string *field_ptr(const std::string &name) const;
 
+  void delete_field(size_t idx);
   bool delete_field(const char *name);
   bool delete_field(const std::string &name);
+
+  void delete_empty_fields();
 
   bool set_field_name(const std::string &old_name, const std::string
     &new_name);
@@ -173,6 +179,12 @@ inline const std::string &
 activity_storage::field_name(size_t idx) const
 {
   return _header[idx].first;
+}
+
+inline int
+activity_storage::field_index(const std::string &name) const
+{
+  return field_index(name.c_str());
 }
 
 inline std::string &
