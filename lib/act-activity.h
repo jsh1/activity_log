@@ -46,8 +46,17 @@ public:
 
   void printf(const char *format) const;
 
+  uint32_t seed() const;
+  void increment_seed();
+
   const std::string &body() const;
   std::string &body();
+
+  size_t field_count() const;
+  const std::string &field_name(size_t idx) const;
+
+  std::string &operator[] (size_t idx);
+  const std::string &operator[](size_t idx) const;
 
   std::string &operator[] (const char *name);
   std::string &operator[] (const std::string &name);
@@ -228,6 +237,19 @@ activity::storage() const
   return _storage;
 }
 
+inline uint32_t
+activity::seed() const
+{
+  return _storage->seed();
+}
+
+inline void
+activity::increment_seed()
+{
+  _storage->increment_seed();
+  _invalid_groups |= group_all;
+}
+
 inline const std::string &
 activity::body() const
 {
@@ -238,6 +260,30 @@ inline std::string &
 activity::body()
 {
   return _storage->body();
+}
+
+inline size_t
+activity::field_count() const
+{
+  return _storage->field_count();
+}
+
+inline const std::string &
+activity::field_name(size_t idx) const
+{
+  return _storage->field_name(idx);
+}
+
+inline std::string &
+activity::operator[](size_t idx)
+{
+  return _storage->operator[](idx);
+}
+
+inline const std::string &
+activity::operator[](size_t idx) const
+{
+  return _storage->operator[](idx);
 }
 
 inline std::string &
