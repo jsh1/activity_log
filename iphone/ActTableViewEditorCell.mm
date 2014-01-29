@@ -60,4 +60,8 @@
   [_target performVoidSelector:_action withObject:self];
 }
 
+- (void)viewWillAppear:(BOOL)animated
+{
+}
+
 @end

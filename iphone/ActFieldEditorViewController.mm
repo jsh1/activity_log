@@ -31,6 +31,7 @@
 
 @synthesize type = _type;
 @synthesize stringValue = _stringValue;
+@synthesize optionStrings = _optionsStrings;
 @synthesize headerString = _headerString;
 @synthesize footerString = _footerString;
 
@@ -64,8 +65,11 @@
 {
   [super viewDidLoad];
 
-  self.tableView.dataSource = self;
-  self.tableView.delegate = self;
+  UITableView *view = self.tableView;
+
+  view.dataSource = self;
+  view.delegate = self;
+  view.keyboardDismissMode = UIScrollViewKeyboardDismissModeOnDrag;
 
   switch (_type)
     {
@@ -96,11 +100,14 @@
 - (void)viewWillAppear:(BOOL)animated
 {
   _editorCell.stringValue = _stringValue;
+
+  [_editorCell viewWillAppear:animated];
 }
 
 - (void)viewDidAppear:(BOOL)animated
 {
-  [_editorCell becomeFirstResponder];
+  if ([_optionsStrings count] == 0)
+    [_editorCell becomeFirstResponder];
 }
 
 - (void)viewWillDisappear:(BOOL)animated
@@ -124,13 +131,15 @@
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tv
 {
-  return 1;
+  return 1 + (_optionsStrings != nil);
 }
 
 - (NSInteger)tableView:(UITableView *)tv numberOfRowsInSection:(NSInteger)sec
 {
   if (sec == 0)
     return 1;
+  else if (sec == 1)
+    return [_optionsStrings count];
   else
     return 0;
 }
@@ -140,6 +149,8 @@
 {
   if (sec == 0)
     return _headerString;
+  else if (sec == 1)
+    return @"Options";
   else
     return nil;
 }
@@ -156,10 +167,40 @@
 - (UITableViewCell *)tableView:(UITableView *)tv
     cellForRowAtIndexPath:(NSIndexPath *)path
 {
-  if (path.section == 0 && path.row == 0)
-    return _editorCell;
-  else
+  NSString *ident = nil;
+
+  switch (path.section)
+    {
+    case 0:
+      if (path.row == 0)
+	return _editorCell;
+      break;
+
+    case 1:
+      ident = @"optionCell";
+      break;
+    }
+
+  if (ident == nil)
     return nil;
+
+  UITableViewCell *cell = [tv dequeueReusableCellWithIdentifier:ident];
+
+  if (cell == nil)
+    {
+      if ([ident isEqualToString:@"optionCell"])
+	{
+	  cell = [[UITableViewCell alloc] initWithStyle:
+		  UITableViewCellStyleDefault reuseIdentifier:ident];
+	}
+    }
+
+  if ([ident isEqualToString:@"optionCell"])
+    {
+      cell.textLabel.text = _optionsStrings[path.row];
+    }
+
+  return cell;
 }
 
 /* UITableViewDelegate methods. */
@@ -175,6 +216,18 @@
     }
 
   return tv.rowHeight;
+}
+
+- (void)tableView:(UITableView *)tv didSelectRowAtIndexPath:(NSIndexPath *)path
+{
+  if (path.section == 1)
+    {
+      _editorCell.stringValue = _optionsStrings[path.row];
+
+      [self.navigationController popViewControllerAnimated:YES];
+    }
+
+  [tv deselectRowAtIndexPath:path animated:NO];
 }
 
 @end

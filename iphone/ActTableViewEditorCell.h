@@ -43,4 +43,6 @@
 
 - (void)sendAction;
 
+- (void)viewWillAppear:(BOOL)animated;
+
 @end

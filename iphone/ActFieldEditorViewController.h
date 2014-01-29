@@ -48,6 +48,8 @@
 
 @property(nonatomic, copy) NSString *stringValue;
 
+@property(nonatomic, copy) NSArray *optionStrings;
+
 @property(nonatomic, copy) NSString *headerString;
 @property(nonatomic, copy) NSString *footerString;
 

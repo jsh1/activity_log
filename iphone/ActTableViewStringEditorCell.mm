@@ -53,10 +53,13 @@
   _textField.text = str;
 }
 
-- (BOOL)becomeFirstResponder
+- (void)viewWillAppear:(BOOL)animated
 {
   _textField.delegate = self;
+}
 
+- (BOOL)becomeFirstResponder
+{
   return [_textField becomeFirstResponder];
 }
 
@@ -71,11 +74,6 @@
 }
 
 /* UITextFieldDelegate methods. */
-
-- (BOOL)textFieldShouldEndEditing:(UITextField *)field
-{
-  return NO;
-}
 
 - (BOOL)textFieldShouldReturn:(UITextField *)field
 {

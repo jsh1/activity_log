@@ -92,6 +92,7 @@
 {
   if (_activityModified)
     {
+      _activity->storage()->delete_empty_fields();
       *_activityStorage = *_activity->storage();
 
       [[ActDatabaseManager sharedManager] activityDidChange:_activityStorage];
@@ -260,6 +261,53 @@
   [self.navigationController pushViewController:controller animated:YES];
 }
 
+- (void)addField
+{
+  auto *controller = [[ActFieldEditorViewController alloc]
+		      initWithFieldType:act::field_data_type::string];
+
+  controller.title = @"Field Name";
+
+  controller.optionStrings = @[@"Activity", @"Type", @"Course",
+    @"Duration", @"Distance", @"Pace", @"Equipment", @"Temperature",
+    @"Weather", @"Weight", @"Keywords", @"Points", @"Effort", @"Quality",
+    @"Resting-HR", @"Avg-HR", @"Max-HR", @"Avg-Cadence", @"Max-Cadence",
+    @"Calories", @"Training-Effect"];
+
+  __weak auto weak_self = self;
+
+  self.viewWillDisappearHandler = ^
+    {
+      if (__strong auto strong_self = weak_self)
+	{
+	  act::activity &a = *strong_self->_activity;
+
+	  NSString *str
+	    = [controller.stringValue stringByTrimmingCharactersInSet
+	       :[NSCharacterSet whitespaceCharacterSet]];
+
+	  if ([str length] != 0)
+	    {
+	      const char *field_name = [str UTF8String];
+
+	      auto field_id = act::lookup_field_id(field_name);
+	      if (field_id != act::field_id::custom)
+		field_name = act::canonical_field_name(field_id);
+
+	      if (a.field_index(field_name) < 0)
+		{
+		  a[field_name] = "";
+		  a.increment_seed();
+
+		  strong_self->_activityModified = YES;
+		}
+	    }
+	}
+    };
+
+  [self.navigationController pushViewController:controller animated:YES];
+}
+
 - (void)editBody
 {
   auto *controller = [[ActTextEditorViewController alloc] init];
@@ -294,11 +342,15 @@
       break;
 
     case 1:
-      /* FIXME: add new field. */
+      [self addField];
       break;
 
     case 2:
       [self editBody];
+      break;
+
+    case 3:
+      /* FIXME: delete activity (somehow). */
       break;
     }
 

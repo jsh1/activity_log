@@ -320,7 +320,6 @@
     cellForRowAtIndexPath:(NSIndexPath *)path
 {
   NSString *ident;
-  UITableViewCell *cell;
 
   if (_viewMode == ActActivitiesViewList)
     {
@@ -338,7 +337,7 @@
   if (ident == nil)
     return nil;
 
-  cell = [tv dequeueReusableCellWithIdentifier:ident];
+  UITableViewCell *cell = [tv dequeueReusableCellWithIdentifier:ident];
 
   if (cell == nil)
     {
