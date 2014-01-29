@@ -21,12 +21,16 @@
 		571A0932188D6A310066B572 /* libxml2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 571A0931188D6A310066B572 /* libxml2.dylib */; };
 		571A093A188D6F320066B572 /* ActAppDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = 571A0939188D6F320066B572 /* ActAppDelegate.mm */; };
 		571A093D188D70A70066B572 /* Main.xib in Resources */ = {isa = PBXBuildFile; fileRef = 571A093B188D70A70066B572 /* Main.xib */; };
+		572BB218189852AE00EDCCA4 /* TableViewStringEditorCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 572BB216189852AD00EDCCA4 /* TableViewStringEditorCell.xib */; };
+		572BB21B189854F200EDCCA4 /* ActTableViewStringEditorCell.mm in Sources */ = {isa = PBXBuildFile; fileRef = 572BB21A189854F200EDCCA4 /* ActTableViewStringEditorCell.mm */; };
+		572BB21E189859CE00EDCCA4 /* ActTableViewEditorCell.mm in Sources */ = {isa = PBXBuildFile; fileRef = 572BB21D189859CE00EDCCA4 /* ActTableViewEditorCell.mm */; };
+		572BB221189859EB00EDCCA4 /* ActFieldEditorViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = 572BB220189859EB00EDCCA4 /* ActFieldEditorViewController.mm */; };
 		576FF5981892DCF100C0C3CF /* ActActivityViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = 576FF5971892DCF100C0C3CF /* ActActivityViewController.mm */; };
 		576FF59B1892DE4900C0C3CF /* ActivityView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 576FF5991892DE4900C0C3CF /* ActivityView.xib */; };
 		57830C44188D7A7C001056B5 /* ActActivitiesViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = 57830C41188D7A7C001056B5 /* ActActivitiesViewController.mm */; };
 		57830C4B188D7AD2001056B5 /* ActivitiesView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 57830C49188D7AD2001056B5 /* ActivitiesView.xib */; };
 		57830C53188D7B26001056B5 /* CoreAnimationExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = 57830C4E188D7B26001056B5 /* CoreAnimationExtensions.m */; };
-		57830C54188D7B26001056B5 /* FoundationExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = 57830C50188D7B26001056B5 /* FoundationExtensions.m */; };
+		57830C54188D7B26001056B5 /* FoundationExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = 57830C50188D7B26001056B5 /* FoundationExtensions.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		57830CAF188D7C38001056B5 /* act-activity-accum.cc in Sources */ = {isa = PBXBuildFile; fileRef = 57830C56188D7B6E001056B5 /* act-activity-accum.cc */; };
 		57830CB0188D7C38001056B5 /* act-activity-storage.cc in Sources */ = {isa = PBXBuildFile; fileRef = 57830C58188D7B6E001056B5 /* act-activity-storage.cc */; };
 		57830CB1188D7C38001056B5 /* act-activity.cc in Sources */ = {isa = PBXBuildFile; fileRef = 57830C5A188D7B6E001056B5 /* act-activity.cc */; };
@@ -134,6 +138,13 @@
 		571A0938188D6F320066B572 /* ActAppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActAppDelegate.h; sourceTree = "<group>"; };
 		571A0939188D6F320066B572 /* ActAppDelegate.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ActAppDelegate.mm; sourceTree = "<group>"; };
 		571A093C188D70A70066B572 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = resources/en.lproj/Main.xib; sourceTree = "<group>"; };
+		572BB217189852AE00EDCCA4 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = resources/en.lproj/TableViewStringEditorCell.xib; sourceTree = "<group>"; };
+		572BB219189854F200EDCCA4 /* ActTableViewStringEditorCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActTableViewStringEditorCell.h; sourceTree = "<group>"; };
+		572BB21A189854F200EDCCA4 /* ActTableViewStringEditorCell.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ActTableViewStringEditorCell.mm; sourceTree = "<group>"; };
+		572BB21C189859CE00EDCCA4 /* ActTableViewEditorCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActTableViewEditorCell.h; sourceTree = "<group>"; };
+		572BB21D189859CE00EDCCA4 /* ActTableViewEditorCell.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ActTableViewEditorCell.mm; sourceTree = "<group>"; };
+		572BB21F189859EB00EDCCA4 /* ActFieldEditorViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActFieldEditorViewController.h; sourceTree = "<group>"; };
+		572BB220189859EB00EDCCA4 /* ActFieldEditorViewController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ActFieldEditorViewController.mm; sourceTree = "<group>"; };
 		576FF5961892DCF100C0C3CF /* ActActivityViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActActivityViewController.h; sourceTree = "<group>"; };
 		576FF5971892DCF100C0C3CF /* ActActivityViewController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ActActivityViewController.mm; sourceTree = "<group>"; };
 		576FF59A1892DE4900C0C3CF /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = resources/en.lproj/ActivityView.xib; sourceTree = "<group>"; };
@@ -393,6 +404,8 @@
 				57B0268418968C0E006440AF /* ActFileManager.mm */,
 				57F95731188ED836000EF638 /* ActDatabaseManager.h */,
 				57F95732188ED836000EF638 /* ActDatabaseManager.mm */,
+				57F95728188DC140000EF638 /* ActSettingsViewController.h */,
+				57F95729188DC140000EF638 /* ActSettingsViewController.mm */,
 				57F95737188EE585000EF638 /* ActQueryListViewController.h */,
 				57F95738188EE585000EF638 /* ActQueryListViewController.mm */,
 				57830C40188D7A7C001056B5 /* ActActivitiesViewController.h */,
@@ -407,8 +420,12 @@
 				576FF5971892DCF100C0C3CF /* ActActivityViewController.mm */,
 				57B0268C18971200006440AF /* ActActivityEditorViewController.h */,
 				57B0268D18971200006440AF /* ActActivityEditorViewController.mm */,
-				57F95728188DC140000EF638 /* ActSettingsViewController.h */,
-				57F95729188DC140000EF638 /* ActSettingsViewController.mm */,
+				572BB21F189859EB00EDCCA4 /* ActFieldEditorViewController.h */,
+				572BB220189859EB00EDCCA4 /* ActFieldEditorViewController.mm */,
+				572BB21C189859CE00EDCCA4 /* ActTableViewEditorCell.h */,
+				572BB21D189859CE00EDCCA4 /* ActTableViewEditorCell.mm */,
+				572BB219189854F200EDCCA4 /* ActTableViewStringEditorCell.h */,
+				572BB21A189854F200EDCCA4 /* ActTableViewStringEditorCell.mm */,
 				57001E9E1891BCFA00611F26 /* ActColor.h */,
 				57001E9F1891BCFA00611F26 /* ActColor.mm */,
 			);
@@ -476,6 +493,7 @@
 				57830C49188D7AD2001056B5 /* ActivitiesView.xib */,
 				576FF5991892DE4900C0C3CF /* ActivityView.xib */,
 				57B02689189711CB006440AF /* ActivityEditorView.xib */,
+				572BB216189852AD00EDCCA4 /* TableViewStringEditorCell.xib */,
 				57CA435818901570008693CA /* QueryListView.xib */,
 				57F9572E188DC70D000EF638 /* Settings.storyboard */,
 			);
@@ -706,6 +724,7 @@
 				57F95730188DC70D000EF638 /* Settings.storyboard in Resources */,
 				571A093D188D70A70066B572 /* Main.xib in Resources */,
 				57F95735188EE0F5000EF638 /* defaults.plist in Resources */,
+				572BB218189852AE00EDCCA4 /* TableViewStringEditorCell.xib in Resources */,
 				571A0902188D691F0066B572 /* InfoPlist.strings in Resources */,
 				57B0268B189711CB006440AF /* ActivityEditorView.xib in Resources */,
 			);
@@ -718,6 +737,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				572BB21B189854F200EDCCA4 /* ActTableViewStringEditorCell.mm in Sources */,
 				571A0904188D691F0066B572 /* main.m in Sources */,
 				57001E9D1890763300611F26 /* ActActivityListItemView.mm in Sources */,
 				57830C54188D7B26001056B5 /* FoundationExtensions.m in Sources */,
@@ -726,10 +746,12 @@
 				57B0268E18971200006440AF /* ActActivityEditorViewController.mm in Sources */,
 				57F95733188ED836000EF638 /* ActDatabaseManager.mm in Sources */,
 				57B0268518968C0E006440AF /* ActFileManager.mm in Sources */,
+				572BB221189859EB00EDCCA4 /* ActFieldEditorViewController.mm in Sources */,
 				57830C53188D7B26001056B5 /* CoreAnimationExtensions.m in Sources */,
 				57F9572A188DC140000EF638 /* ActSettingsViewController.mm in Sources */,
 				57001EA01891BCFA00611F26 /* ActColor.mm in Sources */,
 				576FF5981892DCF100C0C3CF /* ActActivityViewController.mm in Sources */,
+				572BB21E189859CE00EDCCA4 /* ActTableViewEditorCell.mm in Sources */,
 				57830C44188D7A7C001056B5 /* ActActivitiesViewController.mm in Sources */,
 				57F95739188EE585000EF638 /* ActQueryListViewController.mm in Sources */,
 				571A093A188D6F320066B572 /* ActAppDelegate.mm in Sources */,
@@ -834,6 +856,14 @@
 				571A093C188D70A70066B572 /* en */,
 			);
 			name = Main.xib;
+			sourceTree = "<group>";
+		};
+		572BB216189852AD00EDCCA4 /* TableViewStringEditorCell.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				572BB217189852AE00EDCCA4 /* en */,
+			);
+			name = TableViewStringEditorCell.xib;
 			sourceTree = "<group>";
 		};
 		576FF5991892DE4900C0C3CF /* ActivityView.xib */ = {

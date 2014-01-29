@@ -34,7 +34,7 @@
 #import "FoundationExtensions.h"
 
 #define BODY_WRAP_COLUMN 72
-#define SYNC_DELAY_NS (10LL*NSEC_PER_SEC)
+#define SYNC_DELAY_NS (2LL*NSEC_PER_SEC)
 
 NSString *const ActActivityDatabaseDidChange = @"ActActivityDatabaseDidChange";
 NSString *const ActActivityDidChange = @"ActActivityDidChange";
@@ -45,25 +45,41 @@ NSString *const ActActivityDidChange = @"ActActivityDidChange";
 
 #define LOG(x) do {if (VERBOSE) NSLog x;} while (0)
 
+@interface ActDatabaseManager ()
+- (void)synchronizeStorage:(act::activity_storage_ref)storage;
+@end
+
 @implementation ActDatabaseManager
 
-@synthesize fileManager = _fileManager;
+static ActDatabaseManager *_sharedManager;
 
-- (id)initWithFileManager:(ActFileManager *)file_manager
++ (ActDatabaseManager *)sharedManager
+{
+  if (_sharedManager == nil && [ActFileManager sharedManager] != nil)
+    _sharedManager = [[self alloc] init];
+
+  return _sharedManager;
+}
+
++ (void)shutdownSharedManager
+{
+  [_sharedManager invalidate];
+  _sharedManager = nil;
+}
+
+- (id)init
 {
   self = [super init];
   if (self == nil)
     return nil;
 
-  _fileManager = file_manager;
+  ActFileManager *fm = [ActFileManager sharedManager];
+  if (fm == nil)
+    return nil;
 
   [[NSNotificationCenter defaultCenter]
    addObserver:self selector:@selector(fileCacheDidChange:)
-   name:ActFileCacheDidChange object:_fileManager];
-
-  /* Can't just reload() the entire cached database directory, it may
-     include files that no longer exist in the master store, we'll
-     manually call add_activity() for every file. */
+   name:ActFileCacheDidChange object:fm];
 
   _database.reset(new act::database());
 
@@ -77,64 +93,71 @@ NSString *const ActActivityDidChange = @"ActActivityDidChange";
   [self synchronize];
 
   [[NSNotificationCenter defaultCenter] removeObserver:self];
-
-  _fileManager = nil;
 }
 
 - (void)dealloc
 {
-  [self invalidate];
-}
+  assert(!_databaseNeedsSynchronize);
 
-- (BOOL)needsSynchronize
-{
-  return _databaseNeedsSynchronize || _fileManager.needsSynchronize;
+  [self invalidate];
 }
 
 - (void)synchronize
 {
   if (_databaseNeedsSynchronize)
     {
-      ActAppDelegate *delegate
-	= (id)[UIApplication sharedApplication].delegate;
+      _databaseNeedsSynchronize = NO;
 
       for (auto &it : _database->items())
 	{
 	  act::activity_storage_ref storage = it.storage();
 
 	  if (storage->seed() != storage->path_seed())
-	    {
-	      NSString *src = [delegate temporaryLocalFile];
-
-	      if (storage->write_file([src fileSystemRepresentation]))
-		{
-		  NSString *local_path = [NSString stringWithUTF8String:
-					  it.storage()->path()];
-		  NSString *path = [local_path stringByRemovingPathPrefix:
-				    delegate.remoteActivityPath];
-		  NSString *rev = _addedActivityRevisions[path];
-
-		  BOOL ret = [_fileManager copyItemAtLocalPath:src
-			      toRemotePath:path previousRevision:rev
-			      completion:^(NSString *rev)
-			        {
-				  [[NSFileManager defaultManager]
-				   removeItemAtPath:src error:nil];
-
-				  if (rev != nil)
-				    _addedActivityRevisions[path] = rev;
-				  else
-				    storage->increment_seed();
-				}];
-
-		  if (ret)
-		    storage->set_path_seed(storage->seed());
-		}
-	    }
+	    [self synchronizeStorage:storage];
 	}
     }
+}
 
-  [_fileManager synchronize];
+- (void)synchronizeAfterDelay
+{
+  if (!_queuedSynchronize && _databaseNeedsSynchronize)
+    {
+      _queuedSynchronize = YES;
+
+      dispatch_time_t t = dispatch_time(DISPATCH_TIME_NOW, SYNC_DELAY_NS);
+
+      dispatch_after(t, dispatch_get_main_queue(), ^{
+	_queuedSynchronize = NO;
+	[self synchronize];
+      });
+    }
+}
+
+- (void)synchronizeStorage:(act::activity_storage_ref)storage
+{
+  ActAppDelegate *delegate = (id)[UIApplication sharedApplication].delegate;
+
+  NSString *src = [delegate temporaryLocalFile];
+
+  if (!storage->write_file([src fileSystemRepresentation]))
+    return;
+
+  ActFileManager *fm = [ActFileManager sharedManager];
+  if (fm == nil)
+    return ;
+
+  NSString *local_path = [NSString stringWithUTF8String:storage->path()];
+  NSString *remote_path = [fm remotePathForLocalPath:local_path];
+  NSString *rev = _addedActivityRevisions[remote_path];
+
+  BOOL ret = [fm copyItemAtLocalPath:src toRemotePath:remote_path
+	      previousRevision:rev completion:^(BOOL status) {
+		[[NSFileManager defaultManager] removeItemAtPath:src
+		 error:nil];
+	      }];
+
+  if (ret)
+    storage->set_path_seed(storage->seed());
 }
 
 - (act::database *)database
@@ -142,15 +165,17 @@ NSString *const ActActivityDidChange = @"ActActivityDidChange";
   return _database.get();
 }
 
-- (void)reset
+- (void)removeAllActivities
 {
+  /* Can't discard unsynchronized activities. */
+
+  [self synchronize];
+
   BOOL db_empty = _database->items().size() == 0;
 
   _database->clear();
 
   [_addedActivityRevisions removeAllObjects];
-
-  [_fileManager reset];
 
   if (!db_empty)
     {
@@ -163,9 +188,12 @@ NSString *const ActActivityDidChange = @"ActActivityDidChange";
 {
   ActAppDelegate *delegate = (id)[UIApplication sharedApplication].delegate;
 
-  NSString *path = [delegate remoteActivityPath:rel_path];
+  ActFileManager *fm = [ActFileManager sharedManager];
+  if (fm == nil)
+    return;
 
-  NSString *dest = [_fileManager localPathForRemotePath:path revision:rev];
+  NSString *path = [delegate remoteActivityPath:rel_path];
+  NSString *dest = [fm localPathForRemotePath:path revision:rev];
 
   if (dest != nil)
     {
@@ -214,9 +242,15 @@ NSString *const ActActivityDidChange = @"ActActivityDidChange";
     }
 }
 
+- (void)appDelegateWillSuspend:(NSNotification *)note
+{
+  [self synchronize];
+}
+
 - (void)activityDidChange:(const act::activity_storage_ref)a
 {
   _databaseNeedsSynchronize = YES;
+  [self synchronizeAfterDelay];
 
   [[NSNotificationCenter defaultCenter]
    postNotificationName:ActActivityDidChange object:self

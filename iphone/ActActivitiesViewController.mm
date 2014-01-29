@@ -59,15 +59,13 @@
 {
   [super viewDidLoad];
 
-  _database = [[ActDatabaseManager alloc]
-	       initWithFileManager:[ActFileManager sharedManager]];
-
   [[NSNotificationCenter defaultCenter]
    addObserver:self selector:@selector(metadataCacheDidChange:)
-   name:ActMetadataCacheDidChange object:_database.fileManager];
+   name:ActMetadataCacheDidChange object:nil];
+
   [[NSNotificationCenter defaultCenter]
    addObserver:self selector:@selector(activityDatabaseDidChange:)
-   name:ActActivityDatabaseDidChange object:_database];
+   name:ActActivityDatabaseDidChange object:nil];
 
   _addItem = [[UIBarButtonItem alloc]
 	initWithBarButtonSystemItem:UIBarButtonSystemItemAdd
@@ -77,6 +75,11 @@
 	target:self action:@selector(toggleWeekAction:)];
 
   [[self navigationItem] setRightBarButtonItems:@[_addItem, _weekItem]];
+}
+
+- (void)viewWillAppear:(BOOL)animated
+{
+  [self reloadData];
 }
 
 - (const act::database::query &)query
@@ -110,98 +113,112 @@
 
 - (void)reloadData
 {
-  /* Pull activity files spanning the query's partial date range into
-     the database. */
+  ActAppDelegate *delegate = (id)[UIApplication sharedApplication].delegate;
+  ActFileManager *fm = [ActFileManager sharedManager];
+  ActDatabaseManager *dbm = [ActDatabaseManager sharedManager];
 
-  _ignoreNotifications++;
-
-  act::date_range range;
-  for (const auto &it : _query.date_ranges())
-    range.merge(it);
-
-  if (!range.is_empty())
+  if (dbm != nil)
     {
-      ActAppDelegate *delegate
-	= (id)[UIApplication sharedApplication].delegate;
+      /* Pull activity files spanning the query's partial date range into
+         the database. */
 
-      struct tm tm = {0};
-      time_t last = range.start + range.length - 1;
-      localtime_r(&last, &tm);
+      _ignoreNotifications++;
 
-      int year = tm.tm_year + 1900;
-      int month = tm.tm_mon;
+      act::date_range range;
+      for (const auto &it : _query.date_ranges())
+	range.merge(it);
 
-      if (_earliestTime == 0)
-	_earliestTime = act::month_time(year, month - 1);
-
-      time_t min_time = std::max(_earliestTime, range.start);
-
-      while (1)
+      if (!range.is_empty())
 	{
-	  act::standardize_month(year, month);
+	  struct tm tm = {0};
+	  time_t last = range.start + range.length - 1;
+	  localtime_r(&last, &tm);
 
-	  time_t month_start = act::month_time(year, month);
-	  time_t month_end = month_start + act::seconds_in_month(year, month);
+	  int year = tm.tm_year + 1900;
+	  int month = tm.tm_mon;
 
-	  if (!(month_end > min_time))
-	    break;
+	  if (_earliestTime == 0)
+	    _earliestTime = act::month_time(year, month - 1);
 
-	  char buf[64];
-	  snprintf_l(buf, sizeof(buf), nullptr, "%d/%02d", year, month + 1);
+	  time_t min_time = std::max(_earliestTime, range.start);
 
-	  NSString *dir = [NSString stringWithUTF8String:buf];
-
-	  NSDictionary *dict = [_database.fileManager metadataForRemotePath:
-				[delegate remoteActivityPath:dir]];
-
-	  /* Sort files into reverse order, as that's how we display. */
-
-	  NSArray *contents = dict[@"contents"];
-	  contents = [contents sortedArrayUsingComparator:^
-		      NSComparisonResult (id a, id b) {
-			return [b[@"name"] compare:a[@"name"]];
-		      }];
-
-	  for (NSDictionary *sub_dict in contents)
+	  while (1)
 	    {
-	      if ([sub_dict[@"directory"] boolValue])
-		continue;
+	      act::standardize_month(year, month);
 
-	      NSString *name = sub_dict[@"name"];
-	      NSString *path = [dir stringByAppendingPathComponent:name];
-	      NSString *rev = sub_dict[@"rev"];
+	      time_t month_start = act::month_time(year, month);
+	      time_t month_end = (month_start
+				  + act::seconds_in_month(year, month));
 
-	      [_database loadActivityFromPath:path revision:rev];
+	      if (!(month_end > min_time))
+		break;
+
+	      char buf[64];
+	      snprintf_l(buf, sizeof(buf), nullptr,
+			 "%d/%02d", year, month + 1);
+
+	      NSString *dir = [NSString stringWithUTF8String:buf];
+
+	      NSDictionary *dict = [fm metadataForRemotePath:
+				    [delegate remoteActivityPath:dir]];
+
+	      /* Sort files into reverse order, as that's how we display. */
+
+	      NSArray *contents = dict[@"contents"];
+	      contents = [contents sortedArrayUsingComparator:^
+			  NSComparisonResult (id a, id b) {
+			    return [b[@"name"] compare:a[@"name"]];
+			  }];
+
+	      for (NSDictionary *sub_dict in contents)
+		{
+		  if ([sub_dict[@"directory"] boolValue])
+		    continue;
+
+		  NSString *name = sub_dict[@"name"];
+		  NSString *path = [dir stringByAppendingPathComponent:name];
+		  NSString *rev = sub_dict[@"rev"];
+
+		  [dbm loadActivityFromPath:path revision:rev];
+		}
+
+	      month--;
 	    }
 
-	  month--;
+	  _moreItems = _earliestTime > range.start;
 	}
 
-      _moreItems = _earliestTime > range.start;
+      _ignoreNotifications--;
+
+      /* Reload the query results and update the table view. Restrict
+	 the query to only return results until _earliestTime, to avoid
+	 over-filling the table initially. */
+
+      act::database::query query_copy(_query);
+      time_t now = time(nullptr);
+      act::date_range query_range(_earliestTime, now - _earliestTime);
+
+      for (auto &it : query_copy.date_ranges())
+	it.intersect(query_range);
+
+      std::vector<act::database::item> items;
+      dbm.database->execute_query(query_copy, items);
+
+      if (_items != items)
+	{
+	  using std::swap;
+	  swap(_items, items);
+	  _listData.clear();
+	  _needReloadView = YES;
+	}
     }
-
-  _ignoreNotifications--;
-
-  /* Reload the query results and update the table view. Restrict 
-     the query to only return results until _earliestTime, to avoid
-     over-filling the table initially. */
-
-  act::database::query query_copy(_query);
-  time_t now = time(nullptr);
-  act::date_range query_range(_earliestTime, now - _earliestTime);
-
-  for (auto &it : query_copy.date_ranges())
-    it.intersect(query_range);
-
-  std::vector<act::database::item> items;
-  _database.database->execute_query(query_copy, items);
-
-  if (_items != items)
+  else
     {
-      using std::swap;
-      swap(_items, items);
-      _listData.clear();
-      _needReloadView = YES;
+      if (_listData.size() != 0)
+	{
+	  _listData.clear();
+	  _needReloadView = YES;
+	}
     }
 
   if (_needReloadView)
@@ -462,7 +479,6 @@
       ActActivityViewController *controller
 	= [ActActivityViewController instantiate];
 
-      controller.database = _database;
       controller.activityStorage = item->activity->storage();
 
       [self.navigationController pushViewController:controller animated:YES];

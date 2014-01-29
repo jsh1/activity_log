@@ -415,16 +415,30 @@ metadata_dictionary(DBMetadata *meta)
   LOG((@"ERROR: file %@.", [[err userInfo] objectForKey:@"path"]));
 }
 
+- (NSString *)remotePathForLocalPath:(NSString *)path
+{
+  if ([path hasPathPrefix:_localFilePath])
+    {
+      return [@"/" stringByAppendingPathComponent:
+	      [path stringByRemovingPathPrefix:_localFilePath]];
+    }
+  else
+    return nil;
+}
+
 - (BOOL)copyItemAtLocalPath:(NSString *)src_path
     toRemotePath:(NSString *)dest_path previousRevision:(NSString *)rev
-    completion:(void (^)(NSString *rev))block
+    completion:(void (^)(BOOL))block
 {
   assert(![src_path hasPathPrefix:_localFilePath]);
 
   if (_pendingFileUploads[dest_path] != nil)
     return NO;
 
-  _pendingFileUploads[dest_path] = block ? [block copy] : [NSNull null];
+  if (block != nil)
+    _pendingFileUploads[dest_path] = block;
+  else
+    _pendingFileUploads[dest_path] = [NSNull null];
 
   [_dbClient uploadFile:[dest_path lastPathComponent]
    toPath:[dest_path stringByDeletingLastPathComponent]
@@ -471,14 +485,16 @@ metadata_dictionary(DBMetadata *meta)
 
 	  _metadataCacheNeedsSynchronize = YES;
 	  [self synchronizeAfterDelay];
-	}
 
-      /* Call completion handler with new file revision. */
+	  [[NSNotificationCenter defaultCenter]
+	   postNotificationName:ActMetadataCacheDidChange object:self
+	   userInfo:@{@"remotePath": dir}];
+	}
 
       if (![completion isKindOfClass:[NSNull class]])
 	{
-	  void (^block)(NSString *rev) = completion;
-	  block(meta.rev);
+	  void (^block)(BOOL) = completion;
+	  block(YES);
 	}
     }
 }
@@ -496,8 +512,8 @@ metadata_dictionary(DBMetadata *meta)
 
       if (![completion isKindOfClass:[NSNull class]])
 	{
-	  void (^block)(NSString *rev) = completion;
-	  block(nil);
+	  void (^block)(BOOL) = completion;
+	  block(NO);
 	}
     }
 }

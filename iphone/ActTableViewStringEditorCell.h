@@ -1,6 +1,6 @@
 /* -*- c-style: gnu -*-
 
-   Copyright (c) 2013 John Harper <jsh@unfactored.org>
+   Copyright (c) 2014 John Harper <jsh@unfactored.org>
 
    Permission is hereby granted, free of charge, to any person
    obtaining a copy of this software and associated documentation files
@@ -22,37 +22,12 @@
    CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
    SOFTWARE. */
 
-#import <Foundation/Foundation.h>
+#import "ActTableViewEditorCell.h"
 
-@interface NSObject (FoundationExtensions)
-
-/* Using this to avoid ARC warnings when calling -performSelector:. */
-
-- (void)performVoidSelector:(SEL)sel withObject:(id)arg;
-
-@end
-
-@interface NSString (FoundationExtensions)
-
-- (BOOL)isEqualToString:(NSString *)str caseInsensitive:(BOOL)flag;
-
-- (BOOL)hasPrefix:(NSString *)path caseInsensitive:(BOOL)flag;
-
-- (BOOL)hasPathPrefix:(NSString *)path;
-- (BOOL)hasPathPrefix:(NSString *)path caseInsensitive:(BOOL)flag;
-
-- (NSString *)stringByRemovingPathPrefix:(NSString *)path;
-- (NSString *)stringByRemovingPathPrefix:(NSString *)path
-    caseInsensitive:(BOOL)flag;
-  
-@end
-
-@interface NSArray (FoundationExtensions)
-
-- (NSArray *)mappedArray:(id (^)(id))f;
-- (NSArray *)filteredArray:(BOOL (^)(id))f;
-
-- (NSInteger)indexOfString:(NSString *)str caseInsensitive:(BOOL)flag;
-- (BOOL)containsString:(NSString *)str caseInsensitive:(BOOL)flag;
+@interface ActTableViewStringEditorCell : ActTableViewEditorCell
+    <UITextFieldDelegate>
+{
+  IBOutlet UITextField *_textField;
+}
 
 @end

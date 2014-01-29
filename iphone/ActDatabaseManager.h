@@ -29,31 +29,30 @@
 extern NSString *const ActActivityDatabaseDidChange;
 extern NSString *const ActActivityDidChange;
 
-@class ActFileManager;
-
 @interface ActDatabaseManager : NSObject
 {
-  ActFileManager *_fileManager;
-
   std::unique_ptr<act::database> _database;
 
-  BOOL _databaseNeedsSynchronize;
-
-  /* Activity database contents. */
-
   NSMutableDictionary *_addedActivityRevisions;
+
+  BOOL _databaseNeedsSynchronize;
+  BOOL _queuedSynchronize;
 }
 
-- (id)initWithFileManager:(ActFileManager *)fileManager;
++ (ActDatabaseManager *)sharedManager;
 
-@property(nonatomic, readonly) ActFileManager *fileManager;
-@property(nonatomic, readonly) BOOL needsSynchronize;
-
-- (void)reset;
-
-- (void)synchronize;
++ (void)shutdownSharedManager;
 
 - (void)invalidate;
+
+/* Removes all activities from the database. */
+
+- (void)removeAllActivities;
+
+/* Writes any modified activities back to the remote file store. This
+   will happen automatically, usually after a short delay. */
+
+- (void)synchronize;
 
 /* ActActivityDatabaseDidChange will be posted once the file is in
    the database (i.e. may be asynchronous to the call). */

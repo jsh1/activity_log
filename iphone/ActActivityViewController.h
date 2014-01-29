@@ -26,8 +26,6 @@
 
 #import "act-activity.h"
 
-@class ActDatabaseManager;
-
 @interface ActActivityViewController : UIViewController
 {
   IBOutlet UILabel *_courseLabel;
@@ -54,8 +52,6 @@
 
   IBOutlet UILabel *_notesLabel;
 
-  ActDatabaseManager *_database;
-
   std::unique_ptr<act::activity> _activity;
   NSString *_activityGPSPath;
   NSString *_activityGPSRev;
@@ -63,8 +59,6 @@
 }
 
 + (ActActivityViewController *)instantiate;
-
-@property(nonatomic) ActDatabaseManager *database;
 
 @property(nonatomic) act::activity_storage_ref activityStorage;
 

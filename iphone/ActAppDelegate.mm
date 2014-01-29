@@ -26,8 +26,9 @@
 
 #import "ActActivitiesViewController.h"
 #import "ActColor.h"
-#import "ActFileManager.h"
+#import "ActDatabaseManager.h"
 #import "ActDropboxParams.h"
+#import "ActFileManager.h"
 #import "ActQueryListViewController.h"
 
 #import "act-config.h"
@@ -177,12 +178,14 @@ defaults_getenv(const char *key)
 
 - (void)applicationDidEnterBackground:(UIApplication *)app
 {
+  [[ActDatabaseManager sharedManager] synchronize];
   [[ActFileManager sharedManager] synchronize];
 }
 
 - (void)applicationWillEnterForeground:(UIApplication *)app
 {
   [[ActFileManager sharedManager] reset];
+  [[ActDatabaseManager sharedManager] removeAllActivities];
 }
 
 - (void)applicationDidBecomeActive:(UIApplication *)app
@@ -191,6 +194,7 @@ defaults_getenv(const char *key)
 
 - (void)applicationWillTerminate:(UIApplication *)app
 {
+  [ActDatabaseManager shutdownSharedManager];
   [ActFileManager shutdownSharedManager];
 }
 

@@ -1,6 +1,6 @@
 /* -*- c-style: gnu -*-
 
-   Copyright (c) 2013 John Harper <jsh@unfactored.org>
+   Copyright (c) 2014 John Harper <jsh@unfactored.org>
 
    Permission is hereby granted, free of charge, to any person
    obtaining a copy of this software and associated documentation files
@@ -22,37 +22,33 @@
    CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
    SOFTWARE. */
 
-#import <Foundation/Foundation.h>
+#import <UIKit/UIKit.h>
 
-@interface NSObject (FoundationExtensions)
+#import "act-types.h"
 
-/* Using this to avoid ARC warnings when calling -performSelector:. */
+@class ActTableViewEditorCell;
 
-- (void)performVoidSelector:(SEL)sel withObject:(id)arg;
+@interface ActFieldEditorViewController : UITableViewController
+    <UITableViewDataSource, UITableViewDelegate>
+{
+  act::field_data_type _type;
+  NSString *_stringValue;
 
-@end
+  NSString *_headerString;
+  NSString *_footerString;
 
-@interface NSString (FoundationExtensions)
+  ActTableViewEditorCell *_editorCell;
+}
 
-- (BOOL)isEqualToString:(NSString *)str caseInsensitive:(BOOL)flag;
+- (id)initWithFieldType:(act::field_data_type)type;
 
-- (BOOL)hasPrefix:(NSString *)path caseInsensitive:(BOOL)flag;
+- (void)invalidate;
 
-- (BOOL)hasPathPrefix:(NSString *)path;
-- (BOOL)hasPathPrefix:(NSString *)path caseInsensitive:(BOOL)flag;
+@property(nonatomic, readonly) act::field_data_type type;
 
-- (NSString *)stringByRemovingPathPrefix:(NSString *)path;
-- (NSString *)stringByRemovingPathPrefix:(NSString *)path
-    caseInsensitive:(BOOL)flag;
-  
-@end
+@property(nonatomic, copy) NSString *stringValue;
 
-@interface NSArray (FoundationExtensions)
-
-- (NSArray *)mappedArray:(id (^)(id))f;
-- (NSArray *)filteredArray:(BOOL (^)(id))f;
-
-- (NSInteger)indexOfString:(NSString *)str caseInsensitive:(BOOL)flag;
-- (BOOL)containsString:(NSString *)str caseInsensitive:(BOOL)flag;
+@property(nonatomic, copy) NSString *headerString;
+@property(nonatomic, copy) NSString *footerString;
 
 @end

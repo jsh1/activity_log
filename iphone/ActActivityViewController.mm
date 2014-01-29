@@ -42,8 +42,6 @@
 
 @implementation ActActivityViewController
 
-@synthesize database = _database;
-
 + (ActActivityViewController *)instantiate
 {
   return [[[NSBundle mainBundle] loadNibNamed:
@@ -257,9 +255,11 @@ gps_reader::read_gps_file(const act::activity &a) const
 	   [NSDateFormatter dateFormatFromTemplate:@"EEEE" options:0 locale:nil]];
 	}
 
-      _courseLabel.text = [_database stringForField:@"Course" ofActivity:*a];
-      NSString *activity = [_database stringForField:@"Activity" ofActivity:*a];
-      NSString *type = [_database stringForField:@"Type" ofActivity:*a];
+      ActDatabaseManager *dbm = [ActDatabaseManager sharedManager];
+
+      _courseLabel.text = [dbm stringForField:@"Course" ofActivity:*a];
+      NSString *activity = [dbm stringForField:@"Activity" ofActivity:*a];
+      NSString *type = [dbm stringForField:@"Type" ofActivity:*a];
       _activityLabel.text = [NSString stringWithFormat:@"%@, %@",
 			     activity ? [activity capitalizedString] : @"",
 			     type ? type : @""];
@@ -269,13 +269,13 @@ gps_reader::read_gps_file(const act::activity &a) const
 			 [date_formatter stringFromDate:date]];
       _timeLabel.text = [@"at " stringByAppendingString:
 			 [time_formatter stringFromDate:date]];
-      _distanceLabel.text = [_database stringForField:@"Distance" ofActivity:*a];
-      _durationLabel.text = [_database stringForField:@"Duration" ofActivity:*a];
-      _paceLabel.text = [_database stringForField:@"Pace" ofActivity:*a];
-      _avgHRLabel.text = [_database stringForField:@"Avg-HR" ofActivity:*a];
-      _cadenceLabel.text = [_database stringForField:@"Avg-Cadence" ofActivity:*a];
-      _pointsLabel.text = [_database stringForField:@"Points" ofActivity:*a];
-      _notesLabel.text = [_database bodyStringOfActivity:*a];
+      _distanceLabel.text = [dbm stringForField:@"Distance" ofActivity:*a];
+      _durationLabel.text = [dbm stringForField:@"Duration" ofActivity:*a];
+      _paceLabel.text = [dbm stringForField:@"Pace" ofActivity:*a];
+      _avgHRLabel.text = [dbm stringForField:@"Avg-HR" ofActivity:*a];
+      _cadenceLabel.text = [dbm stringForField:@"Avg-Cadence" ofActivity:*a];
+      _pointsLabel.text = [dbm stringForField:@"Points" ofActivity:*a];
+      _notesLabel.text = [dbm bodyStringOfActivity:*a];
     }
   else
     {
@@ -325,7 +325,6 @@ update_constraint(NSLayoutConstraint *constraint, UILabel *label)
   ActActivityEditorViewController *controller
     = [ActActivityEditorViewController instantiate];
 
-  controller.database = _database;
   controller.activityStorage = _activity->storage();
 
   UINavigationController *inner_nav

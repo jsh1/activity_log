@@ -26,6 +26,17 @@
 
 #import "Macros.h"
 
+/* IMPORTANT NOTE: this file is always compiled with ARC disabled. */
+
+@implementation NSObject (FoundationExtensions)
+
+- (void)performVoidSelector:(SEL)sel withObject:(id)arg
+{
+  [self performSelector:sel withObject:arg];
+}
+
+@end
+
 @implementation NSString (FoundationExtensions)
 
 - (BOOL)isEqualToString:(NSString *)str caseInsensitive:(BOOL)flag

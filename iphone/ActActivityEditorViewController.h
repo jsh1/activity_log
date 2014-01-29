@@ -26,12 +26,11 @@
 
 #import "act-activity.h"
 
-@class ActDatabaseManager;
+@class ActFieldEditorViewController;
 
 @interface ActActivityEditorViewController : UITableViewController
     <UITableViewDataSource, UITableViewDelegate>
 {
-  ActDatabaseManager *_database;
   act::activity_storage_ref _activityStorage;
 
   /* Has a copy of _activityStorage, not the original. */
@@ -41,8 +40,6 @@
 }
 
 + (ActActivityEditorViewController *)instantiate;
-
-@property(nonatomic) ActDatabaseManager *database;
 
 /* Setter copies the passed in object. */
 

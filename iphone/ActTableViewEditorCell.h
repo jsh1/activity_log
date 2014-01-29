@@ -1,6 +1,6 @@
 /* -*- c-style: gnu -*-
 
-   Copyright (c) 2013 John Harper <jsh@unfactored.org>
+   Copyright (c) 2014 John Harper <jsh@unfactored.org>
 
    Permission is hereby granted, free of charge, to any person
    obtaining a copy of this software and associated documentation files
@@ -22,37 +22,25 @@
    CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
    SOFTWARE. */
 
-#import <Foundation/Foundation.h>
+#import <UIKit/UIKit.h>
 
-@interface NSObject (FoundationExtensions)
+@interface ActTableViewEditorCell : UITableViewCell
+{
+  __weak id _target;
+  SEL _action;
+}
 
-/* Using this to avoid ARC warnings when calling -performSelector:. */
++ (id)instantiate;
 
-- (void)performVoidSelector:(SEL)sel withObject:(id)arg;
++ (NSString *)nibName;
 
-@end
+- (void)invalidate;
 
-@interface NSString (FoundationExtensions)
+@property(nonatomic, copy) NSString *stringValue;
 
-- (BOOL)isEqualToString:(NSString *)str caseInsensitive:(BOOL)flag;
+@property(nonatomic, weak) id target;
+@property(nonatomic) SEL action;
 
-- (BOOL)hasPrefix:(NSString *)path caseInsensitive:(BOOL)flag;
-
-- (BOOL)hasPathPrefix:(NSString *)path;
-- (BOOL)hasPathPrefix:(NSString *)path caseInsensitive:(BOOL)flag;
-
-- (NSString *)stringByRemovingPathPrefix:(NSString *)path;
-- (NSString *)stringByRemovingPathPrefix:(NSString *)path
-    caseInsensitive:(BOOL)flag;
-  
-@end
-
-@interface NSArray (FoundationExtensions)
-
-- (NSArray *)mappedArray:(id (^)(id))f;
-- (NSArray *)filteredArray:(BOOL (^)(id))f;
-
-- (NSInteger)indexOfString:(NSString *)str caseInsensitive:(BOOL)flag;
-- (BOOL)containsString:(NSString *)str caseInsensitive:(BOOL)flag;
+- (void)sendAction;
 
 @end

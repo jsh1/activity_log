@@ -81,12 +81,16 @@ extern NSString *const ActFileCacheDidChange;
 
 - (NSString *)localPathForRemotePath:(NSString *)path revision:(NSString *)rev;
 
+/* The inverse mapping. */
+
+- (NSString *)remotePathForLocalPath:(NSString *)path;
+
 /* Returns NO if the upload was not started (e.g. there's already an upload
    to the same destination file in progress). If non-nil 'block' is called
    with the new revision of the file, or nil if an error occurred. */
 
 - (BOOL)copyItemAtLocalPath:(NSString *)src_path
     toRemotePath:(NSString *)dest_path previousRevision:(NSString *)rev
-    completion:(void (^)(NSString *rev))block;
+    completion:(void (^)(BOOL))block;
 
 @end

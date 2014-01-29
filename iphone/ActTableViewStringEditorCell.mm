@@ -1,6 +1,6 @@
 /* -*- c-style: gnu -*-
 
-   Copyright (c) 2013 John Harper <jsh@unfactored.org>
+   Copyright (c) 2014 John Harper <jsh@unfactored.org>
 
    Permission is hereby granted, free of charge, to any person
    obtaining a copy of this software and associated documentation files
@@ -22,37 +22,65 @@
    CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
    SOFTWARE. */
 
-#import <Foundation/Foundation.h>
+#import "ActTableViewStringEditorCell.h"
 
-@interface NSObject (FoundationExtensions)
+#import "FoundationExtensions.h"
 
-/* Using this to avoid ARC warnings when calling -performSelector:. */
+@implementation ActTableViewStringEditorCell
 
-- (void)performVoidSelector:(SEL)sel withObject:(id)arg;
++ (NSString *)nibName
+{
+  return @"TableViewStringEditorCell";
+}
 
-@end
+- (void)invalidate
+{
+  _textField.delegate = nil;
+}
 
-@interface NSString (FoundationExtensions)
+- (void)dealloc
+{
+  [self invalidate];
+}
 
-- (BOOL)isEqualToString:(NSString *)str caseInsensitive:(BOOL)flag;
+- (NSString *)stringValue
+{
+  return _textField.text;
+}
 
-- (BOOL)hasPrefix:(NSString *)path caseInsensitive:(BOOL)flag;
+- (void)setStringValue:(NSString *)str
+{
+  _textField.text = str;
+}
 
-- (BOOL)hasPathPrefix:(NSString *)path;
-- (BOOL)hasPathPrefix:(NSString *)path caseInsensitive:(BOOL)flag;
+- (BOOL)becomeFirstResponder
+{
+  _textField.delegate = self;
 
-- (NSString *)stringByRemovingPathPrefix:(NSString *)path;
-- (NSString *)stringByRemovingPathPrefix:(NSString *)path
-    caseInsensitive:(BOOL)flag;
-  
-@end
+  return [_textField becomeFirstResponder];
+}
 
-@interface NSArray (FoundationExtensions)
+- (BOOL)resignFirstResponder
+{
+  /* FIXME: app crashes the second time I edit a field unless I unset
+     the delegate pointer when resigning firstResponder status. */
 
-- (NSArray *)mappedArray:(id (^)(id))f;
-- (NSArray *)filteredArray:(BOOL (^)(id))f;
+  _textField.delegate = nil;
 
-- (NSInteger)indexOfString:(NSString *)str caseInsensitive:(BOOL)flag;
-- (BOOL)containsString:(NSString *)str caseInsensitive:(BOOL)flag;
+  return [_textField resignFirstResponder];
+}
+
+/* UITextFieldDelegate methods. */
+
+- (BOOL)textFieldShouldEndEditing:(UITextField *)field
+{
+  return NO;
+}
+
+- (BOOL)textFieldShouldReturn:(UITextField *)field
+{
+  [self sendAction];
+  return YES;
+}
 
 @end

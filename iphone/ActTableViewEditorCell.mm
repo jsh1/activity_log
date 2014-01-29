@@ -1,6 +1,6 @@
 /* -*- c-style: gnu -*-
 
-   Copyright (c) 2013 John Harper <jsh@unfactored.org>
+   Copyright (c) 2014 John Harper <jsh@unfactored.org>
 
    Permission is hereby granted, free of charge, to any person
    obtaining a copy of this software and associated documentation files
@@ -22,37 +22,42 @@
    CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
    SOFTWARE. */
 
-#import <Foundation/Foundation.h>
+#import "ActTableViewStringEditorCell.h"
 
-@interface NSObject (FoundationExtensions)
+#import "FoundationExtensions.h"
 
-/* Using this to avoid ARC warnings when calling -performSelector:. */
+@implementation ActTableViewEditorCell
 
-- (void)performVoidSelector:(SEL)sel withObject:(id)arg;
+@synthesize target = _target;
+@synthesize action = _action;
 
-@end
++ (id)instantiate
+{
+  return [[[NSBundle mainBundle] loadNibNamed:[self nibName]
+	   owner:self options:nil] firstObject];
+}
 
-@interface NSString (FoundationExtensions)
++ (NSString *)nibName
+{
+  return nil;
+}
 
-- (BOOL)isEqualToString:(NSString *)str caseInsensitive:(BOOL)flag;
+- (void)invalidate
+{
+}
 
-- (BOOL)hasPrefix:(NSString *)path caseInsensitive:(BOOL)flag;
+- (NSString *)stringValue
+{
+  return nil;
+}
 
-- (BOOL)hasPathPrefix:(NSString *)path;
-- (BOOL)hasPathPrefix:(NSString *)path caseInsensitive:(BOOL)flag;
+- (void)setStringValue:(NSString *)str
+{
+}
 
-- (NSString *)stringByRemovingPathPrefix:(NSString *)path;
-- (NSString *)stringByRemovingPathPrefix:(NSString *)path
-    caseInsensitive:(BOOL)flag;
-  
-@end
-
-@interface NSArray (FoundationExtensions)
-
-- (NSArray *)mappedArray:(id (^)(id))f;
-- (NSArray *)filteredArray:(BOOL (^)(id))f;
-
-- (NSInteger)indexOfString:(NSString *)str caseInsensitive:(BOOL)flag;
-- (BOOL)containsString:(NSString *)str caseInsensitive:(BOOL)flag;
+- (void)sendAction
+{
+  [_target performVoidSelector:_action withObject:self];
+}
 
 @end

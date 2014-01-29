@@ -27,12 +27,17 @@
 #import "ActAppDelegate.h"
 #import "ActColor.h"
 #import "ActDatabaseManager.h"
+#import "ActFieldEditorViewController.h"
 
 #define BODY_ROW_HEIGHT 150
 
+@interface ActActivityEditorViewController ()
+@property(nonatomic, copy) void (^viewWillDisappearHandler)(void);
+@end
+
 @implementation ActActivityEditorViewController
 
-@synthesize database = _database;
+@synthesize viewWillDisappearHandler;
 
 + (ActActivityEditorViewController *)instantiate
 {
@@ -66,16 +71,20 @@
     }
 }
 
-- (void)viewDidLoad
+- (void)viewWillAppear:(BOOL)animated
 {
-  [super viewDidLoad];
+  if (void (^handler)(void) = self.viewWillDisappearHandler)
+    {
+      self.viewWillDisappearHandler = nil;
+      handler();
+    }
 
-  if (_activityStorage != nullptr)
-    [self reloadData];
+  [self reloadData];
 }
 
 - (void)reloadData
 {
+  [self.tableView reloadData];
 }
 
 - (IBAction)doneAction:(id)sender
@@ -83,7 +92,8 @@
   if (_activityModified)
     {
       *_activityStorage = *_activity->storage();
-      [_database activityDidChange:_activityStorage];
+
+      [[ActDatabaseManager sharedManager] activityDidChange:_activityStorage];
     }
 
   [self dismissViewControllerAnimated:YES completion:nil];
@@ -183,14 +193,15 @@
       cell.textLabel.text = [NSString stringWithUTF8String:
 			     storage->field_name(idx).c_str()];
       cell.detailTextLabel.text = [NSString stringWithUTF8String:
-				   storage->field_value(idx).c_str()];
+				   (*storage)[idx].c_str()];
     }
   else if ([ident isEqualToString:@"bodyCell"])
     {
       UILabel *label = cell.textLabel;
       label.lineBreakMode = NSLineBreakByWordWrapping;
       label.numberOfLines = 10;
-      label.text = [_database bodyStringOfActivity:*_activity];
+      label.text = [[ActDatabaseManager sharedManager]
+		    bodyStringOfActivity:*_activity];
       label.textColor = [UIColor colorWithWhite:.6 alpha:1];
     }
   
@@ -208,12 +219,49 @@
     return tv.rowHeight;
 }
 
+- (void)editFieldAtIndex:(size_t)idx
+{
+  auto field_id = act::lookup_field_id(_activity->field_name(idx).c_str());
+
+  auto data_type = act::lookup_field_data_type(field_id);
+
+  auto *controller = [[ActFieldEditorViewController alloc]
+		      initWithFieldType:data_type];
+
+  controller.stringValue
+    = [NSString stringWithUTF8String:(*_activity)[idx].c_str()];
+
+  /* FIXME: using this weak/strong dance to hide a compiler warning
+     about a non-existent retain cycle (that I'm going to break by hand
+     in -viewWillDisappear..) */
+
+  __weak auto weak_self = self;
+
+  self.viewWillDisappearHandler = ^
+    {
+      if (__strong auto strong_self = weak_self)
+	{
+	  act::activity &a = *strong_self->_activity;
+
+	  std::string str([controller.stringValue UTF8String]);
+	  canonicalize_field_string(controller.type, str);
+
+	  a[idx] = str;
+	  a.increment_seed();
+
+	  strong_self->_activityModified = YES;
+	}
+    };
+
+  [self.navigationController pushViewController:controller animated:YES];
+}
+
 - (void)tableView:(UITableView *)tv didSelectRowAtIndexPath:(NSIndexPath *)path
 {
   switch (path.section)
     {
     case 0:
-      /* FIXME: edit this field. */
+      [self editFieldAtIndex:path.row];
       break;
 
     case 1:
