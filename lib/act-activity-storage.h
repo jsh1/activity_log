@@ -80,7 +80,9 @@ public:
 
   size_t field_count() const;
   const std::string &field_name(size_t idx) const;
-  const std::string &field_value(size_t idx) const;
+
+  std::string &operator[] (size_t idx);
+  const std::string &operator[](size_t idx) const;
 
   std::string &operator[] (const char *name);
   std::string &operator[] (const std::string &name);
@@ -173,8 +175,14 @@ activity_storage::field_name(size_t idx) const
   return _header[idx].first;
 }
 
+inline std::string &
+activity_storage::operator[](size_t idx)
+{
+  return _header[idx].second;
+}
+
 inline const std::string &
-activity_storage::field_value(size_t idx) const
+activity_storage::operator[](size_t idx) const
 {
   return _header[idx].second;
 }
