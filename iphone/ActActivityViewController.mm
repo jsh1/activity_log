@@ -25,6 +25,8 @@
 #import "ActActivityViewController.h"
 
 #import "ActActivityEditorViewController.h"
+#import "ActActivitySummaryViewController.h"
+#import "ActActivityMapViewController.h"
 #import "ActAppDelegate.h"
 #import "ActColor.h"
 #import "ActDatabaseManager.h"
@@ -36,8 +38,9 @@
 #import <xlocale.h>
 
 @interface ActActivityViewController ()
+@property(nonatomic) Class childViewControllerClass;
+@property(nonatomic) UIViewController<ActActivityChildViewController> *childViewController;
 - (void)reloadData;
-- (void)updateConstraints;
 @end
 
 @implementation ActActivityViewController
@@ -66,24 +69,37 @@
    addObserver:self selector:@selector(fileCacheDidChange:)
    name:ActFileCacheDidChange object:fm];
 
-  /* Make hairline separators. */
+  /* FIXME: need images for these. */
 
-  CGFloat separator_height = 1 / [UIScreen mainScreen].scale;
-  _separator1HeightConstraint.constant = separator_height;
-  _separator2HeightConstraint.constant = separator_height;
+  _summaryItem = [[UIBarButtonItem alloc] initWithTitle:@"Summary"
+		  style:UIBarButtonItemStyleBordered target:self
+		  action:@selector(showSummaryAction:)];
 
-  UIFont *font = [UIFont fontWithDescriptor:
-		  [[UIFontDescriptor preferredFontDescriptorWithTextStyle:
-		    UIFontTextStyleSubheadline]
-		   fontDescriptorWithSymbolicTraits:UIFontDescriptorTraitBold]
-		  size:0];
+  _mapItem = [[UIBarButtonItem alloc] initWithTitle:@"Map"
+	      style:UIBarButtonItemStyleBordered target:self
+	      action:@selector(showMapAction:)];
 
-  _distanceLabel.font = font;
-  _durationLabel.font = font;
-  _paceLabel.font = font;
-  _avgHRLabel.font = font;
-  _cadenceLabel.font = font;
-  _pointsLabel.font = font;
+  _chartsItem = [[UIBarButtonItem alloc] initWithTitle:@"Charts"
+		 style:UIBarButtonItemStyleBordered target:self
+		 action:@selector(showChartsAction:)];
+
+  _lapsItem = [[UIBarButtonItem alloc] initWithTitle:@"Laps"
+	       style:UIBarButtonItemStyleBordered target:self
+	       action:@selector(showLapsAction:)];
+
+  self.toolbarItems = @[_summaryItem,
+			[[UIBarButtonItem alloc] initWithBarButtonSystemItem:
+			 UIBarButtonSystemItemFlexibleSpace target:nil
+			 action:nil],
+			_mapItem,
+			[[UIBarButtonItem alloc] initWithBarButtonSystemItem:
+			 UIBarButtonSystemItemFlexibleSpace target:nil
+			 action:nil],
+			_chartsItem,
+			[[UIBarButtonItem alloc] initWithBarButtonSystemItem:
+			 UIBarButtonSystemItemFlexibleSpace target:nil
+			 action:nil],
+			_lapsItem];
 }
 
 - (void)viewWillAppear:(BOOL)flag
@@ -92,7 +108,9 @@
 
   [self.navigationController setToolbarHidden:NO animated:flag];
 
-  if (_activity)
+  if (_childViewController == nil)
+    [self showSummaryAction:nil];
+  else
     [self reloadData];
 }
 
@@ -234,90 +252,104 @@ gps_reader::read_gps_file(const act::activity &a) const
     }
 }
 
+- (act::activity *)activity
+{
+  return _activity.get();
+}
+
 - (void)reloadData
 {
-  if (const act::activity *a = _activity.get())
-    {
-      static NSDateFormatter *date_formatter;
-      static NSDateFormatter *time_formatter;
-      static NSDateFormatter *weekday_formatter;
+  if ([_childViewController respondsToSelector:@selector(reloadData)])
+    [_childViewController reloadData];
+}
 
-      if (date_formatter == nil)
+- (Class)childViewControllerClass
+{
+  return [_childViewController class];
+}
+
+- (void)setChildViewControllerClass:(Class)cls
+{
+  if (cls != self.childViewControllerClass)
+    {
+      self.childViewController = [[cls alloc] init];
+    }
+}
+
+- (UIViewController<ActActivityChildViewController> *)childViewController
+{
+  return _childViewController;
+}
+
+- (void)setChildViewController:(UIViewController<ActActivityChildViewController> *)controller
+{
+  if (_childViewController != controller)
+    {
+      if (_childViewController != nil)
 	{
-	  date_formatter = [[NSDateFormatter alloc] init];
-	  [date_formatter setDateStyle:NSDateFormatterLongStyle];
-	  [date_formatter setTimeStyle:NSDateFormatterNoStyle];
-	  time_formatter = [[NSDateFormatter alloc] init];
-	  [time_formatter setDateStyle:NSDateFormatterNoStyle];
-	  [time_formatter setTimeStyle:NSDateFormatterShortStyle];
-	  weekday_formatter = [[NSDateFormatter alloc] init];
-	  [weekday_formatter setDateFormat:
-	   [NSDateFormatter dateFormatFromTemplate:@"EEEE" options:0 locale:nil]];
+	  [_childViewController.view removeFromSuperview];
+
+	  [_childViewController removeFromParentViewController];
 	}
 
-      ActDatabaseManager *dbm = [ActDatabaseManager sharedManager];
+      _childViewController = controller;
 
-      _courseLabel.text = [dbm stringForField:@"Course" ofActivity:*a];
-      NSString *activity = [dbm stringForField:@"Activity" ofActivity:*a];
-      NSString *type = [dbm stringForField:@"Type" ofActivity:*a];
-      _activityLabel.text = [NSString stringWithFormat:@"%@, %@",
-			     activity ? [activity capitalizedString] : @"",
-			     type ? type : @""];
-      NSDate *date = [NSDate dateWithTimeIntervalSince1970:(time_t)a->date()];
-      _dateLabel.text = [NSString stringWithFormat:@"%@, %@",
-			 [weekday_formatter stringFromDate:date],
-			 [date_formatter stringFromDate:date]];
-      _timeLabel.text = [@"at " stringByAppendingString:
-			 [time_formatter stringFromDate:date]];
-      _distanceLabel.text = [dbm stringForField:@"Distance" ofActivity:*a];
-      _durationLabel.text = [dbm stringForField:@"Duration" ofActivity:*a];
-      _paceLabel.text = [dbm stringForField:@"Pace" ofActivity:*a];
-      _avgHRLabel.text = [dbm stringForField:@"Avg-HR" ofActivity:*a];
-      _cadenceLabel.text = [dbm stringForField:@"Avg-Cadence" ofActivity:*a];
-      _pointsLabel.text = [dbm stringForField:@"Points" ofActivity:*a];
-      _notesLabel.text = [dbm bodyStringOfActivity:*a];
+      if (_childViewController != nil)
+	{
+	  [self addChildViewController:_childViewController];
+
+	  UIView *child_view = _childViewController.view;
+	  UIView *container_view = self.view;
+
+	  child_view.frame = container_view.bounds;
+	  [container_view addSubview:child_view];
+
+	  [self updateViewConstraints];
+	}
+
+      [self reloadData];
     }
-  else
+}
+
+- (void)updateViewConstraints
+{
+  [super updateViewConstraints];
+
+  if (_childViewController != nil)
     {
-      _courseLabel.text = @"";
-      _activityLabel.text = @"";
-      _dateLabel.text = @"";
-      _timeLabel.text = @"";
-      _distanceLabel.text = @"";
-      _durationLabel.text = @"";
-      _paceLabel.text = @"";
-      _avgHRLabel.text = @"";
-      _cadenceLabel.text = @"";
-      _pointsLabel.text = @"";
-      _notesLabel.text = @"";
+      UIEdgeInsets inset = UIEdgeInsetsMake(self.topLayoutGuide.length, 0,
+					    self.bottomLayoutGuide.length, 0);
+
+      if ([_childViewController
+	   respondsToSelector:@selector(setContentInset:)])
+	{
+	  [_childViewController setContentInset:inset];
+	}
+      else
+	{
+	  UIScrollView *view = (id)_childViewController.view;
+	  if ([view isKindOfClass:[UIScrollView class]])
+	    view.contentInset = inset;
+	}
     }
-
-  [self updateConstraints];
 }
 
-static inline void
-update_constraint(NSLayoutConstraint *constraint, UILabel *label)
+- (IBAction)showSummaryAction:(id)sender
 {
-  const CGFloat spacing = 6;
-  constraint.constant = [label.text length] == 0 ? 0 : spacing;
+  self.childViewControllerClass = [ActActivitySummaryViewController class];
 }
 
-- (void)updateConstraints
+- (IBAction)showLapsAction:(id)sender
 {
-  /* These constraints all are of the form:
+}
 
-	container.height = label.height * 1 + 8
+- (IBAction)showMapAction:(id)sender
+{
+  self.childViewControllerClass = [ActActivityMapViewController class];
+}
 
-     but if the label collapses to zero-height, we want to remove the
-     8px spacing as well, so programmatically set the constraint's
-     constant (the "+ 8") based on if the label is empty or not. */
-
-  update_constraint(_distanceHeightConstraint, _distanceLabel);
-  update_constraint(_durationHeightConstraint, _durationLabel);
-  update_constraint(_paceHeightConstraint, _paceLabel);
-  update_constraint(_avgHRHeightConstraint, _avgHRLabel);
-  update_constraint(_cadenceHeightConstraint, _cadenceLabel);
-  update_constraint(_pointsHeightConstraint, _pointsLabel);
+- (IBAction)showChartsAction:(id)sender
+{
 }
 
 - (IBAction)editAction:(id)sender

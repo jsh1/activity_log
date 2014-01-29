@@ -22,53 +22,34 @@
    CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
    SOFTWARE. */
 
-#import <UIKit/UIKit.h>
+#import "ActActivityViewController.h"
 
-#import "act-activity.h"
-
-@protocol ActActivityChildViewController <NSObject>
-
-- (id)init;
-
-@optional
-
-/* Called when activity may have changed. */
-
-- (void)reloadData;
-
-/* If not defined and root view is UIScrollView, will set view's
-   contentInset directly. */
-
-- (void)setContentInset:(UIEdgeInsets)inset;
-
-@end
-
-@interface ActActivityViewController : UIViewController
+@interface ActActivitySummaryViewController : UIViewController
+    <ActActivityChildViewController>
 {
-  UIViewController<ActActivityChildViewController> *_childViewController;
+  IBOutlet UILabel *_courseLabel;
+  IBOutlet UILabel *_activityLabel;
+  IBOutlet UILabel *_dateLabel;
+  IBOutlet UILabel *_timeLabel;
 
-  UIBarButtonItem *_summaryItem;
-  UIBarButtonItem *_mapItem;
-  UIBarButtonItem *_chartsItem;
-  UIBarButtonItem *_lapsItem;
+  IBOutlet UILabel *_distanceLabel;
+  IBOutlet UILabel *_durationLabel;
+  IBOutlet UILabel *_paceLabel;
+  IBOutlet UILabel *_avgHRLabel;
+  IBOutlet UILabel *_cadenceLabel;
+  IBOutlet UILabel *_pointsLabel;
 
-  std::unique_ptr<act::activity> _activity;
-  NSString *_activityGPSPath;
-  NSString *_activityGPSRev;
-  std::unique_ptr<act::activity::gps_data_reader> _activityGPSReader;
+  IBOutlet NSLayoutConstraint *_distanceHeightConstraint;
+  IBOutlet NSLayoutConstraint *_durationHeightConstraint;
+  IBOutlet NSLayoutConstraint *_paceHeightConstraint;
+  IBOutlet NSLayoutConstraint *_avgHRHeightConstraint;
+  IBOutlet NSLayoutConstraint *_cadenceHeightConstraint;
+  IBOutlet NSLayoutConstraint *_pointsHeightConstraint;
+
+  IBOutlet NSLayoutConstraint *_separator1HeightConstraint;
+  IBOutlet NSLayoutConstraint *_separator2HeightConstraint;
+
+  IBOutlet UILabel *_notesLabel;
 }
-
-+ (ActActivityViewController *)instantiate;
-
-@property(nonatomic) act::activity_storage_ref activityStorage;
-
-@property(nonatomic, readonly) act::activity *activity;
-
-- (IBAction)editAction:(id)sender;
-
-- (IBAction)showSummaryAction:(id)sender;
-- (IBAction)showLapsAction:(id)sender;
-- (IBAction)showMapAction:(id)sender;
-- (IBAction)showChartsAction:(id)sender;
 
 @end

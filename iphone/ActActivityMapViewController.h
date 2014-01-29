@@ -22,53 +22,14 @@
    CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
    SOFTWARE. */
 
-#import <UIKit/UIKit.h>
+#import "ActActivityViewController.h"
 
-#import "act-activity.h"
+#import <MapKit/MapKit.h>
 
-@protocol ActActivityChildViewController <NSObject>
-
-- (id)init;
-
-@optional
-
-/* Called when activity may have changed. */
-
-- (void)reloadData;
-
-/* If not defined and root view is UIScrollView, will set view's
-   contentInset directly. */
-
-- (void)setContentInset:(UIEdgeInsets)inset;
-
-@end
-
-@interface ActActivityViewController : UIViewController
+@interface ActActivityMapViewController : UIViewController
+    <ActActivityChildViewController, MKMapViewDelegate>
 {
-  UIViewController<ActActivityChildViewController> *_childViewController;
-
-  UIBarButtonItem *_summaryItem;
-  UIBarButtonItem *_mapItem;
-  UIBarButtonItem *_chartsItem;
-  UIBarButtonItem *_lapsItem;
-
-  std::unique_ptr<act::activity> _activity;
-  NSString *_activityGPSPath;
-  NSString *_activityGPSRev;
-  std::unique_ptr<act::activity::gps_data_reader> _activityGPSReader;
+  UIEdgeInsets _contentInset;
 }
-
-+ (ActActivityViewController *)instantiate;
-
-@property(nonatomic) act::activity_storage_ref activityStorage;
-
-@property(nonatomic, readonly) act::activity *activity;
-
-- (IBAction)editAction:(id)sender;
-
-- (IBAction)showSummaryAction:(id)sender;
-- (IBAction)showLapsAction:(id)sender;
-- (IBAction)showMapAction:(id)sender;
-- (IBAction)showChartsAction:(id)sender;
 
 @end
