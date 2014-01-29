@@ -25,7 +25,6 @@
 #import "ActFieldEditorViewController.h"
 
 #import "ActAppDelegate.h"
-#import "ActColor.h"
 #import "ActTableViewStringEditorCell.h"
 
 @implementation ActFieldEditorViewController

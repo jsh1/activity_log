@@ -28,6 +28,7 @@
 #import "ActColor.h"
 #import "ActDatabaseManager.h"
 #import "ActFieldEditorViewController.h"
+#import "ActTextEditorViewController.h"
 
 #define BODY_ROW_HEIGHT 150
 
@@ -231,6 +232,9 @@
   controller.stringValue
     = [NSString stringWithUTF8String:(*_activity)[idx].c_str()];
 
+  controller.title = [NSString stringWithUTF8String:
+		      _activity->field_name(idx).c_str()];
+
   /* FIXME: using this weak/strong dance to hide a compiler warning
      about a non-existent retain cycle (that I'm going to break by hand
      in -viewWillDisappear..) */
@@ -256,6 +260,31 @@
   [self.navigationController pushViewController:controller animated:YES];
 }
 
+- (void)editBody
+{
+  auto *controller = [[ActTextEditorViewController alloc] init];
+
+  controller.stringValue = [[ActDatabaseManager sharedManager]
+			    bodyStringOfActivity:*_activity];
+
+  controller.title = @"Notes";
+
+  __weak auto weak_self = self;
+
+  self.viewWillDisappearHandler = ^
+    {
+      if (__strong auto strong_self = weak_self)
+	{
+	  [[ActDatabaseManager sharedManager] setBodyString:
+	   controller.stringValue ofActivity:*strong_self->_activity];
+
+	  strong_self->_activityModified = YES;
+	}
+    };
+
+  [self.navigationController pushViewController:controller animated:YES];
+}
+
 - (void)tableView:(UITableView *)tv didSelectRowAtIndexPath:(NSIndexPath *)path
 {
   switch (path.section)
@@ -269,7 +298,7 @@
       break;
 
     case 2:
-      /* FIXME: edit body text. */
+      [self editBody];
       break;
     }
 

@@ -48,6 +48,7 @@
 		57830CBD188D7C38001056B5 /* act-types.cc in Sources */ = {isa = PBXBuildFile; fileRef = 57830C74188D7B6E001056B5 /* act-types.cc */; };
 		57830CBE188D7C38001056B5 /* act-util.cc in Sources */ = {isa = PBXBuildFile; fileRef = 57830C76188D7B6E001056B5 /* act-util.cc */; };
 		5792BAE4188DB25D0011A069 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5792BAE3188DB25D0011A069 /* Security.framework */; };
+		57A56DB81899452800DFC7C1 /* ActTextEditorViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = 57A56DB71899452800DFC7C1 /* ActTextEditorViewController.mm */; };
 		57B0268518968C0E006440AF /* ActFileManager.mm in Sources */ = {isa = PBXBuildFile; fileRef = 57B0268418968C0E006440AF /* ActFileManager.mm */; };
 		57B0268B189711CB006440AF /* ActivityEditorView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 57B02689189711CB006440AF /* ActivityEditorView.xib */; };
 		57B0268E18971200006440AF /* ActActivityEditorViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = 57B0268D18971200006440AF /* ActActivityEditorViewController.mm */; };
@@ -193,6 +194,8 @@
 		57830C77188D7B6E001056B5 /* act-util.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "act-util.h"; path = "../lib/act-util.h"; sourceTree = "<group>"; };
 		57830C8C188D7BC2001056B5 /* libact.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libact.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		5792BAE3188DB25D0011A069 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
+		57A56DB61899452800DFC7C1 /* ActTextEditorViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActTextEditorViewController.h; sourceTree = "<group>"; };
+		57A56DB71899452800DFC7C1 /* ActTextEditorViewController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ActTextEditorViewController.mm; sourceTree = "<group>"; };
 		57B0268318968C0E006440AF /* ActFileManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActFileManager.h; sourceTree = "<group>"; };
 		57B0268418968C0E006440AF /* ActFileManager.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ActFileManager.mm; sourceTree = "<group>"; };
 		57B0268A189711CB006440AF /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = resources/en.lproj/ActivityEditorView.xib; sourceTree = "<group>"; };
@@ -426,6 +429,8 @@
 				572BB21D189859CE00EDCCA4 /* ActTableViewEditorCell.mm */,
 				572BB219189854F200EDCCA4 /* ActTableViewStringEditorCell.h */,
 				572BB21A189854F200EDCCA4 /* ActTableViewStringEditorCell.mm */,
+				57A56DB61899452800DFC7C1 /* ActTextEditorViewController.h */,
+				57A56DB71899452800DFC7C1 /* ActTextEditorViewController.mm */,
 				57001E9E1891BCFA00611F26 /* ActColor.h */,
 				57001E9F1891BCFA00611F26 /* ActColor.mm */,
 			);
@@ -490,12 +495,12 @@
 			isa = PBXGroup;
 			children = (
 				571A093B188D70A70066B572 /* Main.xib */,
+				57F9572E188DC70D000EF638 /* Settings.storyboard */,
+				57CA435818901570008693CA /* QueryListView.xib */,
 				57830C49188D7AD2001056B5 /* ActivitiesView.xib */,
 				576FF5991892DE4900C0C3CF /* ActivityView.xib */,
 				57B02689189711CB006440AF /* ActivityEditorView.xib */,
 				572BB216189852AD00EDCCA4 /* TableViewStringEditorCell.xib */,
-				57CA435818901570008693CA /* QueryListView.xib */,
-				57F9572E188DC70D000EF638 /* Settings.storyboard */,
 			);
 			name = Nibs;
 			sourceTree = "<group>";
@@ -744,6 +749,7 @@
 				57001EA31891C4C200611F26 /* act-activity-list-item.mm in Sources */,
 				570D9EF21895AEB600406927 /* act-activity-list-section.mm in Sources */,
 				57B0268E18971200006440AF /* ActActivityEditorViewController.mm in Sources */,
+				57A56DB81899452800DFC7C1 /* ActTextEditorViewController.mm in Sources */,
 				57F95733188ED836000EF638 /* ActDatabaseManager.mm in Sources */,
 				57B0268518968C0E006440AF /* ActFileManager.mm in Sources */,
 				572BB221189859EB00EDCCA4 /* ActFieldEditorViewController.mm in Sources */,
