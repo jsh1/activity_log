@@ -41,6 +41,7 @@
 @property(nonatomic) Class childViewControllerClass;
 @property(nonatomic) UIViewController<ActActivityChildViewController> *childViewController;
 - (void)reloadData;
+- (void)updateToolbar;
 @end
 
 @implementation ActActivityViewController
@@ -68,6 +69,10 @@
   [[NSNotificationCenter defaultCenter]
    addObserver:self selector:@selector(fileCacheDidChange:)
    name:ActFileCacheDidChange object:fm];
+
+  _editItem = [[UIBarButtonItem alloc]
+	       initWithBarButtonSystemItem:UIBarButtonSystemItemEdit
+	       target:self action:@selector(editAction:)];
 
   /* FIXME: need images for these. */
 
@@ -109,7 +114,7 @@
   [self.navigationController setToolbarHidden:NO animated:flag];
 
   if (_childViewController == nil)
-    [self showSummaryAction:nil];
+    [self showSummaryAction:_summaryItem];
   else
     [self reloadData];
 }
@@ -118,7 +123,9 @@
 {
   [super viewWillDisappear:flag];
 
-  [self.navigationController setToolbarHidden:YES animated:flag];
+  UINavigationController *nav = self.navigationController;
+  [nav setNavigationBarHidden:NO animated:flag];
+  [nav setToolbarHidden:YES animated:flag];
 }
 
 namespace {
@@ -257,6 +264,29 @@ gps_reader::read_gps_file(const act::activity &a) const
   return _activity.get();
 }
 
+- (BOOL)isFullscreen
+{
+  return self.navigationController.navigationBarHidden;
+}
+
+- (void)setFullscreen:(BOOL)flag
+{
+  UINavigationController *nav = self.navigationController;
+  [nav setNavigationBarHidden:flag animated:YES];
+  [nav setToolbarHidden:flag animated:YES];
+  [self setNeedsStatusBarAppearanceUpdate];
+}
+
+- (BOOL)prefersStatusBarHidden
+{
+  return self.fullscreen;
+}
+
+- (UIStatusBarAnimation)preferredStatusBarUpdateAnimation
+{
+  return UIStatusBarAnimationSlide;
+}
+
 - (void)reloadData
 {
   if ([_childViewController respondsToSelector:@selector(reloadData)])
@@ -307,6 +337,8 @@ gps_reader::read_gps_file(const act::activity &a) const
 	  [self updateViewConstraints];
 	}
 
+      self.fullscreen = NO;
+      [self updateToolbar];
       [self reloadData];
     }
 }
@@ -332,6 +364,60 @@ gps_reader::read_gps_file(const act::activity &a) const
 	    view.contentInset = inset;
 	}
     }
+}
+
+- (void)setBarButtonItem:(UIBarButtonItem *)item selected:(BOOL)flag 
+{
+  if (_itemBgImageSelected == nil)
+    {
+      UIGraphicsBeginImageContextWithOptions(CGSizeMake(8, 8), NO,
+					     [UIScreen mainScreen].scale);
+
+      /* Creating an empty image to avoid changing the button metrics
+	 when installing the selected button background. */
+
+      _itemBgImageNormal = UIGraphicsGetImageFromCurrentImageContext();
+
+      [[[ActColor tintColor] colorWithAlphaComponent:.12] setFill];
+      [[UIBezierPath bezierPathWithRoundedRect:
+	CGRectMake(0, 0, 8, 8) cornerRadius:3.5] fill];
+
+      if (UIImage *im = UIGraphicsGetImageFromCurrentImageContext())
+	{
+	  _itemBgImageSelected = [im resizableImageWithCapInsets:
+				  UIEdgeInsetsMake(4, 4, 4, 4)
+				  resizingMode:UIImageResizingModeStretch];
+	}
+
+      UIGraphicsEndImageContext();
+    }
+
+  UIImage *im = flag ? _itemBgImageSelected : _itemBgImageNormal;
+  [item setBackgroundImage:im forState:UIControlStateNormal
+   barMetrics:UIBarMetricsDefault];
+}
+
+- (void)updateToolbar
+{
+  Class cls = [_childViewController class];
+
+  NSArray *right_items = nil;
+  if ([_childViewController respondsToSelector:@selector(rightBarButtonItems)])
+    right_items = [_childViewController rightBarButtonItems];
+
+  if (right_items == nil)
+    right_items = @[_editItem];
+
+  [self.navigationItem setRightBarButtonItems:right_items animated:YES];
+
+  [self setBarButtonItem:_summaryItem
+   selected:cls == [ActActivitySummaryViewController class]];
+
+  [self setBarButtonItem:_mapItem
+   selected:cls == [ActActivityMapViewController class]];
+
+  _chartsItem.enabled = NO;
+  _lapsItem.enabled = NO;
 }
 
 - (IBAction)showSummaryAction:(id)sender

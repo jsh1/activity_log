@@ -44,6 +44,10 @@ CA_HIDDEN @interface AAMVPointAnnotation : MKPointAnnotation
 CA_HIDDEN @interface AAMVPolylineView : MKPolylineView
 @end
 
+CA_HIDDEN @interface AAMVLayoutGuide : NSObject <UILayoutSupport>
+@property(nonatomic) CGFloat length;
+@end
+
 @implementation ActActivityMapViewController
 
 - (id)init
@@ -64,11 +68,29 @@ CA_HIDDEN @interface AAMVPolylineView : MKPolylineView
 - (void)viewDidLoad
 {
   [super viewDidLoad];
+
+  _mapTypeControl = [[UISegmentedControl alloc]
+		     initWithItems:@[@"Standard", @"Hybrid"]];
+  [_mapTypeControl addTarget:self action:@selector(mapTypeAction:)
+   forControlEvents:UIControlEventValueChanged];
+  _mapTypeControl.selectedSegmentIndex = 0;
+
+  _mapTypeItem = [[UIBarButtonItem alloc] initWithCustomView:_mapTypeControl];
+
+  _pressRecognizer = [[UILongPressGestureRecognizer alloc]
+		      initWithTarget:self action:@selector(pressAction:)];
+  _pressRecognizer.minimumPressDuration = .25;
+  [self.view addGestureRecognizer:_pressRecognizer];
 }
 
 - (void)setContentInset:(UIEdgeInsets)inset
 {
   _contentInset = inset;
+}
+
+- (NSArray *)rightBarButtonItems
+{
+  return @[_mapTypeItem];
 }
 
 - (void)reloadData
@@ -143,7 +165,7 @@ CA_HIDDEN @interface AAMVPolylineView : MKPolylineView
 	CLLocationCoordinate2D loc
 	  = {p->location.latitude, p->location.longitude};
         anno.coordinate = loc;
-	anno.title = [NSString stringWithFormat:@"Lap %d", (int)i];
+	anno.title = [NSString stringWithFormat:@"Lap %d", (int)i + 1];
 	anno.pinColor = MKPinAnnotationColorPurple;
 	anno.lapNumber = i + 1;
 	[map_view addAnnotation:anno];
@@ -171,6 +193,26 @@ CA_HIDDEN @interface AAMVPolylineView : MKPolylineView
   }
 }
 
+- (void)mapTypeAction:(id)sender
+{
+  MKMapView *map_view = (id)self.view;
+
+  map_view.mapType = (_mapTypeControl.selectedSegmentIndex == 0
+		      ? MKMapTypeStandard : MKMapTypeHybrid);
+}
+
+- (void)pressAction:(id)sender
+{
+  if (_pressRecognizer.state == UIGestureRecognizerStateBegan)
+    {
+      self.controller.fullscreen = !self.controller.fullscreen;
+
+      /* Make the compass relayout if it's visible. */
+
+      [self.view setNeedsLayout];
+    }
+}
+
 - (MKAnnotationView *)mapView:(MKMapView *)mapView
     viewForAnnotation:(id <MKAnnotation>)annotation
 {
@@ -186,7 +228,7 @@ CA_HIDDEN @interface AAMVPolylineView : MKPolylineView
 	{
 	  view = [[MKPinAnnotationView alloc] initWithAnnotation:anno
 		  reuseIdentifier:@"pinAnnotationIdentifier"];
-	  view.animatesDrop = YES;
+	  view.animatesDrop = NO;
 	  view.canShowCallout = YES;
 	}
 
@@ -232,6 +274,15 @@ CA_HIDDEN @interface AAMVPolylineView : MKPolylineView
 //  int lapNumber = ((UIButton *)sender).tag;
 }
 
+/* For the map view compass layout. */
+
+- (id<UILayoutSupport>)topLayoutGuide
+{
+  AAMVLayoutGuide *guide = [[AAMVLayoutGuide alloc] init];
+  guide.length = self.controller.fullscreen ? 0 : _contentInset.top;
+  return guide;
+}
+
 @end
 
 @implementation AAMVPointAnnotation
@@ -250,4 +301,8 @@ CA_HIDDEN @interface AAMVPolylineView : MKPolylineView
   CGContextSetLineWidth(ctx, 3 / s);
 }
 
+@end
+
+@implementation AAMVLayoutGuide
+@synthesize length;
 @end

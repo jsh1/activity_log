@@ -87,7 +87,7 @@ defaults_getenv(const char *key)
 
   [[NSBundle mainBundle] loadNibNamed:@"Main" owner:self options:nil];
 
-  _window.tintColor = [ActColor redTextColor];
+  _window.tintColor = [ActColor tintColor];
 
   ActQueryListViewController *controller
     = [ActQueryListViewController instantiate];

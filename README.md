@@ -8,10 +8,9 @@ with cross references to GPS files and other media (e.g. photos, web
 URLs). Storing the files in a Dropbox directory will sync the ad hoc
 database between systems.
 
-Currently two interfaces are planned, (1) a Mac application for
-browsing entries, running queries and more complex data analysis, and
-(2) a suite of shell commands with a consistent git-like interface for
-command-line use.
+### iPhone UI
+
+![Screenshot](http://unfactored.org/images/act-iphone-2014-01-30.png)
 
 ### Mac UI
 

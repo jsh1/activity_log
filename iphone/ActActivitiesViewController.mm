@@ -70,6 +70,7 @@
   _addItem = [[UIBarButtonItem alloc]
 	initWithBarButtonSystemItem:UIBarButtonSystemItemAdd
 	target:self action:@selector(addActivityAction:)];
+
   _weekItem = [[UIBarButtonItem alloc]
 	initWithTitle:@"Week" style:UIBarButtonItemStylePlain
 	target:self action:@selector(toggleWeekAction:)];

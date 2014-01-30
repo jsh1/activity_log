@@ -16,14 +16,6 @@
                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                 <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
             </view>
-            <navigationItem key="navigationItem" id="wsb-0U-w9I">
-                <barButtonItem key="backBarButtonItem" title="Activities" id="Zmg-cP-EOv"/>
-                <barButtonItem key="rightBarButtonItem" systemItem="edit" id="ff5-n4-B83">
-                    <connections>
-                        <action selector="editAction:" destination="cAf-3s-aUs" id="GXE-LY-azp"/>
-                    </connections>
-                </barButtonItem>
-            </navigationItem>
             <simulatedStatusBarMetrics key="simulatedStatusBarMetrics"/>
             <simulatedNavigationBarMetrics key="simulatedTopBarMetrics" translucent="NO" prompted="NO"/>
             <simulatedToolbarMetrics key="simulatedBottomBarMetrics" translucent="NO"/>

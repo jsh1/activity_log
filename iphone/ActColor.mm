@@ -28,6 +28,11 @@
 
 @implementation ActColor
 
++ (UIColor *)tintColor
+{
+  return [self redTextColor];
+}
+
 + (UIColor *)controlTextColor
 {
   static UIColor *color;

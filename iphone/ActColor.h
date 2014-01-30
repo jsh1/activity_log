@@ -28,6 +28,8 @@
 
 @interface ActColor : UIColor
 
++ (UIColor *)tintColor;
+
 + (UIColor *)controlTextColor;
 + (UIColor *)disabledControlTextColor;
 + (UIColor *)controlTextColor:(BOOL)disabled;

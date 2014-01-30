@@ -41,16 +41,23 @@
 
 - (void)setContentInset:(UIEdgeInsets)inset;
 
+- (NSArray *)rightBarButtonItems;
+
 @end
 
 @interface ActActivityViewController : UIViewController
 {
   UIViewController<ActActivityChildViewController> *_childViewController;
 
+  UIBarButtonItem *_editItem;
+
   UIBarButtonItem *_summaryItem;
   UIBarButtonItem *_mapItem;
   UIBarButtonItem *_chartsItem;
   UIBarButtonItem *_lapsItem;
+
+  UIImage *_itemBgImageNormal;
+  UIImage *_itemBgImageSelected;
 
   std::unique_ptr<act::activity> _activity;
   NSString *_activityGPSPath;
@@ -63,6 +70,8 @@
 @property(nonatomic) act::activity_storage_ref activityStorage;
 
 @property(nonatomic, readonly) act::activity *activity;
+
+@property(nonatomic, getter=isFullscreen) BOOL fullscreen;
 
 - (IBAction)editAction:(id)sender;
 
