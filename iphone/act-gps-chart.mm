@@ -460,8 +460,8 @@ chart::draw_line(const line &l, const x_axis_state &xs, CGFloat tx)
       {
 	[[UIColor colorWithRed:stroke_rgb[0] green:stroke_rgb[1]
 	  blue:stroke_rgb[2] alpha:1] setStroke];
-	path.lineWidth = 1.75;
-	path.lineJoinStyle = kCGLineJoinBevel;
+	path.lineWidth = 1.5;
+	path.lineJoinStyle = kCGLineJoinMiter;
 	[path stroke];
       }
   }

@@ -10,6 +10,9 @@
 		57001E9D1890763300611F26 /* ActActivityListItemView.mm in Sources */ = {isa = PBXBuildFile; fileRef = 57001E9C1890763300611F26 /* ActActivityListItemView.mm */; };
 		57001EA01891BCFA00611F26 /* ActColor.mm in Sources */ = {isa = PBXBuildFile; fileRef = 57001E9F1891BCFA00611F26 /* ActColor.mm */; };
 		57001EA31891C4C200611F26 /* act-activity-list-item.mm in Sources */ = {isa = PBXBuildFile; fileRef = 57001EA21891C4C200611F26 /* act-activity-list-item.mm */; };
+		570D0D40189BEE6900CFBD8F /* ActActivityChartListViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = 570D0D3F189BEE6900CFBD8F /* ActActivityChartListViewController.mm */; };
+		570D0D43189BEE7F00CFBD8F /* ActivityChartListView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 570D0D41189BEE7F00CFBD8F /* ActivityChartListView.xib */; };
+		570D0D46189BF6F100CFBD8F /* ActActivityChartItemView.mm in Sources */ = {isa = PBXBuildFile; fileRef = 570D0D45189BF6F100CFBD8F /* ActActivityChartItemView.mm */; };
 		570D9EF21895AEB600406927 /* act-activity-list-section.mm in Sources */ = {isa = PBXBuildFile; fileRef = 570D9EF11895AEB600406927 /* act-activity-list-section.mm */; };
 		571A08F8188D691F0066B572 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 571A08F7188D691F0066B572 /* Foundation.framework */; };
 		571A08FA188D691F0066B572 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 571A08F9188D691F0066B572 /* CoreGraphics.framework */; };
@@ -129,6 +132,11 @@
 		57001E9F1891BCFA00611F26 /* ActColor.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ActColor.mm; sourceTree = "<group>"; };
 		57001EA11891C4C200611F26 /* act-activity-list-item.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "act-activity-list-item.h"; sourceTree = "<group>"; };
 		57001EA21891C4C200611F26 /* act-activity-list-item.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = "act-activity-list-item.mm"; sourceTree = "<group>"; };
+		570D0D3E189BEE6900CFBD8F /* ActActivityChartListViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActActivityChartListViewController.h; sourceTree = "<group>"; };
+		570D0D3F189BEE6900CFBD8F /* ActActivityChartListViewController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ActActivityChartListViewController.mm; sourceTree = "<group>"; };
+		570D0D42189BEE7F00CFBD8F /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = resources/en.lproj/ActivityChartListView.xib; sourceTree = "<group>"; };
+		570D0D44189BF6F100CFBD8F /* ActActivityChartItemView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActActivityChartItemView.h; sourceTree = "<group>"; };
+		570D0D45189BF6F100CFBD8F /* ActActivityChartItemView.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ActActivityChartItemView.mm; sourceTree = "<group>"; };
 		570D9EF01895AEB600406927 /* act-activity-list-section.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "act-activity-list-section.h"; sourceTree = "<group>"; };
 		570D9EF11895AEB600406927 /* act-activity-list-section.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = "act-activity-list-section.mm"; sourceTree = "<group>"; };
 		571A08F4188D691F0066B572 /* Activities.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Activities.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -442,6 +450,10 @@
 				572C46591899A70100A7A7F0 /* ActActivitySummaryViewController.mm */,
 				572C46611899AA1F00A7A7F0 /* ActActivityMapViewController.h */,
 				572C46621899AA1F00A7A7F0 /* ActActivityMapViewController.mm */,
+				570D0D3E189BEE6900CFBD8F /* ActActivityChartListViewController.h */,
+				570D0D3F189BEE6900CFBD8F /* ActActivityChartListViewController.mm */,
+				570D0D44189BF6F100CFBD8F /* ActActivityChartItemView.h */,
+				570D0D45189BF6F100CFBD8F /* ActActivityChartItemView.mm */,
 				5789AB11189AF19400C792A3 /* act-gps-chart.h */,
 				5789AB12189AF19400C792A3 /* act-gps-chart.mm */,
 				57B0268C18971200006440AF /* ActActivityEditorViewController.h */,
@@ -524,6 +536,7 @@
 				576FF5991892DE4900C0C3CF /* ActivityView.xib */,
 				572C465B1899A71000A7A7F0 /* ActivitySummaryView.xib */,
 				572C465E1899A92400A7A7F0 /* ActivityMapView.xib */,
+				570D0D41189BEE7F00CFBD8F /* ActivityChartListView.xib */,
 				57B02689189711CB006440AF /* ActivityEditorView.xib */,
 				572BB216189852AD00EDCCA4 /* TableViewStringEditorCell.xib */,
 			);
@@ -758,6 +771,7 @@
 				57F95735188EE0F5000EF638 /* defaults.plist in Resources */,
 				572BB218189852AE00EDCCA4 /* TableViewStringEditorCell.xib in Resources */,
 				571A0902188D691F0066B572 /* InfoPlist.strings in Resources */,
+				570D0D43189BEE7F00CFBD8F /* ActivityChartListView.xib in Resources */,
 				57B0268B189711CB006440AF /* ActivityEditorView.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -773,6 +787,7 @@
 				571A0904188D691F0066B572 /* main.m in Sources */,
 				57001E9D1890763300611F26 /* ActActivityListItemView.mm in Sources */,
 				572C46631899AA1F00A7A7F0 /* ActActivityMapViewController.mm in Sources */,
+				570D0D40189BEE6900CFBD8F /* ActActivityChartListViewController.mm in Sources */,
 				57830C54188D7B26001056B5 /* FoundationExtensions.m in Sources */,
 				57001EA31891C4C200611F26 /* act-activity-list-item.mm in Sources */,
 				570D9EF21895AEB600406927 /* act-activity-list-section.mm in Sources */,
@@ -788,6 +803,7 @@
 				576FF5981892DCF100C0C3CF /* ActActivityViewController.mm in Sources */,
 				572BB21E189859CE00EDCCA4 /* ActTableViewEditorCell.mm in Sources */,
 				5789AB13189AF19400C792A3 /* act-gps-chart.mm in Sources */,
+				570D0D46189BF6F100CFBD8F /* ActActivityChartItemView.mm in Sources */,
 				57830C44188D7A7C001056B5 /* ActActivitiesViewController.mm in Sources */,
 				57F95739188EE585000EF638 /* ActQueryListViewController.mm in Sources */,
 				571A093A188D6F320066B572 /* ActAppDelegate.mm in Sources */,
@@ -877,6 +893,14 @@
 /* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
+		570D0D41189BEE7F00CFBD8F /* ActivityChartListView.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				570D0D42189BEE7F00CFBD8F /* en */,
+			);
+			name = ActivityChartListView.xib;
+			sourceTree = "<group>";
+		};
 		571A0900188D691F0066B572 /* InfoPlist.strings */ = {
 			isa = PBXVariantGroup;
 			children = (
