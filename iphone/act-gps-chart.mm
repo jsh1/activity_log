@@ -430,7 +430,12 @@ chart::draw_line(const line &l, const x_axis_state &xs, CGFloat tx)
 
     if (!first_pt && (l.flags & FILL_BG))
       {
-	UIBezierPath *fill_path = [path copy];
+	/* This is lame -- adding lines to '[path copy]' modifies 'path'
+	   as well!? */
+
+	UIBezierPath *fill_path
+	  = [UIBezierPath bezierPathWithCGPath:path.CGPath];
+
 	CGFloat y1 = _chart_rect.origin.y + _chart_rect.size.height;
 	[fill_path addLineToPoint:CGPointMake(last_x, y1)];
 	[fill_path addLineToPoint:CGPointMake(first_x, y1)];
