@@ -283,6 +283,7 @@ gps_reader::read_gps_file(const act::activity &a) const
   [nav setNavigationBarHidden:flag animated:YES];
   [nav setToolbarHidden:flag animated:YES];
   [self setNeedsStatusBarAppearanceUpdate];
+  [self updateViewConstraints];
 }
 
 - (BOOL)prefersStatusBarHidden
@@ -299,6 +300,8 @@ gps_reader::read_gps_file(const act::activity &a) const
 {
   if ([_childViewController respondsToSelector:@selector(reloadData)])
     [_childViewController reloadData];
+
+  [self updateToolbar];
 }
 
 - (Class)childViewControllerClass
@@ -346,7 +349,6 @@ gps_reader::read_gps_file(const act::activity &a) const
 	}
 
       self.fullscreen = NO;
-      [self updateToolbar];
       [self reloadData];
     }
 }
@@ -420,6 +422,11 @@ gps_reader::read_gps_file(const act::activity &a) const
 
   [self setBarButtonItem:_summaryItem
    selected:cls == [ActActivitySummaryViewController class]];
+
+  BOOL haveGPS = _activity != nullptr && _activity->gps_data() != nullptr;
+
+  _mapItem.enabled = haveGPS;
+  _chartsItem.enabled = haveGPS;
 
   [self setBarButtonItem:_mapItem
    selected:cls == [ActActivityMapViewController class]];
