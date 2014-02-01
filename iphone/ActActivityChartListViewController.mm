@@ -94,6 +94,11 @@ chart_title(int type)
   _smoothingItem = [[UIBarButtonItem alloc]
 		    initWithCustomView:_smoothingControl];
 
+  _pressRecognizer = [[UILongPressGestureRecognizer alloc]
+		      initWithTarget:self action:@selector(pressAction:)];
+  _pressRecognizer.minimumPressDuration = .25;
+  [self.view addGestureRecognizer:_pressRecognizer];
+
   [(UITableView *)self.view setContentInset:_contentInset];
 
   [self updateRowHeight];
@@ -189,6 +194,15 @@ chart_title(int type)
     _smoothing = 60*4;
 
   [self reloadData];
+}
+
+- (void)pressAction:(id)sender
+{
+  if (_pressRecognizer.state == UIGestureRecognizerStateBegan)
+    {
+      self.controller.fullscreen = !self.controller.fullscreen;
+      [self.view setNeedsLayout];
+    }
 }
 
 - (void)willAnimateRotationToInterfaceOrientation:

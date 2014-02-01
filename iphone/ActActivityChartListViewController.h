@@ -46,6 +46,8 @@ enum
 
   NSArray *_chartTypes;
 
+  UILongPressGestureRecognizer *_pressRecognizer;
+
   std::unique_ptr<act::gps::activity> _smoothedData;
   int _dataSmoothing;
 }
