@@ -45,6 +45,11 @@ enum
   UIEdgeInsets _contentInset;
 
   NSArray *_chartTypes;
+
+  std::unique_ptr<act::gps::activity> _smoothedData;
+  int _dataSmoothing;
 }
+
+@property(nonatomic, readonly) const act::gps::activity *smoothedData;
 
 @end

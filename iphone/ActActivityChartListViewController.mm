@@ -111,6 +111,39 @@ chart_title(int type)
   return @[_smoothingItem];
 }
 
+- (const act::gps::activity *)smoothedData
+{
+  const act::activity *a = self.controller.activity;
+  if (a == nullptr)
+    return nullptr;
+
+  const act::gps::activity *gps_a = a->gps_data();
+  if (gps_a == nullptr)
+    return nullptr;
+
+  if (!_smoothedData
+      || _dataSmoothing != _smoothing
+      || _smoothedData->start_time() != gps_a->start_time()
+      || _smoothedData->total_distance() != gps_a->total_distance()
+      || _smoothedData->total_duration() != gps_a->total_duration())
+    {
+      if (_smoothing > 0)
+	{
+	  _smoothedData.reset(new act::gps::activity);
+	  _smoothedData->smooth(*gps_a, _smoothing);
+	}
+      else if (_smoothedData)
+	_smoothedData.reset();
+
+      _dataSmoothing = _smoothing;
+    }
+
+  if (_smoothedData != nullptr)
+    return _smoothedData.get();
+  else
+    return gps_a;
+}
+
 - (void)reloadData
 {
   NSMutableArray *array = [[NSMutableArray alloc] init];
@@ -194,6 +227,7 @@ chart_title(int type)
 	  ActActivityChartItemView *view
 	    = [[ActActivityChartItemView alloc] init];
 
+	  view.controller = self;
 	  view.frame = cell.contentView.bounds;
 	  view.autoresizingMask = (UIViewAutoresizingFlexibleWidth
 				   | UIViewAutoresizingFlexibleHeight);
@@ -208,7 +242,6 @@ chart_title(int type)
 
       view.activity = self.controller.activity;
       view.chartType = [_chartTypes[path.section] intValue];
-      view.smoothing = _smoothing;
       [view reloadData];
     }
 

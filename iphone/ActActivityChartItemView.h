@@ -27,6 +27,8 @@
 #import "act-activity.h"
 #import "act-gps-chart.h"
 
+@class ActActivityChartListViewController;
+
 @interface ActActivityChartItemView : UIView
 {
   const act::activity *_activity;
@@ -34,13 +36,12 @@
   int _smoothing;
 
   std::unique_ptr<act::gps::chart> _chart;
-  std::unique_ptr<act::gps::activity> _smoothed_data;
-  int _data_smoothing;
 }
+
+@property(nonatomic, weak) ActActivityChartListViewController *controller;
 
 @property(nonatomic) const act::activity *activity;
 @property(nonatomic) int chartType;
-@property(nonatomic) int smoothing;
 
 - (void)reloadData;
 

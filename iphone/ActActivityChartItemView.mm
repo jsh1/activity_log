@@ -30,9 +30,9 @@
 
 @implementation ActActivityChartItemView
 
+@synthesize controller = _controller;
 @synthesize activity = _activity;
 @synthesize chartType = _chartType;
-@synthesize smoothing = _smoothing;
 
 - (void)reloadData
 {
@@ -48,34 +48,9 @@
   if (_chart)
     _chart.reset();
 
-  const act::activity *a = _activity;
-  if (a == nullptr)
-    return;
-
-  const act::gps::activity *gps_a = a->gps_data();
-  if (gps_a == nullptr)
-    return;
-
-  if (!_smoothed_data
-      || _data_smoothing != _smoothing
-      || _smoothed_data->start_time() != gps_a->start_time()
-      || _smoothed_data->total_distance() != gps_a->total_distance()
-      || _smoothed_data->total_duration() != gps_a->total_duration())
-    {
-      if (_smoothing > 0)
-	{
-	  _smoothed_data.reset(new act::gps::activity);
-	  _smoothed_data->smooth(*gps_a, _smoothing);
-	}
-      else if (_smoothed_data)
-	_smoothed_data.reset();
-
-      _data_smoothing = _smoothing;
-    }
-
-  const act::gps::activity *data = _smoothed_data.get();
+  const act::gps::activity *data = self.controller.smoothedData;
   if (data == nullptr)
-    data = gps_a;
+    return;
 
   _chart.reset(new chart(*data, chart::x_axis_type::distance));
 
