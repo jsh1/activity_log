@@ -245,6 +245,11 @@ chart_title(int type)
 	  view.frame = cell.contentView.bounds;
 	  view.autoresizingMask = (UIViewAutoresizingFlexibleWidth
 				   | UIViewAutoresizingFlexibleHeight);
+
+	  /* The paths are complex, use the accelerated CG renderer. */
+
+	  view.layer.drawsAsynchronously = YES;
+
 	  [cell.contentView addSubview:view];
 	}
     }
