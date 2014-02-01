@@ -26,7 +26,8 @@
 
 #import "ActActivityChartItemView.h"
 
-#define SMOOTHING 60
+#define PORTRAIT_ROW_HEIGHT 128
+#define LANDSCAPE_ROW_HEIGHT 210
 
 static NSString *
 chart_title(int type)
@@ -69,6 +70,15 @@ chart_title(int type)
   return (ActActivityViewController *)self.parentViewController;
 }
 
+- (void)updateRowHeight
+{
+  UIInterfaceOrientation orient = self.interfaceOrientation;
+  CGFloat rh = (orient == UIInterfaceOrientationPortrait
+		|| orient == UIInterfaceOrientationPortraitUpsideDown
+		? PORTRAIT_ROW_HEIGHT : LANDSCAPE_ROW_HEIGHT);
+  ((UITableView *)self.view).rowHeight = rh;
+}
+
 - (void)viewDidLoad
 {
   [super viewDidLoad];
@@ -85,6 +95,8 @@ chart_title(int type)
 		    initWithCustomView:_smoothingControl];
 
   [(UITableView *)self.view setContentInset:_contentInset];
+
+  [self updateRowHeight];
 }
 
 - (void)setContentInset:(UIEdgeInsets)inset
@@ -144,6 +156,13 @@ chart_title(int type)
     _smoothing = 60*4;
 
   [self reloadData];
+}
+
+- (void)willAnimateRotationToInterfaceOrientation:
+    (UIInterfaceOrientation)orientation duration:(NSTimeInterval)dur
+{
+  [self updateRowHeight];
+  [(UITableView *)self.view reloadData];
 }
 
 /* UITableViewDataSource methods. */
@@ -214,13 +233,6 @@ chart_title(int type)
   view.textLabel.text = chart_title([_chartTypes[sec] intValue]);
 
   return view;
-}
-
-- (void)tableView:(UITableView *)tv didSelectRowAtIndexPath:(NSIndexPath *)path
-{
-  /* FIXME: push to fullscreen/interactive version of chart. */
-
-  [tv deselectRowAtIndexPath:path animated:NO];
 }
 
 @end

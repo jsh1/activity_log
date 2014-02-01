@@ -286,6 +286,13 @@
 {
 }
 
+- (void)willAnimateRotationToInterfaceOrientation:
+    (UIInterfaceOrientation)orientation duration:(NSTimeInterval)dur
+{
+  [self.tableView reloadData];
+  _needReloadView = NO;
+}
+
 /* UITableViewDataSource methods. */
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tv
@@ -350,9 +357,10 @@
 	  ActActivityListItemView *view
 	    = [[ActActivityListItemView alloc] init];
 
-	  view.frame = cell.contentView.bounds;
+	  view.contentMode = UIViewContentModeRedraw;
 	  view.autoresizingMask = (UIViewAutoresizingFlexibleWidth
 				   | UIViewAutoresizingFlexibleHeight);
+	  view.frame = cell.contentView.bounds;
 	  [cell.contentView addSubview:view];
 	}
       else if ([ident isEqualToString:@"loadMoreCell"])

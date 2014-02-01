@@ -42,6 +42,7 @@
 @property(nonatomic) Class childViewControllerClass;
 @property(nonatomic) UIViewController<ActActivityChildViewController> *childViewController;
 - (void)reloadData;
+- (void)updateViewConstraints;
 - (void)updateToolbar;
 @end
 
@@ -127,6 +128,12 @@
   UINavigationController *nav = self.navigationController;
   [nav setNavigationBarHidden:NO animated:flag];
   [nav setToolbarHidden:YES animated:flag];
+}
+
+- (void)willAnimateRotationToInterfaceOrientation:
+    (UIInterfaceOrientation)orientation duration:(NSTimeInterval)dur
+{
+  [self updateViewConstraints];
 }
 
 namespace {
