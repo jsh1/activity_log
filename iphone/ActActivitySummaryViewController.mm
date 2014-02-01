@@ -68,6 +68,15 @@
   _pointsLabel.font = font;
 }
 
+- (void)viewWillLayoutSubviews
+{
+  /* FIXME: This seems to work (i.e. the label ends up the correct
+     width and height after rotation) but it feels wrong -- the bounds
+     of the label shouldn't be known until after layout finishes? */
+
+  _notesLabel.preferredMaxLayoutWidth = _notesLabel.bounds.size.width;
+}
+
 - (void)reloadData
 {
   if (const act::activity *a = self.controller.activity)
