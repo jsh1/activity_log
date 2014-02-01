@@ -26,6 +26,8 @@
 
 #import "ActActivityViewController.h"
 
+#import "act-format.h"
+
 #define MAP_INSET 10
 
 @interface ActActivityMapViewController ()
@@ -35,10 +37,8 @@
 CA_HIDDEN @interface AAMVPointAnnotation : MKPointAnnotation
 {
   MKPinAnnotationColor _pinColor;
-  int _lapNumber;
 }
 @property(nonatomic) MKPinAnnotationColor pinColor;
-@property(nonatomic) int lapNumber;
 @end
 
 CA_HIDDEN @interface AAMVPolylineView : MKPolylineView
@@ -166,8 +166,10 @@ CA_HIDDEN @interface AAMVLayoutGuide : NSObject <UILayoutSupport>
 	  = {p->location.latitude, p->location.longitude};
         anno.coordinate = loc;
 	anno.title = [NSString stringWithFormat:@"Lap %d", (int)i + 1];
+	std::string sub;
+	act::format_distance(sub, p->distance, act::unit_type::unknown);
+	anno.subtitle = [NSString stringWithUTF8String:sub.c_str()];
 	anno.pinColor = MKPinAnnotationColorPurple;
-	anno.lapNumber = i + 1;
 	[map_view addAnnotation:anno];
       }
 
@@ -177,14 +179,16 @@ CA_HIDDEN @interface AAMVLayoutGuide : NSObject <UILayoutSupport>
 	first.coordinate = coords.front();
 	first.title = @"Start";
 	first.pinColor = MKPinAnnotationColorGreen;
-	first.lapNumber = -1;
 	[map_view addAnnotation:first];
 
 	AAMVPointAnnotation *last = [[AAMVPointAnnotation alloc] init];
 	last.coordinate = coords.back();
 	last.title = @"End";
+	std::string sub;
+	act::format_distance(sub, gps_data->points().back().distance,
+			     act::unit_type::unknown);
+	last.subtitle = [NSString stringWithUTF8String:sub.c_str()];
 	last.pinColor = MKPinAnnotationColorRed;
-	last.lapNumber = -1;
 	[map_view addAnnotation:last];
 
 	[map_view addOverlay:
@@ -232,21 +236,7 @@ CA_HIDDEN @interface AAMVLayoutGuide : NSObject <UILayoutSupport>
 	  view.canShowCallout = YES;
 	}
 
-      if (anno.lapNumber >= 0)
-	{
-	  UIButton *button = (UIButton *)view.rightCalloutAccessoryView;
-	  if (button == nil)
-	    {
-	      button = [UIButton buttonWithType:UIButtonTypeDetailDisclosure];
-	      [button addTarget:self action:@selector(showLapDetails:)
-	       forControlEvents:UIControlEventTouchUpInside];
-	      view.rightCalloutAccessoryView = button;
-	    }
-	  button.tag = anno.lapNumber;
-	}
-      else
-	view.rightCalloutAccessoryView = nil;
-
+      view.rightCalloutAccessoryView = nil;
       view.pinColor = anno.pinColor;
       return view;
     }
@@ -269,11 +259,6 @@ CA_HIDDEN @interface AAMVLayoutGuide : NSObject <UILayoutSupport>
   return nil;
 }
 
-- (void)showLapDetails:(id)sender
-{
-//  int lapNumber = ((UIButton *)sender).tag;
-}
-
 /* For the map view compass layout. */
 
 - (id<UILayoutSupport>)topLayoutGuide
@@ -288,7 +273,6 @@ CA_HIDDEN @interface AAMVLayoutGuide : NSObject <UILayoutSupport>
 @implementation AAMVPointAnnotation
 
 @synthesize pinColor = _pinColor;
-@synthesize lapNumber = _lapNumber;
 
 @end
 
