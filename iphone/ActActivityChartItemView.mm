@@ -137,7 +137,7 @@
 
   if (_chart != nullptr)
     {
-      [[UIColor colorWithWhite:0 alpha:.05] setFill];
+     [[UIColor colorWithWhite:1 alpha:1] setFill];
       UIRectFill(self.bounds);
 
       _chart->set_chart_rect(self.bounds);
@@ -147,7 +147,7 @@
 
 - (BOOL)isOpaque
 {
-  return NO;
+  return YES;
 }
 
 @end
