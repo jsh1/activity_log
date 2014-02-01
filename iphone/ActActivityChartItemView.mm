@@ -57,7 +57,7 @@
   auto field = activity::point_field::distance;
   auto conv = chart::value_conversion::identity;
   auto color = chart::line_color::gray;
-  uint32_t flags = chart::TICK_LINES;
+  uint32_t flags = chart::TICK_LINES | chart::FILL_BG;
 
   switch (_chartType)
     {

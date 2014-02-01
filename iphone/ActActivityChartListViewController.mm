@@ -27,7 +27,7 @@
 #import "ActActivityChartItemView.h"
 
 #define PORTRAIT_ROW_HEIGHT 128
-#define LANDSCAPE_ROW_HEIGHT 210
+#define LANDSCAPE_ROW_HEIGHT 212
 
 static NSString *
 chart_title(int type)
