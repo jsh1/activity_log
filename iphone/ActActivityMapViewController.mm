@@ -75,8 +75,6 @@ CA_HIDDEN @interface AAMVLayoutGuide : NSObject <UILayoutSupport>
    forControlEvents:UIControlEventValueChanged];
   _mapTypeControl.selectedSegmentIndex = 0;
 
-  _mapTypeItem = [[UIBarButtonItem alloc] initWithCustomView:_mapTypeControl];
-
   _pressRecognizer = [[UILongPressGestureRecognizer alloc]
 		      initWithTarget:self action:@selector(pressAction:)];
   _pressRecognizer.minimumPressDuration = .25;
@@ -88,9 +86,14 @@ CA_HIDDEN @interface AAMVLayoutGuide : NSObject <UILayoutSupport>
   _contentInset = inset;
 }
 
+- (UIView *)titleView
+{
+  return _mapTypeControl;
+}
+
 - (NSArray *)rightBarButtonItems
 {
-  return @[_mapTypeItem];
+  return @[];
 }
 
 - (void)reloadData

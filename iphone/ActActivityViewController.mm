@@ -420,6 +420,12 @@ gps_reader::read_gps_file(const act::activity &a) const
 
   [self.navigationItem setRightBarButtonItems:right_items animated:YES];
 
+  UIView *title_view = nil;
+  if ([_childViewController respondsToSelector:@selector(titleView)])
+    title_view = [_childViewController titleView];
+
+  self.navigationItem.titleView = title_view;
+
   [self setBarButtonItem:_summaryItem
    selected:cls == [ActActivitySummaryViewController class]];
 

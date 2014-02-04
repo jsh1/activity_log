@@ -91,9 +91,6 @@ chart_title(int type)
   _smoothing = 15;
   _smoothingControl.selectedSegmentIndex = 1;
 
-  _smoothingItem = [[UIBarButtonItem alloc]
-		    initWithCustomView:_smoothingControl];
-
   _pressRecognizer = [[UILongPressGestureRecognizer alloc]
 		      initWithTarget:self action:@selector(pressAction:)];
   _pressRecognizer.minimumPressDuration = .25;
@@ -111,9 +108,14 @@ chart_title(int type)
   [self.view setNeedsLayout];
 }
 
+- (UIView *)titleView
+{
+  return _smoothingControl;
+}
+
 - (NSArray *)rightBarButtonItems
 {
-  return @[_smoothingItem];
+  return @[];
 }
 
 - (const act::gps::activity *)smoothedData

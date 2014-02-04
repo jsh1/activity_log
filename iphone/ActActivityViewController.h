@@ -41,6 +41,7 @@
 
 - (void)setContentInset:(UIEdgeInsets)inset;
 
+- (UIView *)titleView;
 - (NSArray *)rightBarButtonItems;
 
 @end
