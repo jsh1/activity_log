@@ -1,0 +1,22 @@
+# default .actconfig values
+
+[user]
+	resting-heart-rate = 0
+	max-heart-rate = 0
+	vdot = 0
+
+[files]
+	activity-directory = ~/Documents/Activities
+	gps-file-directory = ~/Documents/Garmin
+
+[units]
+	default-distance-unit = miles
+	default-height-unit = metres
+	default-pace-unit = mile
+	default-speed-unit = mph
+	default-temperature-unit = celsius
+	default-weight-unit = kg
+	default-efficiency-unit = beats/mile
+
+[calendar]
+	start-of-week = sunday
