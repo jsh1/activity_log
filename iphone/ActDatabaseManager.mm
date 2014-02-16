@@ -242,11 +242,6 @@ static ActDatabaseManager *_sharedManager;
     }
 }
 
-- (void)appDelegateWillSuspend:(NSNotification *)note
-{
-  [self synchronize];
-}
-
 - (void)activityDidChange:(const act::activity_storage_ref)a
 {
   _databaseNeedsSynchronize = YES;
