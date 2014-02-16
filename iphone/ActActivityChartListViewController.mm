@@ -88,6 +88,9 @@ chart_title(int type)
   [_smoothingControl addTarget:self action:@selector(smoothingAction:)
    forControlEvents:UIControlEventValueChanged];
 
+  _smoothingItem = [[UIBarButtonItem alloc]
+		    initWithCustomView:_smoothingControl];
+
   _smoothing = 15;
   _smoothingControl.selectedSegmentIndex = 1;
 
@@ -108,14 +111,9 @@ chart_title(int type)
   [self.view setNeedsLayout];
 }
 
-- (UIView *)titleView
-{
-  return _smoothingControl;
-}
-
 - (NSArray *)rightBarButtonItems
 {
-  return @[];
+  return @[_smoothingItem];
 }
 
 - (const act::gps::activity *)smoothedData

@@ -32,6 +32,8 @@
   UIEdgeInsets _contentInset;
 
   UISegmentedControl *_mapTypeControl;
+  UIBarButtonItem *_mapTypeItem;
+
   UILongPressGestureRecognizer *_pressRecognizer;
 }
 

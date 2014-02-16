@@ -39,6 +39,7 @@ enum
     <UITableViewDataSource, UITableViewDelegate>
 {
   UISegmentedControl *_smoothingControl;
+  UIBarButtonItem *_smoothingItem;
   int _smoothing;
 
   UIEdgeInsets _contentInset;

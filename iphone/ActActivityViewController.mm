@@ -424,6 +424,8 @@ gps_reader::read_gps_file(const act::activity &a) const
   if ([_childViewController respondsToSelector:@selector(titleView)])
     title_view = [_childViewController titleView];
 
+  /* FIXME: how to animate this change? */
+
   self.navigationItem.titleView = title_view;
 
   [self setBarButtonItem:_summaryItem
