@@ -33,6 +33,7 @@
 		572C46601899A92400A7A7F0 /* ActivityMapView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 572C465E1899A92400A7A7F0 /* ActivityMapView.xib */; };
 		572C46631899AA1F00A7A7F0 /* ActActivityMapViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = 572C46621899AA1F00A7A7F0 /* ActActivityMapViewController.mm */; };
 		572C46651899AA7C00A7A7F0 /* MapKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 572C46641899AA7C00A7A7F0 /* MapKit.framework */; };
+		5730856F18B2829A00A8B911 /* ActivityLapCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 5730856D18B2829A00A8B911 /* ActivityLapCell.xib */; };
 		576FF5981892DCF100C0C3CF /* ActActivityViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = 576FF5971892DCF100C0C3CF /* ActActivityViewController.mm */; };
 		576FF59B1892DE4900C0C3CF /* ActivityView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 576FF5991892DE4900C0C3CF /* ActivityView.xib */; };
 		57830C44188D7A7C001056B5 /* ActActivitiesViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = 57830C41188D7A7C001056B5 /* ActActivitiesViewController.mm */; };
@@ -61,6 +62,9 @@
 		57B0268518968C0E006440AF /* ActFileManager.mm in Sources */ = {isa = PBXBuildFile; fileRef = 57B0268418968C0E006440AF /* ActFileManager.mm */; };
 		57B0268B189711CB006440AF /* ActivityEditorView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 57B02689189711CB006440AF /* ActivityEditorView.xib */; };
 		57B0268E18971200006440AF /* ActActivityEditorViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = 57B0268D18971200006440AF /* ActActivityEditorViewController.mm */; };
+		57C9294D18B281DA00DCC469 /* ActivityLapsView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 57C9294B18B281DA00DCC469 /* ActivityLapsView.xib */; };
+		57C9295218B2822D00DCC469 /* ActActivityLapCell.mm in Sources */ = {isa = PBXBuildFile; fileRef = 57C9294F18B2822D00DCC469 /* ActActivityLapCell.mm */; };
+		57C9295318B2822D00DCC469 /* ActActivityLapsViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = 57C9295118B2822D00DCC469 /* ActActivityLapsViewController.mm */; };
 		57CA435A18901570008693CA /* QueryListView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 57CA435818901570008693CA /* QueryListView.xib */; };
 		57F9572A188DC140000EF638 /* ActSettingsViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = 57F95729188DC140000EF638 /* ActSettingsViewController.mm */; };
 		57F95730188DC70D000EF638 /* Settings.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 57F9572E188DC70D000EF638 /* Settings.storyboard */; };
@@ -167,6 +171,7 @@
 		572C46611899AA1F00A7A7F0 /* ActActivityMapViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActActivityMapViewController.h; sourceTree = "<group>"; };
 		572C46621899AA1F00A7A7F0 /* ActActivityMapViewController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ActActivityMapViewController.mm; sourceTree = "<group>"; };
 		572C46641899AA7C00A7A7F0 /* MapKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MapKit.framework; path = System/Library/Frameworks/MapKit.framework; sourceTree = SDKROOT; };
+		5730856E18B2829A00A8B911 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = resources/en.lproj/ActivityLapCell.xib; sourceTree = "<group>"; };
 		576FF5961892DCF100C0C3CF /* ActActivityViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActActivityViewController.h; sourceTree = "<group>"; };
 		576FF5971892DCF100C0C3CF /* ActActivityViewController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ActActivityViewController.mm; sourceTree = "<group>"; };
 		576FF59A1892DE4900C0C3CF /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = resources/en.lproj/ActivityView.xib; sourceTree = "<group>"; };
@@ -224,6 +229,11 @@
 		57B0268A189711CB006440AF /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = resources/en.lproj/ActivityEditorView.xib; sourceTree = "<group>"; };
 		57B0268C18971200006440AF /* ActActivityEditorViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActActivityEditorViewController.h; sourceTree = "<group>"; };
 		57B0268D18971200006440AF /* ActActivityEditorViewController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ActActivityEditorViewController.mm; sourceTree = "<group>"; };
+		57C9294C18B281DA00DCC469 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = resources/en.lproj/ActivityLapsView.xib; sourceTree = "<group>"; };
+		57C9294E18B2822D00DCC469 /* ActActivityLapCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActActivityLapCell.h; sourceTree = "<group>"; };
+		57C9294F18B2822D00DCC469 /* ActActivityLapCell.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ActActivityLapCell.mm; sourceTree = "<group>"; };
+		57C9295018B2822D00DCC469 /* ActActivityLapsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActActivityLapsViewController.h; sourceTree = "<group>"; };
+		57C9295118B2822D00DCC469 /* ActActivityLapsViewController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ActActivityLapsViewController.mm; sourceTree = "<group>"; };
 		57CA435918901570008693CA /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = resources/en.lproj/QueryListView.xib; sourceTree = "<group>"; };
 		57F95725188DBA2F000EF638 /* DropboxSDK.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = DropboxSDK.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		57F95728188DC140000EF638 /* ActSettingsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActSettingsViewController.h; sourceTree = "<group>"; };
@@ -456,6 +466,10 @@
 				570D0D45189BF6F100CFBD8F /* ActActivityChartItemView.mm */,
 				5789AB11189AF19400C792A3 /* act-gps-chart.h */,
 				5789AB12189AF19400C792A3 /* act-gps-chart.mm */,
+				57C9295018B2822D00DCC469 /* ActActivityLapsViewController.h */,
+				57C9295118B2822D00DCC469 /* ActActivityLapsViewController.mm */,
+				57C9294E18B2822D00DCC469 /* ActActivityLapCell.h */,
+				57C9294F18B2822D00DCC469 /* ActActivityLapCell.mm */,
 				57B0268C18971200006440AF /* ActActivityEditorViewController.h */,
 				57B0268D18971200006440AF /* ActActivityEditorViewController.mm */,
 				572BB21F189859EB00EDCCA4 /* ActFieldEditorViewController.h */,
@@ -537,6 +551,8 @@
 				572C465B1899A71000A7A7F0 /* ActivitySummaryView.xib */,
 				572C465E1899A92400A7A7F0 /* ActivityMapView.xib */,
 				570D0D41189BEE7F00CFBD8F /* ActivityChartListView.xib */,
+				57C9294B18B281DA00DCC469 /* ActivityLapsView.xib */,
+				5730856D18B2829A00A8B911 /* ActivityLapCell.xib */,
 				57B02689189711CB006440AF /* ActivityEditorView.xib */,
 				572BB216189852AD00EDCCA4 /* TableViewStringEditorCell.xib */,
 			);
@@ -761,8 +777,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				57830C4B188D7AD2001056B5 /* ActivitiesView.xib in Resources */,
+				5730856F18B2829A00A8B911 /* ActivityLapCell.xib in Resources */,
 				576FF59B1892DE4900C0C3CF /* ActivityView.xib in Resources */,
 				572C465D1899A71000A7A7F0 /* ActivitySummaryView.xib in Resources */,
+				57C9294D18B281DA00DCC469 /* ActivityLapsView.xib in Resources */,
 				57CA435A18901570008693CA /* QueryListView.xib in Resources */,
 				571A0913188D69200066B572 /* Images.xcassets in Resources */,
 				57F95730188DC70D000EF638 /* Settings.storyboard in Resources */,
@@ -792,6 +810,7 @@
 				57001EA31891C4C200611F26 /* act-activity-list-item.mm in Sources */,
 				570D9EF21895AEB600406927 /* act-activity-list-section.mm in Sources */,
 				57B0268E18971200006440AF /* ActActivityEditorViewController.mm in Sources */,
+				57C9295218B2822D00DCC469 /* ActActivityLapCell.mm in Sources */,
 				57A56DB81899452800DFC7C1 /* ActTextEditorViewController.mm in Sources */,
 				57F95733188ED836000EF638 /* ActDatabaseManager.mm in Sources */,
 				57B0268518968C0E006440AF /* ActFileManager.mm in Sources */,
@@ -804,6 +823,7 @@
 				572BB21E189859CE00EDCCA4 /* ActTableViewEditorCell.mm in Sources */,
 				5789AB13189AF19400C792A3 /* act-gps-chart.mm in Sources */,
 				570D0D46189BF6F100CFBD8F /* ActActivityChartItemView.mm in Sources */,
+				57C9295318B2822D00DCC469 /* ActActivityLapsViewController.mm in Sources */,
 				57830C44188D7A7C001056B5 /* ActActivitiesViewController.mm in Sources */,
 				57F95739188EE585000EF638 /* ActQueryListViewController.mm in Sources */,
 				571A093A188D6F320066B572 /* ActAppDelegate.mm in Sources */,
@@ -942,6 +962,14 @@
 			name = ActivityMapView.xib;
 			sourceTree = "<group>";
 		};
+		5730856D18B2829A00A8B911 /* ActivityLapCell.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				5730856E18B2829A00A8B911 /* en */,
+			);
+			name = ActivityLapCell.xib;
+			sourceTree = "<group>";
+		};
 		576FF5991892DE4900C0C3CF /* ActivityView.xib */ = {
 			isa = PBXVariantGroup;
 			children = (
@@ -964,6 +992,14 @@
 				57B0268A189711CB006440AF /* en */,
 			);
 			name = ActivityEditorView.xib;
+			sourceTree = "<group>";
+		};
+		57C9294B18B281DA00DCC469 /* ActivityLapsView.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				57C9294C18B281DA00DCC469 /* en */,
+			);
+			name = ActivityLapsView.xib;
 			sourceTree = "<group>";
 		};
 		57CA435818901570008693CA /* QueryListView.xib */ = {

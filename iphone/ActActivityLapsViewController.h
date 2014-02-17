@@ -24,35 +24,11 @@
 
 #import "ActActivityViewController.h"
 
-enum
-{
-  ActActivityChartSpeed,
-  ActActivityChartHeartRate,
-  ActActivityChartCadence,
-  ActActivityChartAltitude,
-  ActActivityChartVerticalOscillation,
-  ActActivityChartStanceTime,
-  ActActivityChartStrideLength,
-};
-
-@interface ActActivityChartListViewController : UITableViewController
+@interface ActActivityLapsViewController : UITableViewController
     <ActActivityChildViewController, UITableViewDataSource,
     UITableViewDelegate>
 {
-  UISegmentedControl *_smoothingControl;
-  UIBarButtonItem *_smoothingItem;
-  int _smoothing;
-
   UIEdgeInsets _contentInset;
-
-  NSArray *_chartTypes;
-
-  UILongPressGestureRecognizer *_pressRecognizer;
-
-  std::unique_ptr<act::gps::activity> _smoothedData;
-  int _dataSmoothing;
 }
-
-@property(nonatomic, readonly) const act::gps::activity *smoothedData;
 
 @end

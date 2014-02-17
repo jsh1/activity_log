@@ -22,37 +22,27 @@
    CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
    SOFTWARE. */
 
-#import "ActActivityViewController.h"
+#import <UIKit/UIKit.h>
 
-enum
+#import "act-activity.h"
+
+@interface ActActivityLapCell : UITableViewCell
 {
-  ActActivityChartSpeed,
-  ActActivityChartHeartRate,
-  ActActivityChartCadence,
-  ActActivityChartAltitude,
-  ActActivityChartVerticalOscillation,
-  ActActivityChartStanceTime,
-  ActActivityChartStrideLength,
-};
+  IBOutlet UILabel *_distanceLabel;
+  IBOutlet UILabel *_paceLabel;
+  IBOutlet UIView *_paceView;
 
-@interface ActActivityChartListViewController : UITableViewController
-    <ActActivityChildViewController, UITableViewDataSource,
-    UITableViewDelegate>
-{
-  UISegmentedControl *_smoothingControl;
-  UIBarButtonItem *_smoothingItem;
-  int _smoothing;
+  NSLayoutConstraint *_widthConstraint;
 
-  UIEdgeInsets _contentInset;
-
-  NSArray *_chartTypes;
-
-  UILongPressGestureRecognizer *_pressRecognizer;
-
-  std::unique_ptr<act::gps::activity> _smoothedData;
-  int _dataSmoothing;
+  const act::activity *_activity;
+  NSInteger _lapIndex;
 }
 
-@property(nonatomic, readonly) const act::gps::activity *smoothedData;
++ (NSString *)nibName;
+
+@property(nonatomic) const act::activity *activity;
+@property(nonatomic) NSInteger lapIndex;
+
+- (void)reloadData;
 
 @end

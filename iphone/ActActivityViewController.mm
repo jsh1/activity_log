@@ -27,6 +27,7 @@
 #import "ActActivityEditorViewController.h"
 #import "ActActivityChartListViewController.h"
 #import "ActActivitySummaryViewController.h"
+#import "ActActivityLapsViewController.h"
 #import "ActActivityMapViewController.h"
 #import "ActAppDelegate.h"
 #import "ActColor.h"
@@ -435,6 +436,7 @@ gps_reader::read_gps_file(const act::activity &a) const
 
   _mapItem.enabled = haveGPS;
   _chartsItem.enabled = haveGPS;
+  _lapsItem.enabled = haveGPS;
 
   [self setBarButtonItem:_mapItem
    selected:cls == [ActActivityMapViewController class]];
@@ -442,16 +444,13 @@ gps_reader::read_gps_file(const act::activity &a) const
   [self setBarButtonItem:_chartsItem
    selected:cls == [ActActivityChartListViewController class]];
 
-  _lapsItem.enabled = NO;
+  [self setBarButtonItem:_lapsItem
+   selected:cls == [ActActivityLapsViewController class]];
 }
 
 - (IBAction)showSummaryAction:(id)sender
 {
   self.childViewControllerClass = [ActActivitySummaryViewController class];
-}
-
-- (IBAction)showLapsAction:(id)sender
-{
 }
 
 - (IBAction)showMapAction:(id)sender
@@ -462,6 +461,11 @@ gps_reader::read_gps_file(const act::activity &a) const
 - (IBAction)showChartsAction:(id)sender
 {
   self.childViewControllerClass = [ActActivityChartListViewController class];
+}
+
+- (IBAction)showLapsAction:(id)sender
+{
+  self.childViewControllerClass = [ActActivityLapsViewController class];
 }
 
 - (IBAction)editAction:(id)sender
