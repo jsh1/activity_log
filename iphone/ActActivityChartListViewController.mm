@@ -91,8 +91,21 @@ chart_title(int type)
   _smoothingItem = [[UIBarButtonItem alloc]
 		    initWithCustomView:_smoothingControl];
 
-  _smoothing = 15;
-  _smoothingControl.selectedSegmentIndex = 1;
+  _smoothing = [[NSUserDefaults standardUserDefaults]
+		integerForKey:@"ActActivityChartListView.smoothing"];
+
+  NSInteger idx = -1;
+  if (_smoothing == 0)
+    idx = 0;
+  else if (_smoothing == 15)
+    idx = 1;
+  else if (_smoothing == 60)
+    idx = 2;
+  else if (_smoothing == 60*4)
+    idx = 3;
+
+  if (idx >= 0)
+    _smoothingControl.selectedSegmentIndex = idx;
 
   _pressRecognizer = [[UILongPressGestureRecognizer alloc]
 		      initWithTarget:self action:@selector(pressAction:)];
@@ -183,6 +196,9 @@ chart_title(int type)
     _smoothing = 60;
   else if (idx == 3)
     _smoothing = 60*4;
+
+  [[NSUserDefaults standardUserDefaults]
+   setInteger:_smoothing forKey:@"ActActivityChartListView.smoothing"];
 
   [self reloadData];
 }

@@ -73,9 +73,22 @@ CA_HIDDEN @interface AAMVLayoutGuide : NSObject <UILayoutSupport>
 		     initWithItems:@[@"Standard", @"Hybrid"]];
   [_mapTypeControl addTarget:self action:@selector(mapTypeAction:)
    forControlEvents:UIControlEventValueChanged];
-  _mapTypeControl.selectedSegmentIndex = 0;
 
   _mapTypeItem = [[UIBarButtonItem alloc] initWithCustomView:_mapTypeControl];
+
+  MKMapView *map_view = (id)self.view;
+
+  map_view.mapType = (MKMapType) [[NSUserDefaults standardUserDefaults]
+				  integerForKey:@"ActActivityMapView.mapType"];
+
+  NSInteger idx = -1;
+  if (map_view.mapType == MKMapTypeStandard)
+    idx = 0;
+  else if (map_view.mapType == MKMapTypeHybrid)
+    idx = 1;
+
+  if (idx >= 0)
+    _mapTypeControl.selectedSegmentIndex = idx;
 
   _pressRecognizer = [[UILongPressGestureRecognizer alloc]
 		      initWithTarget:self action:@selector(pressAction:)];
@@ -112,33 +125,30 @@ CA_HIDDEN @interface AAMVLayoutGuide : NSObject <UILayoutSupport>
 
   {
     const act::location_region &rgn = gps_data->region();
-#if 0
-    MKCoordinateRegion mk_rgn;
-    mk_rgn.center.latitude = rgn.center.latitude;
-    mk_rgn.center.longitude = rgn.center.longitude;
-    mk_rgn.span.latitudeDelta = rgn.size.latitude;
-    mk_rgn.span.longitudeDelta = rgn.size.longitude;
-    [map_view setRegion:mk_rgn animated:NO];
-#else
+
     CLLocationCoordinate2D l0, l1;
     l0.latitude = rgn.center.latitude - rgn.size.latitude*.5;
     l0.longitude = rgn.center.longitude - rgn.size.longitude*.5;
     l1.latitude = rgn.center.latitude + rgn.size.latitude*.5;
     l1.longitude = rgn.center.longitude + rgn.size.longitude*.5;
+
     MKMapPoint p0 = MKMapPointForCoordinate(l0);
     MKMapPoint p1 = MKMapPointForCoordinate(l1);
+
     double llx = std::min(p0.x, p1.x);
     double lly = std::min(p0.y, p1.y);
     double urx = std::max(p0.x, p1.x);
     double ury = std::max(p0.y, p1.y);
+
     MKMapRect r = MKMapRectMake(llx, lly, urx - llx, ury - lly);
+
     UIEdgeInsets inset = _contentInset;
     inset.top += MAP_INSET;
     inset.bottom += MAP_INSET;
     inset.left += MAP_INSET;
     inset.right += MAP_INSET;
+
     [map_view setVisibleMapRect:r edgePadding:inset animated:NO];
-#endif
   }
 
   /* Add track adornments. */
@@ -203,6 +213,9 @@ CA_HIDDEN @interface AAMVLayoutGuide : NSObject <UILayoutSupport>
 
   map_view.mapType = (_mapTypeControl.selectedSegmentIndex == 0
 		      ? MKMapTypeStandard : MKMapTypeHybrid);
+
+  [[NSUserDefaults standardUserDefaults]
+   setInteger:map_view.mapType forKey:@"ActActivityMapView.mapType"];
 }
 
 - (void)pressAction:(id)sender

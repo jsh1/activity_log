@@ -54,5 +54,10 @@
 		<key>run/race</key>
 		<string>.87 0 .02</string>
 	</dict>
+
+	<key>ActActivityChartListView.smoothing</key>
+	<integer>15</integer>
+	<key>ActActivityMapView.mapType</key>
+	<integer>0</integer>
 </dict>
 </plist>
