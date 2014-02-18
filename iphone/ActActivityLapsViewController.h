@@ -28,7 +28,6 @@
     <ActActivityChildViewController, UITableViewDataSource,
     UITableViewDelegate>
 {
-  UIEdgeInsets _contentInset;
 }
 
 @end

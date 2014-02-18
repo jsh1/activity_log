@@ -43,8 +43,6 @@ enum
   UIBarButtonItem *_smoothingItem;
   int _smoothing;
 
-  UIEdgeInsets _contentInset;
-
   NSArray *_chartTypes;
 
   UILongPressGestureRecognizer *_pressRecognizer;

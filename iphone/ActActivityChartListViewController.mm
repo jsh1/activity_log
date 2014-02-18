@@ -99,16 +99,7 @@ chart_title(int type)
   _pressRecognizer.minimumPressDuration = .25;
   [self.view addGestureRecognizer:_pressRecognizer];
 
-  [(UITableView *)self.view setContentInset:_contentInset];
-
   [self updateRowHeight];
-}
-
-- (void)setContentInset:(UIEdgeInsets)inset
-{
-  _contentInset = inset;
-  [(UITableView *)self.view setContentInset:_contentInset];
-  [self.view setNeedsLayout];
 }
 
 - (NSArray *)rightBarButtonItems

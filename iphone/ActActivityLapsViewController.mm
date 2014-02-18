@@ -52,13 +52,6 @@
    forCellReuseIdentifier:@"lapCell"];
 }
 
-- (void)setContentInset:(UIEdgeInsets)inset
-{
-  _contentInset = inset;
-  [(UITableView *)self.view setContentInset:_contentInset];
-  [self.view setNeedsLayout];
-}
-
 - (NSArray *)rightBarButtonItems
 {
   return @[];

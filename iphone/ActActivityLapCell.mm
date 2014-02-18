@@ -90,8 +90,6 @@
 
   [_paceView.superview addConstraint:_widthConstraint];
 
-//  _paceView.backgroundColor = [[ActColor tintColor] colorWithAlphaComponent:.8];
-//  _paceView.backgroundColor = [ActColor lightGrayColor];
   _paceView.layer.allowsEdgeAntialiasing = NO;
 }
 
