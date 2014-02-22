@@ -32,9 +32,9 @@
 #define X_INSET_LEFT 16
 #define X_INSET_RIGHT 5
 #define Y_INSET_TOP 5
-#define Y_INSET_BOTTOM 16
+#define Y_INSET_BOTTOM 10
 #define BODY_RIGHT_INSET 11
-#define BODY_MAX_CHARS 200
+#define BODY_MAX_ROWS 4
 #define TIME_WIDTH 74
 #define STATS_Y_SPACING 2
 
@@ -230,20 +230,17 @@ activity_list_item::draw(const CGRect &bounds)
     {
       subR.size.height = body_height;
 
-      [body drawInRect:subR withAttributes:body_attrs];
+      NSInteger opts = (NSStringDrawingTruncatesLastVisibleLine
+			| NSStringDrawingUsesLineFragmentOrigin);
+
+      [body drawWithRect:subR options:(NSStringDrawingOptions)opts
+       attributes:body_attrs context:nil];
     }
 }
 
 void
 activity_list_item::update_body()
 {
-  static NSString *ellipsis;
-  if (ellipsis == nil)
-    {
-      unichar c = 0x2026;
-      ellipsis = [NSString stringWithCharacters:&c length:1];
-    }
-
   if (!body)
     {
       const std::string &s = activity->body();
@@ -257,15 +254,6 @@ activity_list_item::update_body()
 
 	  while (const char *eol = strchr(ptr, '\n'))
 	    {
-	      /* FIXME: this sucks, do proper n-line truncation. */
-
-	      if ([str length] + eol-ptr >= BODY_MAX_CHARS)
-		{
-		  [str appendString:ellipsis];
-		  finished = true;
-		  break;
-		}
-
 	      NSString *tem = [[NSString alloc] initWithBytes:ptr
 			       length:eol-ptr encoding:NSUTF8StringEncoding];
 	      [str appendString:tem];
@@ -273,8 +261,6 @@ activity_list_item::update_body()
 
 	      if (eol[1] == '\n')
 		{
-		  [str appendString:@" "];
-		  [str appendString:ellipsis];
 		  finished = true;
 		  break;
 		}
@@ -308,10 +294,16 @@ activity_list_item::update_body_height(CGFloat width)
 	  if (!initialized)
 	    initialize();
 
-	  CGSize size = CGSizeMake(width, 10000);
+	  /* FIXME: I have no clue why the "+1" is needed here..? */
+
+	  CGSize size = CGSizeMake(width, (BODY_MAX_ROWS+1)
+				   * text_attrs_leading(body_attrs));
+
+	  NSInteger opts = (NSStringDrawingTruncatesLastVisibleLine
+			    | NSStringDrawingUsesLineFragmentOrigin);
 
 	  CGRect bounds = [body boundingRectWithSize:size
-			   options:NSStringDrawingUsesLineFragmentOrigin
+			   options:(NSStringDrawingOptions)opts
 			   attributes:body_attrs context:nil];
 	  body_height = bounds.size.height;
 	}
@@ -330,6 +322,9 @@ activity_list_item::update_height(CGFloat width)
 
   if (!valid_height)
     {
+      if (!initialized)
+	initialize();
+
       height = 0;
       height += Y_INSET_TOP;
       height += text_attrs_leading(title_attrs);
