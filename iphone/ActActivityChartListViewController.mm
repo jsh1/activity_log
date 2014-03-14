@@ -91,7 +91,7 @@ chart_title(int type)
   _smoothingItem = [[UIBarButtonItem alloc]
 		    initWithCustomView:_smoothingControl];
 
-  _smoothing = [[NSUserDefaults standardUserDefaults]
+  _smoothing = (int) [[NSUserDefaults standardUserDefaults]
 		integerForKey:@"ActActivityChartListView.smoothing"];
 
   NSInteger idx = -1;
