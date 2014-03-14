@@ -10,12 +10,12 @@ database between systems.
 
 ### iPhone UI
 
-![Screenshot](http://unfactored.org/images/act-iphone-2014-01-30.png)
+![Screenshot](http://www.unfactored.org/images/act-iphone-2014-01-30.png)
 
 ### Mac UI
 
-![Screenshot](http://unfactored.org/images/act-screen-2014-01-14-1.png)
-![Screenshot](http://unfactored.org/images/act-screen-2014-01-14-2.png)
+![Screenshot](http://www.unfactored.org/images/act-screen-2014-01-14-1.png)
+![Screenshot](http://www.unfactored.org/images/act-screen-2014-01-14-2.png)
 
 ### Command Line Interface
 
