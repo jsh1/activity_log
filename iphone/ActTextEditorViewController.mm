@@ -27,6 +27,11 @@
 #import "ActAppDelegate.h"
 
 @implementation ActTextEditorViewController
+{
+  NSString *_stringValue;
+
+  CGFloat _currentKeyboardInset;
+}
 
 @synthesize stringValue = _stringValue;
 

@@ -36,6 +36,13 @@
 #import <xlocale.h>
 
 @implementation ActQueryListViewController
+{
+  IBOutlet UIBarButtonItem *_configButton;
+
+  int _year;
+
+  NSArray *_rowData;
+}
 
 + (ActQueryListViewController *)instantiate
 {

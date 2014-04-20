@@ -47,24 +47,6 @@
 @end
 
 @interface ActActivityViewController : UIViewController
-{
-  UIViewController<ActActivityChildViewController> *_childViewController;
-
-  UIBarButtonItem *_editItem;
-
-  UIBarButtonItem *_summaryItem;
-  UIBarButtonItem *_mapItem;
-  UIBarButtonItem *_chartsItem;
-  UIBarButtonItem *_lapsItem;
-
-  UIImage *_itemBgImageNormal;
-  UIImage *_itemBgImageSelected;
-
-  std::unique_ptr<act::activity> _activity;
-  NSString *_activityGPSPath;
-  NSString *_activityGPSRev;
-  std::unique_ptr<act::activity::gps_data_reader> _activityGPSReader;
-}
 
 + (ActActivityViewController *)instantiate;
 

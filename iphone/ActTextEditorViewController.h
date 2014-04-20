@@ -29,11 +29,6 @@
 @class ActTableViewEditorCell;
 
 @interface ActTextEditorViewController : UIViewController <UITextViewDelegate>
-{
-  NSString *_stringValue;
-
-  CGFloat _currentKeyboardInset;
-}
 
 - (id)init;
 

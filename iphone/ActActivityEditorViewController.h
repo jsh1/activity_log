@@ -24,20 +24,12 @@
 
 #import <UIKit/UIKit.h>
 
-#import "act-activity.h"
+#import "act-activity-storage.h"
 
 @class ActFieldEditorViewController;
 
 @interface ActActivityEditorViewController : UITableViewController
     <UITableViewDataSource, UITableViewDelegate>
-{
-  act::activity_storage_ref _activityStorage;
-
-  /* Has a copy of _activityStorage, not the original. */
-
-  std::unique_ptr<act::activity> _activity;
-  BOOL _activityModified;
-}
 
 + (ActActivityEditorViewController *)instantiate;
 

@@ -29,34 +29,6 @@ extern NSString *const ActMetadataCacheDidChange;
 extern NSString *const ActFileCacheDidChange;
 
 @interface ActFileManager : NSObject <DBRestClientDelegate>
-{
-  DBRestClient *_dbClient;
-
-  NSString *_localFilePath;
-
-  BOOL _queuedSynchronize;
-
-  /* Dropbox metadata caching. */
-
-  NSMutableSet *_pendingMetadata;
-  NSMutableDictionary *_metadataCache;		/* path -> NSDictionary */
-  NSMutableDictionary *_oldMetadataCache;
-
-  NSString *_metadataCachePath;
-  BOOL _metadataCacheNeedsSynchronize;
-
-  /* Dropbox file caching. */
-
-  NSMutableDictionary *_fileCacheRevisions;	/* path -> NSNumber<int> */
-  NSMutableDictionary *_pendingFileCacheRevisions;
-
-  NSString *_fileCacheRevisionsPath;
-  BOOL _fileCacheRevisionsNeedsSynchronize;
-
-  /* Upload state. */
-
-  NSMutableDictionary *_pendingFileUploads;	/* path -> block(BOOL) */
-}
 
 + (ActFileManager *)sharedManager;
 

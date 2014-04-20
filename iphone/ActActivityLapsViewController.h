@@ -27,7 +27,5 @@
 @interface ActActivityLapsViewController : UITableViewController
     <ActActivityChildViewController, UITableViewDataSource,
     UITableViewDelegate>
-{
-}
 
 @end

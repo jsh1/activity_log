@@ -25,6 +25,9 @@
 #import "ActActivityListItemView.h"
 
 @implementation ActActivityListItemView
+{
+  act::activity_list_item_ref _listItem;
+}
 
 - (act::activity_list_item_ref)listItem
 {

@@ -28,6 +28,15 @@
 #import "ActTableViewStringEditorCell.h"
 
 @implementation ActFieldEditorViewController
+{
+  act::field_data_type _type;
+  NSString *_stringValue;
+
+  NSString *_headerString;
+  NSString *_footerString;
+
+  ActTableViewEditorCell *_editorCell;
+}
 
 @synthesize type = _type;
 @synthesize stringValue = _stringValue;

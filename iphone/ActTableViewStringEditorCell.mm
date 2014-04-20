@@ -27,6 +27,9 @@
 #import "FoundationExtensions.h"
 
 @implementation ActTableViewStringEditorCell
+{
+  IBOutlet UITextField *_textField;
+}
 
 + (NSString *)nibName
 {

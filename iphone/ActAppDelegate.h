@@ -28,17 +28,6 @@
 
 @interface ActAppDelegate : NSObject
   <UIApplicationDelegate, DBNetworkRequestDelegate>
-{
-  UIWindow *_window;
-  UINavigationController *_navigationController;
-
-  DBSession *_dropboxSession;
-  BOOL _dropboxLinked;
-  int _dropboxRequests;
-
-  NSString *_remoteActivityPath;
-  NSString *_remoteGPSPath;
-}
 
 @property(nonatomic, strong) IBOutlet UIWindow *window;
 @property(nonatomic, strong) IBOutlet UINavigationController *navigationController;

@@ -27,6 +27,11 @@
 #import "ActAppDelegate.h"
 
 @implementation ActSettingsViewController
+{
+  IBOutlet UISwitch *_linkedSwitch;
+  IBOutlet UITextField *_activitiesDirectoryField;
+  IBOutlet UITextField *_gpsDirectoryField;
+}
 
 + (ActSettingsViewController *)instantiate
 {

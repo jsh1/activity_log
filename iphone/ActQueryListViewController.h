@@ -26,13 +26,6 @@
 
 @interface ActQueryListViewController : UITableViewController
     <UITableViewDataSource, UITableViewDelegate>
-{
-  IBOutlet UIBarButtonItem *_configButton;
-
-  int _year;
-
-  NSArray *_rowData;
-}
 
 + (ActQueryListViewController *)instantiate;
 

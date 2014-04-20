@@ -33,6 +33,31 @@
 @end
 
 @implementation ActActivitySummaryViewController
+{
+  IBOutlet UILabel *_courseLabel;
+  IBOutlet UILabel *_activityLabel;
+  IBOutlet UILabel *_dateLabel;
+  IBOutlet UILabel *_timeLabel;
+
+  IBOutlet UILabel *_distanceLabel;
+  IBOutlet UILabel *_durationLabel;
+  IBOutlet UILabel *_paceLabel;
+  IBOutlet UILabel *_avgHRLabel;
+  IBOutlet UILabel *_cadenceLabel;
+  IBOutlet UILabel *_pointsLabel;
+
+  IBOutlet NSLayoutConstraint *_distanceHeightConstraint;
+  IBOutlet NSLayoutConstraint *_durationHeightConstraint;
+  IBOutlet NSLayoutConstraint *_paceHeightConstraint;
+  IBOutlet NSLayoutConstraint *_avgHRHeightConstraint;
+  IBOutlet NSLayoutConstraint *_cadenceHeightConstraint;
+  IBOutlet NSLayoutConstraint *_pointsHeightConstraint;
+
+  IBOutlet NSLayoutConstraint *_separator1HeightConstraint;
+  IBOutlet NSLayoutConstraint *_separator2HeightConstraint;
+
+  IBOutlet UILabel *_notesLabel;
+}
 
 - (id)init
 {

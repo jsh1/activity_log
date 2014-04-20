@@ -30,15 +30,6 @@
 
 @interface ActFieldEditorViewController : UITableViewController
     <UITableViewDataSource, UITableViewDelegate>
-{
-  act::field_data_type _type;
-  NSString *_stringValue;
-
-  NSString *_headerString;
-  NSString *_footerString;
-
-  ActTableViewEditorCell *_editorCell;
-}
 
 - (id)initWithFieldType:(act::field_data_type)type;
 

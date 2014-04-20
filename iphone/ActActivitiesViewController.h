@@ -26,9 +26,6 @@
 
 #import "act-database.h"
 
-#import "act-activity-list-item.h"
-#import "act-activity-list-section.h"
-
 enum
 {
   ActActivitiesViewList,
@@ -37,22 +34,6 @@ enum
 
 @interface ActActivitiesViewController : UITableViewController
     <UITableViewDataSource, UITableViewDelegate>
-{
-  act::database::query _query;
-  NSInteger _viewMode;
-
-  std::vector<act::database::item> _items;
-  std::vector<act::activity_list_section> _listData;
-
-  time_t _earliestTime;
-  BOOL _moreItems;
-  BOOL _needReloadView;
-
-  int _ignoreNotifications;
-
-  UIBarButtonItem *_addItem;
-  UIBarButtonItem *_weekItem;
-}
 
 + (ActActivitiesViewController *)instantiate;
 

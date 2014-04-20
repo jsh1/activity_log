@@ -30,14 +30,6 @@ extern NSString *const ActActivityDatabaseDidChange;
 extern NSString *const ActActivityDidChange;
 
 @interface ActDatabaseManager : NSObject
-{
-  std::unique_ptr<act::database> _database;
-
-  NSMutableDictionary *_addedActivityRevisions;
-
-  BOOL _databaseNeedsSynchronize;
-  BOOL _queuedSynchronize;
-}
 
 + (ActDatabaseManager *)sharedManager;
 

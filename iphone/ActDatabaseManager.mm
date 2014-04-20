@@ -50,6 +50,14 @@ NSString *const ActActivityDidChange = @"ActActivityDidChange";
 @end
 
 @implementation ActDatabaseManager
+{
+  std::unique_ptr<act::database> _database;
+
+  NSMutableDictionary *_addedActivityRevisions;
+
+  BOOL _databaseNeedsSynchronize;
+  BOOL _queuedSynchronize;
+}
 
 static ActDatabaseManager *_sharedManager;
 

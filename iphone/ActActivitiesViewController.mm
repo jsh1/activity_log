@@ -30,19 +30,35 @@
 #import "ActDatabaseManager.h"
 #import "ActFileManager.h"
 
+#import "act-activity-list-item.h"
+#import "act-activity-list-section.h"
+
 #import "act-util.h"
 
 #import <time.h>
 #import <xlocale.h>
 
 @interface ActActivityLoadMoreCell : UITableViewCell
-{
-  time_t _earliestTime;
-}
 @property(nonatomic) time_t earliestTime;
 @end
 
 @implementation ActActivitiesViewController
+{
+  act::database::query _query;
+  NSInteger _viewMode;
+
+  std::vector<act::database::item> _items;
+  std::vector<act::activity_list_section> _listData;
+
+  time_t _earliestTime;
+  BOOL _moreItems;
+  BOOL _needReloadView;
+
+  int _ignoreNotifications;
+
+  UIBarButtonItem *_addItem;
+  UIBarButtonItem *_weekItem;
+}
 
 + (ActActivitiesViewController *)instantiate
 {

@@ -34,6 +34,17 @@
 #import "act-config.h"
 
 @implementation ActAppDelegate
+{
+  UIWindow *_window;
+  UINavigationController *_navigationController;
+
+  DBSession *_dropboxSession;
+  BOOL _dropboxLinked;
+  int _dropboxRequests;
+
+  NSString *_remoteActivityPath;
+  NSString *_remoteGPSPath;
+}
 
 @synthesize window = _window;
 @synthesize navigationController = _navigationController;

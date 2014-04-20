@@ -27,8 +27,16 @@
 #import "ActActivityChartListViewController.h"
 
 #import "act-gps-activity.h"
+#import "act-gps-chart.h"
 
 @implementation ActActivityChartItemView
+{
+  const act::activity *_activity;
+  int _chartType;
+  int _smoothing;
+
+  std::unique_ptr<act::gps::chart> _chart;
+}
 
 @synthesize controller = _controller;
 @synthesize activity = _activity;

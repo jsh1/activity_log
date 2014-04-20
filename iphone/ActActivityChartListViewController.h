@@ -38,18 +38,6 @@ enum
 @interface ActActivityChartListViewController : UITableViewController
     <ActActivityChildViewController, UITableViewDataSource,
     UITableViewDelegate>
-{
-  UISegmentedControl *_smoothingControl;
-  UIBarButtonItem *_smoothingItem;
-  int _smoothing;
-
-  NSArray *_chartTypes;
-
-  UILongPressGestureRecognizer *_pressRecognizer;
-
-  std::unique_ptr<act::gps::activity> _smoothedData;
-  int _dataSmoothing;
-}
 
 @property(nonatomic, readonly) const act::gps::activity *smoothedData;
 

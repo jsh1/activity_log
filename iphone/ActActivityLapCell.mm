@@ -32,6 +32,16 @@
 #import "Macros.h"
 
 @implementation ActActivityLapCell
+{
+  IBOutlet UILabel *_distanceLabel;
+  IBOutlet UILabel *_paceLabel;
+  IBOutlet UIView *_paceView;
+
+  NSLayoutConstraint *_widthConstraint;
+
+  const act::activity *_activity;
+  NSInteger _lapIndex;
+}
 
 @synthesize activity = _activity;
 @synthesize lapIndex = _lapIndex;

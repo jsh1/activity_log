@@ -54,6 +54,18 @@ chart_title(int type)
 }
 
 @implementation ActActivityChartListViewController
+{
+  UISegmentedControl *_smoothingControl;
+  UIBarButtonItem *_smoothingItem;
+  int _smoothing;
+
+  NSArray *_chartTypes;
+
+  UILongPressGestureRecognizer *_pressRecognizer;
+
+  std::unique_ptr<act::gps::activity> _smoothedData;
+  int _dataSmoothing;
+}
 
 - (id)init
 {

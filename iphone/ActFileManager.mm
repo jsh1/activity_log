@@ -46,6 +46,34 @@ NSString *const ActFileCacheDidChange = @"ActFileCacheDidChange";
 #define LOG(x) do {if (VERBOSE) NSLog x;} while (0)
 
 @implementation ActFileManager
+{
+  DBRestClient *_dbClient;
+
+  NSString *_localFilePath;
+
+  BOOL _queuedSynchronize;
+
+  /* Dropbox metadata caching. */
+
+  NSMutableSet *_pendingMetadata;
+  NSMutableDictionary *_metadataCache;		/* path -> NSDictionary */
+  NSMutableDictionary *_oldMetadataCache;
+
+  NSString *_metadataCachePath;
+  BOOL _metadataCacheNeedsSynchronize;
+
+  /* Dropbox file caching. */
+
+  NSMutableDictionary *_fileCacheRevisions;	/* path -> NSNumber<int> */
+  NSMutableDictionary *_pendingFileCacheRevisions;
+
+  NSString *_fileCacheRevisionsPath;
+  BOOL _fileCacheRevisionsNeedsSynchronize;
+
+  /* Upload state. */
+
+  NSMutableDictionary *_pendingFileUploads;	/* path -> block(BOOL) */
+}
 
 static ActFileManager *_sharedManager;
 

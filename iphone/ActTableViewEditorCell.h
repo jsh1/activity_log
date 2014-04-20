@@ -25,10 +25,6 @@
 #import <UIKit/UIKit.h>
 
 @interface ActTableViewEditorCell : UITableViewCell
-{
-  __weak id _target;
-  SEL _action;
-}
 
 + (id)instantiate;
 

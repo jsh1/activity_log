@@ -30,6 +30,8 @@
 #import "ActFieldEditorViewController.h"
 #import "ActTextEditorViewController.h"
 
+#import "act-activity.h"
+
 #define BODY_ROW_HEIGHT 150
 
 @interface ActActivityEditorViewController ()
@@ -37,6 +39,14 @@
 @end
 
 @implementation ActActivityEditorViewController
+{
+  act::activity_storage_ref _activityStorage;
+
+  /* Has a copy of _activityStorage, not the original. */
+
+  std::unique_ptr<act::activity> _activity;
+  BOOL _activityModified;
+}
 
 @synthesize viewWillDisappearHandler;
 

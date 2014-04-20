@@ -27,16 +27,6 @@
 #import "act-activity.h"
 
 @interface ActActivityLapCell : UITableViewCell
-{
-  IBOutlet UILabel *_distanceLabel;
-  IBOutlet UILabel *_paceLabel;
-  IBOutlet UIView *_paceView;
-
-  NSLayoutConstraint *_widthConstraint;
-
-  const act::activity *_activity;
-  NSInteger _lapIndex;
-}
 
 + (NSString *)nibName;
 

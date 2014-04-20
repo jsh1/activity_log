@@ -26,8 +26,5 @@
 
 @interface ActTableViewStringEditorCell : ActTableViewEditorCell
     <UITextFieldDelegate>
-{
-  IBOutlet UITextField *_textField;
-}
 
 @end

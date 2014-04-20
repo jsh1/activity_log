@@ -27,9 +27,6 @@
 #import "act-activity-list-item.h"
 
 @interface ActActivityListItemView : UIView
-{
-  act::activity_list_item_ref _listItem;
-}
 
 @property(nonatomic) act::activity_list_item_ref listItem;
 

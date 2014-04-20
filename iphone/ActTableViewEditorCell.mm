@@ -27,6 +27,10 @@
 #import "FoundationExtensions.h"
 
 @implementation ActTableViewEditorCell
+{
+  __weak id _target;
+  SEL _action;
+}
 
 @synthesize target = _target;
 @synthesize action = _action;

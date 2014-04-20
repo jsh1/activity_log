@@ -25,18 +25,10 @@
 #import <UIKit/UIKit.h>
 
 #import "act-activity.h"
-#import "act-gps-chart.h"
 
 @class ActActivityChartListViewController;
 
 @interface ActActivityChartItemView : UIView
-{
-  const act::activity *_activity;
-  int _chartType;
-  int _smoothing;
-
-  std::unique_ptr<act::gps::chart> _chart;
-}
 
 @property(nonatomic, weak) ActActivityChartListViewController *controller;
 

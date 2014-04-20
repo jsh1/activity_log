@@ -35,9 +35,6 @@
 @end
 
 CA_HIDDEN @interface AAMVPointAnnotation : MKPointAnnotation
-{
-  MKPinAnnotationColor _pinColor;
-}
 @property(nonatomic) MKPinAnnotationColor pinColor;
 @end
 
@@ -49,6 +46,14 @@ CA_HIDDEN @interface AAMVLayoutGuide : NSObject <UILayoutSupport>
 @end
 
 @implementation ActActivityMapViewController
+{
+  UIEdgeInsets _contentInset;
+
+  UISegmentedControl *_mapTypeControl;
+  UIBarButtonItem *_mapTypeItem;
+
+  UILongPressGestureRecognizer *_pressRecognizer;
+}
 
 - (id)init
 {
@@ -284,9 +289,7 @@ CA_HIDDEN @interface AAMVLayoutGuide : NSObject <UILayoutSupport>
 @end
 
 @implementation AAMVPointAnnotation
-
 @synthesize pinColor = _pinColor;
-
 @end
 
 @implementation AAMVPolylineView
@@ -301,5 +304,5 @@ CA_HIDDEN @interface AAMVLayoutGuide : NSObject <UILayoutSupport>
 @end
 
 @implementation AAMVLayoutGuide
-@synthesize length;
+@synthesize length = _length;
 @end
