@@ -57,6 +57,19 @@ config::config()
   _silent(false),
   _verbose(false)
 {
+  if (const char *home = ::getenv("HOME"))
+    {
+      _activity_dir = home;
+      _gps_file_dir = home;
+#if defined(__APPLE__) && __APPLE__
+      _activity_dir.append("/Documents/Activities");
+      _gps_file_dir.append("/Documents/Garmin");
+#else
+      _activity_dir.append("/.activities");
+      _gps_file_dir.append("/.garmin");
+#endif
+    }
+
   if (const char *file = getenv("ACT_CONFIG"))
     read_config_file(file);
   else if (const char *home = ::getenv("HOME"))
@@ -68,16 +81,8 @@ config::config()
 
   if (const char *dir = getenv("ACT_DIR"))
     _activity_dir = dir;
-  else if (const char *home = ::getenv("HOME"))
-    {
-      _activity_dir = home;
-#if defined(__APPLE__) && __APPLE__
-      _activity_dir.append("/Documents/Activities");
-#else
-      _activity_dir.append("/.activities");
-#endif
-    }
-  else
+
+  if (_activity_dir.size() == 0)
     {
       fprintf(stderr, "Error: you need to set $ACT_DIR or $HOME.\n");
       exit(1);
@@ -85,13 +90,6 @@ config::config()
 
   if (const char *dir = getenv("ACT_GPS_DIR"))
     _gps_file_dir = dir;
-#if defined(__APPLE__) && __APPLE__
-  else if (const char *home = ::getenv("HOME"))
-    {
-      _gps_file_dir = home;
-      _gps_file_dir.append("/Documents/Garmin");
-    }
-#endif
 
   if (const char *path = getenv("ACT_GPS_PATH"))
     append_gps_file_path(path, false);
