@@ -331,10 +331,30 @@ make_day(unsigned int year, unsigned int month, unsigned int day)
   return year/4 - year/100 + year/400 + 367*month/12 + day + year*365 - 719499;
 }
 
+namespace {
+
+time_t
+timezone_offset_()
+{
+  time_t now = time(nullptr);
+  struct tm tm = {0};
+  localtime_r(&now, &tm);
+  return tm.tm_gmtoff;
+}
+
+} // anonymous namespace
+
+time_t
+timezone_offset()
+{
+  static time_t offset = timezone_offset_();
+  return offset;
+}
+
 time_t
 make_time(unsigned int year, unsigned int month, unsigned int day)
 {
-  return make_day(year, month, day) * SECONDS_PER_DAY;
+  return make_day(year, month, day) * SECONDS_PER_DAY - timezone_offset();
 }
 
 time_t
@@ -359,6 +379,8 @@ week_index(time_t date)
 
   int start_of_week = act::shared_config().start_of_week();
 
+  date = date + timezone_offset();
+
   return (int)((date + 345600 + start_of_week * -86400) / 604800);
 }
 
@@ -367,7 +389,7 @@ week_date(int week_index)
 {
   int offset = 4 - act::shared_config().start_of_week();
 
-  return (week_index * 7 - offset) * (time_t)86400;
+  return (week_index * 7 - offset) * (time_t)86400 - timezone_offset();
 }
 
 int

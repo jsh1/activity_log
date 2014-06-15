@@ -30,6 +30,7 @@
 
 #import "act-config.h"
 #import "act-format.h"
+#import "act-util.h"
 
 #import "AppKitExtensions.h"
 #import "CoreAnimationExtensions.h"
@@ -164,25 +165,6 @@
 
 @end
 
-static int
-week_for_date(time_t date)
-{
-  // days since Jan 1, 1970 (a thursday); adjust, and into weeks:
-  // (date / (24 * 60 * 60) + 4 - start_of_week) / 7, equiv. to:
-
-  int start_of_week = act::shared_config().start_of_week();
-
-  return (date - (start_of_week - 4) * SECONDS_PER_DAY) / SECONDS_PER_WEEK;
-}
-
-static time_t
-date_for_week(int week)
-{
-  int start_of_week = act::shared_config().start_of_week();
-
-  return week * SECONDS_PER_WEEK + (start_of_week - 4) * SECONDS_PER_DAY;
-}
-
 static CGFloat
 activity_radius(double dist, double dur, double pts, int displayMode)
 {
@@ -292,7 +274,7 @@ activity_radius(double dist, double dur, double pts, int displayMode)
   for (size_t i = 0; i < activities.size(); i++)
     {
       if (activities[i].storage() == storage)
-	return week_for_date(activities[i].date());
+	return act::week_index(activities[i].date());
     }
 
   return -1;
@@ -307,8 +289,8 @@ activity_radius(double dist, double dur, double pts, int displayMode)
 
   if (activities.size() != 0)
     {
-      first_week = week_for_date(activities.back().date());
-      last_week = week_for_date(activities.front().date());
+      first_week = act::week_index(activities.back().date());
+      last_week = act::week_index(activities.front().date());
     }
 
   [_listView setWeekRange:NSMakeRange(first_week, last_week + 1 - first_week)];
@@ -454,7 +436,7 @@ activity_radius(double dist, double dur, double pts, int displayMode)
   if (!(week >= 0))
     return nil;
 
-  time_t date = date_for_week(week);
+  time_t date = act::week_date(week);
 
   for (ActWeekViewLayer *layer in [[self layer] sublayers])
     {
@@ -558,7 +540,7 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
 
   [[_controller headerView] setWeekIndex:week_idx];
 
-  time_t week_date = date_for_week(week_idx);
+  time_t week_date = act::week_date(week_idx);
 
   /* Find first item whose date is at or before the end of the first
      week we're going to look at. */
@@ -943,7 +925,7 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
   subR.size.width = STATS_WIDTH + COLUMN_SPACING; 
   subR.size.height = HEADER_MONTH_HEIGHT;
 
-  time_t date = date_for_week(_weekIndex);
+  time_t date = act::week_date(_weekIndex);
 
   [[date_formatter stringFromDate:[NSDate dateWithTimeIntervalSince1970:date]]
    drawInRect:subR withAttributes:month_attrs];

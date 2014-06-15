@@ -157,6 +157,8 @@ bool leap_year_p(int year);
 time_t seconds_in_year(int year);
 time_t seconds_in_month(int year, int month);
 
+time_t timezone_offset();
+
 // returns number of days or seconds since Jan 1 1970. Year is
 // absolute, month is 0..11, day is 1..31.
 

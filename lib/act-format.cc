@@ -54,7 +54,7 @@ namespace act {
 void
 format_date_time(std::string &str, time_t date)
 {
-  format_date_time(str, date, "%Y-%m-%d %H:%M:%S %z");
+  format_date_time(str, date, "%Y-%m-%d %H:%M:%S");
 }
 
 void
@@ -1024,7 +1024,6 @@ parse_date_time(const std::string &str, size_t &idx,
 {
   struct tm tm = {0};
   tm.tm_isdst = -1;
-  bool is_utc = false;
   time_t range = 0;
 
   /* Check for "now". */
@@ -1090,17 +1089,16 @@ parse_date_time(const std::string &str, size_t &idx,
 		  idx = skip_whitespace(str, idx);
 		}
 
-	      /* If no zone information, assume local time. Otherwise
-		 add the zone offset and convert from UTC to time_t. */
+	      /* We're going to ignore any zone information, we assume
+		 that it's always best to display the local time from
+		 when the activity was created. The easiest way to do
+		 that is to ignore the zone and convert to UTC from our
+		 current local timezone. */
 
 	      if (idx + 4 < str.size() && (str[idx] == '+' || str[idx] == '-'))
 		{
-		  int sign = str[idx++] == '+' ? 1 : -1;
-		  int zone_hrs = parse_decimal(str, idx, 2);
-		  int zone_mins = parse_decimal(str, idx, 2);
-		  hours -= sign * zone_hrs;
-		  minutes -= sign * zone_mins;
-		  is_utc = true;
+		  idx++;
+		  parse_decimal(str, idx, 4);
 		}
 	    }
 	  else
@@ -1114,10 +1112,7 @@ parse_date_time(const std::string &str, size_t &idx,
       tm.tm_sec = seconds;
     }
 
-  if (is_utc)
-    *date_ptr = timegm(&tm);
-  else
-    *date_ptr = mktime(&tm);
+  *date_ptr = mktime(&tm);
 
   if (range_ptr)
     *range_ptr = range;

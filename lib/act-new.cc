@@ -188,7 +188,8 @@ copy_gps_fields(activity_storage &a, const gps::activity &gps_data)
 
   if (a.field_ptr("Date") == nullptr)
     {
-      format_date_time(a["Date"], (time_t) gps_data.start_time());
+      format_date_time(a["Date"], (time_t) gps_data.start_time(),
+		       "%Y-%m-%d %H:%M:%S %z");
       changed = true;
     }
 
