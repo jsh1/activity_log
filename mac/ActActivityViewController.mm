@@ -32,7 +32,7 @@
 
 @implementation ActActivityViewController
 
-- (NSString *)viewNibName
++ (NSString *)viewNibName
 {
   return @"ActActivityView";
 }

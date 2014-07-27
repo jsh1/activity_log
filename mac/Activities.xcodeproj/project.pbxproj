@@ -50,7 +50,7 @@
 		5736AE56187752DC00EAE652 /* ActWeekView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 5736AE54187752DC00EAE652 /* ActWeekView.xib */; };
 		5736AE5918775A8100EAE652 /* ActWeekViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = 5736AE5818775A8100EAE652 /* ActWeekViewController.mm */; };
 		5736AE5B1878272700EAE652 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5736AE5A1878272700EAE652 /* QuartzCore.framework */; };
-		573ABAF71823FC05004FAF17 /* PXSourceList.m in Sources */ = {isa = PBXBuildFile; fileRef = 573ABAF41823FC05004FAF17 /* PXSourceList.m */; };
+		573ABAF71823FC05004FAF17 /* PXSourceList.m in Sources */ = {isa = PBXBuildFile; fileRef = 573ABAF41823FC05004FAF17 /* PXSourceList.m */; settings = {COMPILER_FLAGS = "-Wno-deprecated"; }; };
 		5755061E1824721D00A69209 /* ActSourceListDeviceItem.mm in Sources */ = {isa = PBXBuildFile; fileRef = 575506191824721D00A69209 /* ActSourceListDeviceItem.mm */; };
 		5755061F1824721D00A69209 /* ActSourceListItem.mm in Sources */ = {isa = PBXBuildFile; fileRef = 5755061B1824721D00A69209 /* ActSourceListItem.mm */; };
 		575506201824721D00A69209 /* ActSourceListQueryItem.mm in Sources */ = {isa = PBXBuildFile; fileRef = 5755061D1824721D00A69209 /* ActSourceListQueryItem.mm */; };

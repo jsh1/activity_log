@@ -337,6 +337,9 @@ activity_radius(double dist, double dur, double pts, int displayMode)
 	case NSRightMouseDown:
 	case NSOtherMouseDown:
 	  disableAnimations = NO;
+	  break;
+	default:
+	  break;
 	}
 
       if (disableAnimations)
