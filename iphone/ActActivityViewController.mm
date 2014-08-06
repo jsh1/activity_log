@@ -126,6 +126,8 @@
 			 UIBarButtonSystemItemFlexibleSpace target:nil
 			 action:nil],
 			_lapsItem];
+
+  self.automaticallyAdjustsScrollViewInsets = NO;
 }
 
 - (void)viewWillAppear:(BOOL)flag

@@ -126,7 +126,7 @@ defaults_getenv(const char *key)
 
   if (state && !linked)
     {
-      [_dropboxSession linkFromController:_navigationController];
+      [_dropboxSession linkFromController:[_navigationController visibleViewController]];
     }
   else if (!state && linked)
     {
