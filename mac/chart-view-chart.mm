@@ -189,12 +189,19 @@ chart::line::update_values(const chart &c)
   min_value -= border;
   max_value += border;
 
-  min_value = mean - 3 * sdev;
-  max_value = mean + 3 * sdev;
+  min_value = mean - 2.25 * sdev;
+  max_value = mean + 2.25 * sdev;
 
   if (field == gps::activity::point_field::altitude
       && max_value - min_value < 100)
     max_value = min_value + 100;
+
+  if (field == gps::activity::point_field::speed
+      && a.sport() == gps::activity::sport_type::running)
+    {
+      min_value = std::max(min_value, (float)shared_config().min_running_speed());
+      max_value = std::min(max_value, (float)shared_config().max_running_speed());
+    }
 
   float f0 = ((0 - min_ratio) * (1 / (max_ratio - min_ratio)));
   float f1 = ((1 - max_ratio) * (1 / (max_ratio - min_ratio)));

@@ -56,6 +56,9 @@ class config
 
   double _vdot;
 
+  double _min_running_speed;
+  double _max_running_speed;
+
   bool _silent;
   bool _verbose;
 
@@ -85,6 +88,9 @@ public:
   int max_hr() const;
 
   double vdot() const;
+
+  double min_running_speed() const;
+  double max_running_speed() const;
 
   bool silent() const;
   bool verbose() const;
@@ -194,6 +200,18 @@ inline double
 config::vdot() const
 {
   return _vdot;
+}
+
+inline double
+config::min_running_speed() const
+{
+  return _min_running_speed;
+}
+
+inline double
+config::max_running_speed() const
+{
+  return _max_running_speed;
 }
 
 inline bool

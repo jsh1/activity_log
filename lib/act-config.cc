@@ -54,6 +54,8 @@ config::config()
   _resting_hr(0),
   _max_hr(0),
   _vdot(0),
+  _min_running_speed(2),  // 2 m/s ~ 13.4 min/mi
+  _max_running_speed(7),  // 7 m/s ~ 3.8 min/mi
   _silent(false),
   _verbose(false)
 {
@@ -200,6 +202,9 @@ config::read_config_file(const char *path)
 	    _max_hr = atoi(value);
 	  else if (strcmp(name, "vdot") == 0)
 	    _vdot = strtod(value, nullptr);
+
+	  // FIXME: should check for min/max-running-speed, but
+	  // can't call parse_pace() as we'll deadlock.
 	}
       else if (strcmp(section.c_str(), "files") == 0)
 	{
