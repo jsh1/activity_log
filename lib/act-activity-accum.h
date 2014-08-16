@@ -73,7 +73,7 @@ private:
       double min;
       double max;
 
-      value_accum(accum_field field);
+      explicit value_accum(accum_field field);
       explicit value_accum(const value_accum &rhs) = default;
 
       void add(double x);
