@@ -28,6 +28,7 @@
 #include "act-format.h"
 #include "act-util.h"
 
+#include <math.h>
 #include <xlocale.h>
 
 namespace act {
@@ -574,6 +575,43 @@ date_interval::append_date(std::string &str, int x) const
       snprintf_l(buf, sizeof(buf), nullptr, "%d", 1970 + x);
       str.append(buf);
       break; }
+    }
+}
+
+double
+location::distance(const location &rhs) const
+{
+  double R = 6371e3;
+  double radians = M_PI / 180;
+  double ph1 = latitude * radians;
+  double ph2 = rhs.latitude * radians;
+  double th1 = longitude * radians;
+  double th2 = rhs.longitude * radians;
+
+  if (false)
+    {
+      // "Haversine" formula,
+      // from http://www.movable-type.co.uk/scripts/latlong.html
+
+      double snp = sin((ph2 - ph1) * .5);
+      double snt = sin((th2 - th1) * .5);
+      double a = snp * snp + cos(ph1) * cos(ph2) * snt * snt;
+      double c = 2 * atan2(sqrt(a), sqrt(1-a));
+
+      return R * c;
+    }
+  else
+    {
+      // Equirectangular approximation, same source.
+
+      // This seems good enough for our purposes. (E.g. calculates the
+      // same cumulative distance (to the nearest meter) for the last
+      // point of a 26.2 mile GPS track.)
+
+      double x = (th2 - th1) * cos((ph1 + ph2) * .5);
+      double y = ph2 - ph1;
+
+      return sqrt(x * x + y * y) * R;
     }
 }
 

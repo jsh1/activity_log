@@ -137,7 +137,42 @@ activity::read_compressed_tcx_file(const char *path, const char *prog)
 void
 activity::update_points()
 {
-  if (has_distance() && !has_speed())
+  // We used to only generate per-point speed values if !has_speed(),
+  // but some devices overly smooth their reported speed values, so we
+  // now rebuild the speed values every time. Distance values don't
+  // appear to be smoothed so (for now) we'll use the original data if
+  // it exists.
+
+  if (has_location() && !has_distance())
+    {
+      point *last_p = nullptr;
+
+      double total_distance = 0;
+
+      for (auto &p : _points)
+	{
+	  if (p.location.is_valid())
+	    {
+	      if (last_p != nullptr
+		  && last_p->location.is_valid()
+		  && p.elapsed_time - last_p->elapsed_time > 1e-3f
+		  && p.follows_continuously(*last_p))
+		{
+		  total_distance += p.location.distance(last_p->location);
+		}
+
+	      last_p = &p;
+	    }
+	  else
+	    last_p = nullptr;
+
+	  p.distance = total_distance;
+	}
+
+      set_has_distance(true);
+    }
+
+  if (has_distance())
     {
       point *last_p = nullptr;
 

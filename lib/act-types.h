@@ -193,6 +193,10 @@ struct location
   location(double lat, double lng);
 
   bool is_valid() const;
+
+  // computes great-circle distance in meters, ignoring altitude
+
+  double distance(const location &rhs) const;
 };
 
 void mix(location &a, const location &b, const location &c, double f);
