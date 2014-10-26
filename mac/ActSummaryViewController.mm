@@ -207,7 +207,7 @@
       [_dateDateField setStringValue:[formatter stringFromDate:date]];
 
       NSInteger day = [[[NSCalendar currentCalendar] components:
-			NSWeekdayCalendarUnit fromDate:date] weekday];
+			NSCalendarUnitWeekday fromDate:date] weekday];
       [_dateDayField setStringValue:
        [NSString stringWithFormat:@"on %@",
 	[[formatter weekdaySymbols] objectAtIndex:day - 1]]];

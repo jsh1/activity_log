@@ -36,7 +36,6 @@
   ActViewController *_superviewController;
   NSMutableArray *_subviewControllers;
   NSString *_identifierSuffix;
-  BOOL _viewHasBeenLoaded;
 }
 
 + (NSString *)viewNibName;
@@ -52,10 +51,6 @@
 
 - (id)initWithController:(ActWindowController *)controller
     options:(NSDictionary *)dict;
-
-@property(nonatomic, readonly) BOOL viewHasBeenLoaded;
-
-- (void)viewDidLoad;
 
 - (void)viewWillAppear;
 - (void)viewDidAppear;

@@ -224,7 +224,7 @@
 {
   if (NSString *name = [state objectForKey:@"mapSourceName"])
     {
-      if (_pendingSources > 0 || ![self viewHasBeenLoaded])
+      if (_pendingSources > 0 || !self.viewLoaded)
 	{
 	  [_defaultSourceName release];
 	  _defaultSourceName = [name copy];

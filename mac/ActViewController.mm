@@ -31,7 +31,6 @@
 @synthesize controller = _controller;
 @synthesize identifierSuffix = _identifierSuffix;
 @synthesize superviewController = _superviewController;
-@synthesize viewHasBeenLoaded = _viewHasBeenLoaded;
 
 + (NSString *)viewNibName
 {
@@ -161,24 +160,6 @@
 - (NSView *)initialFirstResponder
 {
   return nil;
-}
-
-- (void)viewDidLoad
-{
-}
-
-- (void)loadView
-{
-  [super loadView];
-
-  _viewHasBeenLoaded = YES;
-
-  // NSViewController calls -viewDidLoad on 10.10 and later, so avoid
-  // calling it twice.
-
-  if ([self view] != nil
-      && ![NSViewController instancesRespondToSelector:@selector(viewDidLoad)])
-    [self viewDidLoad];
 }
 
 - (void)viewWillAppear
