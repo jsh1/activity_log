@@ -78,8 +78,14 @@
   [(ActCollapsibleView *)[self view] setTitle:@"Summary & Notes"];
   [(ActCollapsibleView *)[self view] setHeaderInset:10];
 
-  // creating layers for each subview is not gaining us anything
+  /* creating layers for each subview is not gaining us anything
+
+     FIXME: broken from 10.10 onwards, text fields don't update after
+     creating view. */
+
+#if 0
   [[self view] setCanDrawSubviewsIntoLayer:YES];
+#endif
 
   [_dateBox setRightToLeft:YES];
   [_dateBox setSpacing:1];
