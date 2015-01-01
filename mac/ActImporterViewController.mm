@@ -277,6 +277,18 @@ copyFileToGPSDirectory(std::string &gps_path)
   return nil;
 }
 
+- (void)tableView:(NSTableView *)tv setObjectValue:(id)value
+  forTableColumn:(NSTableColumn *)col row:(NSInteger)row
+{
+  NSString *ident = [col identifier];
+  ActImporterActivity *item = [_activities objectAtIndex:row];
+
+  if ([ident isEqualToString:@"checked"])
+    [item setChecked:[value boolValue]];
+
+  // no other fields are settable
+}
+
 // NSTableDelegate methods
 
 - (void)tableView:(NSTableView *)tv willDisplayCell:(id)cell
