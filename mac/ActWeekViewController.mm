@@ -91,7 +91,7 @@
 {
   time_t _date;
   std::vector<act::database::item> _items;
-  std::vector<act::activity *> _activities;
+  std::vector<act::activity_ref> _activities;
 
   ActWeekView_StatsLayer *_statsLayer;
   ActWeekView_GroupLayer *_groupLayer;
@@ -99,7 +99,7 @@
 
 @property(nonatomic) time_t date;
 @property(nonatomic) const std::vector<act::database::item> &items;
-@property(nonatomic, readonly) const std::vector<act::activity *> &activities;
+@property(nonatomic, readonly) const std::vector<act::activity_ref> &activities;
 
 @property(nonatomic, readonly) ActWeekView_GroupLayer *groupLayer;
 
@@ -125,18 +125,18 @@
 @interface ActWeekView_GroupLayer : ActWeekView_ScaledLayer
 {
   time_t _date;
-  std::vector<act::activity *> _activities;
+  std::vector<act::activity_ref> _activities;
 }
 
 @property(nonatomic) time_t date;
-@property(nonatomic) const std::vector<act::activity *> &activities;
+@property(nonatomic) const std::vector<act::activity_ref> &activities;
 
 @end
 
 @interface ActWeekView_ActivityLayer : ActWeekView_ScaledLayer
 {
   time_t _date;
-  std::vector<act::activity *> _activities;
+  std::vector<act::activity_ref> _activities;
   BOOL _highlit;
   BOOL _expanded, _expandable;
 
@@ -145,7 +145,7 @@
 }
 
 @property(nonatomic) time_t date;
-@property(nonatomic) const std::vector<act::activity *> &activities;
+@property(nonatomic) const std::vector<act::activity_ref> &activities;
 @property(nonatomic, getter=isHighlit) BOOL highlit;
 @property(nonatomic, getter=isExpanded) BOOL expanded;
 @property(nonatomic, getter=isExpandable) BOOL expandable;
@@ -156,11 +156,11 @@
 
 @interface ActWeekView_ActivityGroupLayer : ActWeekView_ScaledLayer
 {
-  std::vector<act::activity *> _activities;
+  std::vector<act::activity_ref> _activities;
   BOOL _expanded;
 }
 
-@property(nonatomic) const std::vector<act::activity *> &activities;
+@property(nonatomic) const std::vector<act::activity_ref> &activities;
 @property(nonatomic, getter=isExpanded) BOOL expanded;
 
 @end
@@ -455,9 +455,9 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
 {
   for (ActWeekView_ActivityLayer *layer in sublayers)
     {
-      const std::vector<act::activity *> &vec = [layer activities];
+      const std::vector<act::activity_ref> &vec = [layer activities];
       if (std::any_of(vec.begin(), vec.end(),
-		      [=] (act::activity *a) {
+		      [=] (act::activity_ref a) {
 			return a->storage() == storage;}))
 	return layer;
     }
@@ -736,14 +736,14 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
   CALayer *self_layer = [self layer];
   CALayer *layer = [self_layer hitTest:NSPointToCGPoint(p)];
 
-  act::activity *selection = nullptr;
+  act::activity_ref selection;
 
   while (layer != nil && layer != self_layer)
     {
       if ([layer isKindOfClass:[ActWeekView_ActivityLayer class]])
 	{
 	  ActWeekView_ActivityLayer *a_layer = (id)layer;
-	  const std::vector<act::activity *> &vec = [a_layer activities];
+	  const std::vector<act::activity_ref> &vec = [a_layer activities];
 
 	  if (vec.size() == 1)
 	    {
@@ -820,7 +820,7 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
 {
   if (_highlitLayer != nil && [_highlitLayer activities].size() == 1)
     {
-      act::activity *a = [_highlitLayer activities].front();
+      const act::activity_ref &a = [_highlitLayer activities].front();
       NSRect r = NSRectFromCGRect([[self layer] convertRect:
 			[_highlitLayer bounds] fromLayer:_highlitLayer]);
       r = NSInsetRect(r, -2, -2);
@@ -1040,35 +1040,17 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
     }
 }
 
-- (void)dealloc
-{
-  for (size_t i = 0; i < _activities.size(); i++)
-    delete _activities[i];
-
-  [super dealloc];
-}
-
 - (void)updateActivities
 {
   if (_activities.size() != _items.size())
     {
-      for (size_t i = _items.size(); i < _activities.size(); i++)
-	delete _activities[i];
-
       _activities.resize(_items.size());
     }
 
   for (size_t i = 0; i < _items.size(); i++)
     {
-      if (_activities[i] != nullptr
-	  && _activities[i]->storage() != _items[i].storage())
-	{
-	  delete _activities[i];
-	  _activities[i] = nullptr;
-	}
-
-      if (_activities[i] == nullptr)
-	_activities[i] = new act::activity(_items[i].storage());
+      if (!_activities[i] || _activities[i]->storage() != _items[i].storage())
+	_activities[i].reset(new act::activity(_items[i].storage()));
     }
 }
 
@@ -1341,12 +1323,12 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
     }
 }
 
-- (const std::vector<act::activity *> &)activities
+- (const std::vector<act::activity_ref> &)activities
 {
   return _activities;
 }
 
-- (void)setActivities:(const std::vector<act::activity *> &)vec
+- (void)setActivities:(const std::vector<act::activity_ref> &)vec
 {
   if (_activities != vec)
     {
@@ -1404,7 +1386,7 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
 
       time_t next_day_date = day_date + SECONDS_PER_DAY;
 
-      std::vector<act::activity *> day_vec;
+      std::vector<act::activity_ref> day_vec;
       while (item_i >= 0 && (_activities[item_i]->date() < next_day_date))
 	{
 	  day_vec.push_back(_activities[item_i]);
@@ -1446,12 +1428,12 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
   return [super defaultValueForKey:key];
 }
 
-- (const std::vector<act::activity *> &)activities
+- (const std::vector<act::activity_ref> &)activities
 {
   return _activities;
 }
 
-- (void)setActivities:(const std::vector<act::activity *> &)vec
+- (void)setActivities:(const std::vector<act::activity_ref> &)vec
 {
   if (_activities != vec)
     {
@@ -1532,7 +1514,7 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
 
   NSColor *color = nil;
   if (_activities.size() == 1)
-    color = [ActColor activityColor:*_activities[0]];
+    color = [ActColor activityColor:*_activities[0].get()];
   else
     color = [NSColor colorWithDeviceWhite:.5 alpha:1];
 
@@ -1583,12 +1565,12 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
 
 @implementation ActWeekView_ActivityGroupLayer
 
-- (const std::vector<act::activity *> &)activities
+- (const std::vector<act::activity_ref> &)activities
 {
   return _activities;
 }
 
-- (void)setActivities:(const std::vector<act::activity *> &)vec
+- (void)setActivities:(const std::vector<act::activity_ref> &)vec
 {
   if (_activities != vec)
     {
@@ -1664,7 +1646,7 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
       [sublayer setDisplayMode:[self displayMode]];
       [sublayer setContentsScale:[self contentsScale]];
 
-      std::vector<act::activity *> day_vec;
+      std::vector<act::activity_ref> day_vec;
       day_vec.push_back(_activities[i]);
 
       [sublayer setActivities:day_vec];

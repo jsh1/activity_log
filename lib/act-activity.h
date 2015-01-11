@@ -226,6 +226,9 @@ private:
   void print_field(FILE *fh, const char *name, const char *arg) const;
 };
 
+typedef std::shared_ptr<activity> activity_ref;
+typedef std::shared_ptr<const activity> const_activity_ref;
+
 // implementation details
 
 inline activity_storage_ref
