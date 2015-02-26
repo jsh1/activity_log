@@ -223,15 +223,15 @@ convertPointToLocation(CGPoint p)
   _seed++;
 
   int zoom = [self mapZoom];
-  zoom = std::min(zoom, [src maxZoom]);
-  zoom = std::max(zoom, [src minZoom]);
+  zoom = std::min(zoom, src.maxZoom);
+  zoom = std::max(zoom, src.minZoom);
 
   NSRect bounds = [self bounds];
-  double tw = [src tileWidth];
-  double th = [src tileHeight];
+  double tw = src.tileWidth;
+  double th = src.tileHeight;
   BOOL retina = NO;
 
-  if ([[self window] backingScaleFactor] > 1.5 && [src supportsRetina])
+  if ([[self window] backingScaleFactor] > 1.5 && src.supportsRetina)
     {
       zoom = zoom + 1; 
       tw = tw * .5;
@@ -390,8 +390,8 @@ convertPointToLocation(CGPoint p)
   NSPoint p0 = [self convertPoint:[e locationInWindow] fromView:nil];
   CGPoint c0 = convertLocationToPoint([self mapCenter]);
 
-  CGFloat mx = (1 << _mapZoom) * [_mapSource tileWidth];
-  CGFloat my = (1 << _mapZoom) * [_mapSource tileHeight];
+  CGFloat mx = (1 << _mapZoom) * _mapSource.tileWidth;
+  CGFloat my = (1 << _mapZoom) * _mapSource.tileHeight;
 
   c0.x *= mx;
   c0.y *= my;

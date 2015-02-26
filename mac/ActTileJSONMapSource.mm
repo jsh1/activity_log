@@ -109,7 +109,7 @@
 
 - (NSString *)name
 {
-  if (NSString *name = [_dict objectForKey:@"name"])
+  if (NSString *name = _dict[@"name"])
     return name;
   else if (_url != nil)
     return @"(loading)";
@@ -121,7 +121,7 @@
 
 - (NSString *)scheme
 {
-  if (NSString *str = [_dict objectForKey:@"scheme"])
+  if (NSString *str = _dict[@"scheme"])
     return str;
   else
     return @"xyz";
@@ -129,7 +129,7 @@
 
 - (int)minZoom
 {
-  if (NSNumber *obj = [_dict objectForKey:@"minzoom"])
+  if (NSNumber *obj = _dict[@"minzoom"])
     return [obj intValue];
   else
     return 0;
@@ -137,7 +137,7 @@
 
 - (int)maxZoom
 {
-  if (NSNumber *obj = [_dict objectForKey:@"maxzoom"])
+  if (NSNumber *obj = _dict[@"maxzoom"])
     return [obj intValue];
   else
     return 22;
@@ -145,12 +145,12 @@
 
 - (BOOL)supportsRetina
 {
-  return [[_dict objectForKey:@"autoscale"] boolValue];
+  return [_dict[@"autoscale"] boolValue];
 }
 
 - (NSURL *)URLForTileIndex:(const ActMapTileIndex &)tile retina:(BOOL)flag
 {
-  NSArray *array = [_dict objectForKey:@"tiles"];
+  NSArray *array = _dict[@"tiles"];
   if ([array count] < 1)
     return nil;
 
@@ -158,7 +158,7 @@
   if ([[self scheme] isEqualToString:@"xyz"])
     ty = (1 << tile.z) - ty - 1;
 
-  NSString *str = [array objectAtIndex:0];
+  NSString *str = array[0];
   str = [str stringByReplacingOccurrencesOfString:@"{x}"
          withString:[NSString stringWithFormat:@"%d", tile.x]];
   str = [str stringByReplacingOccurrencesOfString:@"{y}"
