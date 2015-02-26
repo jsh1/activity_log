@@ -45,8 +45,9 @@ struct ActMapTileIndex
 @property(nonatomic, readonly) int maxZoom;
 @property(nonatomic, readonly) int tileWidth;
 @property(nonatomic, readonly) int tileHeight;
+@property(nonatomic, readonly) BOOL supportsRetina;
 
-- (NSURL *)URLForTileIndex:(const ActMapTileIndex &)tile;
+- (NSURL *)URLForTileIndex:(const ActMapTileIndex &)tile retina:(BOOL)flag;
 
 @end
 

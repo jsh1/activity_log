@@ -226,11 +226,20 @@ convertPointToLocation(CGPoint p)
   zoom = std::min(zoom, [src maxZoom]);
   zoom = std::max(zoom, [src minZoom]);
 
-  int n_tiles = 1 << zoom;
-
   NSRect bounds = [self bounds];
   double tw = [src tileWidth];
   double th = [src tileHeight];
+  BOOL retina = NO;
+
+  if ([[self window] backingScaleFactor] > 1.5 && [src supportsRetina])
+    {
+      zoom = zoom + 1; 
+      tw = tw * .5;
+      th = th * .5;
+      retina = YES;
+    }
+
+  int n_tiles = 1 << zoom;
 
   CGPoint origin = convertLocationToPoint([self mapCenter]);
   origin.x *= n_tiles * tw;
@@ -262,7 +271,7 @@ convertPointToLocation(CGPoint p)
 	  CGFloat px = bounds.origin.x + (tx - origin.x) * tw;
 
 	  ActMapTileIndex tile(tx & (n_tiles - 1), ty, zoom);
-	  NSURL *url = [src URLForTileIndex:tile];
+	  NSURL *url = [src URLForTileIndex:tile retina:retina];
 	  if (url == nil)
 	    continue;
 

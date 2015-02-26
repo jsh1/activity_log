@@ -143,7 +143,12 @@
     return 22;
 }
 
-- (NSURL *)URLForTileIndex:(const ActMapTileIndex &)tile
+- (BOOL)supportsRetina
+{
+  return [[_dict objectForKey:@"autoscale"] boolValue];
+}
+
+- (NSURL *)URLForTileIndex:(const ActMapTileIndex &)tile retina:(BOOL)flag
 {
   NSArray *array = [_dict objectForKey:@"tiles"];
   if ([array count] < 1)
@@ -160,6 +165,12 @@
          withString:[NSString stringWithFormat:@"%d", ty]];
   str = [str stringByReplacingOccurrencesOfString:@"{z}"
          withString:[NSString stringWithFormat:@"%d", tile.z]];
+
+  if (flag) 
+    {
+      str = [str stringByReplacingOccurrencesOfString:@".png"
+	     withString:@"@2x.png"];
+    }
 
   return [NSURL URLWithString:str];
 }

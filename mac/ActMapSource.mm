@@ -63,7 +63,12 @@ NSString *const ActMapSourceDidFinishLoading = @"ActMapSourceDidFinishLoading";
   return 256;
 }
 
-- (NSURL *)URLForTileIndex:(const ActMapTileIndex &)tile
+- (BOOL)supportsRetina
+{
+  return NO;
+}
+
+- (NSURL *)URLForTileIndex:(const ActMapTileIndex &)tile retina:(BOOL)flag
 {
   return nil;
 }
