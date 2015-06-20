@@ -355,7 +355,11 @@ act_new(arguments &args)
     return 1;
 
   if (edit)
-    shared_config().edit_file(filename.c_str());
+    {
+#if ACT_COMMAND_LINE
+      shared_config().edit_file(filename.c_str());
+#endif
+    }
 
   return 0;
 }

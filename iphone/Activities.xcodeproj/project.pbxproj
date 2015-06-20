@@ -24,6 +24,7 @@
 		571A0932188D6A310066B572 /* libxml2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 571A0931188D6A310066B572 /* libxml2.dylib */; };
 		571A093A188D6F320066B572 /* ActAppDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = 571A0939188D6F320066B572 /* ActAppDelegate.mm */; };
 		571A093D188D70A70066B572 /* Main.xib in Resources */ = {isa = PBXBuildFile; fileRef = 571A093B188D70A70066B572 /* Main.xib */; };
+		5720BF501B36056F00D1B473 /* Launch.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 5720BF4F1B36056F00D1B473 /* Launch.storyboard */; };
 		572BB218189852AE00EDCCA4 /* TableViewStringEditorCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 572BB216189852AD00EDCCA4 /* TableViewStringEditorCell.xib */; };
 		572BB21B189854F200EDCCA4 /* ActTableViewStringEditorCell.mm in Sources */ = {isa = PBXBuildFile; fileRef = 572BB21A189854F200EDCCA4 /* ActTableViewStringEditorCell.mm */; };
 		572BB21E189859CE00EDCCA4 /* ActTableViewEditorCell.mm in Sources */ = {isa = PBXBuildFile; fileRef = 572BB21D189859CE00EDCCA4 /* ActTableViewEditorCell.mm */; };
@@ -157,6 +158,7 @@
 		571A0938188D6F320066B572 /* ActAppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActAppDelegate.h; sourceTree = "<group>"; };
 		571A0939188D6F320066B572 /* ActAppDelegate.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ActAppDelegate.mm; sourceTree = "<group>"; };
 		571A093C188D70A70066B572 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = resources/en.lproj/Main.xib; sourceTree = "<group>"; };
+		5720BF4F1B36056F00D1B473 /* Launch.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = Launch.storyboard; sourceTree = "<group>"; };
 		572BB217189852AE00EDCCA4 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = resources/en.lproj/TableViewStringEditorCell.xib; sourceTree = "<group>"; };
 		572BB219189854F200EDCCA4 /* ActTableViewStringEditorCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActTableViewStringEditorCell.h; sourceTree = "<group>"; };
 		572BB21A189854F200EDCCA4 /* ActTableViewStringEditorCell.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ActTableViewStringEditorCell.mm; sourceTree = "<group>"; };
@@ -429,6 +431,7 @@
 				57F95734188EE0F4000EF638 /* defaults.plist */,
 				571A08FF188D691F0066B572 /* Activities-Info.plist */,
 				571A0900188D691F0066B572 /* InfoPlist.strings */,
+				5720BF4F1B36056F00D1B473 /* Launch.storyboard */,
 			);
 			name = Resources;
 			sourceTree = "<group>";
@@ -779,6 +782,7 @@
 				57830C4B188D7AD2001056B5 /* ActivitiesView.xib in Resources */,
 				5730856F18B2829A00A8B911 /* ActivityLapCell.xib in Resources */,
 				576FF59B1892DE4900C0C3CF /* ActivityView.xib in Resources */,
+				5720BF501B36056F00D1B473 /* Launch.storyboard in Resources */,
 				572C465D1899A71000A7A7F0 /* ActivitySummaryView.xib in Resources */,
 				57C9294D18B281DA00DCC469 /* ActivityLapsView.xib in Resources */,
 				57CA435A18901570008693CA /* QueryListView.xib in Resources */,
@@ -1049,7 +1053,7 @@
 					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
 					/usr/include/libxml2,
 				);
-				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
 				WARNING_CFLAGS = "-Wall";
@@ -1077,7 +1081,7 @@
 					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
 					/usr/include/libxml2,
 				);
-				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				SDKROOT = iphoneos;
 				VALIDATE_PRODUCT = YES;
 				WARNING_CFLAGS = "-Wall";
@@ -1089,7 +1093,6 @@
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_INCLUDING_64_BIT)";
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Activities-Prefix.pch";
 				INFOPLIST_FILE = "$(SRCROOT)/resources/Activities-Info.plist";
@@ -1104,7 +1107,6 @@
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_INCLUDING_64_BIT)";
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Activities-Prefix.pch";
 				INFOPLIST_FILE = "$(SRCROOT)/resources/Activities-Info.plist";
@@ -1135,11 +1137,9 @@
 		57F957ED188F0691000EF638 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				CLANG_ENABLE_OBJC_ARC = NO;
 				CLANG_WARN_OBJC_IMPLICIT_ATOMIC_PROPERTIES = NO;
 				DSTROOT = /tmp/dropbox_sdk_ios.dst;
-				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "../dropbox-sdk-ios/DropboxSDK/Classes/DropboxSDK-Prefix.pch";
 				GCC_TREAT_WARNINGS_AS_ERRORS = NO;
@@ -1153,11 +1153,9 @@
 		57F957EE188F0691000EF638 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				CLANG_ENABLE_OBJC_ARC = NO;
 				CLANG_WARN_OBJC_IMPLICIT_ATOMIC_PROPERTIES = NO;
 				DSTROOT = /tmp/dropbox_sdk_ios.dst;
-				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "../dropbox-sdk-ios/DropboxSDK/Classes/DropboxSDK-Prefix.pch";
 				IPHONEOS_DEPLOYMENT_TARGET = 7.1;

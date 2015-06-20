@@ -98,19 +98,19 @@
   /* FIXME: need images for these. */
 
   _summaryItem = [[UIBarButtonItem alloc] initWithTitle:@"Summary"
-		  style:UIBarButtonItemStyleBordered target:self
+		  style:UIBarButtonItemStylePlain target:self
 		  action:@selector(showSummaryAction:)];
 
   _mapItem = [[UIBarButtonItem alloc] initWithTitle:@"Map"
-	      style:UIBarButtonItemStyleBordered target:self
+	      style:UIBarButtonItemStylePlain target:self
 	      action:@selector(showMapAction:)];
 
   _chartsItem = [[UIBarButtonItem alloc] initWithTitle:@"Charts"
-		 style:UIBarButtonItemStyleBordered target:self
+		 style:UIBarButtonItemStylePlain target:self
 		 action:@selector(showChartsAction:)];
 
   _lapsItem = [[UIBarButtonItem alloc] initWithTitle:@"Laps"
-	       style:UIBarButtonItemStyleBordered target:self
+	       style:UIBarButtonItemStylePlain target:self
 	       action:@selector(showLapsAction:)];
 
   self.toolbarItems = @[_summaryItem,
@@ -301,10 +301,13 @@ gps_reader::read_gps_file(const act::activity &a) const
 - (void)setFullscreen:(BOOL)flag
 {
   UINavigationController *nav = self.navigationController;
-  [nav setNavigationBarHidden:flag animated:YES];
-  [nav setToolbarHidden:flag animated:YES];
-  [self setNeedsStatusBarAppearanceUpdate];
-  [self updateViewConstraints];
+  if (nav.navigationBarHidden != flag)
+    {
+      [nav setNavigationBarHidden:flag animated:YES];
+      [nav setToolbarHidden:flag animated:YES];
+      [self setNeedsStatusBarAppearanceUpdate];
+      [self updateViewConstraints];
+    }
 }
 
 - (BOOL)prefersStatusBarHidden
@@ -380,6 +383,10 @@ gps_reader::read_gps_file(const act::activity &a) const
 
   if (_childViewController != nil)
     {
+      /* FIXME: hack to ensure layout guides have correct values */
+
+      [self.navigationController.view layoutIfNeeded];
+
       UIEdgeInsets inset = UIEdgeInsetsMake(self.topLayoutGuide.length, 0,
 					    self.bottomLayoutGuide.length, 0);
 

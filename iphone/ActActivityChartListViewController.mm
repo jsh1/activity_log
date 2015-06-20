@@ -84,10 +84,9 @@ chart_title(int type)
 
 - (void)updateRowHeight
 {
-  UIInterfaceOrientation orient = self.interfaceOrientation;
-  CGFloat rh = (orient == UIInterfaceOrientationPortrait
-		|| orient == UIInterfaceOrientationPortraitUpsideDown
-		? PORTRAIT_ROW_HEIGHT : LANDSCAPE_ROW_HEIGHT);
+  CGFloat rh = (self.traitCollection.verticalSizeClass == 
+		UIUserInterfaceSizeClassRegular ? PORTRAIT_ROW_HEIGHT
+		: LANDSCAPE_ROW_HEIGHT);
   ((UITableView *)self.view).rowHeight = rh;
 }
 

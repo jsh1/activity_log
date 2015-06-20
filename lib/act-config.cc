@@ -328,6 +328,7 @@ config::find_gps_file(std::string &str) const
     return false;
 }
 
+#if ACT_COMMAND_LINE
 void
 config::edit_file(const char *filename) const
 {
@@ -346,5 +347,6 @@ config::edit_file(const char *filename) const
       free(command);
     }
 }
+#endif
 
 } // namespace act

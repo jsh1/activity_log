@@ -96,13 +96,15 @@ CXX = clang++
 CC = clang
 
 includes = -I$(sdk_path)/usr/include/libxml2
+defines := -DACT_COMMAND_LINE=1
 cxx_standard_flags = -std=c++11 -stdlib=libc++
 optimization_cflags := -Os
 debug_cflags := -g
 warning_cflags := -Wall -Werror
 
 compiler_flags = $(includes) $(CXXFLAGS) $(cxx_standard_flags) \
-	$(optimization_cflags) $(debug_cflags) $(warning_cflags)
+	$(optimization_cflags) $(debug_cflags) $(warning_cflags) \
+	$(defines)
 linker_flags = $(LDFLAGS) $(cxx_standard_flags) $(debug_cflags)
 
 # rules
