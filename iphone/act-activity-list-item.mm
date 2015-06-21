@@ -112,7 +112,7 @@ namespace {
 inline CGFloat
 text_attrs_leading(NSDictionary *attrs)
 {
-  return ((UIFont *)attrs[NSFontAttributeName]).leading;
+  return ((UIFont *)attrs[NSFontAttributeName]).lineHeight;
 }
 
 inline CGFloat
