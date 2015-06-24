@@ -26,7 +26,7 @@
 
 #import "ActActivityChartItemView.h"
 
-#define PORTRAIT_ROW_HEIGHT 128
+#define PORTRAIT_ROW_HEIGHT 180
 #define LANDSCAPE_ROW_HEIGHT 212
 
 static NSString *
@@ -176,10 +176,10 @@ chart_title(int type)
 	    [array addObject:@(ActActivityChartSpeed)];
 	  if (gps_data->has_heart_rate())
 	    [array addObject:@(ActActivityChartHeartRate)];
-	  if (gps_data->has_altitude())
-	    [array addObject:@(ActActivityChartAltitude)];
 	  if (gps_data->has_cadence())
 	    [array addObject:@(ActActivityChartCadence)];
+	  if (gps_data->has_altitude())
+	    [array addObject:@(ActActivityChartAltitude)];
 	  if (gps_data->has_dynamics())
 	    {
 	      [array addObject:@(ActActivityChartVerticalOscillation)];

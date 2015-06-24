@@ -21,6 +21,11 @@
      interpretation of data, but does separate headers from body.
      Constructed with a path? Stores the mtime of the file?
 
+2. Add swipe-left/right gestures to iOS app
+
+  To move between activities. Use an interactive transition. Disable
+  while in map view.
+
 
 ## File Format Notes
 

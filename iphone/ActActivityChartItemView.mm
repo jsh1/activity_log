@@ -29,13 +29,13 @@
 #import "act-gps-activity.h"
 #import "act-gps-chart.h"
 
+#import "Macros.h"
+
 @implementation ActActivityChartItemView
 {
   const act::activity *_activity;
   int _chartType;
   int _smoothing;
-
-  std::unique_ptr<act::gps::chart> _chart;
 }
 
 @synthesize controller = _controller;
@@ -44,88 +44,88 @@
 
 - (void)reloadData
 {
-  _chart.reset();
-
   [self setNeedsDisplay];
 }
 
-- (void)updateChart
+struct chart_values_t
 {
-  using namespace act::gps;
+  act::gps::activity::point_field field;
+  act::gps::chart::value_conversion conversion;
+  act::gps::chart::line_color color;
+};
 
-  if (_chart)
-    _chart.reset();
+static chart_values_t chart_values[] =
+{
+  [ActActivityChartSpeed] =
+    {
+      act::gps::activity::point_field::speed,
+      act::gps::chart::value_conversion::speed_ms_pace_mi,
+      act::gps::chart::line_color::blue,
+    },
+  [ActActivityChartHeartRate] = 
+    {
+      act::gps::activity::point_field::heart_rate,
+      act::gps::chart::value_conversion::identity,
+      act::gps::chart::line_color::orange,
+    },
+  [ActActivityChartAltitude] = 
+    {
+      act::gps::activity::point_field::altitude,
+      act::gps::chart::value_conversion::distance_m_ft,
+      act::gps::chart::line_color::green,
+    },
+  [ActActivityChartCadence] = 
+    {
+      act::gps::activity::point_field::cadence,
+      act::gps::chart::value_conversion::identity,
+      act::gps::chart::line_color::tomato,
+    },
+  [ActActivityChartStrideLength] = 
+    {
+      act::gps::activity::point_field::stride_length,
+      act::gps::chart::value_conversion::identity,
+      act::gps::chart::line_color::dark_orchid,
+    },
+  [ActActivityChartVerticalOscillation] = 
+    {
+      act::gps::activity::point_field::vertical_oscillation,
+      act::gps::chart::value_conversion::identity,
+      act::gps::chart::line_color::teal,
+    },
+  [ActActivityChartStanceTime] = 
+    {
+      act::gps::activity::point_field::stance_time,
+      act::gps::chart::value_conversion::identity,
+      act::gps::chart::line_color::steel_blue,
+    },
+};
 
+- (void)drawRect:(CGRect)clip
+{
   const act::gps::activity *data = self.controller.smoothedData;
   if (data == nullptr)
     return;
 
-  _chart.reset(new chart(*data, chart::x_axis_type::distance));
+  using namespace act::gps;
 
-  auto field = activity::point_field::distance;
-  auto conv = chart::value_conversion::identity;
-  auto color = chart::line_color::gray;
+  if (_chartType < 0 || _chartType >= N_ELEMENTS(chart_values))
+    return;
+
+  act::gps::chart chart(*data, chart::x_axis_type::distance);
+
   uint32_t flags = chart::TICK_LINES | chart::FILL_BG;
 
-  switch (_chartType)
-    {
-    case ActActivityChartSpeed:
-      field = activity::point_field::speed;
-      conv = chart::value_conversion::speed_ms_pace_mi;
-      color = chart::line_color::blue;
-      break;
+  chart.add_line(chart_values[_chartType].field,
+     chart_values[_chartType].conversion, chart_values[_chartType].color,
+     flags, -0.05, 1.05);
 
-    case ActActivityChartHeartRate:
-      field = activity::point_field::heart_rate;
-      color = chart::line_color::orange;
-      break;
+  chart.update_values();
+  chart.set_bounds(self.bounds);
 
-    case ActActivityChartAltitude:
-      field = activity::point_field::altitude;
-      conv = chart::value_conversion::distance_m_ft;
-      color = chart::line_color::green;
-      break;
+  [[UIColor colorWithWhite:1 alpha:1] setFill];
+  UIRectFill(self.bounds);
 
-    case ActActivityChartCadence:
-      field = activity::point_field::cadence;
-      color = chart::line_color::tomato;
-      break;
-
-    case ActActivityChartStrideLength:
-      field = activity::point_field::stride_length;
-      color = chart::line_color::dark_orchid;
-      break;
-
-    case ActActivityChartVerticalOscillation:
-      field = activity::point_field::vertical_oscillation;
-      color = chart::line_color::teal;
-      break;
-
-    case ActActivityChartStanceTime:
-      field = activity::point_field::stance_time;
-      color = chart::line_color::steel_blue;
-      break;
-    }
-
-  _chart->add_line(field, conv, color, flags, -0.05, 1.05);
-  _chart->set_chart_rect(self.bounds);
-  _chart->set_selected_lap(-1);
-  _chart->update_values();
-}
-
-- (void)drawRect:(CGRect)clip
-{
-  if (_chart == nullptr && _activity != nullptr)
-    [self updateChart];
-
-  if (_chart != nullptr)
-    {
-     [[UIColor colorWithWhite:1 alpha:1] setFill];
-      UIRectFill(self.bounds);
-
-      _chart->set_chart_rect(self.bounds);
-      _chart->draw();
-    }
+  chart.draw();
 }
 
 - (BOOL)isOpaque

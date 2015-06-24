@@ -38,10 +38,7 @@ public:
   enum line_flags
     {
       FILL_BG = 1U << 0,
-      OPAQUE_BG = 1U << 1,
-      NO_STROKE = 1U << 2,
-      TICK_LINES = 1U << 3,
-      RIGHT_TICKS = 1U << 4,
+      TICK_LINES = 1U << 1,
     };
 
   enum class line_color
@@ -56,7 +53,6 @@ public:
       steel_blue,
       tomato,
       dark_orchid,
-      gray
     };
 
   enum class x_axis_type
@@ -90,20 +86,10 @@ public:
   void add_line(activity::point_field field, value_conversion conv,
     line_color color, uint32_t fill_bg, float min_ratio, float max_ratio);
 
-  void set_selected_lap(int idx);
-  int selected_lap() const;
-
-  void set_current_time(double t);
-  double current_time() const;
-
-  void set_chart_rect(const CGRect &r);		/* calls update_values() */
-  const CGRect &chart_rect() const;
+  void set_bounds(const CGRect &r);		/* calls update_values() */
+  const CGRect &bounds() const;
 
   void draw();
-
-  CGRect current_time_rect() const;
-
-  bool point_at_x(double x, gps::activity::point &ret_p) const;
 
   void remove_all_lines();
 
@@ -154,17 +140,18 @@ private:
 
   friend struct x_axis_state;
 
-  void draw_line(const line &l, const x_axis_state &xs, CGFloat tx);
+  void draw_background() const;
+  void draw_line(const line &l, const x_axis_state &xs, CGFloat tx) const;
   void draw_lap_markers(const x_axis_state &xs);
-  void draw_current_time();
+
+  const CGRect &chart_rect() const;
 
   const activity &_activity;
   x_axis_type _x_axis;
   float _min_time, _max_time;
   float _min_distance, _max_distance;
   std::vector<line> _lines;
-  int _selected_lap;
-  double _current_time;
+  CGRect _bounds;
   CGRect _chart_rect;
 };
 
@@ -200,34 +187,10 @@ chart::line::line(activity::point_field field_, value_conversion conversion_,
 {
 }
 
-inline void
-chart::set_selected_lap(int idx)
+inline const CGRect &
+chart::bounds() const
 {
-  _selected_lap = idx;
-}
-
-inline int
-chart::selected_lap() const
-{
-  return _selected_lap;
-}
-
-inline void
-chart::set_current_time(double t)
-{
-  _current_time = t;
-}
-
-inline double
-chart::current_time() const
-{
-  return _current_time;
-}
-
-inline void
-chart::set_chart_rect(const CGRect &r)
-{
-  _chart_rect = r;
+  return _bounds;
 }
 
 inline const CGRect &

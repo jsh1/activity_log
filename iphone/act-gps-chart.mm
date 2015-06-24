@@ -34,6 +34,8 @@
 
 #include <math.h>
 
+#import "Macros.h"
+
 #define MILES_PER_METER 0.000621371192
 #define KM_PER_METER 1e-3
 #define FEET_PER_METER 3.2808399
@@ -55,8 +57,111 @@
 #define BOX_FONT_SIZE 12
 #define BOX_INSET 8
 
+#define X_INSET 5
+#define Y_INSET 5
+
+#define BG_RADIUS 5
+
 namespace act {
 namespace gps {
+
+namespace {
+
+const float chart_hues[] =
+{
+  [(int)chart::line_color::red] = 0,
+  [(int)chart::line_color::green] = 1 / 3.,
+  [(int)chart::line_color::blue] = 2 / 3.,
+  [(int)chart::line_color::orange] = 1 / 12.,
+  [(int)chart::line_color::yellow] = 1 / 6.,
+  [(int)chart::line_color::magenta] = 8 / 9.,
+  [(int)chart::line_color::teal] = 1 / 2.,
+  [(int)chart::line_color::steel_blue] = 23 / 40.,
+  [(int)chart::line_color::tomato] = 1 / 40.,
+  [(int)chart::line_color::dark_orchid] = 151 / 180.,
+};
+
+CGFloat
+hue_to_rgb(CGFloat v1, CGFloat v2, CGFloat vh)
+{
+  if (vh < 0)
+    vh += 1;
+  if (vh > 1)
+    vh -= 1;
+  if ((6 * vh) < 1)
+    return v1 + (v2 - v1) * vh * 6;
+  else if ((vh * 2) < 1)
+    return v2;
+  else if ((vh * 3) < 2)
+    return v1 + (v2 - v1) * (((CGFloat)2/3) - vh) * 6;
+  else
+    return v1;
+}
+
+void
+hsl_to_rgb(CGFloat h, CGFloat s, CGFloat l, CGFloat rgb[3])
+{
+  if (s == 0)
+    {
+      rgb[2] = rgb[1] = rgb[0] = l;
+    }
+  else
+    {
+      CGFloat v1, v2;
+
+      if (l < (CGFloat).5)
+	v2 = l * (s + 1);
+      else
+	v2 = (l + s) - (s * l);
+	  
+      v1 = 2 * l - v2;
+
+      rgb[0] = hue_to_rgb(v1, v2, h + (CGFloat)(1. / 3));
+      rgb[1] = hue_to_rgb(v1, v2, h);
+      rgb[2] = hue_to_rgb(v1, v2, h - (CGFloat)(1. / 3));
+    }
+}
+
+void
+hsb_to_rgb(CGFloat h, CGFloat s, CGFloat b, CGFloat rgb[3])
+{
+  CGFloat l = .5 * b * (2 - s);
+  CGFloat s_hsl = l < 1 ? (b * s) / (1 - fabs(2 * l - 1)) : 1;
+
+  hsl_to_rgb(h, s_hsl, l, rgb);
+}
+
+CGGradientRef
+create_gradient(CGFloat h1, CGFloat s1, CGFloat b1, CGFloat a1,
+		CGFloat h2, CGFloat s2, CGFloat b2, CGFloat a2)
+{
+  CGFloat vec[8];
+
+  hsb_to_rgb(h1, s1, b1, vec+0);
+  vec[3] = a1;
+
+  hsb_to_rgb(h2, s2, b2, vec+4);
+  vec[7] = a2;
+
+  CGColorSpaceRef space = CGColorSpaceCreateWithName(kCGColorSpaceSRGB);
+
+#if 0
+  /* FIXME: this works in sim but not device!? */
+  CGGradientRef grad = CGGradientCreateWithColorComponents(space, vec, nullptr, 2);
+#else
+  NSArray *colors = @[
+    (__bridge id)[UIColor colorWithRed:vec[0] green:vec[1] blue:vec[2] alpha:vec[3]].CGColor,
+    (__bridge id)[UIColor colorWithRed:vec[4] green:vec[5] blue:vec[6] alpha:vec[7]].CGColor
+  ];
+  CGGradientRef grad = CGGradientCreateWithColors(space, (__bridge CFArrayRef)colors, nullptr);
+#endif
+
+  CGColorSpaceRelease(space);
+
+  return grad;
+}
+
+} // anonymous namespace
 
 chart::x_axis_state::x_axis_state(const chart &chart, x_axis_type type)
 {
@@ -297,12 +402,17 @@ chart::line::format_tick(std::string &s, double tick, double value) const
 
 chart::chart(const activity &a, x_axis_type xa)
 : _activity(a),
-  _x_axis(xa),
-  _selected_lap(-1),
-  _current_time(-1)
+  _x_axis(xa)
 {
   a.get_range(activity::point_field::elapsed_time, _min_time, _max_time);
   a.get_range(activity::point_field::distance, _min_distance, _max_distance);
+}
+
+void
+chart::set_bounds(const CGRect &r)
+{
+  _bounds = r;
+  _chart_rect = CGRectInset(r, X_INSET, Y_INSET);
 }
 
 void
@@ -326,62 +436,73 @@ text_attrs_leading(NSDictionary *attrs)
 void
 chart::draw()
 {
+  CGContextRef ctx = UIGraphicsGetCurrentContext();
+
+  CGContextSaveGState(ctx);
+  CGContextBeginPath(ctx);
+  CGPathRef path = CGPathCreateWithRoundedRect(CGRectInset(bounds(),
+    X_INSET, Y_INSET), BG_RADIUS, BG_RADIUS, nullptr);
+  CGContextAddPath(ctx, path);
+  CGPathRelease(path);
+  CGContextClip(ctx);
+  
+  draw_background();
+
   x_axis_state xs(*this, x_axis());
 
-  CGFloat tl = _chart_rect.origin.x + 2;
-  CGFloat tr = tl + _chart_rect.size.width - 2;
+  CGFloat tl = bounds().origin.x + X_INSET + 2;
 
   for (size_t i = 0; i < _lines.size(); i++)
     {
-      CGFloat tx;
-      if (!(_lines[i].flags & RIGHT_TICKS))
-	tx = tl, tl += KEY_TEXT_WIDTH;
-      else
-	tr -= KEY_TEXT_WIDTH, tx = tr;
+      CGFloat tx = tl;
+      tl += KEY_TEXT_WIDTH;
 
       draw_line(_lines[i], xs, tx);
     }
 
-  draw_lap_markers(xs);
+  if (false)
+    draw_lap_markers(xs);
 
-  draw_current_time();
+  CGContextRestoreGState(ctx);
 }
 
 void
-chart::draw_line(const line &l, const x_axis_state &xs, CGFloat tx)
+chart::draw_background() const
+{
+  if (_lines.size() < 1)
+    return;
+
+  int color = static_cast<int>(_lines[0].color);
+  assert(color >= 0 && color < N_ELEMENTS(chart_hues));
+
+  CGFloat hue = chart_hues[color];
+
+  CGGradientRef grad = create_gradient(hue+.05, .4, 1, 1, hue, .8, .9, 1);
+
+  CGPoint sp = CGPointMake(CGRectGetMidX(bounds()), CGRectGetMinY(bounds()));
+  CGPoint ep = CGPointMake(CGRectGetMidX(bounds()), CGRectGetMaxY(bounds()));
+
+  CGContextRef ctx = UIGraphicsGetCurrentContext();
+  CGContextDrawLinearGradient(ctx, grad, sp, ep, 0);
+
+  CGGradientRelease(grad);
+}
+
+void
+chart::draw_line(const line &l, const x_axis_state &xs, CGFloat tx) const
 {
   /* x' = (x - min_v) * v_scale * chart_w + chart_x
         = x * v_scale * chart_w - min_v * v_scale * chart_w + chart_x
 	v_scale = 1 / (max_v - min_v). */
 
   CGFloat y_scale = 1. / (l.scaled_max_value - l.scaled_min_value);
-  CGFloat yc = (_chart_rect.origin.y
-		- l.scaled_min_value * y_scale * _chart_rect.size.height);
-  CGFloat ym = y_scale * _chart_rect.size.height;
+  CGFloat yc = (chart_rect().origin.y
+		- l.scaled_min_value * y_scale * chart_rect().size.height);
+  CGFloat ym = y_scale * chart_rect().size.height;
 
   // flip vertically
-  yc = -yc + _chart_rect.size.height;
+  yc = -yc + chart_rect().size.height;
   ym = -ym;
-
-  static const CGFloat line_colors[][6] =
-    {
-      [(int)line_color::red] = {1, .5, .5, 1, 0, .3},
-      [(int)line_color::green] = {.75, 1, .75, 0, .6, .2},
-      [(int)line_color::blue] = {.5, .5, 1, 0, .2, 1},
-      [(int)line_color::orange] = {1, .5, 0, 1, .5, 0},
-      [(int)line_color::yellow] = {1, 1, 0, 1, 1, 0},
-      [(int)line_color::magenta] = {1, 0, 1, 1, 0, 1},
-      [(int)line_color::teal] = {0, .5, .5, 0, .5, .5},
-      [(int)line_color::steel_blue] = {70/255., 130/255., 180/255.,
-				       70/255., 130/255., 180/255.},
-      [(int)line_color::tomato] = {1, 99/255., 71/255., 1, 99/255., 71/255.},
-      [(int)line_color::dark_orchid] = {153/255., 50/255., 204/255.,
-					153/255., 50/255., 204/255.},
-      [(int)line_color::gray] = {.6, .6, .6, .6, .6, .6},
-    };
-
-  const CGFloat *fill_rgb = line_colors[(int)l.color];
-  const CGFloat *stroke_rgb = line_colors[(int)l.color] + 3;
 
   {
     UIBezierPath *path = [[UIBezierPath alloc] init];
@@ -436,47 +557,61 @@ chart::draw_line(const line &l, const x_axis_state &xs, CGFloat tx)
 	UIBezierPath *fill_path
 	  = [UIBezierPath bezierPathWithCGPath:path.CGPath];
 
-	CGFloat y1 = _chart_rect.origin.y + _chart_rect.size.height;
-	[fill_path addLineToPoint:CGPointMake(last_x, y1)];
-	[fill_path addLineToPoint:CGPointMake(first_x, y1)];
+	CGFloat yb = chart_rect().origin.y + chart_rect().size.height;
+	[fill_path addLineToPoint:CGPointMake(last_x, yb)];
+	[fill_path addLineToPoint:CGPointMake(first_x, yb)];
 	[fill_path addLineToPoint:CGPointMake(first_x, first_y)];
 	[fill_path closePath];
 
-	CGFloat r = fill_rgb[0], g = fill_rgb[1], b = fill_rgb[2], a = .2;
+	assert((int)l.color >= 0 && (int)l.color < N_ELEMENTS(chart_hues));
+	CGFloat hue = chart_hues[(int)l.color];
 
-	if (l.flags & OPAQUE_BG)
-	  {
-	    // D = S + D * (1-Sa)
-	    // C' = C*F + (1-F)  [assuming white background]
+	CGGradientRef grad = create_gradient(hue, .75, 1, 1, hue, 0, 1, .25);
 
-	    r = r * a + (1 - a);
-	    g = g * a + (1 - a);
-	    b = b * a + (1 - a);
-	    a = 1;
-	  }
+	CGContextRef ctx = UIGraphicsGetCurrentContext();
+	CGContextSaveGState(ctx);
 
-	[[UIColor colorWithRed:r green:g blue:b alpha:a] setFill];
-	[fill_path fill];
+	CGContextBeginPath(ctx);
+	CGContextAddPath(ctx, fill_path.CGPath);
+	CGContextClip(ctx);
+
+	CGFloat y0 = CGRectGetMinY(chart_rect());
+	CGFloat y1 = CGRectGetMaxY(chart_rect());
+	CGPoint sp = CGPointMake(CGRectGetMidX(chart_rect()), MIX(y0, y1, .3));
+	CGPoint ep = CGPointMake(CGRectGetMidX(chart_rect()), MIX(y0, y1, 1.3));
+
+	CGContextDrawLinearGradient(ctx, grad, sp, ep,
+				    kCGGradientDrawsBeforeStartLocation
+				    | kCGGradientDrawsAfterEndLocation);
+
+	CGGradientRelease(grad);
+
+	CGContextRestoreGState(ctx);
       }
 
     // Draw stroked line
 
-    if (!first_pt && !(l.flags & NO_STROKE))
+    if (!first_pt)
       {
-	[[UIColor colorWithRed:stroke_rgb[0] green:stroke_rgb[1]
-	  blue:stroke_rgb[2] alpha:1] setStroke];
-	path.lineWidth = 1.5;
+	CGContextRef ctx = UIGraphicsGetCurrentContext();
+	CGContextSaveGState(ctx);
+	CGContextSetShadow(ctx, CGSizeMake(0, 0), 1);
+
+	[[UIColor whiteColor] setStroke];
+	path.lineWidth = 2;
 	path.lineJoinStyle = kCGLineJoinRound;
 	[path stroke];
+
+	CGContextRestoreGState(ctx);
       }
   }
 
   {
     // Draw 'tick' lines at sensible points around the value's range.
 
-    static NSDictionary *left_attrs, *right_attrs;
+    static NSDictionary *tick_attrs;
 
-    if (left_attrs == nil)
+    if (tick_attrs == nil)
       {
 	NSMutableParagraphStyle *rightStyle
 	= [[NSParagraphStyle defaultParagraphStyle] mutableCopy];
@@ -485,33 +620,35 @@ chart::draw_line(const line &l, const x_axis_state &xs, CGFloat tx)
 	UIFont *label_font
 	  = [UIFont preferredFontForTextStyle:UIFontTextStyleCaption1];
 
-	left_attrs = @{
-	  NSFontAttributeName: label_font,
-	  NSForegroundColorAttributeName: [UIColor blackColor]
-	};
+	NSShadow *shadow = [[NSShadow alloc] init];
+	shadow.shadowColor = [UIColor blackColor];
+	shadow.shadowBlurRadius = 2;
+	shadow.shadowOffset = CGSizeMake(0, 0);
 
-	right_attrs = @{
+	tick_attrs = @{
 	  NSFontAttributeName: label_font,
-	  NSForegroundColorAttributeName: [UIColor blackColor],
-	  NSParagraphStyleAttributeName: rightStyle
+	  NSForegroundColorAttributeName: [UIColor whiteColor],
+	    NSShadowAttributeName: shadow,
 	};
       }
 
     UIBezierPath *path = [[UIBezierPath alloc] init];
 
-    CGFloat llx = _chart_rect.origin.x;
-    CGFloat urx = llx + _chart_rect.size.width;
+    CGFloat llx = bounds().origin.x;
+    CGFloat urx = llx + bounds().size.width;
 
-    CGFloat lly = _chart_rect.origin.y;
-    CGFloat ury = lly + _chart_rect.size.height;
+    CGFloat lly = chart_rect().origin.y;
+    CGFloat ury = lly + chart_rect().size.height;
     CGFloat ly = HUGE_VAL;
+
+    CGFloat label_height = text_attrs_leading(tick_attrs);
 
     for (double tick = l.tick_min; tick < l.tick_max; tick += l.tick_delta)
       {
 	double value = l.convert_to_si(tick);
 	CGFloat y = round(value * ym + yc);
 
-	if (y < lly || y > ury)
+	if (y - label_height < lly || y > ury)
 	  continue;
 	if (fabs(y - ly) < MIN_TICK_GAP)
 	  continue;
@@ -525,15 +662,10 @@ chart::draw_line(const line &l, const x_axis_state &xs, CGFloat tx)
 	std::string s;
 	l.format_tick(s, tick, value);
 
-	NSDictionary *attrs
-	  = !(l.flags & RIGHT_TICKS) ? left_attrs : right_attrs;
-
-	CGFloat label_height = text_attrs_leading(attrs);
-
 	[[NSString stringWithUTF8String:s.c_str()]
 	 drawInRect:CGRectMake(tx, y - (label_height + 2),
 			       KEY_TEXT_WIDTH, label_height)
-	 withAttributes:attrs];
+	 withAttributes:tick_attrs];
 
 	ly = y;
       }
@@ -543,8 +675,7 @@ chart::draw_line(const line &l, const x_axis_state &xs, CGFloat tx)
 	static const CGFloat dash[] = {4, 2};
 	[path setLineDash:dash count:2 phase:0];
 	path.lineWidth = 1;
-	[[UIColor colorWithRed:stroke_rgb[0] green:stroke_rgb[1]
-	  blue:stroke_rgb[2] alpha:.25] setStroke];
+	[[UIColor colorWithWhite:1 alpha:.25] setStroke];
 	[path stroke];
       }
   }
@@ -558,12 +689,8 @@ chart::draw_lap_markers(const x_axis_state &xs)
   double total_dist = (x_axis() == x_axis_type::distance
 		       ? 0 : _activity.start_time());
 
-  CGFloat lly = _chart_rect.origin.y;
-  CGFloat ury = lly + _chart_rect.size.height;
-
-  CGRect highlightRect = CGRectZero;
-  highlightRect.origin.y = lly;
-  highlightRect.size.height = ury - lly;
+  CGFloat lly = chart_rect().origin.y;
+  CGFloat ury = lly + chart_rect().size.height;
 
   for (size_t i = 0; true; i++)
     {
@@ -572,11 +699,6 @@ chart::draw_lap_markers(const x_axis_state &xs)
 
       [path moveToPoint:CGPointMake(x, lly)];
       [path addLineToPoint:CGPointMake(x, ury)];
-
-      if (_selected_lap >= 0 && _selected_lap == i)
-	highlightRect.origin.x = x;
-      else if (_selected_lap >= 0 && _selected_lap == i - 1)
-	highlightRect.size.width = x - highlightRect.origin.x;
 
       if (!(i < _activity.laps().size()))
 	break;
@@ -594,216 +716,6 @@ chart::draw_lap_markers(const x_axis_state &xs)
 
   [[UIColor colorWithWhite:0 alpha:.1] setStroke];
   [path stroke];
-
-  if (highlightRect.size.width > 0)
-    {
-      [[UIColor colorWithRed:.5 green:.5 blue:.8 alpha:.2] setFill];
-      UIRectFrameUsingBlendMode(highlightRect, kCGBlendModePlusDarker);
-    }
-}
-
-void
-chart::draw_current_time()
-{
-  if (_current_time < 0)
-    return;
-
-  activity::point pt;
-  auto elapsed_time = activity::point_field::elapsed_time;
-  if (!_activity.point_at(elapsed_time, _current_time, pt))
-    return;
-
-  x_axis_state xs(*this, x_axis());
-
-  double t = xs.field_fn(pt);
-  if (t < xs.min_value || t > xs.max_value)
-    return;
-
-  CGFloat x = round(t * xs.xm + xs.xc);
-
-  CGRect lineR = CGRectMake(x, _chart_rect.origin.y,
-			    1, _chart_rect.size.height);
-
-  CGRect boxR;
-  boxR.origin.x = x + BOX_INSET;
-  boxR.origin.y = _chart_rect.origin.y + BOX_INSET;
-  boxR.size.width = BOX_WIDTH;
-  boxR.size.height = (2 + _lines.size()) * BOX_HEIGHT;
-  if (boxR.origin.x + boxR.size.width + BOX_INSET > CGRectGetMaxX(_chart_rect))
-    boxR.origin.x = x - BOX_INSET - boxR.size.width;
-
-  [[UIColor whiteColor] setFill];
-  UIRectFill(boxR);
-  [[UIColor blackColor] set];
-  UIRectFill(lineR);
-  [[UIBezierPath bezierPathWithRect:CGRectInset(boxR, .5, .5)] stroke];
-
-  CGRect textR = CGRectInset(boxR, BOX_INSET, 0);
-
-  NSDictionary *attrs = @{
-    NSFontAttributeName:
-      [UIFont preferredFontForTextStyle:UIFontTextStyleBody],
-    NSForegroundColorAttributeName: [UIColor blackColor]
-  };
-
-  std::string buf;
-  format_duration(buf, round(pt.elapsed_time));
-  buf.append("\n");
-  format_distance(buf, pt.distance, unit_type::unknown);
-  buf.append("\n");
-
-  for (const auto &it : _lines)
-    {
-      double value = activity::point::field_function(it.field)(pt);
-
-      switch (it.field)
-	{
-	case activity::point_field::speed:
-	  format_pace(buf, value, unit_type::unknown);
-	  break;
-
-	case activity::point_field::heart_rate: {
-	  unit_type unit = unit_type::beats_per_minute;
-	  if (it.conversion == value_conversion::heartrate_bpm_pmax)
-	    unit = unit_type::percent_hr_max;
-	  else if (it.conversion == value_conversion::heartrate_bpm_hrr)
-	    unit = unit_type::percent_hr_reserve;
-	  format_heart_rate(buf, value, unit);
-	  break; }
-
-	case activity::point_field::altitude: {
-	  unit_type unit = unit_type::metres;
-	  if (it.conversion == value_conversion::distance_m_ft)
-	    unit = unit_type::feet;
-	  format_distance(buf, value, unit);
-	  break; }
-
-	case activity::point_field::cadence:
-	  format_cadence(buf, value, unit_type::steps_per_minute);
-	  break;
-
-	case activity::point_field::vertical_oscillation:
-	  format_distance(buf, value, unit_type::millimetres);
-	  break;
-
-	case activity::point_field::stance_time:
-	  format_duration(buf, value);
-	  break;
-
-	case activity::point_field::stance_ratio:
-	  format_fraction(buf, value);
-	  break;
-
-	case activity::point_field::stride_length:
-	  format_distance(buf, value, unit_type::metres);
-	  break;
-
-	default:
-	  format_number(buf, value);
-	  break;
-	}
-
-      buf.append("\n");
-    }
-
-  [[NSString stringWithUTF8String:buf.c_str()]
-   drawInRect:textR withAttributes:attrs];
-}
-
-CGRect
-chart::current_time_rect() const
-{
-  if (_current_time < 0)
-    return CGRectNull;
-
-  activity::point pt;
-  auto elapsed_time = activity::point_field::elapsed_time;
-  if (!_activity.point_at(elapsed_time, _current_time, pt))
-    return CGRectNull;
-
-  x_axis_state xs(*this, x_axis());
-
-  double t = xs.field_fn(pt);
-  if (t < xs.min_value || t > xs.max_value)
-    return CGRectNull;
-
-  CGFloat x = round(t * xs.xm + xs.xc);
-
-  CGRect lineR = CGRectMake(x, _chart_rect.origin.y,
-			    1, _chart_rect.size.height);
-
-  CGRect boxR;
-  boxR.origin.x = x + BOX_INSET;
-  boxR.origin.y = _chart_rect.origin.y;
-  boxR.size.width = BOX_WIDTH;
-  boxR.size.height = (2 + _lines.size()) * BOX_HEIGHT;
-  if (boxR.origin.x + boxR.size.width + BOX_INSET > CGRectGetMaxX(_chart_rect))
-    boxR.origin.x = x - BOX_INSET - boxR.size.width;
-
-  return CGRectUnion(lineR, boxR);
-}
-
-bool
-chart::point_at_x(double x, activity::point &ret_p) const
-{
-  x_axis_state x_axis(*this, _x_axis);
-
-  double total_dist = 0;
-
-  for (const auto &lap : _activity.laps())
-    {
-      double lx0, lx1;
-
-      if (_x_axis == x_axis_type::elapsed_time)
-	{
-	  lx0 = lap.start_elapsed_time * x_axis.xm + x_axis.xc;
-	  lx1 = lx0 + lap.total_elapsed_time * x_axis.xm;
-	}
-      else
-	{
-	  lx0 = total_dist * x_axis.xm + x_axis.xc;
-	  lx1 = lx0 + lap.total_distance * x_axis.xm;
-	}
-
-      total_dist += lap.total_distance;
-
-      if (lx1 < x)
-	continue;
-      if (lx0 > x)
-	return false;
-
-      const activity::point *last_p = nullptr;
-      double last_x = 0;
-
-      for (auto it = _activity.lap_begin(lap);
-	   it != _activity.points().end(); it++)
-	{
-	  auto p = *it;
-
-	  double p_value = x_axis.field_fn(p);
-	  if (p_value == 0)
-	    continue;
-
-	  double p_x = p_value * x_axis.xm + x_axis.xc;
-
-	  if (p_x > x)
-	    {
-	      if (last_p != nullptr)
-		{
-		  double f = (p_x - x) / (p_x - last_x);
-		  mix(ret_p, *last_p, p, 1-f);
-		  return true;
-		}
-	      else
-		return false;
-	    }
-      
-	  last_p = &p;
-	  last_x = p_x;
-	}
-    }
-
-  return false;
 }
 
 void

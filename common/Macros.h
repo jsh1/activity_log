@@ -40,7 +40,7 @@
 #define ABS(x) ((a) > 0 ? (a) : -(a))
 
 #undef MIX
-#define MIX(a, b, c) ((a) + ((b) - (a)) * (f))
+#define MIX(a, b, f) ((a) + ((b) - (a)) * (f))
 
 #define POINTER_TO_INT(x) ((intptr_t)(x))
 #define INT_TO_POINTER(x) ((void *)(intptr_t)(x))
