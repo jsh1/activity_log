@@ -237,7 +237,7 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
 		  ActSourceListQueryItem *year_item
 		    = [ActSourceListQueryItem itemWithName:
 		       [year_formatter stringFromDate:
-			[NSDate dateWithTimeIntervalSince1970:year_min]]];
+			[NSDate dateWithTimeIntervalSince1970:year_min + 24*60*60]]];
 		  [year_item setExpandable:YES];
 		  act::date_range year_range(year_min, year_max - year_min);
 		  [year_item query].add_date_range(year_range);

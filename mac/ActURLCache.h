@@ -39,7 +39,7 @@
   id<ActURLCacheDelegate> _delegate;
   id _userInfo;
   ActURLCache *_cache;
-  NSURLConnection *_connection;
+  NSURLSessionTask *_task;
   NSMutableData *_data;
   NSError *_error;
   BOOL _dispatching;

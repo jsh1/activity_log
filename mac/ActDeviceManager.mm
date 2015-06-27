@@ -96,16 +96,25 @@ NSString *const ActDeviceManagerDevicesDidChange
 {
   NSMutableDictionary *dict = [NSMutableDictionary dictionary];
 
-  NSWorkspace *workspace = [NSWorkspace sharedWorkspace];
+  /* FIXME: it's not clear what the alternatives to these are. */
 
-  for (NSString *path in [workspace mountedLocalVolumePaths])
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated"
+
+  NSWorkspace *workspace = [NSWorkspace sharedWorkspace];
+  NSArray *local_volumes = [workspace mountedLocalVolumePaths];
+  NSArray *removable_volumes = [workspace mountedRemovableMedia];
+
+#pragma clang diagnostic pop
+
+  for (NSString *path in local_volumes)
     {
       NSURL *url = [NSURL fileURLWithPath:path];
       if (ActDevice *device = [self deviceForURL:url])
 	[dict setObject:device forKey:url];
     }
 
-  for (NSString *path in [workspace mountedRemovableMedia])
+  for (NSString *path in removable_volumes)
     {
       NSURL *url = [NSURL fileURLWithPath:path];
       if (ActDevice *device = [self deviceForURL:url])

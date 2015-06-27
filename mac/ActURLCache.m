@@ -30,12 +30,12 @@
 - (void)commitCachedURL:(ActCachedURL *)url;
 @end
 
-@interface ActCachedURL (internal) <NSURLConnectionDataDelegate>
+@interface ActCachedURL (internal)
 - (void)setCache:(ActURLCache *)cache;
 - (void)setData:(NSData *)data;
 - (void)setError:(NSError *)err;
-- (NSURLConnection *)connection;
-- (void)setConnection:(NSURLConnection *)conn;
+- (NSURLSessionTask *)task;
+- (void)setTask:(NSURLSessionTask *)task;
 - (int)fileId;
 - (void)setFileId:(int)x;
 - (void)dispatch;
@@ -184,15 +184,25 @@ static ActURLCache *_sharedCache;
 	}
     }
 
-  NSURLRequest *request = [[NSURLRequest alloc] initWithURL:[url URL]];
-  NSURLConnection *conn = [[NSURLConnection alloc] initWithRequest:request
-			   delegate:url startImmediately:NO];
-  [request release];
-  [url setConnection:conn];
-  [conn scheduleInRunLoop:[NSRunLoop mainRunLoop]
-   forMode:NSRunLoopCommonModes];
-  [conn start];
-  [conn release];
+  NSURLRequest *request = [NSURLRequest requestWithURL:[url URL]];
+
+  NSURLSessionTask *task = [[NSURLSession sharedSession]
+    dataTaskWithRequest:request completionHandler:^
+    (NSData *data, NSURLResponse *response, NSError *err)
+      {
+	[url setTask:nil];
+	if (err == nil)
+	  {
+	    [url setData:data];
+	    [self commitCachedURL:url];
+	  }
+	else
+	  [url setError:err];
+	[url dispatch];
+      }];
+
+  [url setTask:task];
+  [task resume];
 
   return YES;
 }
@@ -334,7 +344,7 @@ static ActURLCache *_sharedCache;
   [_url release];
   [_userInfo release];
   [_cache release];
-  [_connection release];
+  [_task release];
   [_data release];
   [super dealloc];
 }
@@ -348,59 +358,13 @@ static ActURLCache *_sharedCache;
        target:self argument:nil];
     }
 
-  [_connection cancel];
+  [_task cancel];
 }
 
 - (void)_sendReply:(id)arg
 {
   [_delegate cachedURLDidFinish:self];
   _dispatching = NO;
-}
-
-// NSURLConnectionDataDelegate methods
-
-- (void)connection:(NSURLConnection *)conn
-    didReceiveResponse:(NSURLResponse *)response
-{
-  [_data setLength:0];
-}
-
-- (NSCachedURLResponse *)connection:(NSURLConnection *)conn
-    willCacheResponse:(NSCachedURLResponse *)response
-{
-  return nil;
-}
-
-- (void)connection:(NSURLConnection *)conn didFailWithError:(NSError *)error
-{
-  [_error release];
-  _error = [error copy];
-
-  [_data release];
-  _data = nil;
-
-  [_connection release];
-  _connection = nil;
-
-  [self dispatch];
-}
-
-- (void)connection:(NSURLConnection *)conn didReceiveData:(NSData *)data
-{
-  if (_data == nil)
-    _data = [[NSMutableData alloc] init];
-
-  [_data appendData:data];
-}
-
-- (void)connectionDidFinishLoading:(NSURLConnection *)conn
-{
-  [_connection release];
-  _connection = nil;
-
-  [_cache commitCachedURL:self];
-
-  [self dispatch];
 }
 
 @end
@@ -425,15 +389,15 @@ static ActURLCache *_sharedCache;
   _error = [err retain];
 }
 
-- (NSURLConnection *)connection
+- (NSURLSessionTask *)task
 {
-  return _connection;
+  return _task;
 }
 
-- (void)setConnection:(NSURLConnection *)conn
+- (void)setTask:(NSURLSessionTask *)task
 {
-  [_connection release];
-  _connection = [conn retain];
+  [_task release];
+  _task = [task retain];
 }
 
 - (int)fileId

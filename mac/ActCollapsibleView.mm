@@ -53,7 +53,7 @@ static NSDictionary *_titleAttrs;
   _disclosureButton = [[NSButton alloc] initWithFrame:r];
   [_disclosureButton setButtonType:NSPushOnPushOffButton];
   [_disclosureButton setBezelStyle:NSDisclosureBezelStyle];
-  [_disclosureButton setTitle:nil];
+  [_disclosureButton setTitle:@""];
   [_disclosureButton highlight:NO];
   [_disclosureButton setState:NSOnState];
   [_disclosureButton setTarget:self];
