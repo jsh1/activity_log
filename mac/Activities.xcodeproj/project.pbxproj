@@ -63,6 +63,7 @@
 		57707AE917DFBC4C009BAC5D /* ActMapView.mm in Sources */ = {isa = PBXBuildFile; fileRef = 57707AE517DFBC4C009BAC5D /* ActMapView.mm */; };
 		57707AEA17DFBC4C009BAC5D /* ActTileJSONMapSource.mm in Sources */ = {isa = PBXBuildFile; fileRef = 57707AE717DFBC4C009BAC5D /* ActTileJSONMapSource.mm */; };
 		57707AED17DFBF99009BAC5D /* ActMapViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = 57707AEC17DFBF99009BAC5D /* ActMapViewController.mm */; };
+		577C34D01B3F582D00F4D059 /* ActFont.mm in Sources */ = {isa = PBXBuildFile; fileRef = 577C34CF1B3F582D00F4D059 /* ActFont.mm */; };
 		578D797A17E75DE300E50C29 /* ActSummaryViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = 578D797917E75DE300E50C29 /* ActSummaryViewController.mm */; };
 		578D797D17E7671000E50C29 /* ActHorizontalBoxView.mm in Sources */ = {isa = PBXBuildFile; fileRef = 578D797C17E7671000E50C29 /* ActHorizontalBoxView.mm */; };
 		57921A5717BEAEF0001AD35D /* ActWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 57921A5517BEAEF0001AD35D /* ActWindow.xib */; };
@@ -206,6 +207,8 @@
 		57707AE717DFBC4C009BAC5D /* ActTileJSONMapSource.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ActTileJSONMapSource.mm; sourceTree = "<group>"; };
 		57707AEB17DFBF99009BAC5D /* ActMapViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActMapViewController.h; sourceTree = "<group>"; };
 		57707AEC17DFBF99009BAC5D /* ActMapViewController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ActMapViewController.mm; sourceTree = "<group>"; };
+		577C34CE1B3F582D00F4D059 /* ActFont.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActFont.h; sourceTree = "<group>"; };
+		577C34CF1B3F582D00F4D059 /* ActFont.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ActFont.mm; sourceTree = "<group>"; };
 		578D797817E75DE300E50C29 /* ActSummaryViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActSummaryViewController.h; sourceTree = "<group>"; };
 		578D797917E75DE300E50C29 /* ActSummaryViewController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ActSummaryViewController.mm; sourceTree = "<group>"; };
 		578D797B17E7671000E50C29 /* ActHorizontalBoxView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActHorizontalBoxView.h; sourceTree = "<group>"; };
@@ -362,6 +365,8 @@
 				5769E6D91812D2DD00E3D801 /* ActCollapsibleView.mm */,
 				5734E187181007EB007BDC1B /* ActColor.h */,
 				5734E188181007EB007BDC1B /* ActColor.mm */,
+				577C34CE1B3F582D00F4D059 /* ActFont.h */,
+				577C34CF1B3F582D00F4D059 /* ActFont.mm */,
 				579772E317C4F63900AA2E9D /* ActHeaderView.h */,
 				579772E417C4F63900AA2E9D /* ActHeaderView.mm */,
 				579772E617C4FB0A00AA2E9D /* ActHeaderFieldView.h */,
@@ -646,6 +651,7 @@
 				578D797A17E75DE300E50C29 /* ActSummaryViewController.mm in Sources */,
 				570E6AD017F717FB00A5BB4D /* ActURLCache.m in Sources */,
 				575506201824721D00A69209 /* ActSourceListQueryItem.mm in Sources */,
+				577C34D01B3F582D00F4D059 /* ActFont.mm in Sources */,
 				5734E189181007EB007BDC1B /* ActColor.mm in Sources */,
 				570E6ABE17F4711500A5BB4D /* ActViewController.mm in Sources */,
 				578D797D17E7671000E50C29 /* ActHorizontalBoxView.mm in Sources */,

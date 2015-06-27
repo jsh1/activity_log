@@ -26,6 +26,7 @@
 
 #import "ActAppDelegate.h"
 #import "ActColor.h"
+#import "ActFont.h"
 #import "ActWindowController.h"
 
 #import "act-config.h"
@@ -609,57 +610,57 @@ ActNotesItem::initialize()
   [centerStyle setAlignment:NSCenterTextAlignment];
 
   title_attrs = [[NSDictionary alloc] initWithObjectsAndKeys:
-		 [NSFont fontWithName:@"Helvetica Neue Bold"
-		  size:TITLE_FONT_SIZE], NSFontAttributeName,
+		 [NSFont boldSystemFontOfSize:TITLE_FONT_SIZE],
+		 NSFontAttributeName,
 		 greyColor, NSForegroundColorAttributeName,
 		 nil];
   selected_title_attrs = [[NSDictionary alloc] initWithObjectsAndKeys:
-			  [NSFont fontWithName:@"Helvetica Neue Bold"
-			   size:TITLE_FONT_SIZE], NSFontAttributeName,
+			  [NSFont boldSystemFontOfSize:TITLE_FONT_SIZE],
+			  NSFontAttributeName,
 			  [ActColor alternateSelectedControlTextColor],
 			  NSForegroundColorAttributeName,
 			  nil];
   body_attrs = [[NSDictionary alloc] initWithObjectsAndKeys:
-		[NSFont fontWithName:@"Helvetica" size:BODY_FONT_SIZE],
+		[ActFont bodyFontOfSize:BODY_FONT_SIZE],
 		NSFontAttributeName,
 		greyColor, NSForegroundColorAttributeName,
 		nil];
   time_attrs = [[NSDictionary alloc] initWithObjectsAndKeys:
-		[NSFont fontWithName:@"Helvetica Neue"
-		 size:TIME_FONT_SIZE], NSFontAttributeName,
+		[NSFont systemFontOfSize:TIME_FONT_SIZE],
+		NSFontAttributeName,
 		blueColor, NSForegroundColorAttributeName,
 		rightStyle, NSParagraphStyleAttributeName,
 		nil];
   stats_attrs = [[NSDictionary alloc] initWithObjectsAndKeys:
-		 [NSFont fontWithName:@"Helvetica Neue Bold"
-		  size:STATS_FONT_SIZE], NSFontAttributeName,
+		 [NSFont boldSystemFontOfSize:STATS_FONT_SIZE],
+		 NSFontAttributeName,
 		 redColor, NSForegroundColorAttributeName,
 		 nil];
   dow_attrs = [[NSDictionary alloc] initWithObjectsAndKeys:
-	       [NSFont fontWithName:@"Helvetica Neue Bold"
-		size:DAY_OF_WEEK_FONT_SIZE], NSFontAttributeName,
+	       [NSFont boldSystemFontOfSize:DAY_OF_WEEK_FONT_SIZE],
+	       NSFontAttributeName,
 	       greyColor, NSForegroundColorAttributeName,
 	       centerStyle, NSParagraphStyleAttributeName,
 	       nil];
   dom_attrs = [[NSDictionary alloc] initWithObjectsAndKeys:
-	       [NSFont fontWithName:@"Helvetica Neue Bold"
-		size:DAY_OF_MONTH_FONT_SIZE], NSFontAttributeName,
+	       [NSFont boldSystemFontOfSize:DAY_OF_MONTH_FONT_SIZE],
+	       NSFontAttributeName,
 	       greyColor, NSForegroundColorAttributeName,
 	       centerStyle, NSParagraphStyleAttributeName,
 	       nil];
   month_attrs = [[NSDictionary alloc] initWithObjectsAndKeys:
-		 [NSFont fontWithName:@"Helvetica Neue Bold"
-		  size:MONTH_FONT_SIZE], NSFontAttributeName,
+		 [NSFont boldSystemFontOfSize:MONTH_FONT_SIZE],
+		 NSFontAttributeName,
 		 greyColor, NSForegroundColorAttributeName,
 		 nil];
   week_attrs = [[NSDictionary alloc] initWithObjectsAndKeys:
-		[NSFont fontWithName:@"Helvetica Neue Bold"
-		 size:WEEK_FONT_SIZE], NSFontAttributeName,
+		[NSFont boldSystemFontOfSize:WEEK_FONT_SIZE],
+		NSFontAttributeName,
 		greyColor, NSForegroundColorAttributeName,
 		nil];
   header_stats_attrs = [[NSDictionary alloc] initWithObjectsAndKeys:
-			[NSFont fontWithName:@"Helvetica Neue Bold"
-			 size:HEADER_STATS_FONT_SIZE], NSFontAttributeName,
+			[NSFont boldSystemFontOfSize:HEADER_STATS_FONT_SIZE],
+			NSFontAttributeName,
 			redColor, NSForegroundColorAttributeName,
 			rightStyle, NSParagraphStyleAttributeName,
 			nil];

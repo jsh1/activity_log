@@ -27,6 +27,7 @@
 #import "ActAppDelegate.h"
 #import "ActCollapsibleView.h"
 #import "ActColor.h"
+#import "ActFont.h"
 #import "ActHorizontalBoxView.h"
 #import "ActViewLayout.h"
 #import "ActWindowController.h"
@@ -99,7 +100,7 @@
   [_bodyTextView setUsesFontPanel:NO];
   [_bodyTextView setImportsGraphics:NO];
   [_bodyTextView setDrawsBackground:NO];
-  [_bodyTextView setFont:[NSFont fontWithName:@"Helvetica" size:12]];
+  [_bodyTextView setFont:[ActFont bodyFontOfSize:12]];
   [_bodyTextView setTextColor:[ActColor controlTextColor]];
   [_bodyTextView setDelegate:self];
   [_summaryView addSubview:_bodyTextView];

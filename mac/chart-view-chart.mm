@@ -485,15 +485,13 @@ chart::draw_line(const line &l, const x_axis_state &xs, CGFloat tx)
 	[rightStyle setAlignment:NSRightTextAlignment];
 
 	left_attrs = [[NSDictionary alloc] initWithObjectsAndKeys:
-		      [NSFont fontWithName:@"Helvetica Neue Medium"
-		       size:LABEL_FONT_SIZE],
+		      [NSFont systemFontOfSize:LABEL_FONT_SIZE],
 		      NSFontAttributeName,
 		      [ActColor controlTextColor],
 		      NSForegroundColorAttributeName,
 		      nil];
 	right_attrs = [[NSDictionary alloc] initWithObjectsAndKeys:
-		       [NSFont fontWithName:@"Helvetica Neue Medium"
-			size:LABEL_FONT_SIZE],
+		       [NSFont systemFontOfSize:LABEL_FONT_SIZE],
 		       NSFontAttributeName,
 		       [ActColor controlTextColor],
 		       NSForegroundColorAttributeName,
@@ -642,8 +640,7 @@ chart::draw_current_time()
   NSRect textR = NSInsetRect(boxR, BOX_INSET, 0);
 
   NSDictionary *attrs = [NSDictionary dictionaryWithObjectsAndKeys:
-			 [NSFont fontWithName:@"Helvetica Neue Bold"
-			  size:BOX_FONT_SIZE],
+			 [NSFont boldSystemFontOfSize:BOX_FONT_SIZE],
 			 NSFontAttributeName,
 			 [ActColor controlDetailTextColor],
 			 NSForegroundColorAttributeName,

@@ -26,6 +26,7 @@
 
 #import "ActAppDelegate.h"
 #import "ActColor.h"
+#import "ActFont.h"
 #import "ActWindowController.h"
 
 #import "act-config.h"
@@ -47,10 +48,10 @@
 #define STATS_MAIN_FONT_SIZE 24
 #define STATS_SUB_FONT_SIZE 12
 #define HEADER_MONTH_FONT_SIZE 16
-#define HEADER_MONTH_Y 2
+#define HEADER_MONTH_Y 0
 #define HEADER_MONTH_HEIGHT 25
 #define HEADER_DAY_FONT_SIZE 12
-#define HEADER_DAY_Y 2
+#define HEADER_DAY_Y 3
 #define HEADER_DAY_HEIGHT 20
 #define MIN_RADIUS 3
 
@@ -894,14 +895,14 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
       [centerStyle setAlignment:NSCenterTextAlignment];
 
       month_attrs = [[NSDictionary alloc] initWithObjectsAndKeys:
-		     [NSFont fontWithName:@"Helvetica Neue Bold"
-		      size:HEADER_MONTH_FONT_SIZE], NSFontAttributeName,
+		     [NSFont boldSystemFontOfSize:HEADER_MONTH_FONT_SIZE],
+		     NSFontAttributeName,
 		     greyColor, NSForegroundColorAttributeName,
 		     nil];
 
       day_attrs = [[NSDictionary alloc] initWithObjectsAndKeys:
-		   [NSFont fontWithName:@"Helvetica Neue"
-		    size:HEADER_DAY_FONT_SIZE], NSFontAttributeName,
+		   [NSFont systemFontOfSize:HEADER_DAY_FONT_SIZE],
+		   NSFontAttributeName,
 		   greyColor, NSForegroundColorAttributeName,
 		   centerStyle, NSParagraphStyleAttributeName,
 		   nil];
@@ -1212,18 +1213,18 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
       NSColor *redColor = [ActColor controlDetailTextColor];
 
       date_attrs = [[NSDictionary alloc] initWithObjectsAndKeys:
-		    [NSFont fontWithName:@"Helvetica Neue"
-		     size:STATS_DATE_FONT_SIZE], NSFontAttributeName,
+		    [NSFont systemFontOfSize:STATS_DATE_FONT_SIZE],
+		    NSFontAttributeName,
 		    greyColor, NSForegroundColorAttributeName,
 		    nil];
       main_attrs = [[NSDictionary alloc] initWithObjectsAndKeys:
-		    [NSFont fontWithName:@"Helvetica Neue"
-		     size:STATS_MAIN_FONT_SIZE], NSFontAttributeName,
+		    [ActFont mediumSystemFontOfSize:STATS_MAIN_FONT_SIZE],
+		    NSFontAttributeName,
 		    redColor, NSForegroundColorAttributeName,
 		    nil];
       sub_attrs = [[NSDictionary alloc] initWithObjectsAndKeys:
-		    [NSFont fontWithName:@"Helvetica Neue"
-		     size:STATS_SUB_FONT_SIZE], NSFontAttributeName,
+		    [NSFont systemFontOfSize:STATS_SUB_FONT_SIZE],
+		    NSFontAttributeName,
 		    greyColor, NSForegroundColorAttributeName,
 		    nil];
 

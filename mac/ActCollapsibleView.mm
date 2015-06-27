@@ -32,7 +32,6 @@
 #define MIN_HEIGHT 20
 
 #define TITLE_FONT_SIZE 11
-#define TITLE_HEIGHT 16
 
 @implementation ActCollapsibleView
 
@@ -64,8 +63,7 @@ static NSDictionary *_titleAttrs;
   if (_titleAttrs == nil)
     {
       _titleAttrs = [[NSDictionary alloc] initWithObjectsAndKeys:
-		     [NSFont fontWithName:@"Helvetica Neue Bold"
-		      size:TITLE_FONT_SIZE],
+		     [NSFont boldSystemFontOfSize:TITLE_FONT_SIZE],
 		     NSFontAttributeName,
 		     [ActColor controlTextColor],
 		     NSForegroundColorAttributeName,
@@ -258,7 +256,7 @@ callLayoutSubviews(id delegate, NSView *view)
     {
       NSPoint p;
       p.x = bounds.origin.x + DIS_SIZE + SPACING;
-      p.y = bounds.origin.y + bounds.size.height - _titleSize.height;
+      p.y = bounds.origin.y + bounds.size.height - _headerHeight + (_headerHeight - _titleSize.height) * .5;
       [_title drawAtPoint:p withAttributes:_titleAttrs];
     }
 

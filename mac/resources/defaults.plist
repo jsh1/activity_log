@@ -85,5 +85,8 @@
 		<key>run/race</key>
 		<string>.87 0 .02</string>
 	</dict>
+
+	<key>ActBodyFont</key>
+	<string>Helvetica</string>
 </dict>
 </plist>

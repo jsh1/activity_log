@@ -26,6 +26,7 @@
 
 #import "ActAppDelegate.h"
 #import "ActColor.h"
+#import "ActFont.h"
 #import "ActWindowController.h"
 
 #define BODY_X_INSET 6
@@ -56,7 +57,7 @@
   [_bodyTextView setUsesFontPanel:NO];
   [_bodyTextView setImportsGraphics:NO];
   [_bodyTextView setDrawsBackground:NO];
-  [_bodyTextView setFont:[NSFont fontWithName:@"Helvetica Neue" size:11]];
+  [_bodyTextView setFont:[ActFont bodyFontOfSize:11]];
   [_bodyTextView setTextColor:[ActColor controlTextColor]];
   [[self view] addSubview:_bodyTextView];
   [_bodyTextView release];
