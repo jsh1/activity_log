@@ -232,6 +232,7 @@ callLayoutSubviews(id delegate, NSView *view)
   CGContextSetShouldSmoothFonts(ctx, true);
 
   NSRect bounds = [self bounds];
+  BOOL expanded = [_disclosureButton state] && _contentHeight > 0;
 
   NSColor *bg = [ActColor darkControlBackgroundColor];
   NSColor *dark = [NSColor colorWithDeviceWhite:.66 alpha:1];
@@ -249,18 +250,39 @@ callLayoutSubviews(id delegate, NSView *view)
 				    bounds.size.width - 2, 1)];
 
   [dark setStroke];
-  [[NSBezierPath bezierPathWithRoundedRect:
-    NSInsetRect(bounds, .5, .5) xRadius:3 yRadius:3] stroke];
+
+  NSRect border = NSInsetRect(bounds, .5, .5);
+  NSBezierPath *path = nil;
+  if (!expanded)
+    path = [NSBezierPath bezierPathWithRoundedRect:border xRadius:3 yRadius:3];
+  else
+    {
+      CGFloat llx = border.origin.x;
+      CGFloat lly = border.origin.y;
+      CGFloat urx = llx + border.size.width;
+      CGFloat ury = lly + border.size.height;
+      CGFloat r = 3;
+      path = [NSBezierPath bezierPath];
+      [path moveToPoint:NSMakePoint(llx, lly)];
+      [path lineToPoint:NSMakePoint(urx, lly)];
+      [path appendBezierPathWithArcWithCenter:NSMakePoint(urx - r, ury - r)
+       radius:r startAngle:0 endAngle:90 clockwise:NO];
+      [path appendBezierPathWithArcWithCenter:NSMakePoint(llx + r, ury - r)
+       radius:r startAngle:90 endAngle:180 clockwise:NO];
+      [path closePath];
+    }
+  [path stroke];
 
   if (_titleSize.width > 0)
     {
       NSPoint p;
       p.x = bounds.origin.x + DIS_SIZE + SPACING;
-      p.y = bounds.origin.y + bounds.size.height - _headerHeight + (_headerHeight - _titleSize.height) * .5;
+      p.y = (bounds.origin.y + bounds.size.height - _headerHeight
+	     + (_headerHeight - _titleSize.height) * .5);
       [_title drawAtPoint:p withAttributes:_titleAttrs];
     }
 
-  if ([_disclosureButton state] && _contentHeight > 0)
+  if (expanded)
     {
       [dark setFill];
       [NSBezierPath fillRect:
