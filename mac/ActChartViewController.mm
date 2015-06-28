@@ -324,6 +324,7 @@ enum ChartFieldMasks
     }
 
   _chart->set_chart_rect(NSRectToCGRect([_chartView bounds]));
+  _chart->set_backing_scale([[_chartView window] backingScaleFactor]);
   _chart->set_selected_lap([_controller selectedLapIndex]);
   _chart->update_values();
 

@@ -99,6 +99,9 @@ public:
   void set_chart_rect(const CGRect &r);		/* calls update_values() */
   const CGRect &chart_rect() const;
 
+  void set_backing_scale(CGFloat scale);
+  CGFloat backing_scale() const;
+
   void draw();
 
   CGRect current_time_rect() const;
@@ -162,11 +165,16 @@ protected:
   int _selected_lap;
   double _current_time;
   CGRect _chart_rect;
+  CGFloat _backing_scale;
+  CGFloat _backing_scale_recip;
 
 private:
   void draw_line(const line &l, const x_axis_state &xs, CGFloat tx);
   void draw_lap_markers(const x_axis_state &xs);
   void draw_current_time();
+
+  CGFloat backing_scale_recip() const;
+  CGFloat round_to_pixels(CGFloat x) const;
 };
 
 // implementation details
@@ -235,6 +243,31 @@ inline const CGRect &
 chart::chart_rect() const
 {
   return _chart_rect;
+}
+
+inline void
+chart::set_backing_scale(CGFloat scale)
+{
+  _backing_scale = scale;
+  _backing_scale_recip = 1 / scale;
+}
+
+inline CGFloat
+chart::backing_scale() const
+{
+  return _backing_scale;
+}
+
+inline CGFloat
+chart::backing_scale_recip() const
+{
+  return _backing_scale_recip;
+}
+
+inline CGFloat
+chart::round_to_pixels(CGFloat x) const
+{
+  return round(x * _backing_scale) * _backing_scale_recip;
 }
 
 } // namespace chart_view

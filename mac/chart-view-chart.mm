@@ -310,7 +310,9 @@ chart::chart(const gps::activity &a, x_axis_type xa)
 : _activity(a),
   _x_axis(xa),
   _selected_lap(-1),
-  _current_time(-1)
+  _current_time(-1),
+  _backing_scale(1),
+  _backing_scale_recip(1)
 {
   a.get_range(gps::activity::point_field::elapsed_time, _min_time, _max_time);
   a.get_range(gps::activity::point_field::distance,
@@ -512,7 +514,8 @@ chart::draw_line(const line &l, const x_axis_state &xs, CGFloat tx)
     for (double tick = l.tick_min; tick < l.tick_max; tick += l.tick_delta)
       {
 	double value = l.convert_to_si(tick);
-	CGFloat y = round(value * ym + yc);
+	CGFloat y = value * ym + yc;
+	y = round_to_pixels(y) + backing_scale_recip() * (CGFloat).5;
 
 	if (y < lly || y > ury)
 	  continue;
@@ -537,11 +540,9 @@ chart::draw_line(const line &l, const x_axis_state &xs, CGFloat tx)
 
     if (l.flags & TICK_LINES)
       {
-	static const CGFloat dash[] = {4, 2};
-	[path setLineDash:dash count:2 phase:0];
-	[path setLineWidth:1];
+	[path setLineWidth:backing_scale_recip()];
 	[[NSColor colorWithCalibratedRed:stroke_rgb[0]
-	  green:stroke_rgb[1] blue:stroke_rgb[2] alpha:.25] setStroke];
+	  green:stroke_rgb[1] blue:stroke_rgb[2] alpha:.125] setStroke];
 	[path stroke];
       }
 
@@ -567,7 +568,7 @@ chart::draw_lap_markers(const x_axis_state &xs)
   for (size_t i = 0; true; i++)
     {
       CGFloat x = total_dist * xs.xm + xs.xc;
-      x = floor(x) + 0.5;
+      x = round_to_pixels(x) + backing_scale_recip() * (CGFloat).5;
 
       [path moveToPoint:NSMakePoint(x, lly)];
       [path lineToPoint:NSMakePoint(x, ury)];
@@ -587,16 +588,14 @@ chart::draw_lap_markers(const x_axis_state &xs)
 		      + _activity.laps()[i].total_elapsed_time);
     }
 
-  static const CGFloat dash[] = {4, 2};
-  [path setLineDash:dash count:2 phase:0];
-  [path setLineWidth:1];
+  [path setLineWidth:backing_scale_recip()];
 
   [[NSColor colorWithDeviceWhite:0 alpha:.1] setStroke];
   [path stroke];
 
   if (highlightRect.size.width > 0)
     {
-      [[NSColor colorWithCalibratedRed:.5 green:.5 blue:.8 alpha:.2] setFill];
+      [[NSColor colorWithCalibratedRed:.5 green:.5 blue:.8 alpha:.125] setFill];
       NSRectFillUsingOperation(highlightRect, NSCompositePlusDarker);
     }
 }
