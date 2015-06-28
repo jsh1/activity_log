@@ -758,6 +758,8 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
 
   [[_controller controller] setSelectedActivityStorage:
    selection ? selection->storage() : nullptr];
+
+  [self setHighlitLayer:nil];
 }
 
 - (void)mouseMoved:(NSEvent *)e
@@ -790,19 +792,28 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
       layer = [layer superlayer];
     }
 
-  if (_expandedLayer != expanded_layer)
+  [self setExpandedLayer:expanded_layer];
+  [self setHighlitLayer:highlit_layer];
+}
+
+- (void)setExpandedLayer:(ActWeekView_ActivityLayer *)layer
+{
+  if (_expandedLayer != layer)
     {
       [_expandedLayer setExpanded:NO];
       [_expandedLayer release];
-      _expandedLayer = [expanded_layer retain];
+      _expandedLayer = [layer retain];
       [_expandedLayer setExpanded:YES];
     }
+}
 
-  if (_highlitLayer != highlit_layer)
+- (void)setHighlitLayer:(ActWeekView_ActivityLayer *)layer
+{
+  if (_highlitLayer != layer)
     {
       [_highlitLayer setHighlit:NO];
       [_highlitLayer release];
-      _highlitLayer = [highlit_layer retain];
+      _highlitLayer = [layer retain];
       [_highlitLayer setHighlit:YES];
 
       [NSRunLoop cancelPreviousPerformRequestsWithTarget:self
@@ -874,7 +885,6 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
   static NSDateFormatter *date_formatter;
   static NSDictionary *month_attrs;
   static NSDictionary *day_attrs;
-  static NSGradient *grad;
   static NSColor *separator_color;
   static dispatch_once_t once;
 
@@ -907,19 +917,11 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
 		   centerStyle, NSParagraphStyleAttributeName,
 		   nil];
 
-      grad = [[NSGradient alloc] initWithStartingColor:
-	      [ActColor darkControlBackgroundColor] endingColor:
-	      [ActColor controlBackgroundColor]];
-
       separator_color = [[NSColor colorWithDeviceWhite:.80 alpha:1] retain];
     });
 
   NSRect bounds = [self bounds];
-
-  [grad drawInRect:bounds angle:90];
-
   CGFloat scale = [_controller interfaceScale];
-
   NSRect subR;
 
   // draw month name
@@ -958,20 +960,12 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
   // draw separator
 
   subR.origin.x = bounds.origin.x;
-  subR.origin.y = bounds.origin.y + 1;
+  subR.origin.y = bounds.origin.y;
   subR.size.width = bounds.size.width;
   subR.size.height = 1;
 
   [separator_color setFill];
   [NSBezierPath fillRect:subR];
-  subR.origin.y -= 1;
-  [[ActColor whiteColor] setFill];
-  [NSBezierPath fillRect:subR];
-}
-
-- (BOOL)isOpaque
-{
-  return YES;
 }
 
 @end

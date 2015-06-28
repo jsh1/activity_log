@@ -546,29 +546,11 @@
 
 - (void)drawRect:(NSRect)r
 {
-  static NSGradient *grad;
-
-  if (grad == nil)
-    {
-      grad = [[NSGradient alloc] initWithStartingColor:
-	      [ActColor controlBackgroundColor] endingColor:
-	      [ActColor darkControlBackgroundColor]];
-    }
-
-  NSRect bounds = [self bounds];
-
-  [grad drawInRect:bounds angle:90];
-
   if (const ActNotesItem *item = [_controller headerItem])
-    item->draw_header(bounds, 0, [_controller headerStats]);
+    item->draw_header([self bounds], 0, [_controller headerStats]);
 }
 
 - (BOOL)isFlipped
-{
-  return YES;
-}
-
-- (BOOL)isOpaque
 {
   return YES;
 }
@@ -665,7 +647,7 @@ ActNotesItem::initialize()
 			rightStyle, NSParagraphStyleAttributeName,
 			nil];
 
-  separator_color = [[NSColor colorWithDeviceWhite:.80 alpha:1] retain];
+  separator_color = [[NSColor colorWithDeviceWhite:.85 alpha:1] retain];
 
   NSLocale *locale = [(ActAppDelegate *)[NSApp delegate] currentLocale];
 
@@ -844,9 +826,6 @@ ActNotesItem::draw(const NSRect &bounds, uint32_t flags) const
 
   [separator_color setFill];
   [NSBezierPath fillRect:subR];
-  subR.origin.y += 1;
-  [[ActColor whiteColor] setFill];
-  [NSBezierPath fillRect:subR];
 }
 
 void
@@ -922,14 +901,11 @@ ActNotesItem::draw_header(const NSRect &bounds, uint32_t flags,
   // draw separator
 
   subR.origin.x = bounds.origin.x;
-  subR.origin.y = bounds.origin.y + bounds.size.height - 2;
+  subR.origin.y = bounds.origin.y + bounds.size.height - 1;
   subR.size.width = bounds.size.width;
   subR.size.height = 1;
 
   [separator_color setFill];
-  [NSBezierPath fillRect:subR];
-  subR.origin.y += 1;
-  [[ActColor whiteColor] setFill];
   [NSBezierPath fillRect:subR];
 }
 

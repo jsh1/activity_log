@@ -21,6 +21,11 @@
             <rect key="frame" x="0.0" y="0.0" width="473" height="443"/>
             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
             <subviews>
+                <visualEffectView appearanceType="vibrantLight" blendingMode="behindWindow" state="followsWindowActiveState" id="fzl-QX-Stj">
+                    <rect key="frame" x="0.0" y="391" width="473" height="52"/>
+                    <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
+                    <animations/>
+                </visualEffectView>
                 <customView id="ldB-fk-9Cu" customClass="ActWeekHeaderView">
                     <rect key="frame" x="0.0" y="391" width="473" height="52"/>
                     <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>

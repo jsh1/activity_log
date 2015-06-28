@@ -234,22 +234,15 @@ callLayoutSubviews(id delegate, NSView *view)
   NSRect bounds = [self bounds];
   BOOL expanded = [_disclosureButton state] && _contentHeight > 0;
 
-  NSColor *bg = [ActColor darkControlBackgroundColor];
-  NSColor *dark = [NSColor colorWithDeviceWhite:.66 alpha:1];
-  NSColor *light = [NSColor whiteColor];
+  NSColor *dark = [NSColor colorWithDeviceWhite:.75 alpha:1];
 
-  [bg setFill];
+  [[ActColor darkControlBackgroundColor] setFill];
   [NSBezierPath fillRect:NSMakeRect(bounds.origin.x + 1,
 				    bounds.origin.y + bounds.size.height
-				    - _headerHeight, bounds.size.width - 2,
-				    _headerHeight - 2)];
+				    - _headerHeight - 1, bounds.size.width - 1,
+				    _headerHeight)];
 
-  [light setFill];
-  [NSBezierPath fillRect:NSMakeRect(bounds.origin.x + 1,
-				    bounds.origin.y + bounds.size.height - 2,
-				    bounds.size.width - 2, 1)];
-
-  [dark setStroke];
+  [dark set];
 
   NSRect border = NSInsetRect(bounds, .5, .5);
   NSBezierPath *path = nil;
@@ -262,6 +255,7 @@ callLayoutSubviews(id delegate, NSView *view)
       CGFloat urx = llx + border.size.width;
       CGFloat ury = lly + border.size.height;
       CGFloat r = 3;
+
       path = [NSBezierPath bezierPath];
       [path moveToPoint:NSMakePoint(llx, lly)];
       [path lineToPoint:NSMakePoint(urx, lly)];
@@ -270,6 +264,11 @@ callLayoutSubviews(id delegate, NSView *view)
       [path appendBezierPathWithArcWithCenter:NSMakePoint(llx + r, ury - r)
        radius:r startAngle:90 endAngle:180 clockwise:NO];
       [path closePath];
+
+      [NSBezierPath fillRect:
+       NSMakeRect(bounds.origin.x + 1, bounds.origin.y
+		  + bounds.size.height - (_headerHeight + (SPACING - 1)),
+		  bounds.size.width - 2, 1)];
     }
   [path stroke];
 
@@ -280,15 +279,6 @@ callLayoutSubviews(id delegate, NSView *view)
       p.y = (bounds.origin.y + bounds.size.height - _headerHeight
 	     + (_headerHeight - _titleSize.height) * .5);
       [_title drawAtPoint:p withAttributes:_titleAttrs];
-    }
-
-  if (expanded)
-    {
-      [dark setFill];
-      [NSBezierPath fillRect:
-       NSMakeRect(bounds.origin.x + 1, bounds.origin.y
-		  + bounds.size.height - (_headerHeight + (SPACING - 1)),
-		  bounds.size.width - 2, 1)];
     }
 
   CGContextRestoreGState(ctx);
