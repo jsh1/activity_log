@@ -457,7 +457,7 @@
   CGContextSaveGState(ctx);
 
   CGContextSetRGBStrokeColor(ctx, 0, 0.2, 1, .75);
-  CGContextSetLineWidth(ctx, 3);
+  CGContextSetLineWidth(ctx, 2);
   CGContextSetLineJoin(ctx, kCGLineJoinRound);
 
   draw_track(gps_a->points().begin(), gps_a->points().end(), 9);
