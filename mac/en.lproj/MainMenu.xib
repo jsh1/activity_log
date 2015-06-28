@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="4514" systemVersion="13B42" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="8121.17" systemVersion="15A204h" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
     <dependencies>
-        <deployment defaultVersion="1090" identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="4514"/>
+        <deployment identifier="macosx"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="8121.17"/>
     </dependencies>
     <objects>
         <customObject id="-2" userLabel="File's Owner" customClass="NSApplication">
@@ -11,7 +11,7 @@
             </connections>
         </customObject>
         <customObject id="-1" userLabel="First Responder" customClass="FirstResponder"/>
-        <customObject id="-3" userLabel="Application"/>
+        <customObject id="-3" userLabel="Application" customClass="NSObject"/>
         <menu title="AMainMenu" systemMenu="main" id="29">
             <items>
                 <menuItem title="Activities" id="56">
@@ -648,32 +648,27 @@ DQ
                                 </connections>
                             </menuItem>
                             <menuItem isSeparatorItem="YES" id="yeB-Bt-ud4"/>
-                            <menuItem title="Toggle Summary Pane" tag="1" keyEquivalent="" id="M1m-R5-WCx">
-                                <modifierMask key="keyEquivalentModifierMask"/>
+                            <menuItem title="Toggle Summary Pane" tag="1" keyEquivalent="4" id="M1m-R5-WCx">
                                 <connections>
                                     <action selector="toggleActivityPane:" target="-1" id="EVM-a2-qZw"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="Toggle Laps Pane" tag="2" keyEquivalent="" id="FPS-19-NpS">
-                                <modifierMask key="keyEquivalentModifierMask"/>
+                            <menuItem title="Toggle Laps Pane" tag="2" keyEquivalent="5" id="FPS-19-NpS">
                                 <connections>
                                     <action selector="toggleActivityPane:" target="-1" id="aVP-De-4KZ"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="Toggle Data Pane" tag="3" keyEquivalent="" id="WXx-cC-a4g">
-                                <modifierMask key="keyEquivalentModifierMask"/>
+                            <menuItem title="Toggle Data Pane" tag="3" keyEquivalent="6" id="WXx-cC-a4g">
                                 <connections>
                                     <action selector="toggleActivityPane:" target="-1" id="FRX-qr-Hzz"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="Toggle Route Pane" tag="4" keyEquivalent="" id="eE3-tn-0NA">
-                                <modifierMask key="keyEquivalentModifierMask"/>
+                            <menuItem title="Toggle Route Pane" tag="4" keyEquivalent="7" id="eE3-tn-0NA">
                                 <connections>
                                     <action selector="toggleActivityPane:" target="-1" id="Kve-R5-p7j"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="Toggle Chart Pane(s)" tag="5" keyEquivalent="" id="RsO-bj-8lD">
-                                <modifierMask key="keyEquivalentModifierMask"/>
+                            <menuItem title="Toggle Chart Pane(s)" tag="5" keyEquivalent="8" id="RsO-bj-8lD">
                                 <connections>
                                     <action selector="toggleActivityPane:" target="-1" id="qzY-Nk-5fY"/>
                                 </connections>
