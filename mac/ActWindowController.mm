@@ -393,6 +393,12 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
    [[self viewControllerWithClass:[ActViewerViewController class]]
     initialFirstResponder]];
 
+  _listTypeControl.selectedSegment = ((ActViewerViewController *)
+    [self viewControllerWithClass:[ActViewerViewController class]])
+    .listViewType;
+
+  [self updateUnimportedActivitiesCount];
+
   [window makeFirstResponder:[window initialFirstResponder]];
 }
 
@@ -544,9 +550,17 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
 
 - (void)setListViewType:(NSInteger)x
 {
-  [(ActViewerViewController *)
-   [self viewControllerWithClass:[ActViewerViewController class]]
-   setListViewType:x];
+  ((ActViewerViewController *)[self viewControllerWithClass:
+    [ActViewerViewController class]]).listViewType = x;
+
+  _listTypeControl.selectedSegment = x;
+}
+
+- (IBAction)listViewAction:(id)sender
+{
+  if (sender == _listTypeControl) {
+    self.listViewType = _listTypeControl.selectedSegment;
+  }
 }
 
 - (act::database *)database
@@ -591,6 +605,8 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
   [self sourceListSelectionDidChange:nil];
 
   [_sourceListView reloadData];
+
+  [self updateUnimportedActivitiesCount];
 }
 
 - (const std::vector<act::database::item> &)activityList
@@ -1076,6 +1092,59 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
   [self reloadActivities];
 }
 
+- (void)foreachUnimportedActivityURL:(void (^)(NSURL *url))block
+{
+  for (ActDevice *device in [ActDeviceManager sharedDeviceManager].allDevices)
+    {
+      for (NSURL *url in device.activityURLs)
+	{
+	  @autoreleasepool
+	    {
+	      const char *path = url.path.lastPathComponent.UTF8String;
+	      act::database::query_term_ref term
+		(new act::database::equal_term("gps-file", path));
+
+	      act::database::query q;
+	      q.set_term(term);
+
+	      std::vector<act::database::item> results;
+	      _database->execute_query(q, results);
+
+	      if (results.size() == 0)
+		block(url);
+	    }
+	}
+    }
+}
+
+- (void)updateUnimportedActivitiesCount
+{
+  __block NSInteger count = 0;
+
+  [self foreachUnimportedActivityURL:^(NSURL *url) {
+    count++;
+  }];
+
+  NSString *title = count == 0 ? @"⬇︎" : [NSString stringWithFormat:@"⬇︎ %d", (int)count];
+  [_importControl setLabel:title forSegment:0];
+  _importControl.enabled = count != 0;
+}
+
+- (IBAction)importAllActivities:(id)sender
+{
+  ActImporterViewController *importer
+    = (id)[self viewControllerWithClass:[ActImporterViewController class]];
+
+  [self foreachUnimportedActivityURL:^(NSURL *url) {
+    [importer importActivityFromURL:url];
+  }];
+
+  [importer reloadData];
+
+  [self performSelector:@selector(reloadActivities)
+   withObject:nil afterDelay:.25];
+}
+
 - (IBAction)editActivity:(id)sender
 {
   [self setWindowMode:ActWindowMode_Viewer];
@@ -1137,6 +1206,15 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
     [self setSelectedActivityStorage:_activityList.back().storage()];
 }
 
+- (IBAction)nextPreviousActivity:(id)sender
+{
+  if ([_nextPreviousControl.cell
+       tagForSegment:_nextPreviousControl.selectedSegment] < 0)
+    [self previousActivity:sender];
+  else
+    [self nextActivity:sender];
+}
+
 - (IBAction)setListViewAction:(id)sender
 {
   [self setWindowMode:ActWindowMode_Viewer];
@@ -1187,6 +1265,8 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
   [item foreachItem:^void (ActSourceListItem *it) {[it setController:self];}];
 
   [_sourceListView reloadItem:item reloadChildren:YES];
+
+  [self updateUnimportedActivitiesCount];
 }
 
 - (void)windowWillClose:(NSNotification *)note
@@ -1201,6 +1281,18 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
 - (NSUndoManager *)windowWillReturnUndoManager:(NSWindow *)window
 {
   return _undoManager;
+}
+
+- (BOOL)validateUserInterfaceItem:(id <NSValidatedUserInterfaceItem>)item
+{
+  SEL sel = item.action;
+
+  if (sel == @selector(importAllActivities:))
+    {
+      return _importControl.enabled;
+    }
+
+  return YES;
 }
 
 // NSSplitViewDelegate methods

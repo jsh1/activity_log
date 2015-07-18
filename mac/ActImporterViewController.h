@@ -33,6 +33,9 @@
   NSMutableArray *_activities;
 }
 
+- (void)reloadData;
+- (void)importActivityFromURL:(NSURL *)url;
+
 - (IBAction)importAction:(id)sender;
 - (IBAction)revealAction:(id)sender;
 

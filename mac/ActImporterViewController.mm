@@ -99,6 +99,11 @@
   [super dealloc];
 }
 
+- (void)reloadData
+{
+  [_tableView reloadData];
+}
+
 - (void)reloadDataForActivity:(ActImporterActivity *)item
 {
   NSInteger row = [_activities indexOfObjectIdenticalTo:item];
@@ -125,7 +130,36 @@
       [obj release];
     }
 
-  [_tableView reloadData];
+  [self reloadData];
+}
+
+- (void)importActivityFromURL:(NSURL *)url
+{
+  const char *path = url.path.UTF8String;
+
+  std::string gps_path(path);
+
+  if (!act::shared_config().find_gps_file(gps_path))
+    {
+      // try to copy file to gps directory
+
+      copyFileToGPSDirectory(gps_path);
+    }
+
+  act::arguments args("act-new");
+  args.push_back("--gps-file");
+  args.push_back(gps_path);
+
+  act::act_new(args);
+
+  for (ActImporterActivity *item in _activities)
+    {
+      if ([item.URL isEqual:url])
+	{
+	  item.checked = NO;
+	  item.exists = YES;
+	}
+    }
 }
 
 // gps_path is source file on entry, and will be new location if the
@@ -173,27 +207,12 @@ copyFileToGPSDirectory(std::string &gps_path)
 {
   for (ActImporterActivity *item in _activities)
     {
-      if ([item isChecked])
+      if (item.checked)
 	{
-	  const char *path = [[[item URL] path] UTF8String];
+	  [self importActivityFromURL:item.URL];
 
-	  std::string gps_path(path);
-
-	  if (!act::shared_config().find_gps_file(gps_path))
-	    {
-	      // try to copy file to gps directory
-
-	      copyFileToGPSDirectory(gps_path);
-	    }
-
-	  act::arguments args("act-new");
-	  args.push_back("--gps-file");
-	  args.push_back(gps_path);
-
-	  act::act_new(args);
-
-	  [item setChecked:NO];
-	  [item setExists:YES];
+	  item.checked = NO;
+	  item.exists = YES;
 	}
     }
 
@@ -202,7 +221,7 @@ copyFileToGPSDirectory(std::string &gps_path)
 
   // FIXME: switch to viewing the earliest activity?
 
-  [_tableView reloadData];
+  [self reloadData];
 }
 
 - (IBAction)revealAction:(id)sender

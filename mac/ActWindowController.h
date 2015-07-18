@@ -55,6 +55,12 @@ enum ActWindowMode
     <NSSplitViewDelegate, PXSourceListDataSource, PXSourceListDelegate,
     NSPopoverDelegate>
 {
+  IBOutlet NSSegmentedControl *_listTypeControl;
+  IBOutlet NSSegmentedControl *_reloadControl;
+  IBOutlet NSSegmentedControl *_addControl;
+  IBOutlet NSSegmentedControl *_importControl;
+  IBOutlet NSSegmentedControl *_nextPreviousControl;
+
   IBOutlet ActSplitView *_splitView;
 
   IBOutlet PXSourceList *_sourceListView;
@@ -149,11 +155,13 @@ enum ActWindowMode
 - (IBAction)importFile:(id)sender;
 - (IBAction)delete:(id)sender;
 - (IBAction)reloadDatabase:(id)sender;
+- (IBAction)importAllActivities:(id)sender;
 - (IBAction)editActivity:(id)sender;
 - (IBAction)nextActivity:(id)sender;
 - (IBAction)previousActivity:(id)sender;
 - (IBAction)firstActivity:(id)sender;
 - (IBAction)lastActivity:(id)sender;
+- (IBAction)nextPreviousActivity:(id)sender;
 
 - (IBAction)setListViewAction:(id)sender;
 
