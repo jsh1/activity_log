@@ -68,7 +68,7 @@
 	    src = [ActTileJSONMapSource mapSourceFromURL:url];
 	}
 
-      if ([src name] != nil)
+      if (src.name != nil)
 	[tem addObject:src];
     }
 
@@ -121,9 +121,9 @@
    addObserver:self selector:@selector(currentTimeDidChange:)
    name:ActCurrentTimeDidChange object:_controller];
 
-  for (ActMapSource *src in [[self class] mapSources])
+  for (ActMapSource *src in [self.class mapSources])
     {
-      if ([src isLoading])
+      if (src.loading)
 	_pendingSources++;
     }
 
@@ -150,28 +150,28 @@
   else
     [self mapSourceDidFinishLoading:nil];
 
-  [(ActCollapsibleView *)[self view] setTitle:@"Route"];
+  ((ActCollapsibleView *)self.view).title = @"Route";
 
-  [_zoomSlider setIntValue:[_mapView mapZoom]];
+  _zoomSlider.intValue = _mapView.mapZoom;
 }
 
 - (void)setMapSourceAtIndex:(int)idx
 {
-  NSArray *sources = [[self class] mapSources];
+  NSArray *sources = [self.class mapSources];
   if (sources == nil)
     return;
 
-  if (idx < 0 || idx >= [sources count])
+  if (idx < 0 || idx >= sources.count)
     return;
 
-  ActMapSource *src = [sources objectAtIndex:idx];
-  int src_min = [src minZoom];
-  int src_max = [src maxZoom];
+  ActMapSource *src = sources[idx];
+  int src_min = src.minZoom;
+  int src_max = src.maxZoom;
 
-  [_mapView setMapSource:src];
-  [_zoomSlider setMinValue:src_min];
-  [_zoomSlider setMaxValue:src_max];
-  [_zoomSlider setNumberOfTickMarks:src_max - src_min + 1];
+  _mapView.mapSource = src;
+  _zoomSlider.minValue = src_min;
+  _zoomSlider.maxValue = src_max;
+  _zoomSlider.numberOfTickMarks = src_max - src_min + 1;
 
   [_mapSrcButton selectItemAtIndex:idx];
 }
@@ -180,9 +180,9 @@
 {
   NSInteger idx = 0;
 
-  for (ActMapSource *src in [[self class] mapSources])
+  for (ActMapSource *src in [self.class mapSources])
     {
-      if ([[src name] isEqualToString:name])
+      if ([src.name isEqualToString:name])
 	{
 	  [self setMapSourceAtIndex:idx];
 	  break;
@@ -199,8 +199,8 @@
 
   [_mapSrcButton removeAllItems];
 
-  for (ActMapSource *src in [[self class] mapSources])
-    [_mapSrcButton addItemWithTitle:[src name]];
+  for (ActMapSource *src in [self.class mapSources])
+    [_mapSrcButton addItemWithTitle:src.name];
 
   if (_defaultSourceName != nil)
     {
@@ -214,15 +214,14 @@
 
 - (NSDictionary *)savedViewState
 {
-  return [NSDictionary dictionaryWithObjectsAndKeys:
-	  [[_mapView mapSource] name],
-	  @"mapSourceName",
-	  nil];
+  return @{
+    @"mapSourceName": _mapView.mapSource.name,
+  };
 }
 
 - (void)applySavedViewState:(NSDictionary *)state
 {
-  if (NSString *name = [state objectForKey:@"mapSourceName"])
+  if (NSString *name = state[@"mapSourceName"])
     {
       if (_pendingSources > 0 || !self.viewLoaded)
 	{
@@ -238,7 +237,7 @@
 {
   if (view == _mapView)
     {
-      const act::activity *a = [_controller selectedActivity];
+      const act::activity *a = _controller.selectedActivity;
 
       if (a != nullptr && a->gps_data() != nullptr)
 	return floor(width * (9./16.));
@@ -255,7 +254,7 @@
 
 - (void)_updateDisplayedRegion
 {
-  const act::activity *a = [_controller selectedActivity];
+  const act::activity *a = _controller.selectedActivity;
   if (!a)
     return;
 
@@ -267,37 +266,37 @@
 
   // FIXME: need a notification/KVO for this?
 
-  [_zoomSlider setIntValue:[_mapView mapZoom]];
+  _zoomSlider.intValue = _mapView.mapZoom;
 }
 
 - (void)selectedActivityDidChange:(NSNotification *)note
 {
   [self _updateDisplayedRegion];
-  [_mapView setNeedsDisplay:YES];
+  _mapView.needsDisplay = YES;
 
-  const act::activity *a = [_controller selectedActivity];
+  const act::activity *a = _controller.selectedActivity;
   bool has_map = a != nullptr && a->gps_data() != nullptr;
 
-  [_centerButton setEnabled:has_map];
+  _centerButton.enabled = has_map;
 }
 
 - (void)selectedLapIndexDidChange:(NSNotification *)note
 {
-  const act::activity *a = [_controller selectedActivity];
+  const act::activity *a = _controller.selectedActivity;
 
   if (a != nullptr && a->gps_data() != nullptr)
-    [_mapView setNeedsDisplay:YES];
+    _mapView.needsDisplay = YES;
 }
 
 - (void)updateCurrentLocation
 {
   _hasCurrentLocation = NO;
 
-  double t = [_controller currentTime];
+  double t = _controller.currentTime;
   if (!(t >= 0))
     return;
 
-  const act::activity *a = [_controller selectedActivity];
+  const act::activity *a = _controller.selectedActivity;
   if (a == nullptr)
     return;
 
@@ -341,25 +340,25 @@
 {
   if (sender == _mapSrcButton)
     {
-      [self setMapSourceAtIndex:[_mapSrcButton indexOfSelectedItem]];
+      [self setMapSourceAtIndex:_mapSrcButton.indexOfSelectedItem];
     }
   else if (sender == _zoomSlider)
     {
-      [_mapView setMapZoom:[_zoomSlider intValue]];
+      _mapView.mapZoom = _zoomSlider.intValue;
     }
   else if (sender == _zoomInButton)
     {
-      int zoom = [_mapView mapZoom];
-      zoom = std::min(zoom + 1, [[_mapView mapSource] maxZoom]);
-      [_mapView setMapZoom:zoom];
-      [_zoomSlider setIntValue:zoom];
+      int zoom = _mapView.mapZoom;
+      zoom = std::min(zoom + 1, _mapView.mapSource.maxZoom);
+      _mapView.mapZoom = zoom;
+      _zoomSlider.intValue = zoom;
     }
   else if (sender == _zoomOutButton)
     {
-      int zoom = [_mapView mapZoom];
-      zoom = std::max(zoom - 1, [[_mapView mapSource] minZoom]);
-      [_mapView setMapZoom:zoom];
-      [_zoomSlider setIntValue:zoom];
+      int zoom = _mapView.mapZoom;
+      zoom = std::max(zoom - 1, _mapView.mapSource.minZoom);
+      _mapView.mapZoom = zoom;
+      _zoomSlider.intValue = zoom;
     }
   else if (sender == _centerButton)
     {
@@ -371,7 +370,7 @@
     mapBottomLeft:(const act::location &)loc_ll
     topRight:(const act::location &)loc_ur
 {
-  const act::activity *a = [_controller selectedActivity];
+  const act::activity *a = _controller.selectedActivity;
   if (!a)
     return;
 
@@ -379,10 +378,9 @@
   if (!gps_a || !gps_a->has_location())
     return;
 
-  CGContextRef ctx =
-    (CGContextRef) [[NSGraphicsContext currentContext] graphicsPort];
+  CGContextRef ctx = [NSGraphicsContext currentContext].CGContext;
 
-  NSRect bounds = [view bounds];
+  NSRect bounds = view.bounds;
 
   double xa = bounds.size.width / (loc_ur.longitude - loc_ll.longitude);
   double xb = bounds.origin.x - loc_ll.longitude * xa;
@@ -462,7 +460,7 @@
 
   draw_track(gps_a->points().begin(), gps_a->points().end(), 9);
 
-  int selected_lap = [_controller selectedLapIndex];
+  int selected_lap = _controller.selectedLapIndex;
 
   if (selected_lap >= 0)
     {

@@ -64,18 +64,18 @@
 {
   [super viewDidLoad];
 
-  for (ActViewController *controller in [self subviewControllers])
-    [_activityView addSubview:[controller view]];
+  for (ActViewController *controller in self.subviewControllers)
+    [_activityView addSubview:controller.view];
 }
 
 - (void)updateSubviews
 {
   NSMutableArray *array = [NSMutableArray array];
 
-  for (ActViewController *controller in [self subviewControllers])
-    [array addObject:[controller view]];
+  for (ActViewController *controller in self.subviewControllers)
+    [array addObject:controller.view];
 
-  [_activityView setSubviews:array];
+  _activityView.subviews = array;
   [_activityView subviewNeedsLayout:nil];
 }
 
@@ -83,7 +83,7 @@
 {
   NSMutableArray *array = [NSMutableArray array];
 
-  for (ActViewController *controller in [self subviewControllers])
+  for (ActViewController *controller in self.subviewControllers)
     {
       id obj = [controller propertyListRepresentation];
       if (obj != nil)
@@ -103,17 +103,19 @@
     {
       suffix = [NSString stringWithFormat:@".%08x", arc4random()];
       BOOL unique = YES;
-      for (ActViewController *c in [self subviewControllers])
+      for (ActViewController *c in self.subviewControllers)
 	{
-	  if ([[c identifierSuffix] isEqualToString:suffix])
+	  if ([c.identifierSuffix isEqualToString:suffix])
 	    unique = NO;
 	}
       if (unique)
 	break;
     }
 
-  NSDictionary *dict = @{@"className": NSStringFromClass(cls),
-			 @"identifierSuffix": suffix};
+  NSDictionary *dict = @{
+    @"className": NSStringFromClass(cls),
+    @"identifierSuffix": suffix
+  };
 
   ActViewController *obj
     = [ActViewController viewControllerWithPropertyListRepresentation:dict
@@ -134,11 +136,11 @@
   [self updateSubviewDefaults];
 }
 
-- (IBAction)toggleActivityPane:(id)sender
+- (IBAction)toggleActivityPane:(NSControl *)sender
 {
   NSString *class_name = nil;
 
-  switch ([sender tag])
+  switch (sender.tag)
     {
     case 1:
       class_name = @"ActSummaryViewController";
@@ -165,24 +167,24 @@
 
   BOOL any_visible = NO;
 
-  for (ActViewController *controller in [self subviewControllers])
+  for (ActViewController *controller in self.subviewControllers)
     {
       if ([controller isKindOfClass:cls])
 	{
-	  ActCollapsibleView *view = (id)[controller view];
+	  ActCollapsibleView *view = (id)controller.view;
 	  if ([view isKindOfClass:[ActCollapsibleView class]]
-	      && ![view isCollapsed])
+	      && !view.collapsed)
 	    any_visible = YES;
 	}
     }
 
-  for (ActViewController *controller in [self subviewControllers])
+  for (ActViewController *controller in self.subviewControllers)
     {
       if ([controller isKindOfClass:cls])
 	{
-	  ActCollapsibleView *view = (id)[controller view];
+	  ActCollapsibleView *view = (id)controller.view;
 	  if ([view isKindOfClass:[ActCollapsibleView class]])
-	    [view setCollapsed:any_visible];
+	    view.collapsed = any_visible;
 	}
     }
 }
@@ -194,15 +196,15 @@
 
   NSMutableDictionary *collapsed = [NSMutableDictionary dictionary];
 
-  for (ActViewController *controller in [self subviewControllers])
+  for (ActViewController *controller in self.subviewControllers)
     {
-      ActCollapsibleView *view = (id)[controller view];
+      ActCollapsibleView *view = (id)controller.view;
       if ([view isKindOfClass:[ActCollapsibleView class]]
-	  && [view isCollapsed])
-	[collapsed setObject:@YES forKey:[controller identifier]];
+	  && view.collapsed)
+	collapsed[controller.identifier] = @YES;
     }
 
-  [state setObject:collapsed forKey:@"ActViewCollapsed"];
+  state[@"ActViewCollapsed"] = collapsed;
 
   return state;
 }
@@ -211,12 +213,12 @@
 {
   [super applySavedViewState:state];
 
-  if (NSDictionary *dict = [state objectForKey:@"ActViewCollapsed"])
+  if (NSDictionary *dict = state[@"ActViewCollapsed"])
     {
-      for (ActViewController *controller in [self subviewControllers])
+      for (ActViewController *controller in self.subviewControllers)
 	{
-	  if (NSNumber *obj = [dict objectForKey:[controller identifier]])
-	    [(ActCollapsibleView *)[controller view] setCollapsed:[obj boolValue]];
+	  if (NSNumber *obj = dict[controller.identifier])
+	    ((ActCollapsibleView *)controller.view).collapsed = obj.boolValue;
 	}
     }
 }
@@ -229,7 +231,7 @@ static CGFloat
 layoutSubviews(ActActivityView *self, CGFloat width,
 	       BOOL modifySubviews, BOOL updateHeight)
 {
-  NSRect bounds = [self bounds];
+  NSRect bounds = self.bounds;
   CGFloat y = 0;
 
   if (width < 0)
@@ -237,7 +239,7 @@ layoutSubviews(ActActivityView *self, CGFloat width,
 
   self->_ignoreLayout++;
 
-  for (NSView *view in [self subviews])
+  for (NSView *view in self.subviews)
     {
       CGFloat height = [view heightForWidth:width];
 
@@ -252,8 +254,8 @@ layoutSubviews(ActActivityView *self, CGFloat width,
 	  frame.size.width = width;
 	  frame.size.height = height;
 
-	  if (!NSEqualRects(frame, [view frame]))
-	    [view setFrame:frame];
+	  if (!NSEqualRects(frame, view.frame))
+	    view.frame = frame;
 
 	  [view layoutSubviews];
 	}
@@ -285,7 +287,7 @@ layoutSubviews(ActActivityView *self, CGFloat width,
   // times, and doesn't run until after all views have responded to
   // their notifications.
 
-  [self setNeedsDisplay:YES];
+  self.needsDisplay = YES;
 }
 
 - (void)layoutSubviews

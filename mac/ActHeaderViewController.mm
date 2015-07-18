@@ -63,12 +63,12 @@
 
   [_headerView viewDidLoad];
 
-  [(ActCollapsibleView *)[self view] setTitle:@"Data Fields"];
+  ((ActCollapsibleView *)self.view).title = @"Data Fields";
 
   // creating layers for each subview is not gaining us anything
-  [[self view] setCanDrawSubviewsIntoLayer:YES];
+  self.view.canDrawSubviewsIntoLayer = YES;
 
-  [_boxView setRightToLeft:YES];
+  _boxView.rightToLeft = YES;
 }
 
 - (void)dealloc
@@ -79,9 +79,9 @@
 
 - (void)_updateHeaderFields
 {
-  const act::activity *a = [_controller selectedActivity];
+  const act::activity *a = _controller.selectedActivity;
 
-  [_headerView setDisplayedFields:[NSArray array]];
+  _headerView.displayedFields = @[];
 
   if (a != nullptr)
     {

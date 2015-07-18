@@ -32,10 +32,10 @@
 
 - (void)scrollRectToVisible:(NSRect)rect animated:(BOOL)flag
 {
-  NSScrollView *scrollView = [self enclosingScrollView];
-  NSClipView *clipView = [scrollView contentView];
+  NSScrollView *scrollView = self.enclosingScrollView;
+  NSClipView *clipView = scrollView.contentView;
 
-  NSRect bounds = [clipView bounds];
+  NSRect bounds = clipView.bounds;
 
   if (rect.origin.x < bounds.origin.x)
     bounds.origin.x = rect.origin.x;
@@ -50,18 +50,18 @@
   bounds = [clipView constrainBoundsRect:bounds];
 
   if (flag)
-    [[clipView animator] setBounds:bounds];
+    [clipView animator].bounds = bounds;
   else
-    [clipView setBounds:bounds];
+    clipView.bounds = bounds;
 
   [scrollView reflectScrolledClipView:clipView];
 }
 
 - (void)flashScrollersIfNeeded
 {
-  NSScrollView *scrollView = [self enclosingScrollView];
+  NSScrollView *scrollView = self.enclosingScrollView;
 
-  if ([self frame].size.height > [scrollView bounds].size.height)
+  if (self.frame.size.height > scrollView.bounds.size.height)
     [scrollView flashScrollers];
 }
 
@@ -91,7 +91,7 @@
 {
   NSIndexSet *rows = [NSIndexSet indexSetWithIndex:row];
   NSIndexSet *cols = [NSIndexSet indexSetWithIndexesInRange:
-		      NSMakeRange(0, [[self tableColumns] count])];
+		      NSMakeRange(0, self.tableColumns.count)];
 
   [self reloadDataForRowIndexes:rows columnIndexes:cols];
 }
@@ -102,15 +102,15 @@
 
 - (NSArray *)selectedItems
 {
-  NSIndexSet *sel = [self selectedRowIndexes];
+  NSIndexSet *sel = self.selectedRowIndexes;
 
-  if ([sel count] == 0)
-    return [NSArray array];
+  if (sel.count == 0)
+    return @[];
 
   NSMutableArray *array = [NSMutableArray array];
 
   NSInteger idx;
-  for (idx = [sel firstIndex]; idx != NSNotFound;
+  for (idx = sel.firstIndex; idx != NSNotFound;
        idx = [sel indexGreaterThanIndex:idx])
     {
       [array addObject:[self itemAtRow:idx]];
@@ -121,7 +121,7 @@
 
 - (void)setSelectedItems:(NSArray *)array
 {
-  if ([array count] == 0)
+  if (array.count == 0)
     {
       [self selectRowIndexes:[NSIndexSet indexSet] byExtendingSelection:NO];
       return;

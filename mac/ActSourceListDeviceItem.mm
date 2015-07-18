@@ -46,7 +46,7 @@
 
   _device = [device retain];
 
-  [self setName:[_device name]];
+  self.name = _device.name;
 
   return self;
 }
@@ -59,8 +59,8 @@
 
 - (void)select
 {
-  [_controller setSelectedDevice:_device];
-  [_controller setWindowMode:ActWindowMode_Importer];
+  _controller.selectedDevice = _device;
+  _controller.windowMode = ActWindowMode_Importer;
 }
 
 - (BOOL)hasBadge
@@ -72,12 +72,12 @@
 {
   std::set<std::string> activities;
 
-  for (NSURL *url in [_device activityURLs])
-    activities.insert([[[url path] lastPathComponent] UTF8String]);
+  for (NSURL *url in _device.activityURLs)
+    activities.insert(url.path.lastPathComponent.UTF8String);
 
   if (activities.size() != 0)
     {
-      for (const auto &it : [_controller database]->items())
+      for (const auto &it : _controller.database->items())
 	{
 	  if (const std::string *s = it.storage()->field_ptr("GPS-File"))
 	    {

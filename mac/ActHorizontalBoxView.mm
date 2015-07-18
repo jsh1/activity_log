@@ -33,9 +33,9 @@
 {
   CGFloat h = 0;
 
-  for (NSView *subview in [self subviews])
+  for (NSView *subview in self.subviews)
     {
-      CGFloat hh = [subview frame].size.height;
+      CGFloat hh = subview.frame.size.height;
       if (h < hh)
 	h = hh;
     }
@@ -45,14 +45,14 @@
 
 - (void)layoutSubviews
 {
-  NSRect bounds = [self bounds];
+  NSRect bounds = self.bounds;
   CGFloat x = 0;
 
-  for (NSView *subview in [self subviews])
+  for (NSView *subview in self.subviews)
     {
-      CGFloat w = [subview preferredWidth];
+      CGFloat w = subview.preferredWidth;
 
-      NSRect old_frame = [subview frame];
+      NSRect old_frame = subview.frame;
 
       NSRect new_frame;
       if (!_rightToLeft)
@@ -64,7 +64,7 @@
       new_frame.size.height = old_frame.size.height;
 
       if (!NSEqualRects(old_frame, new_frame))
-	[subview setFrame:new_frame];
+	subview.frame = new_frame;
 
       x += w + _spacing;
     }
@@ -81,7 +81,7 @@
 
 - (CGFloat)preferredWidth
 {
-  return [self frame].size.width;
+  return self.frame.size.width;
 }
 
 @end

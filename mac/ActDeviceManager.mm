@@ -51,10 +51,10 @@ NSString *const ActDeviceManagerDevicesDidChange
   _devices = [[NSMutableDictionary alloc] init];
 
   NSWorkspace *workspace = [NSWorkspace sharedWorkspace];
-  [[workspace notificationCenter]
+  [workspace.notificationCenter
    addObserver:self selector:@selector(volumeDidMount:)
    name:NSWorkspaceDidMountNotification object:nil];
-  [[workspace notificationCenter]
+  [workspace.notificationCenter
    addObserver:self selector:@selector(volumeDidUnmount:)
    name:NSWorkspaceDidUnmountNotification object:nil];
 
@@ -65,21 +65,21 @@ NSString *const ActDeviceManagerDevicesDidChange
 
 - (void)dealloc
 {
-  [[[NSWorkspace sharedWorkspace] notificationCenter] removeObserver:self];
+  [[NSWorkspace sharedWorkspace].notificationCenter removeObserver:self];
 
   [_devices release];
 
   [super dealloc];
 }
 
-- (NSArray *)devices
+- (NSArray *)allDevices
 {
-  return [_devices allValues];
+  return _devices.allValues;
 }
 
 - (ActDevice *)deviceForURL:(NSURL *)url
 {
-  NSString *path = [url path];
+  NSString *path = url.path;
   NSFileManager *fm = [NSFileManager defaultManager];
 
   for (NSString *dir in @[@"Garmin", @"GARMIN"])
@@ -102,8 +102,8 @@ NSString *const ActDeviceManagerDevicesDidChange
 #pragma clang diagnostic ignored "-Wdeprecated"
 
   NSWorkspace *workspace = [NSWorkspace sharedWorkspace];
-  NSArray *local_volumes = [workspace mountedLocalVolumePaths];
-  NSArray *removable_volumes = [workspace mountedRemovableMedia];
+  NSArray *local_volumes = workspace.mountedLocalVolumePaths;
+  NSArray *removable_volumes = workspace.mountedRemovableMedia;
 
 #pragma clang diagnostic pop
 
@@ -111,14 +111,14 @@ NSString *const ActDeviceManagerDevicesDidChange
     {
       NSURL *url = [NSURL fileURLWithPath:path];
       if (ActDevice *device = [self deviceForURL:url])
-	[dict setObject:device forKey:url];
+	dict[url] = device;
     }
 
   for (NSString *path in removable_volumes)
     {
       NSURL *url = [NSURL fileURLWithPath:path];
       if (ActDevice *device = [self deviceForURL:url])
-	[dict setObject:device forKey:url];
+	dict[url] = device;
     }
 
   if (![_devices isEqual:dict])
@@ -133,14 +133,14 @@ NSString *const ActDeviceManagerDevicesDidChange
 
 - (void)volumeDidMount:(NSNotification *)note
 {
-  NSURL *url = [[note userInfo] objectForKey:NSWorkspaceVolumeURLKey];
+  NSURL *url = note.userInfo[NSWorkspaceVolumeURLKey];
 
-  if ([_devices objectForKey:url] != nil)
+  if (_devices[url] != nil)
     return;
 
   if (ActDevice *device = [self deviceForURL:url])
     {
-      [_devices setObject:device forKey:url];
+      _devices[url] = device;
 
       [[NSNotificationCenter defaultCenter] postNotificationName:
        ActDeviceManagerDevicesDidChange object:self];
@@ -149,9 +149,9 @@ NSString *const ActDeviceManagerDevicesDidChange
 
 - (void)volumeDidUnmount:(NSNotification *)note
 {
-  NSURL *url = [[note userInfo] objectForKey:NSWorkspaceVolumeURLKey];
+  NSURL *url = note.userInfo[NSWorkspaceVolumeURLKey];
 
-  ActDevice *device = [_devices objectForKey:url];
+  ActDevice *device = _devices[url];
   if (device == nil)
     return;
 

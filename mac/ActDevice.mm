@@ -35,7 +35,7 @@
 
 - (NSArray *)activityURLs
 {
-  return [NSArray array];
+  return @[];
 }
 
 - (void)invalidate

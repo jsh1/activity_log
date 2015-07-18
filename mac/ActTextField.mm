@@ -49,7 +49,7 @@
 
 - (ActFieldEditor *)actFieldEditor
 {
-  id<ActTextFieldDelegate> delegate = (id)[self delegate];
+  id<ActTextFieldDelegate> delegate = (id)self.delegate;
 
   if ([delegate respondsToSelector:@selector(actFieldEditor:)])
     return [delegate actFieldEditor:self];
@@ -67,8 +67,8 @@
       // which fails if the view is entered then completion key is typed
       // before anything is changed. So use this.
 
-      BOOL flag = [[self cell] completesEverything];
-      [[self actFieldEditor] setCompletesEverything:flag];
+      BOOL flag = ((ActTextFieldCell *)self.cell).completesEverything;
+      self.actFieldEditor.completesEverything = flag;
     }
 
   return ret;
@@ -76,12 +76,12 @@
 
 - (void)setCompletesEverything:(BOOL)flag
 {
-  [[self cell] setCompletesEverything:flag];
+  ((ActTextFieldCell *)self.cell).completesEverything = flag;
 }
 
 - (BOOL)completesEverything
 {
-  return [[self cell] completesEverything];
+  return ((ActTextFieldCell *)self.cell).completesEverything;
 }
 
 @end
@@ -91,23 +91,22 @@
 
 - (CGFloat)preferredWidth
 {
-  NSString *text = [self stringValue];
+  NSString *text = self.stringValue;
 
-  if ([text length] == 0)
-    text = [[self cell] placeholderString];
+  if (text.length == 0)
+    text = ((NSTextFieldCell *)self.cell).placeholderString;
 
   CGFloat width = 2;
 
-  if ([text length] != 0)
+  if (text.length != 0)
     {
-      NSDictionary *attrs = [[NSDictionary alloc] initWithObjectsAndKeys:
-			     [self font], NSFontAttributeName, nil];
+      NSDictionary *attrs = @{
+	NSFontAttributeName: self.font,
+      };
 
       NSSize size = [text sizeWithAttributes:attrs];
 
       width = std::max(width, size.width + 3);
-
-      [attrs release];
     }
 
   return ceil(width);
@@ -117,7 +116,7 @@
 {
   [super textDidChange:notification];
 
-  [[self superview] subviewNeedsLayout:self];
+  [self.superview subviewNeedsLayout:self];
 }
 
 @end
@@ -130,7 +129,7 @@
 - (NSTextView *)fieldEditorForView:(NSView *)view
 {
   if ([view isKindOfClass:[ActTextField class]])
-    return [(ActTextField *)view actFieldEditor];
+    return ((ActTextField *)view).actFieldEditor;
   else
     return nil;
 }
@@ -165,11 +164,11 @@
 
 - (NSRange)rangeForUserCompletion
 {
-  NSArray *ranges = [self selectedRanges];
-  if ([ranges count] < 1)
+  NSArray *ranges = self.selectedRanges;
+  if (ranges.count < 1)
     return NSMakeRange(NSNotFound, 0);
 
-  NSRange range = [[ranges objectAtIndex:0] rangeValue];
+  NSRange range = [ranges[0] rangeValue];
   if (range.length > 0 || range.location == 0)
     return range;
 
@@ -177,7 +176,7 @@
     return NSMakeRange(0, range.location);
 
   NSInteger idx = range.location;
-  NSString *str = [self string];
+  NSString *str = self.string;
   NSCharacterSet *set = [[self class] wordCharacters];
 
   while (idx > 0 && [set characterIsMember:[str characterAtIndex:idx-1]])
@@ -198,23 +197,23 @@
 - (NSArray *)completionsForPartialWordRange:(NSRange)range
     indexOfSelectedItem:(NSInteger *)idx
 {
-  id delegate = [self delegate];
+  id delegate = self.delegate;
 
   if ([delegate respondsToSelector:
        @selector(textView:completions:forPartialWordRange:indexOfSelectedItem:)])
     {
-      return [delegate textView:self completions:[NSArray array]
+      return [delegate textView:self completions:@[]
 	      forPartialWordRange:range indexOfSelectedItem:idx];
     }
   else
-    return [NSArray array];
+    return @[];
 }
 
 - (void)didChangeText
 {
   [super didChangeText];
 
-  if (_autoCompletes && [[self string] length] != 0 && _completionDepth == 0)
+  if (_autoCompletes && self.string.length != 0 && _completionDepth == 0)
     {
       _completionDepth++;
 

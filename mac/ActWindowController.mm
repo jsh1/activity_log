@@ -113,13 +113,13 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
       BOOL found = NO;
       for (ActSourceListItem *item in items)
 	{
-	  if ([[item name] isEqualToString:path])
+	  if ([item.name isEqualToString:path])
 	    {
 	      if (rest == nil)
 		return item;
 
 	      found = YES;
-	      items = [item subitems];
+	      items = item.subitems;
 	      path = rest;
 	      break;
 	    }
@@ -137,12 +137,12 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
 
   if (ActSourceListItem *item = [self sourceListItemWithPath:@"ACTIVITIES"])
     {
-      [item setSubitems:[NSArray array]];
+      item.subitems = @[];
       [item addSubitem:[ActSourceListQueryItem itemWithName:@"All"]];
 
       std::map<std::string, std::set<std::string>> map;
 
-      for (const auto &it : [self database]->items())
+      for (const auto &it : self.database->items())
 	{
 	  if (const std::string *s = it.storage()->field_ptr("activity"))
 	    {
@@ -158,9 +158,8 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
 	    (new act::database::equal_term("activity", it.first));
 
 	  ActSourceListQueryItem *sub
-	    = [ActSourceListQueryItem itemWithName:
-	       [NSString stringWithUTF8String:it.first.c_str()]];
-	  [sub query].set_term(type_term);
+	    = [ActSourceListQueryItem itemWithName:@(it.first.c_str())];
+	  sub.query.set_term(type_term);
 	  [item addSubitem:sub];
 
 	  for (const auto &type : it.second)
@@ -171,25 +170,25 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
 		(new act::database::and_term(type_term, subtype_term));
 
 	      ActSourceListQueryItem *sub2
-	        = [ActSourceListQueryItem itemWithName:
-		   [NSString stringWithUTF8String:type.c_str()]];
-	      [sub2 query].set_term(sub_term);
+	        = [ActSourceListQueryItem itemWithName:@(type.c_str())];
+	      sub2.query.set_term(sub_term);
 	      [sub addSubitem:sub2];
-	      [sub setExpandable:YES];
+	      sub.expandable = YES;
 	    }
 	}
 
-      [item foreachItem:
-       ^void (ActSourceListItem *it) {[it setController:self];}];
+      [item foreachItem:^(ActSourceListItem *it) {
+	 it.controller = self;
+       }];
 
       [_sourceListView reloadItem:item reloadChildren:YES];
     }
 
   if (ActSourceListItem *item = [self sourceListItemWithPath:@"DATE"])
     {
-      [item setSubitems:[NSArray array]];
+      item.subitems = @[];
 
-      const act::database *db = [self database];
+      const act::database *db = self.database;
 
       if (db->items().size() != 0)
 	{
@@ -206,20 +205,18 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
 
 	  if (year_formatter == nil)
 	    {
-	      NSLocale *locale = [(ActAppDelegate *)
-				  [NSApp delegate] currentLocale];
+	      NSLocale *locale
+	        = ((ActAppDelegate *)NSApp.delegate).currentLocale;
 
 	      year_formatter = [[NSDateFormatter alloc] init];
-	      [year_formatter setLocale:locale];
-	      [year_formatter setDateFormat:
-	       [NSDateFormatter dateFormatFromTemplate:@"yyyy"
-		options:0 locale:locale]];
+	      year_formatter.locale = locale;
+	      year_formatter.dateFormat = [NSDateFormatter dateFormatFromTemplate:@"yyyy"
+		options:0 locale:locale];
 
 	      month_formatter = [[NSDateFormatter alloc] init];
-	      [month_formatter setLocale:locale];
-	      [month_formatter setDateFormat:
-	       [NSDateFormatter dateFormatFromTemplate:@"MMMM"
-		options:0 locale:locale]];
+	      month_formatter.locale = locale;
+	      month_formatter.dateFormat = [NSDateFormatter dateFormatFromTemplate:@"MMMM"
+		options:0 locale:locale];
 	    }
 
 	  auto it = db->items().cbegin();
@@ -238,9 +235,9 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
 		    = [ActSourceListQueryItem itemWithName:
 		       [year_formatter stringFromDate:
 			[NSDate dateWithTimeIntervalSince1970:year_min + 24*60*60]]];
-		  [year_item setExpandable:YES];
+		  year_item.expandable = YES;
 		  act::date_range year_range(year_min, year_max - year_min);
-		  [year_item query].add_date_range(year_range);
+		  year_item.query.add_date_range(year_range);
 		  [item addSubitem:year_item];
 
 		  int month = 11;
@@ -256,10 +253,10 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
 			    = [ActSourceListQueryItem itemWithName:
 			       [month_formatter stringFromDate:
 				[NSDate dateWithTimeIntervalSince1970:month_min]]];
-			  [month_item setExpandable:YES];
+			  month_item.expandable = YES;
 			  act::date_range month_range(month_min,
 						      month_max - month_min);
-			  [month_item query].add_date_range(month_range);
+			  month_item.query.add_date_range(month_range);
 			  [year_item addSubitem:month_item];
 
 			  while (it != it_end && it->date() >= month_min)
@@ -276,8 +273,9 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
 	    }
 	}
 
-      [item foreachItem:
-       ^void (ActSourceListItem *it) {[it setController:self];}];
+      [item foreachItem:^(ActSourceListItem *it) {
+	it.controller = self;
+      }];
 
       [_sourceListView reloadItem:item reloadChildren:YES];
     }
@@ -313,7 +311,7 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
   [_sourceListItems addObject:[ActSourceListItem itemWithName:@"QUERIES"]];
 
   for (ActSourceListItem *item in _sourceListItems)
-    [item setExpandable:YES];
+    item.expandable = YES;
 
   [self updateSourceList];
   [self devicesDidChange:nil];
@@ -323,7 +321,7 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
 
 - (void)windowDidLoad
 {
-  NSWindow *window = [self window];
+  NSWindow *window = self.window;
 
   // 10.9 enables layer-backed views on the scrolling list view
   // implicitly, so we may as well enable them for the entire window.
@@ -331,21 +329,21 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
   // use inclusive (single-layer) mode (which also avoids any special
   // tricks being needed for font-smoothing).
 
-  [[window contentView] setWantsLayer:YES];
+  window.contentView.wantsLayer = YES;
 
   [self addSplitView:_splitView identifier:@"0.Window"];
-  [_splitView setIndexOfResizableSubview:1];
+  _splitView.indexOfResizableSubview = 1;
 
   _fieldEditor = [[ActFieldEditor alloc] initWithFrame:NSZeroRect];
 
-  [_fieldEditor setFieldEditor:YES];
-  [_fieldEditor setRichText:NO];
-  [_fieldEditor setImportsGraphics:NO];
-  [_fieldEditor setUsesFontPanel:NO];
-  [_fieldEditor setContinuousSpellCheckingEnabled:NO];
-  [_fieldEditor setGrammarCheckingEnabled:NO];
-  [_fieldEditor setAllowsDocumentBackgroundColorChange:NO];
-  [_fieldEditor setAllowsImageEditing:NO];
+  _fieldEditor.fieldEditor = YES;
+  _fieldEditor.richText = NO;
+  _fieldEditor.importsGraphics = NO;
+  _fieldEditor.usesFontPanel = NO;
+  _fieldEditor.continuousSpellCheckingEnabled = NO;
+  _fieldEditor.grammarCheckingEnabled = NO;
+  _fieldEditor.allowsDocumentBackgroundColorChange = NO;
+  _fieldEditor.allowsImageEditing = NO;
 
   if (ActViewController *obj = [[ActViewerViewController alloc]
 				initWithController:self options:nil])
@@ -370,7 +368,7 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
 
   // make sure we're in viewer mode before trying to restore view state
 
-  [self setWindowMode:ActWindowMode_Viewer];
+  self.windowMode = ActWindowMode_Viewer;
 
   [self applySavedWindowState];
 
@@ -387,11 +385,8 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
      [self sourceListItemWithPath:@"ACTIVITIES.All"]]]
    byExtendingSelection:NO];
 
-  [self setWindowMode:ActWindowMode_Viewer];
-
-  [window setInitialFirstResponder:
-   [[self viewControllerWithClass:[ActViewerViewController class]]
-    initialFirstResponder]];
+  window.initialFirstResponder = [self viewControllerWithClass:
+   [ActViewerViewController class]].initialFirstResponder;
 
   _listTypeControl.selectedSegment = ((ActViewerViewController *)
     [self viewControllerWithClass:[ActViewerViewController class]])
@@ -399,7 +394,7 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
 
   [self updateUnimportedActivitiesCount];
 
-  [window makeFirstResponder:[window initialFirstResponder]];
+  [window makeFirstResponder:window.initialFirstResponder];
 }
 
 - (void)dealloc
@@ -421,19 +416,19 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
 
 - (void)addSplitView:(ActSplitView *)view identifier:(NSString *)ident
 {
-  [view setDelegate:self];
-  [_splitViews setObject:view forKey:ident];
+  view.delegate = self;
+  _splitViews[ident] = view;
 }
 
 - (void)removeSplitView:(ActSplitView *)view identifier:(NSString *)ident
 {
   [_splitViews removeObjectForKey:ident];
-  [view setDelegate:nil];
+  view.delegate = nil;
 }
 
 - (void)saveWindowState
 {
-  if (![self isWindowLoaded] || [self window] == nil)
+  if (!self.windowLoaded || self.window == nil)
     return;
 
   NSMutableDictionary *controllers = [NSMutableDictionary dictionary];
@@ -441,24 +436,24 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
   for (ActViewController *controller in _viewControllers)
     {
       NSDictionary *sub = [controller savedViewState];
-      if ([sub count] != 0)
-	[controllers setObject:sub forKey:[controller identifier]];
+      if (sub.count != 0)
+	controllers[controller.identifier] = sub;
     }
 
   NSMutableDictionary *split = [NSMutableDictionary dictionary];
 
   for (NSString *ident in _splitViews)
     {
-      ActSplitView *view = [_splitViews objectForKey:ident];
+      ActSplitView *view = _splitViews[ident];
       NSDictionary *sub = [view savedViewState];
-      if ([sub count] != 0)
-	[split setObject:sub forKey:ident];
+      if (sub.count != 0)
+	split[ident] = sub;
     }
 
-  NSDictionary *dict = [NSDictionary dictionaryWithObjectsAndKeys:
-			controllers, @"ActViewControllers",
-			split, @"ActSplitViews",
-			nil];
+  NSDictionary *dict = @{
+    @"ActViewControllers": controllers,
+    @"ActSplitViews": split,
+  };
 
   [[NSUserDefaults standardUserDefaults]
    setObject:dict forKey:@"ActSavedWindowState"];
@@ -471,24 +466,24 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
   if (state == nil)
     return;
 
-  if (NSDictionary *dict = [state objectForKey:@"ActViewControllers"])
+  if (NSDictionary *dict = state[@"ActViewControllers"])
     {
       for (ActViewController *controller in _viewControllers)
 	{
-	  if (NSDictionary *sub = [dict objectForKey:[controller identifier]])
+	  if (NSDictionary *sub = dict[controller.identifier])
 	    [controller applySavedViewState:sub];
 	}
     }
 
-  if (NSDictionary *dict = [state objectForKey:@"ActSplitViews"])
+  if (NSDictionary *dict = state[@"ActSplitViews"])
     {
-      NSArray *split_keys = [[_splitViews allKeys] sortedArrayUsingSelector:
+      NSArray *split_keys = [_splitViews.allKeys sortedArrayUsingSelector:
 			     @selector(caseInsensitiveCompare:)];
 
       for (NSString *ident in split_keys)
 	{
-	  ActSplitView *view = [_splitViews objectForKey:ident];
-	  if (NSDictionary *sub = [dict objectForKey:ident])
+	  ActSplitView *view = _splitViews[ident];
+	  if (NSDictionary *sub = dict[ident])
 	    [view applySavedViewState:sub];
 	}
     }
@@ -516,14 +511,14 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
 	  [controller removeFromContainer];
 	}
 
-      NSRect frame = [[self window] frame];
+      NSRect frame = self.window.frame;
       _windowModeWidths[_windowMode] = frame.size.width;
 
       _windowMode = mode;
 
 #if 0
       frame.size.width = _windowModeWidths[_windowMode];
-      [[self window] setFrame:frame display:YES];
+      self.window.frame = frame;
 #endif
 
       Class new_class = nil;
@@ -543,9 +538,8 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
 
 - (NSInteger)listViewType
 {
-  return [(ActViewerViewController *)
-	  [self viewControllerWithClass:[ActViewerViewController class]]
-	  listViewType];
+  return ((ActViewerViewController *)[self viewControllerWithClass:
+   [ActViewerViewController class]]).listViewType;
 }
 
 - (void)setListViewType:(NSInteger)x
@@ -577,7 +571,7 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
 - (void)showQueryResults:(const act::database::query &)query
 {
   _activityList.clear();
-  [self database]->execute_query(query, _activityList);
+  self.database->execute_query(query, _activityList);
 
   BOOL selection = NO;
   for (auto &it : _activityList)
@@ -593,14 +587,14 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
    postNotificationName:ActActivityListDidChange object:self];
 
   if (!selection)
-    [self setSelectedActivityStorage:nullptr];
+    self.selectedActivityStorage = nullptr;
 }
 
 - (void)reloadActivities
 {
-  [self setSelectedActivityStorage:nullptr];
+  self.selectedActivityStorage = nullptr;
 
-  [self database]->reload();
+  self.database->reload();
 
   [self sourceListSelectionDidChange:nil];
 
@@ -739,7 +733,7 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
 - (void)activity:(const act::activity_storage_ref)a
     didChangeField:(NSString *)name;
 {
-  [self setNeedsSynchronize:YES];
+  self.needsSynchronize = YES;
 
   [[NSNotificationCenter defaultCenter]
    postNotificationName:ActActivityDidChangeField object:self
@@ -748,7 +742,7 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
 
 - (void)activityDidChangeBody:(const act::activity_storage_ref)a
 {
-  [self setNeedsSynchronize:YES];
+  self.needsSynchronize = YES;
 
   [[NSNotificationCenter defaultCenter]
    postNotificationName:ActActivityDidChangeBody object:self
@@ -757,7 +751,7 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
 
 - (NSString *)bodyString
 {
-  if (const act::activity *a = [self selectedActivity])
+  if (const act::activity *a = self.selectedActivity)
     return [self bodyStringOfActivity:*a];
   else
     return @"";
@@ -765,13 +759,13 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
 
 - (void)setBodyString:(NSString *)str
 {
-  if (act::activity *a = [self selectedActivity])
+  if (act::activity *a = self.selectedActivity)
     [self setBodyString:str ofActivity:*a];
 }
 
 - (NSDate *)dateField
 {
-  if (const act::activity *a = [self selectedActivity])
+  if (const act::activity *a = self.selectedActivity)
     return [NSDate dateWithTimeIntervalSince1970:a->date()];
   else
     return nil;
@@ -784,8 +778,8 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
   if (date != nil)
     {
       std::string str;
-      act::format_date_time(str, (time_t) [date timeIntervalSince1970]);
-      value = [NSString stringWithUTF8String:str.c_str()];
+      act::format_date_time(str, (time_t) date.timeIntervalSince1970);
+      value = @(str.c_str());
     }
 
   [self setString:value forField:@"Date"];
@@ -793,7 +787,7 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
 
 - (NSString *)stringForField:(NSString *)name
 {
-  if (const act::activity *a = [self selectedActivity])
+  if (const act::activity *a = self.selectedActivity)
     return [self stringForField:name ofActivity:*a];
   else
     return nil;
@@ -802,7 +796,7 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
 - (NSString *)stringForField:(NSString *)name
     ofActivity:(const act::activity &)a
 {
-  const char *field = [name UTF8String];
+  const char *field = name.UTF8String;
   act::field_id field_id = act::lookup_field_id(field);
   act::field_data_type field_type = act::lookup_field_data_type(field_id);
 
@@ -812,7 +806,7 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
     {
     case act::field_data_type::string:
       if (const std::string *s = a.field_ptr(field))
-	return [NSString stringWithUTF8String:s->c_str()];
+	return @(s->c_str());
       break;
 
     case act::field_data_type::keywords:
@@ -832,12 +826,12 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
       break;
     }
 
-  return [NSString stringWithUTF8String:ret.c_str()];
+  return @(ret.c_str());
 }
 
 - (BOOL)isFieldReadOnly:(NSString *)name
 {
-  if (const act::activity *a = [self selectedActivity])
+  if (const act::activity *a = self.selectedActivity)
     return [self isFieldReadOnly:name ofActivity:*a];
   else
     return YES;
@@ -845,30 +839,30 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
 
 - (BOOL)isFieldReadOnly:(NSString *)name ofActivity:(const act::activity &)a
 {
-  return a.storage()->field_read_only_p([name UTF8String]);
+  return a.storage()->field_read_only_p(name.UTF8String);
 }
 
 - (void)setString:(NSString *)str forField:(NSString *)name
 {
-  if (act::activity *a = [self selectedActivity])
+  if (act::activity *a = self.selectedActivity)
     [self setString:str forField:name ofActivity:*a];
 }
 
 - (void)setString:(NSString *)str forField:(NSString *)name
     ofActivity:(act::activity &)a
 {
-  const char *field_name = [name UTF8String];
+  const char *field_name = name.UTF8String;
   auto id = act::lookup_field_id(field_name);
   if (id != act::field_id::custom)
     field_name = act::canonical_field_name(id);
 
   // FIXME: trim whitespace?
 
-  if ([str length] != 0)
+  if (str.length != 0)
     {
       auto type = act::lookup_field_data_type(id);
 
-      std::string value([str UTF8String]);
+      std::string value(str.UTF8String);
       act::canonicalize_field_string(type, value);
 
       (*a.storage())[field_name] = value;
@@ -882,7 +876,7 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
 
 - (void)deleteField:(NSString *)name
 {
-  if (act::activity *a = [self selectedActivity])
+  if (act::activity *a = self.selectedActivity)
     [self deleteField:name ofActivity:*a];
 }
 
@@ -893,17 +887,17 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
 
 - (void)renameField:(NSString *)oldName to:(NSString *)newName
 {
-  if (act::activity *a = [self selectedActivity])
+  if (act::activity *a = self.selectedActivity)
     [self renameField:oldName to:newName ofActivity:*a];
 }
 
 - (void)renameField:(NSString *)oldName to:(NSString *)newName
     ofActivity:(act::activity &)a
 {
-  if ([newName length] == 0)
+  if (newName.length == 0)
     return [self deleteField:newName ofActivity:a];
 
-  a.storage()->set_field_name([oldName UTF8String], [newName UTF8String]);
+  a.storage()->set_field_name(oldName.UTF8String, newName.UTF8String);
 
   [self activity:a.storage() didChangeField:oldName];
   [self activity:a.storage() didChangeField:newName];
@@ -949,7 +943,7 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
 {
   static const char whitespace[] = " \t\n\f\r";
 
-  const char *ptr = [str UTF8String];
+  const char *ptr = str.UTF8String;
   ptr = ptr + strspn(ptr, whitespace);
 
   std::string wrapped;
@@ -1043,44 +1037,43 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
   if (default_dir == nil)
     {
       if (const char *path = act::shared_config().gps_file_dir())
-	default_dir = [NSString stringWithUTF8String:path];
+	default_dir = @(path);
     }
 
-  [panel setAllowedFileTypes:@[@"fit", @"tcx"]];
-  [panel setAllowsMultipleSelection:YES];
-  [panel setDirectoryURL:[NSURL fileURLWithPath:default_dir]];
-  [panel setPrompt:@"Import"];
-  [panel setTitle:@"Select FIT/TCX Files to Import"];
+  panel.allowedFileTypes = @[@"fit", @"tcx"];
+  panel.allowsMultipleSelection = YES;
+  panel.directoryURL = [NSURL fileURLWithPath:default_dir];
+  panel.prompt = @"Import";
+  panel.title = @"Select FIT/TCX Files to Import";
 
-  [panel beginWithCompletionHandler:
-   ^(NSInteger status) {
-     if (status == NSFileHandlingPanelOKButton)
-       {
-	 NSArray *urls = [panel URLs];
+  [panel beginWithCompletionHandler:^(NSInteger status) {
+    if (status == NSFileHandlingPanelOKButton)
+      {
+	NSArray *urls = panel.URLs;
 
-	 for (NSURL *url in urls)
-	   {
-	     if (![url isFileURL])
-	       continue;
+	for (NSURL *url in urls)
+	  {
+	    if (!url.fileURL)
+	      continue;
 
-	     act::arguments args("act-new");
-	     args.push_back("--gps-file");
-	     args.push_back([[url path] UTF8String]);
+	    act::arguments args("act-new");
+	    args.push_back("--gps-file");
+	    args.push_back(url.path.UTF8String);
 
-	     act::act_new(args);
-	   }
+	    act::act_new(args);
+	  }
 
-	 if ([urls count] != 0)
-	   {
-	     [[NSUserDefaults standardUserDefaults] setObject:
-	      [[[urls lastObject] path] stringByDeletingLastPathComponent]
-	      forKey:@"ActLastGPSImportDirectory"];
-	   }
+	if (urls.count != 0)
+	  {
+	    [[NSUserDefaults standardUserDefaults] setObject:
+	     [urls.lastObject path].stringByDeletingLastPathComponent
+	     forKey:@"ActLastGPSImportDirectory"];
+	  }
 
-	 [self performSelector:@selector(reloadActivities)
-	  withObject:nil afterDelay:.25];
-       }
-   }];
+	[self performSelector:@selector(reloadActivities)
+	 withObject:nil afterDelay:.25];
+      }
+  }];
 }
 
 - (IBAction)delete:(id)sender
@@ -1147,16 +1140,15 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
 
 - (IBAction)editActivity:(id)sender
 {
-  [self setWindowMode:ActWindowMode_Viewer];
+  self.windowMode = ActWindowMode_Viewer;
 
-  [[self window] makeFirstResponder:
-   [[self viewControllerWithClass:[ActSummaryViewController class]]
-    initialFirstResponder]];
+  [self.window makeFirstResponder:[self viewControllerWithClass:
+    [ActSummaryViewController class]].initialFirstResponder];
 }
 
 - (IBAction)nextActivity:(id)sender
 {
-  [self setWindowMode:ActWindowMode_Viewer];
+  self.windowMode = ActWindowMode_Viewer;
 
   if (_selectedActivityStorage == nullptr)
     return [self firstActivity:sender];
@@ -1167,14 +1159,14 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
 			 });
 
   if (++it < _activityList.end())
-    [self setSelectedActivityStorage:it->storage()];
+    self.selectedActivityStorage = it->storage();
   else
     NSBeep();
 }
 
 - (IBAction)previousActivity:(id)sender
 {
-  [self setWindowMode:ActWindowMode_Viewer];
+  self.windowMode = ActWindowMode_Viewer;
 
   if (_selectedActivityStorage == nullptr)
     return [self lastActivity:sender];
@@ -1185,25 +1177,25 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
 			 });
 
   if (--it >= _activityList.begin())
-    [self setSelectedActivityStorage:it->storage()];
+    self.selectedActivityStorage = it->storage();
   else
     NSBeep();
 }
 
 - (IBAction)firstActivity:(id)sender
 {
-  [self setWindowMode:ActWindowMode_Viewer];
+  self.windowMode = ActWindowMode_Viewer;
 
   if (_activityList.size() > 0)
-    [self setSelectedActivityStorage:_activityList.front().storage()];
+    self.selectedActivityStorage = _activityList.front().storage();
 }
 
 - (IBAction)lastActivity:(id)sender
 {
-  [self setWindowMode:ActWindowMode_Viewer];
+  self.windowMode = ActWindowMode_Viewer;
 
   if (_activityList.size() > 0)
-    [self setSelectedActivityStorage:_activityList.back().storage()];
+    self.selectedActivityStorage = _activityList.back().storage();
 }
 
 - (IBAction)nextPreviousActivity:(id)sender
@@ -1217,8 +1209,8 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
 
 - (IBAction)setListViewAction:(id)sender
 {
-  [self setWindowMode:ActWindowMode_Viewer];
-  [self setListViewType:[sender tag]];
+  self.windowMode = ActWindowMode_Viewer;
+  self.listViewType = [sender tag];
 }
 
 - (IBAction)toggleActivityPane:(id)sender
@@ -1237,14 +1229,14 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
   if (_activityPopover == nil)
     {
       _activityPopover = [[NSPopover alloc] init];
-      [_activityPopover setContentViewController:c];
-      [_activityPopover setDelegate:self];
+      _activityPopover.contentViewController = c;
+      _activityPopover.delegate = self;
     }
 
-  NSView *c_view = [c view];
-  [c setActivityStorage:storage];
+  NSView *c_view = c.view;
+  c.activityStorage = storage;
   [c sizeToFit];
-  [_activityPopover setContentSize:[c_view frame].size];
+  _activityPopover.contentSize = c_view.frame.size;
   [_activityPopover showRelativeToRect:r ofView:view preferredEdge:edge];
 }
 
@@ -1257,12 +1249,14 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
 {
   ActSourceListItem *item = [self sourceListItemWithPath:@"DEVICES"];
 
-  [item setSubitems:[NSArray array]];
+  item.subitems = @[];
 
-  for (ActDevice *device in [[ActDeviceManager sharedDeviceManager] devices])
+  for (ActDevice *device in [ActDeviceManager sharedDeviceManager].allDevices)
     [item addSubitem:[ActSourceListDeviceItem itemWithDevice:device]];
 
-  [item foreachItem:^void (ActSourceListItem *it) {[it setController:self];}];
+  [item foreachItem:^(ActSourceListItem *it) {
+    it.controller = self;
+  }];
 
   [_sourceListView reloadItem:item reloadChildren:YES];
 
@@ -1311,7 +1305,7 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
 - (CGFloat)splitView:(NSSplitView *)view constrainMinCoordinate:(CGFloat)p
     ofSubviewAt:(NSInteger)idx
 {
-  NSView *subview = [[view subviews] objectAtIndex:idx];
+  NSView *subview = view.subviews[idx];
   CGFloat min_size = [(ActSplitView *)view minimumSizeOfSubview:subview];
 
   return p + min_size;
@@ -1320,7 +1314,7 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
 - (CGFloat)splitView:(NSSplitView *)view constrainMaxCoordinate:(CGFloat)p
     ofSubviewAt:(NSInteger)idx
 {
-  NSView *subview = [[view subviews] objectAtIndex:idx];
+  NSView *subview = view.subviews[idx];
   CGFloat min_size = [(ActSplitView *)view minimumSizeOfSubview:subview];
 
   return p - min_size;
@@ -1339,26 +1333,22 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
 
 - (void)popoverWillShow:(NSNotification *)notification
 {
-  [(ActViewController *)[(NSPopover *)[notification object]
-			 contentViewController] viewWillAppear];
+  [(ActViewController *)((NSPopover *)notification.object).contentViewController viewWillAppear];
 }
 
 - (void)popoverDidShow:(NSNotification *)notification
 {
-  [(ActViewController *)[(NSPopover *)[notification object]
-			 contentViewController] viewDidAppear];
+  [(ActViewController *)((NSPopover *)notification.object).contentViewController viewDidAppear];
 }
 
 - (void)popoverWillClose:(NSNotification *)notification
 {
-  [(ActViewController *)[(NSPopover *)[notification object]
-			 contentViewController] viewWillDisappear];
+  [(ActViewController *)((NSPopover *)notification.object).contentViewController viewWillDisappear];
 }
 
 - (void)popoverDidClose:(NSNotification *)notification
 {
-  [(ActViewController *)[(NSPopover *)[notification object]
-			 contentViewController] viewDidDisappear];
+  [(ActViewController *)((NSPopover *)notification.object).contentViewController viewDidDisappear];
 }
 
 // PXSourceListDataSource methods
@@ -1366,47 +1356,47 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
 - (NSUInteger)sourceList:(PXSourceList *)lst numberOfChildrenOfItem:(id)item
 {
   if (item == nil)
-    return [_sourceListItems count];
+    return _sourceListItems.count;
   else
-    return [(ActSourceListItem *)item subitemsCount];
+    return ((ActSourceListItem *)item).subitemsCount;
 }
 
 - (id)sourceList:(PXSourceList *)lst child:(NSUInteger)idx ofItem:(id)item
 {
   if (item == nil)
-    return [_sourceListItems objectAtIndex:idx];
+    return _sourceListItems[idx];
   else
-    return [[(ActSourceListItem *)item subitems] objectAtIndex:idx];
+    return ((ActSourceListItem *)item).subitems[idx];
 }
 
 - (id)sourceList:(PXSourceList *)lst objectValueForItem:(id)item
 {
-  return [(ActSourceListItem *)item name];
+  return ((ActSourceListItem *)item).name;
 }
 
 - (BOOL)sourceList:(PXSourceList *)lst isItemExpandable:(id)item
 {
-  return [(ActSourceListItem *)item isExpandable];
+  return ((ActSourceListItem *)item).expandable;
 }
 
 - (BOOL)sourceList:(PXSourceList *)lst itemHasBadge:(id)item
 {
-  return [(ActSourceListItem *)item hasBadge];
+  return ((ActSourceListItem *)item).hasBadge;
 }
 
 - (NSInteger)sourceList:(PXSourceList *)lst badgeValueForItem:(id)item
 {
-  return [(ActSourceListItem *)item badgeValue];
+  return ((ActSourceListItem *)item).badgeValue;
 }
 
 - (BOOL)sourceList:(PXSourceList *)lst itemHasIcon:(id)item
 {
-  return [(ActSourceListItem *)item hasIcon];
+  return ((ActSourceListItem *)item).hasIcon;
 }
 
 - (NSImage*)sourceList:(PXSourceList *)lst iconForItem:(id)item
 {
-  return [(ActSourceListItem *)item iconImage];
+  return ((ActSourceListItem *)item).iconImage;
 }
 
 // PXSourceListDelegate methods
@@ -1424,7 +1414,7 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
 - (void)sourceListSelectionDidChange:(NSNotification *)note
 {
   ActSourceListItem *item = [_sourceListView itemAtRow:
-			     [_sourceListView selectedRow]];
+			     _sourceListView.selectedRow];
 
   [item select];
 }

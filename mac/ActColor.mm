@@ -142,17 +142,17 @@
 
       for (NSString *name in strings)
 	{
-	  NSString *desc = [strings objectForKey:name];
+	  NSString *desc = strings[name];
 	  NSArray *strings = [desc componentsSeparatedByCharactersInSet:
 			      [NSCharacterSet whitespaceCharacterSet]];
-	  if ([strings count] == 3)
+	  if (strings.count == 3)
 	    {
-	      CGFloat red = [[strings objectAtIndex:0] doubleValue];
-	      CGFloat green = [[strings objectAtIndex:1] doubleValue];
-	      CGFloat blue = [[strings objectAtIndex:2] doubleValue];
+	      CGFloat red = [strings[0] doubleValue];
+	      CGFloat green = [strings[1] doubleValue];
+	      CGFloat blue = [strings[2] doubleValue];
 	      NSColor *c = [NSColor colorWithDeviceRed:red green:green
 			    blue:blue alpha:1];
-	      [dict setObject:c forKey:name];
+	      dict[name] = c;
 	    }
 	}
 
@@ -171,8 +171,7 @@
   if (type2 != nullptr)
     type.append(*type2);
 
-  NSColor *c = [colors objectForKey:
-		[NSString stringWithUTF8String:type.c_str()]];
+  NSColor *c = colors[@(type.c_str())];
   if (c == nil)
     c = [NSColor colorWithDeviceWhite:.5 alpha:1];
 

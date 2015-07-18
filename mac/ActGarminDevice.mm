@@ -57,7 +57,7 @@
 
 - (NSString *)name
 {
-  return [_path lastPathComponent];
+  return _path.lastPathComponent;
 }
 
 - (NSArray *)activityURLs
@@ -69,14 +69,14 @@
     {
       path = [_path stringByAppendingPathComponent:@ACTIVITTY_PATH_1];
       if (![fm fileExistsAtPath:path])
-	return [NSArray array];
+	return @[];
     }
 
   NSMutableArray *array = [NSMutableArray array];
 
   for (NSString *file in [fm contentsOfDirectoryAtPath:path error:nullptr])
     {
-      if ([[file pathExtension] isEqualToString:@"fit" caseInsensitive:YES])
+      if ([file.pathExtension isEqualToString:@"fit" caseInsensitive:YES])
 	{
 	  NSURL *url = [NSURL fileURLWithPath:
 			[path stringByAppendingPathComponent:file]];

@@ -86,20 +86,19 @@
   [super viewDidLoad];
 
   [_controller addSplitView:_splitView identifier:@"1.Viewer"];
-  [_splitView setIndexOfResizableSubview:1];
+  _splitView.indexOfResizableSubview = 1;
 
-  for (ActViewController *controller in [self subviewControllers])
+  for (ActViewController *controller in self.subviewControllers)
     {
       if ([controller isKindOfClass:[ActActivityViewController class]])
 	{
 	  [controller addToContainerView:_contentContainer];
-	  [[controller view] setHidden:
-	   [_controller selectedActivityStorage] ? NO : YES];
+	  controller.view.hidden = _controller.selectedActivityStorage == nullptr;
 	}
     }
 
   if (_listViewType < 0)
-    [self setListViewType:0];
+    self.listViewType = 0;
 }
 
 - (void)dealloc
@@ -126,14 +125,14 @@ listViewControllerClass(int type)
 {
   Class cls = listViewControllerClass(_listViewType);
 
-  return [[self viewControllerWithClass:cls] initialFirstResponder];
+  return [self viewControllerWithClass:cls].initialFirstResponder;
 }
 
 - (void)setListViewType:(NSInteger)type
 {
   if (_listViewType != type)
     {
-      NSWindow *window = [[self view] window];
+      NSWindow *window = self.view.window;
 
       ActViewController *old_cls = listViewControllerClass(_listViewType);
       ActViewController *new_cls = listViewControllerClass(type);
@@ -141,20 +140,20 @@ listViewControllerClass(int type)
       ActViewController *oldC = [self viewControllerWithClass:old_cls];
       ActViewController *newC = [self viewControllerWithClass:new_cls];
 
-      NSResponder *first = [window firstResponder];
+      NSResponder *first = window.firstResponder;
 
       BOOL firstResponder = ([first isKindOfClass:[NSView class]]
-			     && [(NSView *)first isDescendantOf:[oldC view]]);
+			     && [(NSView *)first isDescendantOf:oldC.view]);
 
       [newC addToContainerView:_listContainer];
       [oldC removeFromContainer];
 
       _listViewType = type;
 
-      [window setInitialFirstResponder:[newC initialFirstResponder]];
+      window.initialFirstResponder = newC.initialFirstResponder;
 
       if (firstResponder)
-	[window makeFirstResponder:[newC initialFirstResponder]];
+	[window makeFirstResponder:newC.initialFirstResponder];
     }
 }
 
@@ -168,8 +167,7 @@ listViewControllerClass(int type)
   NSMutableDictionary *state
     = [NSMutableDictionary dictionaryWithDictionary:[super savedViewState]];
 
-  [state setObject:[NSNumber numberWithUnsignedInt:_listViewType]
-   forKey:@"ActSelectedListView"];
+  state[@"ActSelectedListView"] = @(_listViewType);
 
   return state;
 }
@@ -178,9 +176,9 @@ listViewControllerClass(int type)
 {
   [super applySavedViewState:state];
 
-  if (NSNumber *obj = [state objectForKey:@"ActSelectedListView"])
+  if (NSNumber *obj = state[@"ActSelectedListView"])
     {
-      [self setListViewType:[obj intValue]];
+      self.listViewType = obj.intValue;
     }
 }
 
@@ -189,8 +187,7 @@ listViewControllerClass(int type)
   ActViewController *activityC = [self viewControllerWithClass:
 				  [ActActivityViewController class]];
 
-  [[activityC view] setHidden:
-   [_controller selectedActivityStorage] ? NO : YES];
+  activityC.view.hidden = _controller.selectedActivityStorage == nullptr;
 }
 
 @end

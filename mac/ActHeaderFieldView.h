@@ -45,7 +45,8 @@
 
 - (void)update;
 
-- (CGFloat)preferredHeight;
+@property(nonatomic, readonly) CGFloat preferredHeight;
+
 - (void)layoutSubviews;
 
 // controller calls -makeFirstResponder: with these views

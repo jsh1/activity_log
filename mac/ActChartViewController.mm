@@ -135,9 +135,9 @@ enum ChartFieldMasks
 
 - (void)viewDidLoad
 {
-  [_configMenu setFont:[NSFont systemFontOfSize:[NSFont smallSystemFontSize]]];
+  _configMenu.font = [NSFont systemFontOfSize:[NSFont smallSystemFontSize]];
 
-  [_removeButton setEnabled:[self identifierSuffix] != nil];
+  _removeButton.enabled = self.identifierSuffix != nil;
 
   [self updateTitle];
 }
@@ -160,10 +160,10 @@ enum ChartFieldMasks
   if (_chart)
     {
       _chart.reset();
-      [_chartView setNeedsDisplay:YES];
+      _chartView.needsDisplay = YES;
     }
 
-  const act::activity *a = [_controller selectedActivity];
+  const act::activity *a = _controller.selectedActivity;
   if (a == nullptr)
     return;
 
@@ -323,12 +323,12 @@ enum ChartFieldMasks
 	slice_idx++;
     }
 
-  _chart->set_chart_rect(NSRectToCGRect([_chartView bounds]));
-  _chart->set_backing_scale([[_chartView window] backingScaleFactor]);
-  _chart->set_selected_lap([_controller selectedLapIndex]);
+  _chart->set_chart_rect(NSRectToCGRect(_chartView.bounds));
+  _chart->set_backing_scale(_chartView.window.backingScaleFactor);
+  _chart->set_selected_lap(_controller.selectedLapIndex);
   _chart->update_values();
 
-  [_chartView setNeedsDisplay:YES];
+  _chartView.needsDisplay = YES;
 }
 
 - (void)updateChart
@@ -340,7 +340,7 @@ enum ChartFieldMasks
   bool has_chart = (bool)_chart;
 
   if (had_chart != has_chart)
-    [[_chartView superview] subviewNeedsLayout:_chartView];
+    [_chartView.superview subviewNeedsLayout:_chartView];
 }
 
 - (void)updateTitle
@@ -410,7 +410,7 @@ enum ChartFieldMasks
 	}
     }
 
-  [(ActCollapsibleView *)[self view] setTitle:str != nil ? str : @"Chart"];
+  ((ActCollapsibleView *)self.view).title = str != nil ? str : @"Chart";
 
   [str release];
 }
@@ -424,8 +424,8 @@ enum ChartFieldMasks
 {
   if (_chart)
     {
-      _chart->set_selected_lap([_controller selectedLapIndex]);
-      [_chartView setNeedsDisplay:YES];
+      _chart->set_selected_lap(_controller.selectedLapIndex);
+      _chartView.needsDisplay = YES;
     }
 }
 
@@ -442,7 +442,7 @@ enum ChartFieldMasks
 {
   if (_chart)
     {
-      _chart->set_current_time([_controller currentTime]);
+      _chart->set_current_time(_controller.currentTime);
 
       CGRect dirtyR = _chart->current_time_rect();
       [_chartView setNeedsDisplayInRect:NSRectFromCGRect(dirtyR)];
@@ -487,19 +487,19 @@ enum ChartFieldMasks
 - (void)popUpConfigMenuForView:(NSView *)view
 {
   [_configMenu popUpMenuPositioningItem:[_configMenu itemAtIndex:0]
-   atLocation:[view bounds].origin inView:view];
+   atLocation:view.bounds.origin inView:view];
 }
 
 - (IBAction)buttonAction:(id)sender
 {
   if (sender == _addButton)
     {
-      [(ActActivityViewController *)[self superviewController]
-       addSubviewControllerWithClass:[self class] after:self];
+      [(ActActivityViewController *)self.superviewController
+       addSubviewControllerWithClass:self.class after:self];
     }
   else if (sender == _removeButton)
     {
-      [(ActActivityViewController *)[self superviewController]
+      [(ActActivityViewController *)self.superviewController
        removeSubviewController:self];
     }
 }
@@ -514,11 +514,11 @@ enum ChartFieldMasks
 
 - (void)applySavedViewState:(NSDictionary *)state
 {
-  if (NSNumber *obj = [state objectForKey:@"fieldMask"])
-    _fieldMask = [obj unsignedIntValue];
+  if (NSNumber *obj = state[@"fieldMask"])
+    _fieldMask = obj.unsignedIntValue;
 
-  if (NSNumber *obj = [state objectForKey:@"smoothing"])
-    _smoothing = [obj intValue];
+  if (NSNumber *obj = state[@"smoothing"])
+    _smoothing = obj.intValue;
 
   [self updateChart];
   [self updateTitle];
@@ -530,7 +530,7 @@ enum ChartFieldMasks
 {
   if (view == _chartView)
     {
-      if ([self chart])
+      if (self.chart)
 	return 150;
       else
 	return 0;
@@ -551,7 +551,7 @@ enum ChartFieldMasks
     {
       uint32_t enableMask = 0;
 
-      if (const act::activity *a = [_controller selectedActivity])
+      if (const act::activity *a = _controller.selectedActivity)
 	{
 	  if (const act::gps::activity *gps_a = a->gps_data())
 	    {
@@ -568,17 +568,17 @@ enum ChartFieldMasks
 	    }
 	}
 
-      for (NSMenuItem *item in [menu itemArray])
+      for (NSMenuItem *item in menu.itemArray)
 	{
-	  if ([item action] == @selector(configMenuAction:))
+	  if (item.action == @selector(configMenuAction:))
 	    {
-	      uint32_t bit = 1U << [item tag];
-	      [item setState:(_fieldMask & bit) ? NSOnState : NSOffState];
-	      [item setEnabled:(_fieldMask & bit) ? YES : NO];
+	      uint32_t bit = 1U << item.tag;
+	      item.state = (_fieldMask & bit) ? NSOnState : NSOffState;
+	      item.enabled = (_fieldMask & bit) ? YES : NO;
 	    }
-	  else if ([item action] == @selector(smoothingAction:))
+	  else if (item.action == @selector(smoothingAction:))
 	    {
-	      [item setState:[item tag] == _smoothing];
+	      item.state = item.tag == _smoothing;
 	    }
 	}	      
     }
@@ -586,20 +586,20 @@ enum ChartFieldMasks
 
 - (void)mouseExited:(NSEvent *)e
 {
-  [_controller setCurrentTime:-1];
+  _controller.currentTime = -1;
 }
 
 - (void)mouseMoved:(NSEvent *)e
 {
   if (_chart)
     {
-      NSPoint p = [_chartView convertPoint:[e locationInWindow] fromView:nil];
+      NSPoint p = [_chartView convertPoint:e.locationInWindow fromView:nil];
 
       act::gps::activity::point pt;
       if (_chart->point_at_x(p.x, pt))
 	{
 	  double t = pt.elapsed_time;
-	  [_controller setCurrentTime:t];
+	  _controller.currentTime = t;
 	}
     }
 }
@@ -611,10 +611,10 @@ enum ChartFieldMasks
 
 - (void)updateTrackingAreas
 {
-  NSRect bounds = [self bounds];
+  NSRect bounds = self.bounds;
 
   if (_trackingArea == nil
-      || !NSEqualRects(bounds, [_trackingArea rect]))
+      || !NSEqualRects(bounds, _trackingArea.rect))
     {
       [self removeTrackingArea:_trackingArea];
       _trackingArea = [[NSTrackingArea alloc] initWithRect:bounds
@@ -632,9 +632,9 @@ enum ChartFieldMasks
   [[ActColor controlBackgroundColor] setFill];
   [NSBezierPath fillRect:r];
 
-  if (act::chart_view::chart *chart = [_controller chart])
+  if (act::chart_view::chart *chart = _controller.chart)
     {
-      chart->set_chart_rect(NSRectToCGRect([self bounds]));
+      chart->set_chart_rect(NSRectToCGRect(self.bounds));
       chart->draw();
     }
 }

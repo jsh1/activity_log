@@ -105,7 +105,7 @@
 
   [[NSNotificationCenter defaultCenter]
    addObserver:self selector:@selector(listBoundsDidChange:)
-   name:NSViewBoundsDidChangeNotification object:[_scrollView contentView]];
+   name:NSViewBoundsDidChangeNotification object:_scrollView.contentView];
 
   _headerItemIndex = -1;
 }
@@ -139,7 +139,7 @@
 
 - (NSRect)rectForRow:(NSInteger)row
 {
-  NSRect bounds = [_listView bounds];
+  NSRect bounds = _listView.bounds;
 
   if (NSIsEmptyRect(bounds))
     return bounds;
@@ -148,7 +148,7 @@
 
   for (size_t i = 0; i < _activities.size(); i++)
     {
-      _activities[i].update_height([_listView bounds].size.width);
+      _activities[i].update_height(_listView.bounds.size.width);
 
       if (i == row)
 	{
@@ -165,8 +165,8 @@
 
 - (NSRect)visibleRectForRow:(NSInteger)row
 {
-  NSRect bounds = [_listView bounds];
-  NSRect vis_rect = [_listView visibleRect];
+  NSRect bounds = _listView.bounds;
+  NSRect vis_rect = _listView.visibleRect;
 
   if (NSIsEmptyRect(vis_rect))
     return vis_rect;
@@ -178,7 +178,7 @@
       if (!(y < vis_rect.origin.y + vis_rect.size.height))
 	return NSZeroRect;
 
-      _activities[i].update_height([_listView bounds].size.width);
+      _activities[i].update_height(_listView.bounds.size.width);
 
       if (i == row)
 	{
@@ -196,11 +196,11 @@
 
 - (NSInteger)rowForYPosition:(CGFloat)p startPosition:(CGFloat *)ret_p
 {
-  CGFloat y = [_listView bounds].origin.y + Y_OFFSET;
+  CGFloat y = _listView.bounds.origin.y + Y_OFFSET;
 
   for (size_t i = 0; i < _activities.size(); i++)
     {
-      _activities[i].update_height([_listView bounds].size.width);
+      _activities[i].update_height(_listView.bounds.size.width);
       CGFloat ny = y + _activities[i].height;
 
       if (p < ny)
@@ -219,18 +219,18 @@
 - (void)selectRow:(NSInteger)row
 {
   if (row >= 0 && row < _activities.size())
-    [_controller setSelectedActivityStorage:_activities[row].storage];
+    _controller.selectedActivityStorage = _activities[row].storage;
 }
 
 - (void)toggleRowSelected:(NSInteger)row
 {
   if (row >= 0 && row < _activities.size())
     {
-      act::activity_storage_ref sel = [_controller selectedActivityStorage];
+      act::activity_storage_ref sel = _controller.selectedActivityStorage;
       if (_activities[row].storage == sel)
-	[_controller setSelectedActivityStorage:nullptr];
+	_controller.selectedActivityStorage = nullptr;
       else
-	[_controller setSelectedActivityStorage:_activities[row].storage];
+	_controller.selectedActivityStorage = _activities[row].storage;
     }
 }
 
@@ -245,23 +245,22 @@
 
   for (size_t i = 0; i < _activities.size(); i++)
     {
-      _activities[i].update_height([_listView bounds].size.width);
+      _activities[i].update_height(_listView.bounds.size.width);
       y += _activities[i].height;
     }
 
-  NSRect r = [_listView frame];
+  NSRect r = _listView.frame;
 
   if (r.size.height != y)
     {
       r.size.height = y;
-      [_listView setFrame:r];
+      _listView.frame = r;
     }
 }
 
 - (void)updateHeaderItemIndex
 {
-  NSInteger idx = [self rowForYPosition:
-		   [[_scrollView contentView] bounds].origin.y
+  NSInteger idx = [self rowForYPosition:_scrollView.contentView.bounds.origin.y
 		   startPosition:nullptr];
 
   // FIXME: only if week/month changed?
@@ -305,13 +304,13 @@
 	}
 
       _headerItemIndex = idx;
-      [_headerView setNeedsDisplay:YES];
+      _headerView.needsDisplay = YES;
     }
 }
 
 - (void)activityListDidChange:(NSNotification *)note
 {
-  const auto &activities = [_controller activityList];
+  const auto &activities = _controller.activityList;
 
   _activities.clear();
 
@@ -321,14 +320,14 @@
   [self updateListViewBounds];
   [self updateHeaderItemIndex];
 
-  [_listView setNeedsDisplay:YES];
-  [_headerView setNeedsDisplay:YES];
+  _listView.needsDisplay = YES;
+  _headerView.needsDisplay = YES;
 }
 
 - (void)selectedActivityDidChange:(NSNotification *)note
 {
   NSInteger row = [self rowForActivityStorage:
-		   [_controller selectedActivityStorage]];
+		   _controller.selectedActivityStorage];
 
   if (row != NSNotFound)
     {
@@ -336,14 +335,14 @@
       [_listView scrollRectToVisible:r];
     }
 
-  [_listView setNeedsDisplay:YES];
+  _listView.needsDisplay = YES;
 }
 
 - (void)activityDidChangeField:(NSNotification *)note
 {
-  void *ptr = [[[note userInfo] objectForKey:@"activity"] pointerValue];
+  void *ptr = [note.userInfo[@"activity"] pointerValue];
   const auto &a = *reinterpret_cast<const act::activity_storage_ref *> (ptr);
-  NSString *field = [[note userInfo] objectForKey:@"field"];
+  NSString *field = note.userInfo[@"field"];
 
   NSInteger row = [self rowForActivityStorage:a];
   if (row == NSNotFound)
@@ -359,7 +358,7 @@
 
 - (void)activityDidChangeBody:(NSNotification *)note
 {
-  void *ptr = [[[note userInfo] objectForKey:@"activity"] pointerValue];
+  void *ptr = [note.userInfo[@"activity"] pointerValue];
   const auto &a = *reinterpret_cast<const act::activity_storage_ref *> (ptr);
 
   NSInteger row = [self rowForActivityStorage:a];
@@ -373,7 +372,7 @@
   // visible item, and if 'row' is not greater than that, invalidate
   // the view.
 
-  [_listView setNeedsDisplay:YES];
+  _listView.needsDisplay = YES;
 }
 
 - (void)listBoundsDidChange:(NSNotification *)note
@@ -400,7 +399,7 @@
 
 - (void)drawRect:(NSRect)r
 {
-  NSRect bounds = [self bounds];
+  NSRect bounds = self.bounds;
 
   [[ActColor controlBackgroundColor] setFill];
   [NSBezierPath fillRect:r];
@@ -410,10 +409,10 @@
   if (row == NSNotFound)
     return;
 
-  const std::vector<ActNotesItem> &activities = [_controller activities];
+  const std::vector<ActNotesItem> &activities = _controller.activities;
 
-  act::activity_storage_ref selection = [[_controller controller]
-					 selectedActivityStorage];
+  act::activity_storage_ref selection
+    = _controller.controller.selectedActivityStorage;
 
   for (size_t i = row; y < r.origin.y + r.size.height
        && i < activities.size(); i++)
@@ -441,7 +440,7 @@
       if (activities[i].storage == selection)
 	{
 	  flags |= DRAW_SELECTED;
-	  if ([[self window] firstResponder] == self)
+	  if (self.window.firstResponder == self)
 	    flags |= DRAW_FOCUSED;
 	}
 
@@ -453,14 +452,14 @@
 
 - (void)scrollPageUpAnimated:(BOOL)flag
 {
-  NSRect rect = [self visibleRect];
+  NSRect rect = self.visibleRect;
   rect.origin.y -= rect.size.height;
   [self scrollRectToVisible:rect animated:flag];
 }
 
 - (void)scrollPageDownAnimated:(BOOL)flag
 {
-  NSRect rect = [self visibleRect];
+  NSRect rect = self.visibleRect;
   rect.origin.y += rect.size.height;
   [self scrollRectToVisible:rect animated:flag];
 }
@@ -482,38 +481,38 @@
 
 - (BOOL)becomeFirstResponder
 {
-  [self setNeedsDisplay:YES];
+  self.needsDisplay = YES;
   return YES;
 }
 
 - (BOOL)resignFirstResponder
 {
-  [self setNeedsDisplay:YES];
+  self.needsDisplay = YES;
   return YES;
 }
 
 - (void)keyDown:(NSEvent *)e
 {
-  NSString *chars = [e charactersIgnoringModifiers];
+  NSString *chars = e.charactersIgnoringModifiers;
 
-  if ([chars length] == 1)
+  if (chars.length == 1)
     {
       switch ([chars characterAtIndex:0])
 	{
 	case NSDownArrowFunctionKey:
-	  [[_controller controller] nextActivity:_controller];
+	  [_controller.controller nextActivity:_controller];
 	  return;
 
 	case NSUpArrowFunctionKey:
-	  [[_controller controller] previousActivity:_controller];
+	  [_controller.controller previousActivity:_controller];
 	  return;
 
 	case NSHomeFunctionKey:
-	  [[_controller controller] firstActivity:_controller];
+	  [_controller.controller firstActivity:_controller];
 	  return;
 
 	case NSEndFunctionKey:
-	  [[_controller controller] lastActivity:_controller];
+	  [_controller.controller lastActivity:_controller];
 	  return;
 
 	case NSPageUpFunctionKey:
@@ -533,7 +532,7 @@
 
 - (void)mouseDown:(NSEvent *)e
 {
-  NSPoint p = [self convertPoint:[e locationInWindow] fromView:nil];
+  NSPoint p = [self convertPoint:e.locationInWindow fromView:nil];
   NSInteger row = [_controller rowForYPosition:p.y startPosition:nullptr];
 
   if (row != NSNotFound)
@@ -546,8 +545,8 @@
 
 - (void)drawRect:(NSRect)r
 {
-  if (const ActNotesItem *item = [_controller headerItem])
-    item->draw_header([self bounds], 0, [_controller headerStats]);
+  if (const ActNotesItem *item = _controller.headerItem)
+    item->draw_header(self.bounds, 0, _controller.headerStats);
 }
 
 - (BOOL)isFlipped
@@ -584,87 +583,85 @@ ActNotesItem::initialize()
   NSColor *blueColor = [ActColor colorWithCalibratedRed:72/255. green:122/255. blue:1 alpha:1];
 
   NSMutableParagraphStyle *rightStyle
-    = [[NSParagraphStyle defaultParagraphStyle] mutableCopy];
-  [rightStyle setAlignment:NSRightTextAlignment];
+    = [[[NSParagraphStyle defaultParagraphStyle] mutableCopy] autorelease];
+  rightStyle.alignment = NSRightTextAlignment;
 
   NSMutableParagraphStyle *centerStyle
-    = [[NSParagraphStyle defaultParagraphStyle] mutableCopy];
-  [centerStyle setAlignment:NSCenterTextAlignment];
+    = [[[NSParagraphStyle defaultParagraphStyle] mutableCopy] autorelease];
+  centerStyle.alignment = NSCenterTextAlignment;
 
-  title_attrs = [[NSDictionary alloc] initWithObjectsAndKeys:
-		 [NSFont boldSystemFontOfSize:TITLE_FONT_SIZE],
-		 NSFontAttributeName,
-		 greyColor, NSForegroundColorAttributeName,
-		 nil];
-  selected_title_attrs = [[NSDictionary alloc] initWithObjectsAndKeys:
-			  [NSFont boldSystemFontOfSize:TITLE_FONT_SIZE],
-			  NSFontAttributeName,
-			  [ActColor alternateSelectedControlTextColor],
-			  NSForegroundColorAttributeName,
-			  nil];
-  body_attrs = [[NSDictionary alloc] initWithObjectsAndKeys:
-		[ActFont bodyFontOfSize:BODY_FONT_SIZE],
-		NSFontAttributeName,
-		greyColor, NSForegroundColorAttributeName,
-		nil];
-  time_attrs = [[NSDictionary alloc] initWithObjectsAndKeys:
-		[NSFont systemFontOfSize:TIME_FONT_SIZE],
-		NSFontAttributeName,
-		blueColor, NSForegroundColorAttributeName,
-		rightStyle, NSParagraphStyleAttributeName,
-		nil];
-  stats_attrs = [[NSDictionary alloc] initWithObjectsAndKeys:
-		 [NSFont boldSystemFontOfSize:STATS_FONT_SIZE],
-		 NSFontAttributeName,
-		 redColor, NSForegroundColorAttributeName,
-		 nil];
-  dow_attrs = [[NSDictionary alloc] initWithObjectsAndKeys:
-	       [NSFont boldSystemFontOfSize:DAY_OF_WEEK_FONT_SIZE],
-	       NSFontAttributeName,
-	       greyColor, NSForegroundColorAttributeName,
-	       centerStyle, NSParagraphStyleAttributeName,
-	       nil];
-  dom_attrs = [[NSDictionary alloc] initWithObjectsAndKeys:
-	       [NSFont boldSystemFontOfSize:DAY_OF_MONTH_FONT_SIZE],
-	       NSFontAttributeName,
-	       greyColor, NSForegroundColorAttributeName,
-	       centerStyle, NSParagraphStyleAttributeName,
-	       nil];
-  month_attrs = [[NSDictionary alloc] initWithObjectsAndKeys:
-		 [NSFont boldSystemFontOfSize:MONTH_FONT_SIZE],
-		 NSFontAttributeName,
-		 greyColor, NSForegroundColorAttributeName,
-		 nil];
-  week_attrs = [[NSDictionary alloc] initWithObjectsAndKeys:
-		[NSFont boldSystemFontOfSize:WEEK_FONT_SIZE],
-		NSFontAttributeName,
-		greyColor, NSForegroundColorAttributeName,
-		nil];
-  header_stats_attrs = [[NSDictionary alloc] initWithObjectsAndKeys:
-			[NSFont boldSystemFontOfSize:HEADER_STATS_FONT_SIZE],
-			NSFontAttributeName,
-			redColor, NSForegroundColorAttributeName,
-			rightStyle, NSParagraphStyleAttributeName,
-			nil];
+  title_attrs = [@{
+    NSFontAttributeName: [NSFont boldSystemFontOfSize:TITLE_FONT_SIZE],
+    NSForegroundColorAttributeName: greyColor,
+  } retain];
+
+  selected_title_attrs = [@{
+    NSFontAttributeName: [NSFont boldSystemFontOfSize:TITLE_FONT_SIZE],
+    NSForegroundColorAttributeName: [ActColor alternateSelectedControlTextColor],
+  } retain];
+
+  body_attrs = [@{
+    NSFontAttributeName: [ActFont bodyFontOfSize:BODY_FONT_SIZE],
+    NSForegroundColorAttributeName: greyColor
+  } retain];
+
+  time_attrs = [@{
+    NSFontAttributeName: [NSFont systemFontOfSize:TIME_FONT_SIZE],
+    NSForegroundColorAttributeName: blueColor,
+    NSParagraphStyleAttributeName: rightStyle,
+  } retain];
+
+  stats_attrs = [@{
+    NSFontAttributeName: [NSFont boldSystemFontOfSize:STATS_FONT_SIZE],
+    NSForegroundColorAttributeName: redColor,
+  } retain];
+
+  dow_attrs = [@{
+    NSFontAttributeName: [NSFont boldSystemFontOfSize:DAY_OF_WEEK_FONT_SIZE],
+    NSForegroundColorAttributeName: greyColor,
+    NSParagraphStyleAttributeName: centerStyle,
+  } retain];
+
+  dom_attrs = [@{
+    NSFontAttributeName: [ActFont mediumSystemFontOfSize:DAY_OF_MONTH_FONT_SIZE],
+    NSForegroundColorAttributeName: greyColor,
+    NSParagraphStyleAttributeName: centerStyle,
+  } retain];
+
+  month_attrs = [@{
+    NSFontAttributeName: [NSFont boldSystemFontOfSize:MONTH_FONT_SIZE],
+    NSForegroundColorAttributeName: greyColor,
+  } retain];
+
+  week_attrs = [@{
+    NSFontAttributeName: [NSFont boldSystemFontOfSize:WEEK_FONT_SIZE],
+    NSForegroundColorAttributeName: greyColor,
+  } retain];
+
+  header_stats_attrs = [@{
+    NSFontAttributeName: [NSFont boldSystemFontOfSize:HEADER_STATS_FONT_SIZE],
+    NSForegroundColorAttributeName: redColor,
+    NSParagraphStyleAttributeName: rightStyle,
+  } retain];
 
   separator_color = [[NSColor colorWithDeviceWhite:.85 alpha:1] retain];
 
-  NSLocale *locale = [(ActAppDelegate *)[NSApp delegate] currentLocale];
+  NSLocale *locale = ((ActAppDelegate *)NSApp.delegate).currentLocale;
 
   time_formatter = [[NSDateFormatter alloc] init];
-  [time_formatter setLocale:locale];
-  [time_formatter setDateFormat:
-   [NSDateFormatter dateFormatFromTemplate:@"ha" options:0 locale:locale]];
+  time_formatter.locale = locale;
+  time_formatter.dateFormat =
+   [NSDateFormatter dateFormatFromTemplate:@"ha" options:0 locale:locale];
 
   week_formatter = [[NSDateFormatter alloc] init];
-  [week_formatter setLocale:locale];
-  [week_formatter setDateFormat:
-   [NSDateFormatter dateFormatFromTemplate:@"MMMdd" options:0 locale:locale]];
+  week_formatter.locale = locale;
+  week_formatter.dateFormat =
+   [NSDateFormatter dateFormatFromTemplate:@"MMMdd" options:0 locale:locale];
 
   month_formatter = [[NSDateFormatter alloc] init];
-  [month_formatter setLocale:locale];
-  [month_formatter setDateFormat:
-   [NSDateFormatter dateFormatFromTemplate:@"MMMMyyyy" options:0 locale:locale]];
+  month_formatter.locale = locale;
+  month_formatter.dateFormat =
+   [NSDateFormatter dateFormatFromTemplate:@"MMMMyyyy" options:0 locale:locale];
 
   initialized = true;
 }
@@ -717,8 +714,7 @@ ActNotesItem::draw(const NSRect &bounds, uint32_t flags) const
       // draw day-of-week
 
       subR.size.height = DAY_OF_WEEK_HEIGHT;
-      [[[[time_formatter shortWeekdaySymbols]
-	 objectAtIndex:day_of_week] uppercaseString]
+      [(time_formatter.shortWeekdaySymbols[day_of_week]).uppercaseString
        drawInRect:subR withAttributes:dow_attrs];
     }
 
@@ -765,9 +761,7 @@ ActNotesItem::draw(const NSRect &bounds, uint32_t flags) const
       if ((flags & DRAW_SELECTED) && (flags & DRAW_FOCUSED))
 	attrs = selected_title_attrs;
 
-      [(s != nullptr
-	? [NSString stringWithUTF8String:s->c_str()]
-	: @"Untitled")
+      [(s != nullptr ? @(s->c_str()) : @"Untitled")
        drawInRect:ssubR withAttributes:attrs];
     }
 
@@ -796,8 +790,7 @@ ActNotesItem::draw(const NSRect &bounds, uint32_t flags) const
 
   subR.size.height = STATS_HEIGHT;
 
-  [[NSString stringWithUTF8String:buf.c_str()]
-   drawInRect:subR withAttributes:stats_attrs];
+  [@(buf.c_str()) drawInRect:subR withAttributes:stats_attrs];
 
   subR.origin.y += STATS_LEADING;
 
@@ -882,8 +875,7 @@ ActNotesItem::draw_header(const NSRect &bounds, uint32_t flags,
     {
       std::string buf;
       act::format_distance(buf, stats.month_distance, act::unit_type::unknown);
-      [[NSString stringWithUTF8String:buf.c_str()]
-       drawInRect:subR withAttributes:header_stats_attrs];
+      [@(buf.c_str()) drawInRect:subR withAttributes:header_stats_attrs];
     }
 
   // draw week stats
@@ -894,8 +886,7 @@ ActNotesItem::draw_header(const NSRect &bounds, uint32_t flags,
     {
       std::string buf;
       act::format_distance(buf, stats.week_distance, act::unit_type::unknown);
-      [[NSString stringWithUTF8String:buf.c_str()]
-       drawInRect:subR withAttributes:header_stats_attrs];
+      [@(buf.c_str()) drawInRect:subR withAttributes:header_stats_attrs];
     }
 
   // draw separator

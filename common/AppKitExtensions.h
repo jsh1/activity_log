@@ -48,8 +48,7 @@
 
 @interface NSOutlineView (AppKitExtensions)
 
-- (NSArray *)selectedItems;
-- (void)setSelectedItems:(NSArray *)array;
+@property(nonatomic, copy) NSArray *selectedItems;
 
 - (void)setSelectedRow:(NSInteger)row;
 

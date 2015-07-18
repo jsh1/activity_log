@@ -34,10 +34,8 @@
 - (void)setCache:(ActURLCache *)cache;
 - (void)setData:(NSData *)data;
 - (void)setError:(NSError *)err;
-- (NSURLSessionTask *)task;
-- (void)setTask:(NSURLSessionTask *)task;
-- (int)fileId;
-- (void)setFileId:(int)x;
+@property(nonatomic, retain) NSURLSessionTask *task;
+@property(nonatomic, assign) int fileId;
 - (void)dispatch;
 @end
 
@@ -64,10 +62,10 @@ static ActURLCache *_sharedCache;
 
   if (_sharedCache == nil)
     {
-      path = [[[NSSearchPathForDirectoriesInDomains(NSCachesDirectory,
+      path = [[NSSearchPathForDirectoriesInDomains(NSCachesDirectory,
 						    NSUserDomainMask,
-						    YES) lastObject]
-	       stringByAppendingPathComponent:[[NSBundle mainBundle] bundleIdentifier]]
+						    YES).lastObject
+	       stringByAppendingPathComponent:[NSBundle mainBundle].bundleIdentifier]
 	      stringByAppendingPathComponent:@"ActURLCache"];
       if (path == nil)
 	return nil;
@@ -108,7 +106,7 @@ static ActURLCache *_sharedCache;
     }
 
   file = [_path stringByAppendingPathComponent:@"cache.db"];
-  TRY(sqlite3_open_v2([file UTF8String], (sqlite3**)&_handle,
+  TRY(sqlite3_open_v2(file.UTF8String, (sqlite3**)&_handle,
 		      SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, NULL));
 
   if (_handle == NULL)
@@ -141,8 +139,8 @@ static ActURLCache *_sharedCache;
 
 - (BOOL)loadURL:(ActCachedURL *)url
 {
-  assert([url URL] != nil && [url delegate] != nil);
-  assert([url cache] == nil);
+  assert(url.URL != nil && url.delegate != nil);
+  assert(url.cache == nil);
 
   if (_queryStmt == NULL)
     {
@@ -151,11 +149,11 @@ static ActURLCache *_sharedCache;
 			     (sqlite3_stmt **) &_queryStmt, NULL));
     }
 
-  [url setCache:self];
+  url.cache = self;
 
   int fileid = 0, expires = 0;
 
-  TRY(sqlite3_bind_text(_queryStmt, 1, [[[url URL] absoluteString] UTF8String],
+  TRY(sqlite3_bind_text(_queryStmt, 1, url.URL.absoluteString.UTF8String,
 			-1, SQLITE_TRANSIENT));
 
   if (sqlite3_step(_queryStmt) == SQLITE_ROW)
@@ -169,14 +167,14 @@ static ActURLCache *_sharedCache;
 
   if (fileid != 0)
     {
-      [url setFileId:fileid];
+      url.fileId = fileid;
 
       if (time(NULL) < (time_t)expires)
 	{
-	  [url setData:[NSData dataWithContentsOfFile:
-			[self _pathForFileId:fileid]]];
+	  url.data = [NSData dataWithContentsOfFile:
+		      [self _pathForFileId:fileid]];
 
-	  if ([[url data] length] != 0)
+	  if (url.data.length != 0)
 	    {
 	      [url dispatch];
 	      return YES;
@@ -184,24 +182,24 @@ static ActURLCache *_sharedCache;
 	}
     }
 
-  NSURLRequest *request = [NSURLRequest requestWithURL:[url URL]];
+  NSURLRequest *request = [NSURLRequest requestWithURL:url.URL];
 
   NSURLSessionTask *task = [[NSURLSession sharedSession]
     dataTaskWithRequest:request completionHandler:^
     (NSData *data, NSURLResponse *response, NSError *err)
       {
-	[url setTask:nil];
+	url.task = nil;
 	if (err == nil)
 	  {
-	    [url setData:data];
+	    url.data = data;
 	    [self commitCachedURL:url];
 	  }
 	else
-	  [url setError:err];
+	  url.error = err;
 	[url dispatch];
       }];
 
-  [url setTask:task];
+  url.task = task;
   [task resume];
 
   return YES;
@@ -209,13 +207,13 @@ static ActURLCache *_sharedCache;
 
 - (void)commitCachedURL:(ActCachedURL *)url
 {            
-  NSData *data = [url data];
-  const char *url_str = [[[url URL] absoluteString] UTF8String];
+  NSData *data = url.data;
+  const char *url_str = url.URL.absoluteString.UTF8String;
   NSFileManager *fm = [NSFileManager defaultManager];
 
-  if ([url fileId] != 0)
+  if (url.fileId != 0)
     {
-      int fileid = [url fileId];
+      int fileid = url.fileId;
 
       [fm removeItemAtPath:[self _pathForFileId:fileid] error:NULL];
 
@@ -255,7 +253,7 @@ static ActURLCache *_sharedCache;
       TRY(sqlite3_bind_text(_insertStmt, 1, url_str, -1, SQLITE_TRANSIENT));
       TRY(sqlite3_bind_int(_insertStmt, 2, fileid));
       TRY(sqlite3_bind_int(_insertStmt, 3, expires));
-      TRY(sqlite3_bind_int(_insertStmt, 4, (int) [data length]));
+      TRY(sqlite3_bind_int(_insertStmt, 4, (int) data.length));
 
       if (sqlite3_step(_insertStmt) == SQLITE_DONE)
 	{
@@ -417,7 +415,7 @@ static ActURLCache *_sharedCache;
       _dispatching = YES;
       [[NSRunLoop mainRunLoop]
        performSelector:@selector(_sendReply:) target:self argument:nil
-       order:0 modes:[NSArray arrayWithObject:NSRunLoopCommonModes]];
+       order:0 modes:@[NSRunLoopCommonModes]];
     }
 }
 

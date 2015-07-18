@@ -38,7 +38,7 @@
 - (NSInteger)badgeValue
 {
   std::vector<act::database::item> items;
-  [_controller database]->execute_query(_query, items);
+  _controller.database->execute_query(_query, items);
 
   return (NSInteger)items.size();
 }
@@ -46,7 +46,7 @@
 - (void)select
 {
   [_controller showQueryResults:_query];
-  [_controller setWindowMode:ActWindowMode_Viewer];
+  _controller.windowMode = ActWindowMode_Viewer;
 }
 
 @end

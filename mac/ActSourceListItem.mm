@@ -38,7 +38,7 @@
 + (id)itemWithName:(NSString *)name
 {
   ActSourceListItem *item = [self item];
-  [item setName:name];
+  item.name = name;
   return item;
 }
 
@@ -51,7 +51,7 @@
 
 - (NSArray *)subitems
 {
-  return _subitems != nil ? _subitems : [NSArray array];
+  return _subitems != nil ? _subitems : @[];
 }
 
 - (void)setSubitems:(NSArray *)array
@@ -65,7 +65,7 @@
 
 - (NSInteger)subitemsCount
 {
-  return [_subitems count];
+  return _subitems.count;
 }
 
 - (void)addSubitem:(ActSourceListItem *)item

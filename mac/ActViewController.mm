@@ -45,7 +45,7 @@
 
   NSDictionary *dict = obj;
 
-  Class cls = NSClassFromString([dict objectForKey:@"className"]);
+  Class cls = NSClassFromString(dict[@"className"]);
   if (![cls isSubclassOfClass:[ActViewController class]])
     return nil;
 
@@ -57,10 +57,10 @@
 {
   NSMutableDictionary *dict = [NSMutableDictionary dictionary];
 
-  [dict setObject:NSStringFromClass([self class]) forKey:@"className"];
+  dict[@"className"] = NSStringFromClass(self.class);
 
   if (_identifierSuffix != nil)
-    [dict setObject:_identifierSuffix forKey:@"identifierSuffix"];
+    dict[@"identifierSuffix"] = _identifierSuffix;
 
   return dict;
 }
@@ -68,14 +68,14 @@
 - (id)initWithController:(ActWindowController *)controller
     options:(NSDictionary *)opts
 {
-  self = [super initWithNibName:[[self class] viewNibName]
+  self = [super initWithNibName:[self.class viewNibName]
 	  bundle:[NSBundle mainBundle]];
   if (self == nil)
     return nil;
 
   _controller = controller;
   _subviewControllers = [[NSMutableArray alloc] init];
-  _identifierSuffix = [[opts objectForKey:@"identifierSuffix"] copy];
+  _identifierSuffix = [opts[@"identifierSuffix"] copy];
 
   return self;
 }
@@ -89,7 +89,7 @@
 
 - (NSString *)identifier
 {
-  NSString *ident = NSStringFromClass([self class]);
+  NSString *ident = NSStringFromClass(self.class);
 
   if (_identifierSuffix != nil)
     ident = [ident stringByAppendingString:_identifierSuffix];
@@ -99,7 +99,7 @@
 
 - (ActViewController *)viewControllerWithClass:(Class)cls
 {
-  if ([self class] == cls)
+  if (self.class == cls)
     return self;
 
   for (ActViewController *obj in _subviewControllers)
@@ -180,30 +180,30 @@
 
 - (NSDictionary *)savedViewState
 {
-  if ([_subviewControllers count] == 0)
-    return [NSDictionary dictionary];
+  if (_subviewControllers.count == 0)
+    return @{};
 
   NSMutableDictionary *controllers = [NSMutableDictionary dictionary];
 
   for (ActViewController *controller in _subviewControllers)
     {
       NSDictionary *sub = [controller savedViewState];
-      if ([sub count] != 0)
-	[controllers setObject:sub forKey:[controller identifier]];
+      if (sub.count != 0)
+	controllers[controller.identifier] = sub;
     }
 
-  return [NSDictionary dictionaryWithObjectsAndKeys:
-	  controllers, @"ActViewControllers",
-	  nil];
+  return @{
+    @"ActViewControllers": controllers,
+  };
 }
 
 - (void)applySavedViewState:(NSDictionary *)state
 {
-  if (NSDictionary *dict = [state objectForKey:@"ActViewControllers"])
+  if (NSDictionary *dict = state[@"ActViewControllers"])
     {
       for (ActViewController *controller in _subviewControllers)
 	{
-	  if (NSDictionary *sub = [dict objectForKey:[controller identifier]])
+	  if (NSDictionary *sub = dict[controller.identifier])
 	    [controller applySavedViewState:sub];
 	}
     }
@@ -211,11 +211,11 @@
 
 - (void)addToContainerView:(NSView *)superview
 {
-  if (NSView *view = [self view])
+  if (NSView *view = self.view)
     {
-      assert([view superview] == nil);
+      assert(view.superview == nil);
 
-      [view setFrame:[superview bounds]];
+      view.frame = superview.bounds;
 
       [self viewWillAppear];
 
@@ -229,7 +229,7 @@
 {
   [self viewWillDisappear];
 
-  [[self view] removeFromSuperview];
+  [self.view removeFromSuperview];
 
   [self viewDidDisappear];
 }
@@ -238,7 +238,7 @@
 
 - (ActFieldEditor *)actFieldEditor:(ActTextField *)obj
 {
-  return [_controller fieldEditor];
+  return _controller.fieldEditor;
 }
 
 @end

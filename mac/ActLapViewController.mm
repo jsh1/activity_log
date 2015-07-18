@@ -28,6 +28,8 @@
 #import "ActTableView.h"
 #import "ActWindowController.h"
 
+#import "AppKitExtensions.h"
+
 #import "act-format.h"
 
 #define HEADER_HEIGHT 16
@@ -46,11 +48,12 @@ addTableColumn (NSTableView *tv, NSFont *font, NSString *ident,NSString *title)
 {
   NSTableColumn *tc = [[NSTableColumn alloc] initWithIdentifier:ident];
   [tc setEditable:NO];
-  [[tc dataCell] setFont:font];
-  [[tc dataCell] setVerticallyCentered:YES];
+  NSCell *cell = tc.dataCell;
+  cell.font = font;
+  cell.verticallyCentered = YES;
   NSTableHeaderCell *hc = [[NSTableHeaderCell alloc] initTextCell:title];
-  [hc setFont:font];
-  [tc setHeaderCell:hc];
+  hc.font = font;
+  tc.headerCell = hc;
   [hc release];
   [tv addTableColumn:tc];
   [tc release];
@@ -60,7 +63,7 @@ addTableColumn (NSTableView *tv, NSFont *font, NSString *ident,NSString *title)
 static void
 setTableColumnEnabled(NSTableView *tv, NSString *ident, BOOL state)
 {
-  [[tv tableColumnWithIdentifier:ident] setHidden:!state];
+  [tv tableColumnWithIdentifier:ident].hidden = !state;
 }
 #endif
 
@@ -90,20 +93,20 @@ setTableColumnEnabled(NSTableView *tv, NSString *ident, BOOL state)
 
 - (void)viewDidLoad
 {
-  [(ActCollapsibleView *)[self view] setTitle:@"Laps"];
+  ((ActCollapsibleView *)self.view).title = @"Laps";
 
   // creating layers for each subview is not gaining us anything
-  [[self view] setCanDrawSubviewsIntoLayer:YES];
+  self.view.canDrawSubviewsIntoLayer = YES;
 
   _headerView = [[NSTableHeaderView alloc] initWithFrame:NSZeroRect];
   [_lapView addSubview:_headerView];
   [_headerView release];
 
   _tableView = [[ActTableView alloc] initWithFrame:NSZeroRect];
-  [_tableView setDataSource:self];
-  [_tableView setDelegate:self];
-  [_tableView setUsesAlternatingRowBackgroundColors:YES];
-  [_tableView setRowHeight:ROW_HEIGHT];
+  _tableView.dataSource = self;
+  _tableView.delegate = self;
+  _tableView.usesAlternatingRowBackgroundColors = YES;
+  _tableView.rowHeight = ROW_HEIGHT;
 
   NSFont *font = [NSFont systemFontOfSize:[NSFont smallSystemFontSize]];
   addTableColumn(_tableView, font, @"lap", @"Lap");
@@ -122,13 +125,13 @@ setTableColumnEnabled(NSTableView *tv, NSString *ident, BOOL state)
   [_lapView addSubview:_tableView];
   [_tableView release];
 
-  [_headerView setTableView:_tableView];
+  _headerView.tableView = _tableView;
 }
 
 - (void)selectedActivityDidChange:(NSNotification *)note
 {
 #if 0
-  const act::activity *a = [_controller selectedActivity];
+  const act::activity *a = _controller.selectedActivity;
   if (!a)
     return;
 
@@ -163,12 +166,12 @@ setTableColumnEnabled(NSTableView *tv, NSString *ident, BOOL state)
 
 - (void)selectedLapIndexDidChange:(NSNotification *)note
 {
-  NSInteger row = [_controller selectedLapIndex];
+  NSInteger row = _controller.selectedLapIndex;
   NSIndexSet *set = nil;
 
   if (row >= 0)
     {
-      if (row != [_tableView selectedRow])
+      if (row != _tableView.selectedRow)
 	set = [NSIndexSet indexSetWithIndex:row];
     }
   else
@@ -193,22 +196,22 @@ setTableColumnEnabled(NSTableView *tv, NSString *ident, BOOL state)
   if (rows == 0)
     return;
 
-  NSRect r = [_lapView bounds];
+  NSRect r = _lapView.bounds;
 
   r.size.height = (ROW_HEIGHT + SEPARATOR_HEIGHT) * rows;
-  [_tableView setFrame:r];
+  _tableView.frame = r;
   [_tableView sizeToFit];
 
   r.origin.y += r.size.height;
   r.size.height = HEADER_HEIGHT;
-  [_headerView setFrame:r];
+  _headerView.frame = r;
 }
 
 // NSTableViewDataSource methods
 
 - (NSInteger)numberOfRowsInTableView:(NSTableView *)tv
 {
-  const act::activity *a = [_controller selectedActivity];
+  const act::activity *a = _controller.selectedActivity;
   if (!a)
     return 0;
 
@@ -222,7 +225,7 @@ setTableColumnEnabled(NSTableView *tv, NSString *ident, BOOL state)
 - (id)tableView:(NSTableView *)tv
   objectValueForTableColumn:(NSTableColumn *)col row:(NSInteger)row
 {
-  const act::activity *a = [_controller selectedActivity];
+  const act::activity *a = _controller.selectedActivity;
   if (!a)
     return nil;
 
@@ -236,7 +239,7 @@ setTableColumnEnabled(NSTableView *tv, NSString *ident, BOOL state)
   const act::gps::activity::lap &lap = gps_data->laps()[row];
 
   std::string str;
-  NSString *ident = [col identifier];
+  NSString *ident = col.identifier;
 
   if ([ident isEqualToString:@"lap"])
     return [NSString stringWithFormat:@"%d", (int) row + 1];
@@ -276,7 +279,7 @@ setTableColumnEnabled(NSTableView *tv, NSString *ident, BOOL state)
     act::format_distance(str, lap.avg_vertical_oscillation, act::unit_type::millimetres);
 
   if (str.size() != 0)
-    return [NSString stringWithUTF8String:str.c_str()];
+    return @(str.c_str());
   else
     return nil;
 }
@@ -285,7 +288,7 @@ setTableColumnEnabled(NSTableView *tv, NSString *ident, BOOL state)
 
 - (void)tableViewSelectionDidChange:(NSNotification *)note
 {
-  [_controller setSelectedLapIndex:[_tableView selectedRow]];
+  _controller.selectedLapIndex = _tableView.selectedRow;
 }
 
 @end

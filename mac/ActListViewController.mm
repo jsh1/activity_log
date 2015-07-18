@@ -27,6 +27,8 @@
 #import "ActAppDelegate.h"
 #import "ActWindowController.h"
 
+#import "AppKitExtensions.h"
+
 #import "act-format.h"
 
 #import <algorithm>
@@ -52,8 +54,8 @@
    addObserver:self selector:@selector(activityDidChangeField:)
    name:ActActivityDidChangeField object:_controller];
 
-  for (NSTableColumn *col in [_tableView tableColumns])
-    [[col dataCell] setVerticallyCentered:YES];
+  for (NSTableColumn *col in _tableView.tableColumns)
+    ((NSCell *)col.dataCell).verticallyCentered = YES;
 }
 
 - (void)dealloc
@@ -74,7 +76,7 @@
   if (storage == nullptr)
     return NSNotFound;
 
-  const std::vector<act::database::item> &vec = [_controller activityList];
+  const std::vector<act::database::item> &vec = _controller.activityList;
 
   const auto &pos = std::find_if(vec.begin(), vec.end(),
 				 [=] (const act::database::item &a) {
@@ -89,7 +91,7 @@
 
 - (act::activity *)activityForRow:(NSInteger)row
 {
-  const auto &vec = [_controller activityList];
+  const auto &vec = _controller.activityList;
 
   act::activity_storage_ref storage = vec[row].storage();
 
@@ -114,13 +116,13 @@
 - (void)selectedActivityDidChange:(NSNotification *)note
 {
   NSInteger newRow = [self rowForActivityStorage:
-		      [_controller selectedActivityStorage]];
+		      _controller.selectedActivityStorage];
 
   NSIndexSet *set = nil;
 
   if (newRow != NSNotFound)
     {
-      if (newRow != [_tableView selectedRow])
+      if (newRow != _tableView.selectedRow)
 	set = [NSIndexSet indexSetWithIndex:newRow];
     }
   else
@@ -134,7 +136,7 @@
 
 - (void)activityDidChangeField:(NSNotification *)note
 {
-  void *ptr = [[[note userInfo] objectForKey:@"activity"] pointerValue];
+  void *ptr = [note.userInfo[@"activity"] pointerValue];
   const auto &a = *reinterpret_cast<const act::activity_storage_ref *> (ptr);
 
   NSInteger row = [self rowForActivityStorage:a];
@@ -143,14 +145,14 @@
 
   [_tableView reloadDataForRowIndexes:[NSIndexSet indexSetWithIndex:row]
    columnIndexes:[NSIndexSet indexSetWithIndexesInRange:
-		  NSMakeRange(0, [_tableView numberOfColumns])]];
+		  NSMakeRange(0, _tableView.numberOfColumns)]];
 }
 
 // NSTableViewDataSource methods
 
 - (NSInteger)numberOfRowsInTableView:(NSTableView *)tv
 {
-  return [_controller activityList].size();
+  return _controller.activityList.size();
 }
 
 - (id)tableView:(NSTableView *)tv
@@ -158,7 +160,7 @@
 {
   const act::activity *a = [self activityForRow:row];
 
-  NSString *ident = [col identifier];
+  NSString *ident = col.identifier;
 
   if ([ident isEqualToString:@"date"])
     {
@@ -167,12 +169,12 @@
       if (formatter == nil)
 	{
 	  NSLocale *locale
-	    = [(ActAppDelegate *)[NSApp delegate] currentLocale];
+	    = ((ActAppDelegate *)NSApp.delegate).currentLocale;
 	  formatter = [[NSDateFormatter alloc] init];
-	  [formatter setLocale:locale];
-	  [formatter setDateFormat:
+	  formatter.locale = locale;
+	  formatter.dateFormat = 
 	   [NSDateFormatter dateFormatFromTemplate:@"d/M/yy ha"
-	    options:0 locale:locale]];
+	    options:0 locale:locale];
 	}
 
       return [formatter stringFromDate:
@@ -187,7 +189,7 @@
 {
   act::activity *a = [self activityForRow:row];
 
-  NSString *ident = [col identifier];
+  NSString *ident = col.identifier;
 
   if ([ident isEqualToString:@"date"])
     return;
@@ -199,13 +201,13 @@
 
 - (void)tableViewSelectionDidChange:(NSNotification *)note
 {
-  NSInteger row = [_tableView selectedRow];
-  const auto &activities = [_controller activityList];
+  NSInteger row = _tableView.selectedRow;
+  const auto &activities = _controller.activityList;
 
   if (row >= 0 && row < activities.size())
-    [_controller setSelectedActivityStorage:activities[row].storage()];
+    _controller.selectedActivityStorage = activities[row].storage();
   else
-    [_controller setSelectedActivityStorage:nullptr];
+    _controller.selectedActivityStorage = nullptr;
 }
 
 @end

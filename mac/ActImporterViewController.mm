@@ -85,8 +85,8 @@
 {
   [super viewDidLoad];
 
-  for (NSTableColumn *col in [_tableView tableColumns])
-    [[col dataCell] setVerticallyCentered:YES];
+  for (NSTableColumn *col in _tableView.tableColumns)
+    ((NSCell *)col.dataCell).verticallyCentered = YES;
 }
 
 - (void)dealloc
@@ -121,8 +121,8 @@
 
   _activities = [[NSMutableArray alloc] init];
 
-  for (NSURL *url in [[[_controller selectedDevice]
-		       activityURLs] reverseObjectEnumerator])
+  for (NSURL *url in [_controller.selectedDevice.activityURLs
+		      reverseObjectEnumerator])
     {
       ActImporterActivity *obj
         = [[ActImporterActivity alloc] initWithURL:url controller:self];
@@ -188,10 +188,10 @@ copyFileToGPSDirectory(std::string &gps_path)
 
 	  NSFileManager *fm = [NSFileManager defaultManager];
 
-	  NSString *src = [NSString stringWithUTF8String:gps_path.c_str()];
-	  NSString *dst = [NSString stringWithUTF8String:dst_path.c_str()];
+	  NSString *src = @(gps_path.c_str());
+	  NSString *dst = @(dst_path.c_str());
 
-	  [fm createDirectoryAtPath:[dst stringByDeletingLastPathComponent]
+	  [fm createDirectoryAtPath:dst.stringByDeletingLastPathComponent
 	   withIntermediateDirectories:YES attributes:nil error:nil];
 
 	  if ([fm copyItemAtPath:src toPath:dst error:nil])
@@ -226,10 +226,9 @@ copyFileToGPSDirectory(std::string &gps_path)
 
 - (IBAction)revealAction:(id)sender
 {
-  ActImporterActivity *item
-    = [_activities objectAtIndex:[_tableView selectedRow]];
+  ActImporterActivity *item = _activities[_tableView.selectedRow];
 
-  const char *path = [[[[item URL] path] lastPathComponent] UTF8String];
+  const char *path = item.URL.path.lastPathComponent.UTF8String;
   act::database::query_term_ref term
     (new act::database::equal_term("gps-file", path));
 
@@ -237,28 +236,28 @@ copyFileToGPSDirectory(std::string &gps_path)
   q.set_term(term);
 
   [_controller showQueryResults:q];
-  [_controller setWindowMode:ActWindowMode_Viewer];
+  _controller.windowMode = ActWindowMode_Viewer;
 }
 
 // NSTableDataSource methods
 
 - (NSInteger)numberOfRowsInTableView:(NSTableView *)tv
 {
-  return [_activities count];
+  return _activities.count;
 }
 
 - (id)tableView:(NSTableView *)tv
   objectValueForTableColumn:(NSTableColumn *)col row:(NSInteger)row
 {
-  NSString *ident = [col identifier];
-  ActImporterActivity *item = [_activities objectAtIndex:row];
+  NSString *ident = col.identifier;
+  ActImporterActivity *item = _activities[row];
 
   if ([ident isEqualToString:@"checked"])
-    return [NSNumber numberWithBool:[item isChecked]];
+    return @(item.checked);
   else if ([ident isEqualToString:@"reveal"])
     return nil;
 
-  const act::gps::activity *a = [item data];
+  const act::gps::activity *a = item.data;
   if (a == nullptr)
     return nil;
 
@@ -269,12 +268,12 @@ copyFileToGPSDirectory(std::string &gps_path)
       if (formatter == nil)
 	{
 	  NSLocale *locale
-	    = [(ActAppDelegate *)[NSApp delegate] currentLocale];
+	    = ((ActAppDelegate *)NSApp.delegate).currentLocale;
 	  formatter = [[NSDateFormatter alloc] init];
-	  [formatter setLocale:locale];
-	  [formatter setDateFormat:
+	  formatter.locale = locale;
+	  formatter.dateFormat = 
 	   [NSDateFormatter dateFormatFromTemplate:@"d/M/yy ha"
-	    options:0 locale:locale]];
+	    options:0 locale:locale];
 	}
 
       return [formatter stringFromDate:
@@ -284,13 +283,13 @@ copyFileToGPSDirectory(std::string &gps_path)
     {
       std::string buf;
       act::format_distance(buf, a->total_distance(), act::unit_type::unknown);
-      return [NSString stringWithUTF8String:buf.c_str()];
+      return @(buf.c_str());
     }
   else if ([ident isEqualToString:@"duration"])
     {
       std::string buf;
       act::format_duration(buf, a->total_duration());
-      return [NSString stringWithUTF8String:buf.c_str()];
+      return @(buf.c_str());
     }
 
   return nil;
@@ -299,28 +298,28 @@ copyFileToGPSDirectory(std::string &gps_path)
 - (void)tableView:(NSTableView *)tv setObjectValue:(id)value
   forTableColumn:(NSTableColumn *)col row:(NSInteger)row
 {
-  NSString *ident = [col identifier];
-  ActImporterActivity *item = [_activities objectAtIndex:row];
+  NSString *ident = col.identifier;
+  ActImporterActivity *item = _activities[row];
 
   if ([ident isEqualToString:@"checked"])
-    [item setChecked:[value boolValue]];
+    item.checked = [value boolValue];
 
   // no other fields are settable
 }
 
 // NSTableDelegate methods
 
-- (void)tableView:(NSTableView *)tv willDisplayCell:(id)cell
+- (void)tableView:(NSTableView *)tv willDisplayCell:(NSCell *)cell
     forTableColumn:(NSTableColumn *)col row:(NSInteger)row
 {
-  NSString *ident = [col identifier];
-  ActImporterActivity *item = [_activities objectAtIndex:row];
+  NSString *ident = col.identifier;
+  ActImporterActivity *item = _activities[row];
 
-  if (([ident isEqualToString:@"checked"] && [item exists])
-      || ([ident isEqualToString:@"reveal"] && ![item exists]))
-    [cell setEnabled:NO];
+  if (([ident isEqualToString:@"checked"] && item.exists)
+      || ([ident isEqualToString:@"reveal"] && !item.exists))
+    cell.enabled = NO;
   else
-    [cell setEnabled:YES];
+    cell.enabled = YES;
 }
 
 @end
@@ -344,7 +343,7 @@ copyFileToGPSDirectory(std::string &gps_path)
 
   // FIXME: quicker to do all queries at once?
 
-  const char *path = [[[url path] lastPathComponent] UTF8String];
+  const char *path = url.path.lastPathComponent.UTF8String;
   act::database::query_term_ref term
     (new act::database::equal_term("gps-file", path));
 
@@ -352,7 +351,7 @@ copyFileToGPSDirectory(std::string &gps_path)
   q.set_term(term);
 
   std::vector<act::database::item> results;
-  [[_controller controller] database]->execute_query(q, results);
+  _controller.controller.database->execute_query(q, results);
 
   _exists = results.size() != 0;
   _checked = !_exists;
@@ -383,7 +382,7 @@ copyFileToGPSDirectory(std::string &gps_path)
       dispatch_async(q, ^{
 	act::gps::activity *a = new act::gps::activity;
 
-	if (a->read_file([[_url path] UTF8String]))
+	if (a->read_file(_url.path.UTF8String))
 	  {
 	    _data.reset(a);
 

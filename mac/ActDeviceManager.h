@@ -31,7 +31,7 @@
 
 + (ActDeviceManager *)sharedDeviceManager;
 
-- (NSArray *)devices;
+@property(nonatomic, copy, readonly) NSArray *allDevices;
 
 - (void)rescanVolumes;
 

@@ -27,6 +27,7 @@
 #import "ActColor.h"
 #import "ActCollapsibleView.h"
 #import "ActHeaderFieldView.h"
+#import "ActHeaderViewController.h"
 #import "ActViewLayout.h"
 #import "ActWindowController.h"
 
@@ -41,7 +42,7 @@
 
 - (ActWindowController *)controller
 {
-  return (ActWindowController *)[[self window] windowController];
+  return (ActWindowController *)self.window.windowController;
 }
 
 - (id)initWithFrame:(NSRect)frame
@@ -57,11 +58,11 @@
 {
   [[NSNotificationCenter defaultCenter]
    addObserver:self selector:@selector(selectedActivityDidChange:)
-   name:ActSelectedActivityDidChange object:[self controller]];
+   name:ActSelectedActivityDidChange object:self.controller];
 
   [[NSNotificationCenter defaultCenter]
    addObserver:self selector:@selector(activityDidChangeField:)
-   name:ActActivityDidChangeField object:[self controller]];
+   name:ActActivityDidChangeField object:self.controller];
 }
 
 - (void)dealloc
@@ -74,10 +75,10 @@
 {
   NSMutableArray *array = [[NSMutableArray alloc] init];
 
-  for (ActHeaderFieldView *subview in [self subviews])
+  for (ActHeaderFieldView *subview in self.subviews)
     {
-      NSString *name = [subview fieldName];
-      if ([name length] != 0)
+      NSString *name = subview.fieldName;
+      if (name.length != 0)
 	[array addObject:name];
     }
 
@@ -86,7 +87,7 @@
 
 - (void)setDisplayedFields:(NSArray *)array
 {
-  NSMutableArray *old_subviews = [[self subviews] mutableCopy];
+  NSMutableArray *old_subviews = [self.subviews mutableCopy];
   NSMutableArray *new_subviews = [[NSMutableArray alloc] init];
 
   for (NSString *field in array)
@@ -96,7 +97,7 @@
       NSInteger old_idx = 0;
       for (ActHeaderFieldView *old_subview in old_subviews)
 	{
-	  if ([[old_subview fieldName]
+	  if ([old_subview.fieldName
 	       isEqualToString:field caseInsensitive:YES])
 	    {
 	      new_subview = old_subview;
@@ -110,14 +111,14 @@
 	{
 	  new_subview = [[[ActHeaderFieldView alloc]
 			  initWithFrame:NSZeroRect] autorelease];
-	  [new_subview setHeaderView:self];
-	  [new_subview setFieldName:field];
+	  new_subview.headerView = self;
+	  new_subview.fieldName = field;
 	}
 
       [new_subviews addObject:new_subview];
     }
 
-  [self setSubviews:new_subviews];
+  self.subviews = new_subviews;
 
   [new_subviews release];
   [old_subviews release];
@@ -125,17 +126,17 @@
 
 - (ActHeaderFieldView *)_ensureField:(NSString *)name
 {
-  for (ActHeaderFieldView *subview in [self subviews])
+  for (ActHeaderFieldView *subview in self.subviews)
     {
-      if ([[subview fieldName] isEqualToString:name caseInsensitive:YES])
+      if ([subview.fieldName isEqualToString:name caseInsensitive:YES])
 	return subview;
     }
 
   ActHeaderFieldView *field
     = [[ActHeaderFieldView alloc] initWithFrame:NSZeroRect];
 
-  [field setHeaderView:self];
-  [field setFieldName:name];
+  field.headerView = self;
+  field.fieldName = name;
 
   [self addSubview:field];
   [field release];
@@ -145,9 +146,9 @@
 
 - (BOOL)displaysField:(NSString *)name
 {
-  for (ActHeaderFieldView *subview in [self subviews])
+  for (ActHeaderFieldView *subview in self.subviews)
     {
-      if ([[subview fieldName] isEqualToString:name caseInsensitive:YES])
+      if ([subview.fieldName isEqualToString:name caseInsensitive:YES])
 	return YES;
     }
 
@@ -161,9 +162,9 @@
 
 - (void)removeDisplayedField:(NSString *)name
 {
-  for (ActHeaderFieldView *subview in [self subviews])
+  for (ActHeaderFieldView *subview in self.subviews)
     {
-      if ([[subview fieldName] isEqualToString:name caseInsensitive:YES])
+      if ([subview.fieldName isEqualToString:name caseInsensitive:YES])
 	{
 	  [subview removeFromSuperview];
 	  return;
@@ -176,10 +177,10 @@
   if (sender == _addFieldButton)
     {
       ActHeaderFieldView *field = [self _ensureField:@""];
-      [(ActCollapsibleView *)[_controller view] setCollapsed:NO];
-      [[self superview] subviewNeedsLayout:self];
-      [[self window] makeFirstResponder:[field nameView]];
-      [self scrollRectToVisible:[field convertRect:[field bounds] toView:self]];
+      ((ActCollapsibleView *)_controller.view).collapsed = NO;
+      [self.superview subviewNeedsLayout:self];
+      [self.window makeFirstResponder:field.nameView];
+      [self scrollRectToVisible:[field convertRect:field.bounds toView:self]];
     }
 }
 
@@ -187,11 +188,11 @@
 {
   BOOL previous = NO;
 
-  for (ActHeaderFieldView *subview in [self subviews])
+  for (ActHeaderFieldView *subview in self.subviews)
     {
       if (previous)
 	{
-	  [[self window] makeFirstResponder:[subview valueView]];
+	  [self.window makeFirstResponder:subview.valueView];
 	  return;
 	}
       else if (subview == view)
@@ -206,20 +207,20 @@
 
 - (void)selectedActivityDidChange:(NSNotification *)note
 {
-  for (ActHeaderFieldView *subview in [self subviews])
+  for (ActHeaderFieldView *subview in self.subviews)
     [subview update];
 }
 
 - (void)activityDidChangeField:(NSNotification *)note
 {
-  NSDictionary *dict = [note userInfo];
+  NSDictionary *dict = note.userInfo;
 
-  void *ptr = [[dict objectForKey:@"activity"] pointerValue];
+  void *ptr = [dict[@"activity"] pointerValue];
   const auto &a = *reinterpret_cast<const act::activity_storage_ref *> (ptr);
   
-  if (a == [[self controller] selectedActivityStorage])
+  if (a == self.controller.selectedActivityStorage)
     {
-      for (ActHeaderFieldView *subview in [self subviews])
+      for (ActHeaderFieldView *subview in self.subviews)
 	[subview update];
     }
 }
@@ -228,11 +229,11 @@
 {
   CGFloat h = 0;
 
-  for (ActHeaderFieldView *field in [self subviews])
+  for (ActHeaderFieldView *field in self.subviews)
     {
       if (h != 0)
        h += FIELD_Y_SPACING;
-      h += [field preferredHeight];
+      h += field.preferredHeight;
     }
 
   return h + Y_INSET * 2;
@@ -240,19 +241,19 @@
 
 - (void)layoutSubviews
 {
-  NSRect bounds = NSInsetRect([self bounds], X_INSET, Y_INSET);
+  NSRect bounds = NSInsetRect(self.bounds, X_INSET, Y_INSET);
 
   CGFloat y = 0;
 
-  for (ActHeaderFieldView *field in [self subviews])
+  for (ActHeaderFieldView *field in self.subviews)
     {
       NSRect frame;
-      CGFloat h = [field preferredHeight];
+      CGFloat h = field.preferredHeight;
       frame.origin.x = bounds.origin.x;
       frame.origin.y = bounds.origin.y + bounds.size.height - (y + h);
       frame.size.width = bounds.size.width;
       frame.size.height = h;
-      [field setFrame:frame];
+      field.frame = frame;
       [field layoutSubviews];
       y += h + FIELD_Y_SPACING;
     }

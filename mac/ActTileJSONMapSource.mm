@@ -41,7 +41,7 @@
 
 + (ActTileJSONMapSource *)mapSourceFromURL:(NSURL *)url
 {
-  if ([url isFileURL])
+  if (url.fileURL)
     {
       NSData *data = [NSData dataWithContentsOfURL:url];
       if (data == nil)
@@ -96,8 +96,8 @@
   assert(_url == nil);
 
   _url = [[ActCachedURL alloc] init];
-  [_url setURL:url];
-  [_url setDelegate:self];
+  _url.URL = url;
+  _url.delegate = self;
 
   [[ActURLCache sharedURLCache] loadURL:_url];
 }
@@ -130,7 +130,7 @@
 - (int)minZoom
 {
   if (NSNumber *obj = _dict[@"minzoom"])
-    return [obj intValue];
+    return obj.intValue;
   else
     return 0;
 }
@@ -138,7 +138,7 @@
 - (int)maxZoom
 {
   if (NSNumber *obj = _dict[@"maxzoom"])
-    return [obj intValue];
+    return obj.intValue;
   else
     return 22;
 }
@@ -151,11 +151,11 @@
 - (NSURL *)URLForTileIndex:(const ActMapTileIndex &)tile retina:(BOOL)flag
 {
   NSArray *array = _dict[@"tiles"];
-  if ([array count] < 1)
+  if (array.count < 1)
     return nil;
 
   int ty = tile.y;
-  if ([[self scheme] isEqualToString:@"xyz"])
+  if ([self.scheme isEqualToString:@"xyz"])
     ty = (1 << tile.z) - ty - 1;
 
   NSString *str = array[0];
@@ -180,7 +180,7 @@
 - (void)cachedURLDidFinish:(ActCachedURL *)url
 {
   [_dict release];
-  _dict = [[NSJSONSerialization JSONObjectWithData:[url data]
+  _dict = [[NSJSONSerialization JSONObjectWithData:url.data
 	    options:0 error:nil] retain];
 
   [_url release];

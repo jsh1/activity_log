@@ -49,25 +49,25 @@
 {
   [super viewDidLoad];
 
-  _baseHeight = [[self view] frame].size.height;
+  _baseHeight = self.view.frame.size.height;
 
   _bodyTextView = [[NSTextView alloc] initWithFrame:NSZeroRect];
-  [_bodyTextView setEditable:NO];
-  [_bodyTextView setRichText:NO];
-  [_bodyTextView setUsesFontPanel:NO];
-  [_bodyTextView setImportsGraphics:NO];
-  [_bodyTextView setDrawsBackground:NO];
-  [_bodyTextView setFont:[ActFont bodyFontOfSize:11]];
-  [_bodyTextView setTextColor:[ActColor controlTextColor]];
-  [[self view] addSubview:_bodyTextView];
+  _bodyTextView.editable = NO;
+  _bodyTextView.richText = NO;
+  _bodyTextView.usesFontPanel = NO;
+  _bodyTextView.importsGraphics = NO;
+  _bodyTextView.drawsBackground = NO;
+  _bodyTextView.font = [ActFont bodyFontOfSize:11];
+  _bodyTextView.textColor = [ActColor controlTextColor];
+  [self.view addSubview:_bodyTextView];
   [_bodyTextView release];
 
   _bodyLayoutContainer = [[NSTextContainer alloc]
 			  initWithContainerSize:NSZeroSize];
-  [_bodyLayoutContainer setLineFragmentPadding:0];
+  _bodyLayoutContainer.lineFragmentPadding = 0;
   _bodyLayoutManager = [[NSLayoutManager alloc] init];
   [_bodyLayoutManager addTextContainer:_bodyLayoutContainer];
-  [[_bodyTextView textStorage] addLayoutManager:_bodyLayoutManager];
+  [_bodyTextView.textStorage addLayoutManager:_bodyLayoutManager];
 
   [[NSNotificationCenter defaultCenter]
    addObserver:self selector:@selector(activityDidChangeField:)
@@ -80,17 +80,17 @@
   NSColor *greyColor = [ActColor controlTextColor];
   NSColor *redColor = [ActColor controlDetailTextColor];
 
-  [_typeField setTextColor:greyColor];
-  [_dateField setTextColor:greyColor];
-  [_courseField setTextColor:greyColor];
-  [_distanceLabel setTextColor:greyColor];
-  [_distanceField setTextColor:redColor];
-  [_durationLabel setTextColor:greyColor];
-  [_durationField setTextColor:redColor];
-  [_paceLabel setTextColor:greyColor];
-  [_paceField setTextColor:redColor];
-  [_pointsLabel setTextColor:greyColor];
-  [_pointsField setTextColor:redColor];
+  _typeField.textColor = greyColor;
+  _dateField.textColor = greyColor;
+  _courseField.textColor = greyColor;
+  _distanceLabel.textColor = greyColor;
+  _distanceField.textColor = redColor;
+  _durationLabel.textColor = greyColor;
+  _durationField.textColor = redColor;
+  _paceLabel.textColor = greyColor;
+  _paceField.textColor = redColor;
+  _pointsLabel.textColor = greyColor;
+  _pointsField.textColor = redColor;
 
   [self reloadFields];
 }
@@ -120,7 +120,7 @@
 
 - (void)activityDidChangeField:(NSNotification *)note
 {
-  void *ptr = [[[note userInfo] objectForKey:@"activity"] pointerValue];
+  void *ptr = [note.userInfo[@"activity"] pointerValue];
   const auto &a = *reinterpret_cast<const act::activity_storage_ref *> (ptr);
 
   if (a == _activityStorage)
@@ -129,11 +129,11 @@
 
 - (void)activityDidChangeBody:(NSNotification *)note
 {
-  void *ptr = [[[note userInfo] objectForKey:@"activity"] pointerValue];
+  void *ptr = [note.userInfo[@"activity"] pointerValue];
   const auto &a = *reinterpret_cast<const act::activity_storage_ref *> (ptr);
 
   if (a == _activityStorage)
-    [_bodyTextView setString:[_controller bodyString]];
+    _bodyTextView.string = _controller.bodyString;
 }
 
 - (void)reloadFields
@@ -144,54 +144,54 @@
   dispatch_once(&once, ^
     {
       date_formatter = [[NSDateFormatter alloc] init];
-      NSLocale *locale = [(ActAppDelegate *)[NSApp delegate] currentLocale];
-      [date_formatter setLocale:locale];
-      [date_formatter setDateFormat:
+      NSLocale *locale = ((ActAppDelegate *)NSApp.delegate).currentLocale;
+      date_formatter.locale = locale;
+      date_formatter.dateFormat =
        [NSDateFormatter dateFormatFromTemplate:
-	@"E dd MMM yyyy ha" options:0 locale:locale]];
+	@"E dd MMM yyyy ha" options:0 locale:locale];
     });
 
   if (_activity)
     {
-      [_typeField setObjectValue:
+      _typeField.objectValue =
        [NSString stringWithFormat:@"%@ / %@",
 	[_controller stringForField:@"activity" ofActivity:*_activity],
-	[_controller stringForField:@"type" ofActivity:*_activity]]];
-      [_dateField setObjectValue:[date_formatter stringFromDate:
-       [NSDate dateWithTimeIntervalSince1970:_activity->date()]]];
-      [_courseField setObjectValue:
-       [_controller stringForField:@"course" ofActivity:*_activity]];
-      [_distanceField setObjectValue:
-       [_controller stringForField:@"distance" ofActivity:*_activity]];
-      [_durationField setObjectValue:
-       [_controller stringForField:@"duration" ofActivity:*_activity]];
-      [_paceField setObjectValue:
-       [_controller stringForField:@"pace" ofActivity:*_activity]];
-      [_pointsField setObjectValue:
-       [_controller stringForField:@"points" ofActivity:*_activity]];
-      [_bodyTextView setString:[_controller bodyStringOfActivity:*_activity]];
+	[_controller stringForField:@"type" ofActivity:*_activity]];
+      _dateField.objectValue =
+       [NSDate dateWithTimeIntervalSince1970:_activity->date()];
+      _courseField.objectValue =
+       [_controller stringForField:@"course" ofActivity:*_activity];
+      _distanceField.objectValue =
+       [_controller stringForField:@"distance" ofActivity:*_activity];
+      _durationField.objectValue =
+       [_controller stringForField:@"duration" ofActivity:*_activity];
+      _paceField.objectValue =
+       [_controller stringForField:@"pace" ofActivity:*_activity];
+      _pointsField.objectValue =
+       [_controller stringForField:@"points" ofActivity:*_activity];
+      _bodyTextView.string = [_controller bodyStringOfActivity:*_activity];
     }
   else
     {
-      [_typeField setObjectValue:nil];
-      [_dateField setObjectValue:nil];
-      [_distanceField setObjectValue:nil];
-      [_durationField setObjectValue:nil];
-      [_paceField setObjectValue:nil];
-      [_pointsField setObjectValue:nil];
-      [_bodyTextView setString:@""];
+      _typeField.objectValue = nil;
+      _dateField.objectValue = nil;
+      _distanceField.objectValue = nil;
+      _durationField.objectValue = nil;
+      _paceField.objectValue = nil;
+      _pointsField.objectValue = nil;
+      _bodyTextView.string = @"";
     }
 }
 
 - (void)sizeToFit
 {
-  NSView *view = [self view];
-  NSRect old_frame = [view frame];
+  NSView *view = self.view;
+  NSRect old_frame = view.frame;
 
   // See https://developer.apple.com/library/mac/documentation/Cocoa/Conceptual/TextLayout/Tasks/StringHeight.html
  
-  [_bodyLayoutContainer setContainerSize:
-   NSMakeSize(old_frame.size.width - BODY_X_INSET*2, CGFLOAT_MAX)];
+  _bodyLayoutContainer.containerSize =
+   NSMakeSize(old_frame.size.width - BODY_X_INSET*2, CGFLOAT_MAX);
   [_bodyLayoutManager glyphRangeForTextContainer:_bodyLayoutContainer];
  
   CGFloat new_height = ([_bodyLayoutManager usedRectForTextContainer:
@@ -209,7 +209,7 @@
   view_frame.size.width = new_frame.size.width - BODY_X_INSET*2;
   view_frame.origin.y = 10;
   view_frame.size.height = new_height;
-  [_bodyTextView setFrame:view_frame];
+  _bodyTextView.frame = view_frame;
 }
 
 @end

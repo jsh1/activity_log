@@ -51,27 +51,29 @@
 
   _labelField = [[ActTextField alloc] initWithFrame:
 		 NSMakeRect(0, 0, LABEL_WIDTH, LABEL_HEIGHT)];
-  [_labelField setTarget:self];
-  [_labelField setAction:@selector(controlAction:)];
-  [_labelField setDelegate:self];
-  [_labelField setDrawsBackground:NO];
-  [_labelField setAlignment:NSRightTextAlignment];
-  [[_labelField cell] setBordered:NO];
-  [[_labelField cell] setFont:font];
-  [[_labelField cell] setTextColor:[ActColor controlTextColor]];
+  _labelField.target = self;
+  _labelField.action = @selector(controlAction:);
+  _labelField.delegate = self;
+  _labelField.drawsBackground = NO;
+  _labelField.alignment = NSRightTextAlignment;
+  NSTextFieldCell *cell = _labelField.cell;
+  cell.bordered = NO;
+  cell.font = font;
+  cell.textColor = [ActColor controlTextColor];
   [self addSubview:_labelField];
   [_labelField release];
 
   _valueField = [[ActTextField alloc] initWithFrame:
 		 NSMakeRect(LABEL_WIDTH + SPACING, 0, frame.size.width
 			    - LABEL_WIDTH, CONTROL_HEIGHT)];
-  [_valueField setTarget:self];
-  [_valueField setAction:@selector(controlAction:)];
-  [_valueField setDelegate:self];
-  [_valueField setDrawsBackground:NO];
-  [[_valueField cell] setBordered:NO];
-  [[_valueField cell] setFont:font1];
-  [[_valueField cell] setTextColor:[ActColor controlTextColor]];
+  _valueField.target = self;
+  _valueField.action = @selector(controlAction:);
+  _valueField.delegate = self;
+  _valueField.drawsBackground = NO;
+  cell = _valueField.cell;
+  cell.bordered = NO;
+  cell.font = font1;
+  cell.textColor = [ActColor controlTextColor];
   [self addSubview:_valueField];
   [_valueField release];
 
@@ -90,7 +92,7 @@
 
 - (ActWindowController *)controller
 {
-  return (ActWindowController *)[[self window] windowController];
+  return (ActWindowController *)self.window.windowController;
 }
 
 - (NSString *)fieldName
@@ -100,16 +102,17 @@
 
 - (void)_updateFieldName
 {
-  [_labelField setStringValue:_fieldName];
-  [[_labelField cell] setTruncatesLastVisibleLine:YES];
+  _labelField.stringValue = _fieldName;
+  ((NSTextFieldCell *)_labelField.cell).truncatesLastVisibleLine = YES;
 
-  BOOL readOnly = [[self controller] isFieldReadOnly:_fieldName];
-  [[_valueField cell] setEditable:!readOnly];
-  [[_valueField cell] setTextColor:[ActColor controlTextColor:readOnly]];
-  [[_valueField cell] setTruncatesLastVisibleLine:YES];
+  BOOL readOnly = [self.controller isFieldReadOnly:_fieldName];
+  NSTextFieldCell *cell = _valueField.cell;
+  cell.editable = !readOnly;
+  cell.textColor = [ActColor controlTextColor:readOnly];
+  cell.truncatesLastVisibleLine = YES;
 
-  [_labelField setCompletesEverything:YES];
-  [_valueField setCompletesEverything:[_fieldName isEqualToString:@"Course"]];
+  _labelField.completesEverything = YES;
+  _valueField.completesEverything = [_fieldName isEqualToString:@"Course"];
 }
 
 - (void)setFieldName:(NSString *)name
@@ -125,29 +128,29 @@
 
 - (NSString *)fieldString
 {
-  if ([_fieldName length] != 0)
-    return [[self controller] stringForField:_fieldName];
+  if (_fieldName.length != 0)
+    return [self.controller stringForField:_fieldName];
   else
-    return [_valueField stringValue];
+    return _valueField.stringValue;
 }
 
 - (void)setFieldString:(NSString *)str
 {
-  if ([_fieldName length] != 0)
+  if (_fieldName.length != 0)
     {
-      ActWindowController *controller = [self controller];
+      ActWindowController *controller = self.controller;
       if (![str isEqual:[controller stringForField:_fieldName]])
 	[controller setString:str forField:_fieldName];
     }
   else
-    [_valueField setStringValue:str];
+    _valueField.stringValue = str;
 }
 
 - (void)renameField:(NSString *)newName
 {
   if (![newName isEqualToString:_fieldName])
     {
-      ActWindowController *controller = [self controller];
+      ActWindowController *controller = self.controller;
 
       NSString *oldName = _fieldName;
       _fieldName = [newName copy];
@@ -155,15 +158,15 @@
 
       [self _updateFieldName];
 
-      if ([oldName length] != 0)
+      if (oldName.length != 0)
 	{
-	  if ([newName length] != 0)
+	  if (newName.length != 0)
 	    [controller renameField:oldName to:newName];
 	  else
 	    [controller deleteField:oldName];
 	}
-      else if ([newName length] != 0)
-	[controller setString:[_valueField stringValue] forField:newName];
+      else if (newName.length != 0)
+	[controller setString:_valueField.stringValue forField:newName];
 
       [oldName release];
     }
@@ -184,7 +187,7 @@
   // reload everything in case of dependent fields (pace, etc)
 
   [self _updateFieldName];
-  [_valueField setStringValue:[self fieldString]];
+  _valueField.stringValue = self.fieldString;
 }
 
 - (CGFloat)preferredHeight
@@ -194,15 +197,15 @@
 
 - (void)layoutSubviews
 {
-  NSRect bounds = [self bounds];
+  NSRect bounds = self.bounds;
   NSRect frame = bounds;
 
   frame.size.width = LABEL_WIDTH;
-  [_labelField setFrame:frame];
+  _labelField.frame = frame;
 
   frame.origin.x += frame.size.width + SPACING;
   frame.size.width = bounds.size.width - frame.origin.x;
-  [_valueField setFrame:frame];
+  _valueField.frame = frame;
 }
 
 - (IBAction)controlAction:(id)sender
@@ -210,15 +213,15 @@
   if (sender == _labelField)
     [self renameField:[sender stringValue]];
   else if (sender == _valueField)
-    [self setFieldString:[sender stringValue]];
+    self.fieldString = [sender stringValue];
 
-  NSEvent *e = [[self window] currentEvent];
-  if ([e type] == NSKeyDown
-      && [[e charactersIgnoringModifiers] isEqualToString:@"\r"]
+  NSEvent *e = self.window.currentEvent;
+  if (e.type == NSKeyDown
+      && [e.charactersIgnoringModifiers isEqualToString:@"\r"]
       && _depth == 0)
     {
       if (sender == _labelField)
-	[[self window] makeFirstResponder:_valueField];
+	[self.window makeFirstResponder:_valueField];
       else
 	[_headerView selectFieldFollowing:self];
     }
@@ -241,27 +244,27 @@
 {
   if (control == _labelField || control == _valueField)
     {
-      if (control == _valueField && [_fieldName length] == 0)
+      if (control == _valueField && _fieldName.length == 0)
 	return nil;
 
-      NSString *str = [[textView string] substringWithRange:charRange];
+      NSString *str = [textView.string substringWithRange:charRange];
 
-      act::database *db = [[self controller] database];
+      act::database *db = self.controller.database;
 
       std::vector<std::string> completions;
       if (control == _labelField)
 	{
-	  db->complete_field_name([str UTF8String], completions);
+	  db->complete_field_name(str.UTF8String, completions);
 	}
       else
 	{
-	  db->complete_field_value([_fieldName UTF8String],
-				   [str UTF8String], completions);
+	  db->complete_field_value(_fieldName.UTF8String,
+				   str.UTF8String, completions);
 	}
 
       NSMutableArray *array = [NSMutableArray array];
       for (const auto &it : completions)
-	[array addObject:[NSString stringWithUTF8String:it.c_str()]];
+	[array addObject:@(it.c_str())];
 
       return array;
     }
@@ -273,7 +276,7 @@
 
 - (ActFieldEditor *)actFieldEditor:(ActTextField *)obj
 {
-  return [[self controller] fieldEditor];
+  return self.controller.fieldEditor;
 }
 
 @end

@@ -63,7 +63,7 @@
 
 - (IBAction)showWindow:(id)sender
 {
-  [[self windowController] showWindow:sender];
+  [self.windowController showWindow:sender];
 }
 
 - (NSWindowController *)windowController
@@ -105,13 +105,13 @@
 {
   if (menu == _viewMenu)
     {
-      for (NSMenuItem *item in [menu itemArray])
+      for (NSMenuItem *item in menu.itemArray)
 	{
-	  SEL sel = [item action];
+	  SEL sel = item.action;
 	  if (sel == @selector(setWindowModeAction:))
-	    [item setState:[_windowController windowMode] == [item tag]];
+	    item.state = _windowController.windowMode == item.tag;
 	  else if (sel == @selector(setListViewAction:))
-	    [item setState:[_windowController listViewType] == [item tag]];
+	    item.state = _windowController.listViewType == item.tag;
 	}
     }
 }

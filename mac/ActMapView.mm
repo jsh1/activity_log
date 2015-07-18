@@ -93,7 +93,7 @@ convertPointToLocation(CGPoint p)
 {
   for (NSURL *url in _images)
     {
-      ActMapImage *im = [_images objectForKey:url];
+      ActMapImage *im = _images[url];
       [im invalidate];
     }
 
@@ -120,7 +120,7 @@ convertPointToLocation(CGPoint p)
     {
       [_mapSource release];
       _mapSource = [src retain];
-      [self setNeedsDisplay:YES];
+      self.needsDisplay = YES;
     }
 }
 
@@ -134,7 +134,7 @@ convertPointToLocation(CGPoint p)
   if (_mapZoom != z)
     {
       _mapZoom = z;
-      [self setNeedsDisplay:YES];
+      self.needsDisplay = YES;
     }
 }
 
@@ -148,15 +148,15 @@ convertPointToLocation(CGPoint p)
   if (_mapCenter.latitude != l.latitude || _mapCenter.longitude != l.longitude)
     {
       _mapCenter = l;
-      [self setNeedsDisplay:YES];
+      self.needsDisplay = YES;
     }
 }
 
 - (void)displayRegion:(const act::location_region &)rgn
 {
-  [self setMapCenter:rgn.center];
+  self.mapCenter = rgn.center;
 
-  ActMapSource *src = [self mapSource];
+  ActMapSource *src = self.mapSource;
   if (src == nil)
     return;
 
@@ -171,9 +171,9 @@ convertPointToLocation(CGPoint p)
   double pw = fabs(p_ur.x - p_ll.x);
   double ph = fabs(p_ur.y - p_ll.y);
 
-  NSRect bounds = [self bounds];
-  double tw = bounds.size.width / [src tileWidth];
-  double th = bounds.size.height / [src tileHeight];
+  NSRect bounds = self.bounds;
+  double tw = bounds.size.width / src.tileWidth;
+  double th = bounds.size.height / src.tileHeight;
 
   double zw = log2(tw / pw);
   double zh = log2(th / ph);
@@ -181,28 +181,28 @@ convertPointToLocation(CGPoint p)
   int zoom = floor(std::min(zw, zh));
   zoom = std::min(zoom, MAX_IMPLICIT_ZOOM);
 
-  [self setMapZoom:zoom];
+  self.mapZoom = zoom;
 }
 
 - (NSPoint)pointAtLocation:(const act::location &)loc
 {
-  ActMapSource *src = [self mapSource];
+  ActMapSource *src = self.mapSource;
   if (src == nil)
     return CGPointZero;
 
-  int zoom = [self mapZoom];
-  zoom = std::min(zoom, [src maxZoom]);
-  zoom = std::max(zoom, [src minZoom]);
+  int zoom = self.mapZoom;
+  zoom = std::min(zoom, src.maxZoom);
+  zoom = std::max(zoom, src.minZoom);
 
   int n_tiles = 1U << zoom;
 
-  double tw = [src tileWidth];
-  double th = [src tileHeight];
+  double tw = src.tileWidth;
+  double th = src.tileHeight;
 
-  NSRect bounds = [self bounds];
+  NSRect bounds = self.bounds;
 
   CGPoint pl = convertLocationToPoint(loc);
-  CGPoint origin = convertLocationToPoint([self mapCenter]);
+  CGPoint origin = convertLocationToPoint(self.mapCenter);
   origin.x *= n_tiles * tw;
   origin.y *= n_tiles * th;
   origin.x -= bounds.size.width * (CGFloat).5;
@@ -216,22 +216,22 @@ convertPointToLocation(CGPoint p)
 
 - (void)drawRect:(NSRect)r
 {
-  ActMapSource *src = [self mapSource];
+  ActMapSource *src = self.mapSource;
   if (src == nil)
     return;
 
   _seed++;
 
-  int zoom = [self mapZoom];
+  int zoom = self.mapZoom;
   zoom = std::min(zoom, src.maxZoom);
   zoom = std::max(zoom, src.minZoom);
 
-  NSRect bounds = [self bounds];
+  NSRect bounds = self.bounds;
   double tw = src.tileWidth;
   double th = src.tileHeight;
   BOOL retina = NO;
 
-  if ([[self window] backingScaleFactor] > 1.5 && src.supportsRetina)
+  if (self.window.backingScaleFactor > 1.5 && src.supportsRetina)
     {
       zoom = zoom + 1; 
       tw = tw * .5;
@@ -241,7 +241,7 @@ convertPointToLocation(CGPoint p)
 
   int n_tiles = 1 << zoom;
 
-  CGPoint origin = convertLocationToPoint([self mapCenter]);
+  CGPoint origin = convertLocationToPoint(self.mapCenter);
   origin.x *= n_tiles * tw;
   origin.y *= n_tiles * th;
   origin.x -= bounds.size.width * (CGFloat).5;
@@ -303,7 +303,7 @@ convertPointToLocation(CGPoint p)
 
   for (NSURL *url in _images)
     {
-      ActMapImage *im = [_images objectForKey:url];
+      ActMapImage *im = _images[url];
 
       if (im->_seed != _seed)
 	{
@@ -321,7 +321,7 @@ convertPointToLocation(CGPoint p)
 
 - (ActMapImage *)imageForURL:(NSURL *)url
 {
-  ActMapImage *im = [_images objectForKey:url];
+  ActMapImage *im = _images[url];
 
   if (im == nil)
     {
@@ -331,7 +331,7 @@ convertPointToLocation(CGPoint p)
 
       im = [[ActMapImage alloc] init];
 
-      [_images setObject:im forKey:url];
+      _images[url] = im;
       [im release];
     }
 
@@ -339,9 +339,9 @@ convertPointToLocation(CGPoint p)
     {
       ActCachedURL *cached_url = [[ActCachedURL alloc] init];
 
-      [cached_url setURL:url];
-      [cached_url setDelegate:self];
-      [cached_url setUserInfo:im];
+      cached_url.URL = url;
+      cached_url.delegate = self;
+      cached_url.userInfo = im;
 
       if ([[ActURLCache sharedURLCache] loadURL:cached_url])
 	im->_url = cached_url;
@@ -360,14 +360,14 @@ convertPointToLocation(CGPoint p)
 
 - (void)cachedURLDidFinish:(ActCachedURL *)url
 {
-  ActMapImage *im = [url userInfo];
-  NSData *data = [url data];
+  ActMapImage *im = url.userInfo;
+  NSData *data = url.data;
 
-  if ([data length] != 0)
+  if (data.length != 0)
     {
       im->_failed = NO;
       if ([im decodeImageData:data])
-	[self setNeedsDisplay:YES];		// FIXME: shoddy
+	self.needsDisplay = YES;		// FIXME: shoddy
     }
   else
     {
@@ -387,8 +387,8 @@ convertPointToLocation(CGPoint p)
 
   BOOL dragging = NO;
 
-  NSPoint p0 = [self convertPoint:[e locationInWindow] fromView:nil];
-  CGPoint c0 = convertLocationToPoint([self mapCenter]);
+  NSPoint p0 = [self convertPoint:e.locationInWindow fromView:nil];
+  CGPoint c0 = convertLocationToPoint(self.mapCenter);
 
   CGFloat mx = (1 << _mapZoom) * _mapSource.tileWidth;
   CGFloat my = (1 << _mapZoom) * _mapSource.tileHeight;
@@ -398,12 +398,12 @@ convertPointToLocation(CGPoint p)
 
   while (1)
     {
-      e = [[self window] nextEventMatchingMask:DRAG_MASK];
+      e = [self.window nextEventMatchingMask:DRAG_MASK];
 
-      if ([e type] != NSLeftMouseDragged)
+      if (e.type != NSLeftMouseDragged)
 	break;
 
-      NSPoint p1 = [self convertPoint:[e locationInWindow] fromView:nil];
+      NSPoint p1 = [self convertPoint:e.locationInWindow fromView:nil];
 
       if (!dragging && (fabs(p1.x - p0.x) >= DRAG_THRESH
 			|| fabs(p1.y - p0.y) >= DRAG_THRESH))
@@ -417,7 +417,7 @@ convertPointToLocation(CGPoint p)
 	  c1.x = (c0.x + (p0.x - p1.x)) / mx;
 	  c1.y = (c0.y + (p0.y - p1.y)) / my;
 
-	  [self setMapCenter:convertPointToLocation(c1)];
+	  self.mapCenter = convertPointToLocation(c1);
 
 	  [self displayIfNeeded];
 	}
@@ -473,9 +473,8 @@ convertPointToLocation(CGPoint p)
 {
   if (_image != NULL)
     {
-      CGContextRef ctx
-	= (CGContextRef) [[NSGraphicsContext currentContext] graphicsPort];
-  
+      CGContextRef ctx = [NSGraphicsContext currentContext].CGContext;
+
       CGContextDrawImage(ctx, r, _image);
     }
 }

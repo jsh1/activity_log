@@ -232,18 +232,18 @@ activity_radius(double dist, double dur, double pts, int displayMode)
 
   [[NSNotificationCenter defaultCenter]
    addObserver:self selector:@selector(listViewBoundsDidChange:)
-   name:NSViewBoundsDidChangeNotification object:[_listView superview]];
+   name:NSViewBoundsDidChangeNotification object:_listView.superview];
 
   /* This is so we update when the list view changes size. */
 
-  [_listView setPostsFrameChangedNotifications:YES];
+  _listView.postsFrameChangedNotifications = YES;
   [[NSNotificationCenter defaultCenter]
    addObserver:self selector:@selector(listViewBoundsDidChange:)
    name:NSViewFrameDidChangeNotification object:_listView];
 
-  [_scrollView setBackgroundColor:[ActColor midControlBackgroundColor]];
+  _scrollView.backgroundColor = [ActColor midControlBackgroundColor];
 
-  [_scaleSlider setDoubleValue:_interfaceScale];
+  _scaleSlider.doubleValue = _interfaceScale;
 }
 
 - (void)viewWillAppear
@@ -270,7 +270,7 @@ activity_radius(double dist, double dur, double pts, int displayMode)
   if (storage == nullptr)
     return -1;
 
-  const auto &activities = [_controller activityList];
+  const auto &activities = _controller.activityList;
 
   for (size_t i = 0; i < activities.size(); i++)
     {
@@ -283,7 +283,7 @@ activity_radius(double dist, double dur, double pts, int displayMode)
 
 - (void)activityListDidChange:(NSNotification *)note
 {
-  const auto &activities = [_controller activityList];
+  const auto &activities = _controller.activityList;
 
   int first_week = 0;
   int last_week = 0;
@@ -294,14 +294,13 @@ activity_radius(double dist, double dur, double pts, int displayMode)
       last_week = act::week_index(activities.front().date());
     }
 
-  [_listView setWeekRange:NSMakeRange(first_week, last_week + 1 - first_week)];
-  [_listView setNeedsDisplay:YES];
+  _listView.weekRange = NSMakeRange(first_week, last_week + 1 - first_week);
+  _listView.needsDisplay = YES;
 }
 
 - (void)selectedActivityDidChange:(NSNotification *)note
 {
-  int week = [self weekForActivityStorage:
-	      [_controller selectedActivityStorage]];
+  int week = [self weekForActivityStorage:_controller.selectedActivityStorage];
 
   if (week >= 0)
     {
@@ -309,12 +308,12 @@ activity_radius(double dist, double dur, double pts, int displayMode)
       [_listView scrollRectToVisible:r animated:YES];
     }
 
-  [_listView setNeedsDisplay:YES];
+  _listView.needsDisplay = YES;
 }
 
 - (void)activityDidChangeField:(NSNotification *)note
 {
-  void *ptr = [[[note userInfo] objectForKey:@"activity"] pointerValue];
+  void *ptr = [note.userInfo[@"activity"] pointerValue];
   const auto &a = *reinterpret_cast<const act::activity_storage_ref *> (ptr);
 
   [_listView invalidateActivityStorage:a];
@@ -322,7 +321,7 @@ activity_radius(double dist, double dur, double pts, int displayMode)
 
 - (void)listViewBoundsDidChange:(NSNotification *)note
 {
-  [_listView setNeedsDisplay:YES];
+  _listView.needsDisplay = YES;
 }
 
 - (IBAction)controlAction:(id)sender
@@ -332,7 +331,7 @@ activity_radius(double dist, double dur, double pts, int displayMode)
       _interfaceScale = [sender doubleValue];
 
       BOOL disableAnimations = YES;
-      switch ([[[[self view] window] currentEvent] type])
+      switch (self.view.window.currentEvent.type)
 	{
 	case NSLeftMouseDown:
 	case NSRightMouseDown:
@@ -346,14 +345,14 @@ activity_radius(double dist, double dur, double pts, int displayMode)
       if (disableAnimations)
 	[CATransaction setDisableActions:YES];
 
-      [_listView setNeedsDisplay:YES];
-      [_headerView setNeedsDisplay:YES];
+      _listView.needsDisplay = YES;
+      _headerView.needsDisplay = YES;
     }
   else if (sender == _displayModeControl)
     {
       _displayMode = [sender selectedSegment];
 
-      [_listView setNeedsDisplay:YES];
+      _listView.needsDisplay = YES;
     }
 }
 
@@ -367,16 +366,16 @@ activity_radius(double dist, double dur, double pts, int displayMode)
 
 - (void)applySavedViewState:(NSDictionary *)state
 {
-  if (NSNumber *obj = [state objectForKey:@"interfaceScale"])
-    _interfaceScale = [obj doubleValue];
+  if (NSNumber *obj = state[@"interfaceScale"])
+    _interfaceScale = obj.doubleValue;
 
-  if (NSNumber *obj = [state objectForKey:@"displayMode"])
-    _displayMode = [obj intValue];
+  if (NSNumber *obj = state[@"displayMode"])
+    _displayMode = obj.intValue;
 
   if (_scaleSlider != nil)
-    [_scaleSlider setDoubleValue:_interfaceScale];
+    _scaleSlider.doubleValue = _interfaceScale;
   if (_displayModeControl != nil)
-    [_displayModeControl setSelectedSegment:_displayMode];
+    _displayModeControl.selectedSegment = _displayMode;
 }
 
 // CALayerDelegate methods
@@ -408,7 +407,7 @@ activity_radius(double dist, double dur, double pts, int displayMode)
   if (!NSEqualRanges(_weekRange, x))
     {
       _weekRange = x;
-      [self setNeedsDisplay:YES];
+      self.needsDisplay = YES;
     }
 }
 
@@ -418,7 +417,7 @@ activity_radius(double dist, double dur, double pts, int displayMode)
       || week >= _weekRange.location + _weekRange.length)
     return NSZeroRect;
 
-  NSRect bounds = [self bounds];
+  NSRect bounds = self.bounds;
 
   return NSMakeRect(bounds.origin.x, bounds.origin.y + bounds.size.height
 		    - ((week + 1) - _weekRange.location) * ROW_HEIGHT,
@@ -427,7 +426,7 @@ activity_radius(double dist, double dur, double pts, int displayMode)
 
 - (NSRect)visibleRectForWeek:(int)week
 {
-  NSRect vis_rect = [self visibleRect];
+  NSRect vis_rect = self.visibleRect;
 
   if (NSIsEmptyRect(vis_rect))
     return vis_rect;
@@ -442,10 +441,10 @@ activity_radius(double dist, double dur, double pts, int displayMode)
 
   time_t date = act::week_date(week);
 
-  for (ActWeekViewLayer *layer in [[self layer] sublayers])
+  for (ActWeekViewLayer *layer in self.layer.sublayers)
     {
-      if ([layer date] == date)
-	return [layer groupLayer];
+      if (layer.date == date)
+	return layer.groupLayer;
     }
 
   return nil;
@@ -456,7 +455,7 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
 {
   for (ActWeekView_ActivityLayer *layer in sublayers)
     {
-      const std::vector<act::activity_ref> &vec = [layer activities];
+      const std::vector<act::activity_ref> &vec = layer.activities;
       if (std::any_of(vec.begin(), vec.end(),
 		      [=] (act::activity_ref a) {
 			return a->storage() == storage;}))
@@ -479,13 +478,13 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
     return nil;
 
   ActWeekView_ActivityLayer *layer
-    = activityLayerForStorage([glayer sublayers], storage);
+    = activityLayerForStorage(glayer.sublayers, storage);
   if (layer == nil)
     return nil;
 
-  ActWeekView_ActivityGroupLayer *aglayer = [layer groupLayer];
+  ActWeekView_ActivityGroupLayer *aglayer = layer.groupLayer;
   if (aglayer != nil)
-    layer = activityLayerForStorage([aglayer sublayers], storage);
+    layer = activityLayerForStorage(aglayer.sublayers, storage);
 
   return layer;
 }
@@ -497,7 +496,7 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
 
 - (void)updateFrameSize
 {
-  NSRect frame = [self frame];
+  NSRect frame = self.frame;
   CGFloat h = ROW_HEIGHT * _weekRange.length;
 
   if (frame.size.height != h)
@@ -506,10 +505,10 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
       [self flashScrollersIfNeeded];
     }
 
-  NSRect bounds = [self bounds];
+  NSRect bounds = self.bounds;
 
   if (_trackingArea == nil
-      || !NSEqualRects(bounds, [_trackingArea rect]))
+      || !NSEqualRects(bounds, _trackingArea.rect))
     {
       [self removeTrackingArea:_trackingArea];
       _trackingArea = [[NSTrackingArea alloc] initWithRect:bounds
@@ -524,25 +523,25 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
 
 - (void)updateLayersForRect:(NSRect)rect
 {
-  NSRect bounds = [self bounds];
+  NSRect bounds = self.bounds;
 
   int y0 = floor((rect.origin.y - bounds.origin.y) / ROW_HEIGHT);
   int y1 = ceil((rect.origin.y + rect.size.height - bounds.origin.y) / ROW_HEIGHT);
   if (y0 < 0) y0 = 0;
   if (y1 < 0) y1 = 0;
 
-  CGFloat backing_scale = [[self window] backingScaleFactor];
-  CGFloat interface_scale = [_controller interfaceScale];
+  CGFloat backing_scale = self.window.backingScaleFactor;
+  CGFloat interface_scale = _controller.interfaceScale;
 
-  CALayer *layer = [self layer];
-  NSMutableArray *old_sublayers = [[layer sublayers] mutableCopy];
+  CALayer *layer = self.layer;
+  NSMutableArray *old_sublayers = [layer.sublayers mutableCopy];
   NSMutableArray *new_sublayers = [[NSMutableArray alloc] init];
 
-  const auto &activities = [[_controller controller] activityList];
+  const auto &activities = _controller.controller.activityList;
 
   int week_idx = _weekRange.location + (_weekRange.length - (y0 + 1));
 
-  [[_controller headerView] setWeekIndex:week_idx];
+  _controller.headerView.weekIndex = week_idx;
 
   time_t week_date = act::week_date(week_idx);
 
@@ -565,7 +564,7 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
       NSInteger old_idx = 0;
       for (ActWeekViewLayer *tem in old_sublayers)
 	{
-	  if ([tem date] == week_date)
+	  if (tem.date == week_date)
 	    {
 	      [old_sublayers removeObjectAtIndex:old_idx];
 	      sublayer = tem;
@@ -577,15 +576,15 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
       if (sublayer == nil)
 	{
 	  sublayer = [ActWeekViewLayer layer];
-	  [sublayer setDate:week_date];
-	  [sublayer setDelegate:_controller];
+	  sublayer.date = week_date;
+	  sublayer.delegate = _controller;
 	}
       
-      [sublayer setFrame:CGRectMake(bounds.origin.x + LEFT_BORDER,
+      sublayer.frame = CGRectMake(bounds.origin.x + LEFT_BORDER,
 		bounds.origin.y + ROW_HEIGHT * y, bounds.size.width
 		- floor((LEFT_BORDER + RIGHT_BORDER * interface_scale)),
-		ROW_HEIGHT)];
-      [sublayer setContentsScale:backing_scale];
+		ROW_HEIGHT);
+      sublayer.contentsScale = backing_scale;
 
       [new_sublayers addObject:sublayer];
 
@@ -593,14 +592,14 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
       while (item != activities.cend() && !(item->date() < week_date))
 	week_vec.push_back(*item++);
 
-      [sublayer setItems:week_vec];
-      [sublayer setInterfaceScale:interface_scale];
+      sublayer.items = week_vec;
+      sublayer.interfaceScale = interface_scale;
       [sublayer setNeedsLayout];
 
       week_date = week_date - SECONDS_PER_WEEK;
     }
 
-  [layer setSublayers:new_sublayers];
+  layer.sublayers = new_sublayers;
 
   [new_sublayers release];
   [old_sublayers release];
@@ -609,7 +608,7 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
 - (void)updateSelectionState
 {
   act::activity_storage_ref storage
-    = [[_controller controller] selectedActivityStorage];
+    = _controller.controller.selectedActivityStorage;
 
   ActWeekView_ActivityLayer *selected_layer
     = [self activityLayerForStorage:storage];
@@ -646,7 +645,7 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
 - (void)updateLayer
 {
   [self updateSelectionState];
-  [self updateLayersForRect:[self visibleRect]];
+  [self updateLayersForRect:self.visibleRect];
 }
 
 - (BOOL)isFlipped
@@ -661,14 +660,14 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
 
 - (void)scrollPageUpAnimated:(BOOL)flag
 {
-  NSRect rect = [self visibleRect];
+  NSRect rect = self.visibleRect;
   rect.origin.y -= rect.size.height;
   [self scrollRectToVisible:rect animated:flag];
 }
 
 - (void)scrollPageDownAnimated:(BOOL)flag
 {
-  NSRect rect = [self visibleRect];
+  NSRect rect = self.visibleRect;
   rect.origin.y += rect.size.height;
   [self scrollRectToVisible:rect animated:flag];
 }
@@ -680,38 +679,38 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
 
 - (BOOL)becomeFirstResponder
 {
-  [self setNeedsDisplay:YES];
+  self.needsDisplay = YES;
   return YES;
 }
 
 - (BOOL)resignFirstResponder
 {
-  [self setNeedsDisplay:YES];
+  self.needsDisplay = YES;
   return YES;
 }
 
 - (void)keyDown:(NSEvent *)e
 {
-  NSString *chars = [e charactersIgnoringModifiers];
+  NSString *chars = e.charactersIgnoringModifiers;
 
-  if ([chars length] == 1)
+  if (chars.length == 1)
     {
       switch ([chars characterAtIndex:0])
 	{
 	case NSLeftArrowFunctionKey:
-	  [[_controller controller] nextActivity:_controller];
+	  [_controller.controller nextActivity:_controller];
 	  return;
 
 	case NSRightArrowFunctionKey:
-	  [[_controller controller] previousActivity:_controller];
+	  [_controller.controller previousActivity:_controller];
 	  return;
 
 	case NSHomeFunctionKey:
-	  [[_controller controller] firstActivity:_controller];
+	  [_controller.controller firstActivity:_controller];
 	  return;
 
 	case NSEndFunctionKey:
-	  [[_controller controller] lastActivity:_controller];
+	  [_controller.controller lastActivity:_controller];
 	  return;
 
 	case NSPageUpFunctionKey:
@@ -731,10 +730,9 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
 
 - (void)mouseDown:(NSEvent *)e
 {
-  NSPoint p = [[self superview] convertPoint:[e locationInWindow]
-	       fromView:nil];
+  NSPoint p = [self.superview convertPoint:e.locationInWindow fromView:nil];
 
-  CALayer *self_layer = [self layer];
+  CALayer *self_layer = self.layer;
   CALayer *layer = [self_layer hitTest:NSPointToCGPoint(p)];
 
   act::activity_ref selection;
@@ -744,7 +742,7 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
       if ([layer isKindOfClass:[ActWeekView_ActivityLayer class]])
 	{
 	  ActWeekView_ActivityLayer *a_layer = (id)layer;
-	  const std::vector<act::activity_ref> &vec = [a_layer activities];
+	  const std::vector<act::activity_ref> &vec = a_layer.activities;
 
 	  if (vec.size() == 1)
 	    {
@@ -753,21 +751,20 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
 	    }
 	}
 
-      layer = [layer superlayer];
+      layer = layer.superlayer;
     }
 
-  [[_controller controller] setSelectedActivityStorage:
-   selection ? selection->storage() : nullptr];
+  _controller.controller.selectedActivityStorage
+    = selection ? selection->storage() : nullptr;
 
-  [self setHighlitLayer:nil];
+  self.highlitLayer = nil;
 }
 
 - (void)mouseMoved:(NSEvent *)e
 {
-  NSPoint p = [[self superview] convertPoint:[e locationInWindow]
-	       fromView:nil];
+  NSPoint p = [self.superview convertPoint:e.locationInWindow fromView:nil];
 
-  CALayer *self_layer = [self layer];
+  CALayer *self_layer = self.layer;
   CALayer *layer = [self_layer hitTest:NSPointToCGPoint(p)];
   ActWeekView_ActivityLayer *highlit_layer = nil;
   ActWeekView_ActivityLayer *expanded_layer = nil;
@@ -777,33 +774,33 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
       if ([layer isKindOfClass:[ActWeekView_ActivityLayer class]])
 	{
 	  if (highlit_layer == nil
-	      && [(ActWeekView_ActivityLayer *)layer activities].size() == 1)
+	      && ((ActWeekView_ActivityLayer *)layer).activities.size() == 1)
 	    {
 	      highlit_layer = (ActWeekView_ActivityLayer *)layer;
 	    }
 
-	  if ([(ActWeekView_ActivityLayer *)layer isExpandable])
+	  if (((ActWeekView_ActivityLayer *)layer).expandable)
 	    {
 	      expanded_layer = (ActWeekView_ActivityLayer *)layer;
 	      break;
 	    }
 	}
 
-      layer = [layer superlayer];
+      layer = layer.superlayer;
     }
 
-  [self setExpandedLayer:expanded_layer];
-  [self setHighlitLayer:highlit_layer];
+  self.expandedLayer = expanded_layer;
+  self.highlitLayer = highlit_layer;
 }
 
 - (void)setExpandedLayer:(ActWeekView_ActivityLayer *)layer
 {
   if (_expandedLayer != layer)
     {
-      [_expandedLayer setExpanded:NO];
+      _expandedLayer.expanded = NO;
       [_expandedLayer release];
       _expandedLayer = [layer retain];
-      [_expandedLayer setExpanded:YES];
+      _expandedLayer.expanded = YES;
     }
 }
 
@@ -811,14 +808,14 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
 {
   if (_highlitLayer != layer)
     {
-      [_highlitLayer setHighlit:NO];
+      _highlitLayer.highlit = NO;
       [_highlitLayer release];
       _highlitLayer = [layer retain];
-      [_highlitLayer setHighlit:YES];
+      _highlitLayer.highlit = YES;
 
       [NSRunLoop cancelPreviousPerformRequestsWithTarget:self
        selector:@selector(updatePopover) object:nil];
-      [[_controller controller] hidePopover];
+      [_controller.controller hidePopover];
 
       if (_highlitLayer != nil)
 	{
@@ -830,32 +827,32 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
 
 - (void)updatePopover
 {
-  if (_highlitLayer != nil && [_highlitLayer activities].size() == 1)
+  if (_highlitLayer != nil && _highlitLayer.activities.size() == 1)
     {
-      const act::activity_ref &a = [_highlitLayer activities].front();
-      NSRect r = NSRectFromCGRect([[self layer] convertRect:
-			[_highlitLayer bounds] fromLayer:_highlitLayer]);
+      const act::activity_ref &a = _highlitLayer.activities.front();
+      NSRect r = NSRectFromCGRect([self.layer convertRect:_highlitLayer.bounds
+				   fromLayer:_highlitLayer]);
       r = NSInsetRect(r, -2, -2);
 
-      [[_controller controller] showPopoverWithActivityStorage:a->storage()
+      [_controller.controller showPopoverWithActivityStorage:a->storage()
        relativeToRect:r ofView:self preferredEdge:NSMaxYEdge];
     }
   else
-    [[_controller controller] hidePopover];
+    [_controller.controller hidePopover];
 }
 
 - (void)mouseExited:(NSEvent *)e
 {
   if (_expandedLayer != nil)
     {
-      [_expandedLayer setExpanded:NO];
+      _expandedLayer.expanded = NO;
       [_expandedLayer release];
       _expandedLayer = nil;
     }
 
   if (_highlitLayer != nil)
     {
-      [_highlitLayer setHighlit:NO];
+      _highlitLayer.highlit = NO;
       [_highlitLayer release];
       _highlitLayer = nil;
       [self updatePopover];
@@ -876,7 +873,7 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
   if (_weekIndex != idx)
     {
       _weekIndex = idx;
-      [self setNeedsDisplay:YES];
+      self.needsDisplay = YES;
     }
 }
 
@@ -890,45 +887,43 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
 
   dispatch_once(&once, ^
     {
-      NSLocale *locale = [(ActAppDelegate *)[NSApp delegate] currentLocale];
+      NSLocale *locale = ((ActAppDelegate *)NSApp.delegate).currentLocale;
 
       date_formatter = [[NSDateFormatter alloc] init];
-      [date_formatter setLocale:locale];
-      [date_formatter setDateFormat:
+      date_formatter.locale = locale;
+      date_formatter.dateFormat =
        [NSDateFormatter dateFormatFromTemplate:@"MMMyyyy" options:0
-	locale:locale]];
+	locale:locale];
 
       NSColor *greyColor = [ActColor controlTextColor];
 
       NSMutableParagraphStyle *centerStyle
-        = [[NSParagraphStyle defaultParagraphStyle] mutableCopy];
-      [centerStyle setAlignment:NSCenterTextAlignment];
+        = [[[NSParagraphStyle defaultParagraphStyle] mutableCopy] autorelease];
+      centerStyle.alignment = NSCenterTextAlignment;
 
-      month_attrs = [[NSDictionary alloc] initWithObjectsAndKeys:
-		     [NSFont boldSystemFontOfSize:HEADER_MONTH_FONT_SIZE],
-		     NSFontAttributeName,
-		     greyColor, NSForegroundColorAttributeName,
-		     nil];
+      month_attrs = [@{
+        NSFontAttributeName: [NSFont boldSystemFontOfSize:HEADER_MONTH_FONT_SIZE],
+	NSForegroundColorAttributeName: greyColor,
+      } retain];
 
-      day_attrs = [[NSDictionary alloc] initWithObjectsAndKeys:
-		   [NSFont systemFontOfSize:HEADER_DAY_FONT_SIZE],
-		   NSFontAttributeName,
-		   greyColor, NSForegroundColorAttributeName,
-		   centerStyle, NSParagraphStyleAttributeName,
-		   nil];
+      day_attrs = [@{
+        NSFontAttributeName: [NSFont systemFontOfSize:HEADER_DAY_FONT_SIZE],
+	NSForegroundColorAttributeName: greyColor,
+	NSParagraphStyleAttributeName: centerStyle,
+      } retain];
 
       separator_color = [[NSColor colorWithDeviceWhite:.80 alpha:1] retain];
     });
 
-  NSRect bounds = [self bounds];
-  CGFloat scale = [_controller interfaceScale];
+  NSRect bounds = self.bounds;
+  CGFloat scale = _controller.interfaceScale;
   NSRect subR;
 
   // draw month name
 
   subR.origin.x = bounds.origin.x + LEFT_BORDER;
   subR.origin.y = bounds.origin.y + HEADER_MONTH_Y;
-  subR.size.width = STATS_WIDTH + COLUMN_SPACING; 
+  subR.size.width = STATS_WIDTH + COLUMN_SPACING;
   subR.size.height = HEADER_MONTH_HEIGHT;
 
   time_t date = act::week_date(_weekIndex);
@@ -953,7 +948,7 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
       subR.size.width = dw;
 
       int di = (i + start_of_week) % 7;
-      [[[date_formatter shortWeekdaySymbols] objectAtIndex:di]
+      [date_formatter.shortWeekdaySymbols[di]
        drawInRect:subR withAttributes:day_attrs];
     }
 
@@ -1054,14 +1049,14 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
   if (_statsLayer == nil)
     {
       _statsLayer = [ActWeekView_StatsLayer layer];
-      [_statsLayer setDelegate:[self delegate]];
+      _statsLayer.delegate = self.delegate;
       [self addSublayer:_statsLayer];
     }
 
   if (_groupLayer == nil)
     {
       _groupLayer = [ActWeekView_GroupLayer layer];
-      [_groupLayer setDelegate:[self delegate]];
+      _groupLayer.delegate = self.delegate;
       [self addSublayer:_groupLayer];
     }
 
@@ -1078,28 +1073,28 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
       points += it->points();
     }
 
-  CGRect bounds = [self bounds];
-  int displayMode = [(ActWeekViewController *)[self delegate] displayMode];
+  CGRect bounds = self.bounds;
+  int displayMode = ((ActWeekViewController *)self.delegate).displayMode;
 
-  [_statsLayer setDate:_date];
-  [_statsLayer setDisplayMode:displayMode];
-  [_statsLayer setDistance:distance];
-  [_statsLayer setDuration:duration];
-  [_statsLayer setPoints:points];
+  _statsLayer.date = _date;
+  _statsLayer.displayMode = displayMode;
+  _statsLayer.distance = distance;
+  _statsLayer.duration = duration;
+  _statsLayer.points = points;
   CGRect sr = CGRectMake(bounds.origin.x, bounds.origin.y,
 			 STATS_WIDTH, bounds.size.height);
   sr = CGRectInset(sr, STATS_X_INSET, STATS_Y_INSET);
-  [_statsLayer setFrame:sr];
-  [_statsLayer setContentsScale:[self contentsScale]];
+  _statsLayer.frame = sr;
+  _statsLayer.contentsScale = self.contentsScale;
 
-  [_groupLayer setInterfaceScale:[self interfaceScale]];
-  [_groupLayer setDate:_date];
-  [_groupLayer setActivities:_activities];
-  [_groupLayer setDisplayMode:displayMode];
+  _groupLayer.interfaceScale = self.interfaceScale;
+  _groupLayer.date = _date;
+  _groupLayer.activities = _activities;
+  _groupLayer.displayMode = displayMode;
   CGFloat xoff = STATS_WIDTH + COLUMN_SPACING;
-  [_groupLayer setFrame:CGRectMake(bounds.origin.x + xoff,
-	bounds.origin.y, bounds.size.width - xoff, bounds.size.height)];
-  [_groupLayer setContentsScale:[self contentsScale]];
+  _groupLayer.frame = CGRectMake(bounds.origin.x + xoff,
+	bounds.origin.y, bounds.size.width - xoff, bounds.size.height);
+  _groupLayer.contentsScale = self.contentsScale;
 }
 
 @end
@@ -1195,13 +1190,13 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
 
   dispatch_once(&once, ^
     {
-      NSLocale *locale = [(ActAppDelegate *)[NSApp delegate] currentLocale];
+      NSLocale *locale = ((ActAppDelegate *)NSApp.delegate).currentLocale;
 
       date_formatter = [[NSDateFormatter alloc] init];
-      [date_formatter setLocale:locale];
-      [date_formatter setDateFormat:
-       [NSDateFormatter dateFormatFromTemplate:@"dMMM" options:0
-	locale:locale]];
+      date_formatter.locale = locale;
+      date_formatter.dateFormat
+        = [NSDateFormatter dateFormatFromTemplate:@"dMMM" options:0
+	   locale:locale];
 
       NSColor *greyColor = [ActColor controlTextColor];
       NSColor *redColor = [ActColor controlDetailTextColor];
@@ -1236,7 +1231,7 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
 			[date_formatter stringFromDate:
 			 [NSDate dateWithTimeIntervalSince1970:end_date]]];
 
-  size_t date_len = [date_str length];
+  size_t date_len = date_str.length;
 
   std::string dist_str;
   act::format_distance(dist_str, _distance, act::unit_type::unknown);
@@ -1279,7 +1274,7 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
   size_t sub_len = rest.size() - main_len;
 
   NSString *str = [date_str stringByAppendingString:
-		   [NSString stringWithUTF8String:rest.c_str()]];
+		   @(rest.c_str())];
 
   NSMutableAttributedString *astr = [[NSMutableAttributedString alloc]
 				     initWithString:str];
@@ -1288,14 +1283,14 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
   [astr setAttributes:main_attrs range:NSMakeRange(date_len, main_len)];
   [astr setAttributes:sub_attrs range:NSMakeRange(date_len + main_len, sub_len)];
 
-  [self setString:astr];
+  self.string = astr;
   [astr release];
 }
 
 - (void)drawInContext:(CGContextRef)ctx
 {
-  CGContextSetFillColorWithColor(ctx, [[ActColor midControlBackgroundColor] CGColor]);
-  CGContextFillRect(ctx, [self bounds]);
+  CGContextSetFillColorWithColor(ctx, [ActColor midControlBackgroundColor].CGColor);
+  CGContextFillRect(ctx, self.bounds);
   CGContextSetShouldSmoothFonts(ctx, true);
   [super drawInContext:ctx];
 }
@@ -1334,10 +1329,10 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
 
 - (void)layoutSublayers
 {
-  NSMutableArray *old_sublayers = [[self sublayers] mutableCopy];
+  NSMutableArray *old_sublayers = [self.sublayers mutableCopy];
   NSMutableArray *new_sublayers = [[NSMutableArray alloc] init];
 
-  CGRect bounds = [self bounds];
+  CGRect bounds = self.bounds;
   CGFloat item_width = floor(bounds.size.width / 7);
 
   ssize_t item_i = _activities.size() - 1;
@@ -1350,7 +1345,7 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
       NSInteger old_idx = 0;
       for (ActWeekView_ActivityLayer *tem in old_sublayers)
 	{
-	  if ([tem date] == day_date)
+	  if (tem.date == day_date)
 	    {
 	      [old_sublayers removeObjectAtIndex:old_idx];
 	      sublayer = tem;
@@ -1362,9 +1357,9 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
       if (sublayer == nil)
 	{
 	  sublayer = [ActWeekView_ActivityLayer layer];
-	  [sublayer setDate:day_date];
+	  sublayer.date = day_date;
 	  [sublayer setExpandable:YES];
-	  [sublayer setDelegate:[self delegate]];
+	  sublayer.delegate = self.delegate;
 	}
 
       CGFloat px = bounds.origin.x + floor(i * item_width + item_width * .5);
@@ -1372,10 +1367,10 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
 
       [CATransaction animationBlock:^
         {
-	  [sublayer setPosition:CGPointMake(px, py)];
+	  sublayer.position = CGPointMake(px, py);
 	}];
 
-      [sublayer setContentsScale:[self contentsScale]];
+      sublayer.contentsScale = self.contentsScale;
 
       [new_sublayers addObject:sublayer];
 
@@ -1388,14 +1383,14 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
 	  item_i--;
 	}
 
-      [sublayer setActivities:day_vec];
-      [sublayer setDisplayMode:[self displayMode]];
-      [sublayer setInterfaceScale:[self interfaceScale]];
+      sublayer.activities = day_vec;
+      sublayer.displayMode = self.displayMode;
+      sublayer.interfaceScale = self.interfaceScale;
 
       day_date = next_day_date;
     }
 
-  [self setSublayers:new_sublayers];
+  self.sublayers = new_sublayers;
 
   [new_sublayers release];
   [old_sublayers release];
@@ -1467,7 +1462,7 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
 
 - (void)layoutSublayers
 {
-  ActWeekViewController *controller = (ActWeekViewController *)[self delegate];
+  ActWeekViewController *controller = (ActWeekViewController *)self.delegate;
 
   double dist = 0, dur = 0, pts = 0;
   for (const auto &it : _activities)
@@ -1484,15 +1479,15 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
   BOOL selected = NO;
   if (_activities.size() == 1
       && (_activities.front()->storage()
-	  == [[controller controller] selectedActivityStorage]))
+	  == controller.controller.selectedActivityStorage))
     {
       selected = YES;
-      [[controller listView] setSelectedLayer:self];
+      [controller.listView setSelectedLayer:self];
     }
 
-  CGFloat scale = [self interfaceScale];
+  CGFloat scale = self.interfaceScale;
 
-  CGFloat radius = activity_radius(dist, dur, pts, [self displayMode]);
+  CGFloat radius = activity_radius(dist, dur, pts, self.displayMode);
   radius = round(radius * scale);
   if (radius < MIN_RADIUS)
     radius = MIN_RADIUS;
@@ -1521,33 +1516,33 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
 
   [CATransaction animationBlock:^
     {
-      [self setBounds:CGRectMake(0, 0, radius*2, radius*2)];
-      [self setCornerRadius:radius];
-      [self setBackgroundColor:[background_color CGColor]];
-      [self setBorderColor:[color CGColor]];
-      [self setBorderWidth:selected ? 5 : _activities.size() == 1 ? 1 : 0];
-      [self setShadowOpacity:_highlit ? 1 : 0];
+      self.bounds = CGRectMake(0, 0, radius*2, radius*2);
+      self.cornerRadius = radius;
+      self.backgroundColor = background_color.CGColor;
+      self.borderColor = color.CGColor;
+      self.borderWidth = selected ? 5 : _activities.size() == 1 ? 1 : 0;
+      self.shadowOpacity = _highlit ? 1 : 0;
     }];
 
   if (_highlit)
-    [self setShadowColor:[color CGColor]];
+    self.shadowColor = color.CGColor;
 
-  [self setZPosition:_expanded ? 1 : 0];
+  self.zPosition = _expanded ? 1 : 0;
 
   if (_activities.size() > 1)
     {
       if (_groupLayer == nil)
 	{
 	  _groupLayer = [ActWeekView_ActivityGroupLayer layer];
-	  [_groupLayer setDelegate:[self delegate]];
+	  _groupLayer.delegate = self.delegate;
 	  [self addSublayer:_groupLayer];
 	}
 
-      [_groupLayer setInterfaceScale:scale];
-      [_groupLayer setActivities:_activities];
-      [_groupLayer setDisplayMode:[self displayMode]];
-      [_groupLayer setExpanded:_expanded];
-      [_groupLayer setFrame:[self bounds]];
+      _groupLayer.interfaceScale = scale;
+      _groupLayer.activities = _activities;
+      _groupLayer.displayMode = self.displayMode;
+      _groupLayer.expanded = _expanded;
+      _groupLayer.frame = self.bounds;
     }
   else if (_groupLayer != nil)
     {
@@ -1590,34 +1585,34 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
 
 - (void)layoutSublayers
 {
-  NSArray *sublayers = [NSArray arrayWithArray:[self sublayers]];
-  size_t count = [sublayers count];
+  NSArray *sublayers = [NSArray arrayWithArray:self.sublayers];
+  size_t count = sublayers.count;
 
   while (count > _activities.size())
     {
-      [[sublayers objectAtIndex:count-1] removeFromSuperlayer];
+      [sublayers[count-1] removeFromSuperlayer];
       count--;
     }
 
-  CGRect bounds = [self bounds];
+  CGRect bounds = self.bounds;
 
   CGFloat cx = bounds.origin.x + floor(bounds.size.width * .5);
   CGFloat cy = bounds.origin.y + floor(bounds.size.height * .5);
 
   double ang_step = (2 * M_PI) / _activities.size();
 
-  CGFloat scale = [self interfaceScale];
+  CGFloat scale = self.interfaceScale;
 
   for (size_t i = 0; i < _activities.size(); i++)
     {
       ActWeekView_ActivityLayer *sublayer = nil;
 
       if (i < count)
-	sublayer = [sublayers objectAtIndex:i];
+	sublayer = sublayers[i];
       else
 	{
 	  sublayer = [ActWeekView_ActivityLayer layer];
-	  [sublayer setDelegate:[self delegate]];
+	  sublayer.delegate = self.delegate;
 	  [self addSublayer:sublayer];
 	}
 
@@ -1625,7 +1620,7 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
       double dur = _activities[i]->duration();
       double pts = _activities[i]->points();
 
-      CGFloat radius = activity_radius(dist, dur, pts, [self displayMode]);
+      CGFloat radius = activity_radius(dist, dur, pts, self.displayMode);
       radius = round(radius * scale);
       CGFloat ang = i * ang_step + M_PI;
       CGFloat hyp = bounds.size.width * .5 - radius * (_expanded ? .4 : 1);
@@ -1634,17 +1629,17 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
 
       [CATransaction animationBlock:^
         {
-	  [sublayer setPosition:CGPointMake(px, py)];
+	  sublayer.position = CGPointMake(px, py);
 	}];
 
-      [sublayer setInterfaceScale:scale];
-      [sublayer setDisplayMode:[self displayMode]];
-      [sublayer setContentsScale:[self contentsScale]];
+      sublayer.interfaceScale = scale;
+      sublayer.displayMode = self.displayMode;
+      sublayer.contentsScale = self.contentsScale;
 
       std::vector<act::activity_ref> day_vec;
       day_vec.push_back(_activities[i]);
 
-      [sublayer setActivities:day_vec];
+      sublayer.activities = day_vec;
     }
 }
 

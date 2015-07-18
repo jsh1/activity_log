@@ -128,10 +128,8 @@ enum ActWindowMode
 
 // these operate on the selected activity
 
-- (NSString *)bodyString;
-- (void)setBodyString:(NSString *)str;
-- (NSDate *)dateField;
-- (void)setDateField:(NSDate *)date;
+@property(nonatomic, copy) NSString *bodyString;
+@property(nonatomic, copy) NSDate *dateField;
 - (NSString *)stringForField:(NSString *)name;
 - (BOOL)isFieldReadOnly:(NSString *)name;
 - (void)setString:(NSString *)str forField:(NSString *)name;

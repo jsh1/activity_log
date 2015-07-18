@@ -46,6 +46,6 @@
 
 @interface NSView (ActSplitView)
 
-- (CGFloat)minSize;
+@property(nonatomic, readonly) CGFloat minSize;
 
 @end

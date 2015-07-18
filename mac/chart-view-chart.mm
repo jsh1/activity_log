@@ -467,8 +467,8 @@ chart::draw_line(const line &l, const x_axis_state &xs, CGFloat tx)
       {
 	[[NSColor colorWithCalibratedRed:stroke_rgb[0] green:stroke_rgb[1]
 	  blue:stroke_rgb[2] alpha:1] setStroke];
-	[path setLineWidth:1.75];
-	[path setLineJoinStyle:NSBevelLineJoinStyle];
+	path.lineWidth = 1.75;
+	path.lineJoinStyle = NSBevelLineJoinStyle;
 	[path stroke];
       }
 
@@ -484,7 +484,7 @@ chart::draw_line(const line &l, const x_axis_state &xs, CGFloat tx)
       {
 	NSMutableParagraphStyle *rightStyle
 	= [[NSParagraphStyle defaultParagraphStyle] mutableCopy];
-	[rightStyle setAlignment:NSRightTextAlignment];
+	rightStyle.alignment = NSRightTextAlignment;
 
 	left_attrs = [[NSDictionary alloc] initWithObjectsAndKeys:
 		      [NSFont systemFontOfSize:LABEL_FONT_SIZE],
@@ -531,7 +531,7 @@ chart::draw_line(const line &l, const x_axis_state &xs, CGFloat tx)
 	std::string s;
 	l.format_tick(s, tick, value);
 
-	[[NSString stringWithUTF8String:s.c_str()]
+	[@(s.c_str())
 	 drawInRect:NSMakeRect(tx, y - (LABEL_HEIGHT + 2), KEY_TEXT_WIDTH, LABEL_HEIGHT)
 	 withAttributes:!(l.flags & RIGHT_TICKS) ? left_attrs : right_attrs];
 
@@ -540,7 +540,7 @@ chart::draw_line(const line &l, const x_axis_state &xs, CGFloat tx)
 
     if (l.flags & TICK_LINES)
       {
-	[path setLineWidth:backing_scale_recip()];
+	path.lineWidth = backing_scale_recip();
 	[[NSColor colorWithCalibratedRed:stroke_rgb[0]
 	  green:stroke_rgb[1] blue:stroke_rgb[2] alpha:.125] setStroke];
 	[path stroke];
@@ -588,7 +588,7 @@ chart::draw_lap_markers(const x_axis_state &xs)
 		      + _activity.laps()[i].total_elapsed_time);
     }
 
-  [path setLineWidth:backing_scale_recip()];
+  path.lineWidth = backing_scale_recip();
 
   [[NSColor colorWithDeviceWhite:0 alpha:.1] setStroke];
   [path stroke];
@@ -638,12 +638,8 @@ chart::draw_current_time()
 
   NSRect textR = NSInsetRect(boxR, BOX_INSET, 0);
 
-  NSDictionary *attrs = [NSDictionary dictionaryWithObjectsAndKeys:
-			 [NSFont boldSystemFontOfSize:BOX_FONT_SIZE],
-			 NSFontAttributeName,
-			 [ActColor controlDetailTextColor],
-			 NSForegroundColorAttributeName,
-			 nil];
+  NSDictionary *attrs = @{NSFontAttributeName: [NSFont boldSystemFontOfSize:BOX_FONT_SIZE],
+			 NSForegroundColorAttributeName: [ActColor controlDetailTextColor]};
 
   std::string buf;
   format_duration(buf, round(pt.elapsed_time));
@@ -705,7 +701,7 @@ chart::draw_current_time()
       buf.append("\n");
     }
 
-  [[NSString stringWithUTF8String:buf.c_str()]
+  [@(buf.c_str())
    drawInRect:textR withAttributes:attrs];
 }
 

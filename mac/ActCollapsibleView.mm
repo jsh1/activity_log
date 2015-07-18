@@ -50,13 +50,13 @@ static NSDictionary *_titleAttrs;
 
   NSRect r = NSMakeRect(0, 0, DIS_SIZE, DIS_SIZE);
   _disclosureButton = [[NSButton alloc] initWithFrame:r];
-  [_disclosureButton setButtonType:NSPushOnPushOffButton];
-  [_disclosureButton setBezelStyle:NSDisclosureBezelStyle];
-  [_disclosureButton setTitle:@""];
-  [_disclosureButton highlight:NO];
-  [_disclosureButton setState:NSOnState];
-  [_disclosureButton setTarget:self];
-  [_disclosureButton setAction:@selector(controlAction:)];
+  _disclosureButton.buttonType = NSPushOnPushOffButton;
+  _disclosureButton.bezelStyle = NSDisclosureBezelStyle;
+  _disclosureButton.title = @"";
+  _disclosureButton.highlighted = NO;
+  _disclosureButton.state = NSOnState;
+  _disclosureButton.target = self;
+  _disclosureButton.action = @selector(controlAction:);
   [self addSubview:_disclosureButton];
   [_disclosureButton release];
 
@@ -84,14 +84,14 @@ static NSDictionary *_titleAttrs;
 
 - (BOOL)isCollapsed
 {
-  return ![_disclosureButton state];
+  return !_disclosureButton.state;
 }
 
 - (void)setCollapsed:(BOOL)flag
 {
-  if ([_disclosureButton state] != !flag)
+  if (_disclosureButton.state != !flag)
     {
-      [_disclosureButton setState:!flag];
+      _disclosureButton.state = !flag;
       [self controlAction:_disclosureButton];
     }
 }
@@ -112,7 +112,7 @@ static NSDictionary *_titleAttrs;
       [super subviewNeedsLayout:self];
 
       // FIXME: only invalidate title rect
-      [self setNeedsDisplay:YES];
+      self.needsDisplay = YES;
     }
 }
 
@@ -148,7 +148,7 @@ callLayoutSubviews(id delegate, NSView *view)
   if (header_height < MIN_HEIGHT)
     header_height = MIN_HEIGHT;
 
-  if (![_disclosureButton state])
+  if (!_disclosureButton.state)
     return header_height;
 
   CGFloat content_height;
@@ -159,7 +159,7 @@ callLayoutSubviews(id delegate, NSView *view)
 
 - (void)layoutSubviews
 {
-  NSRect bounds = [self bounds];
+  NSRect bounds = self.bounds;
 
   NSPoint p = NSMakePoint(bounds.origin.x, bounds.origin.y
 			  + bounds.size.height - DIS_SIZE);
@@ -187,7 +187,7 @@ callLayoutSubviews(id delegate, NSView *view)
 	header_y -= (MIN_HEIGHT - (int)header_height) >> 1;
 
       NSRect hr = NSMakeRect(header_x, header_y, header_width, header_height);
-      [_headerView setFrame:hr];
+      _headerView.frame = hr;
       callLayoutSubviews(_delegate, _headerView);
     }
 
@@ -195,7 +195,7 @@ callLayoutSubviews(id delegate, NSView *view)
     header_height = MIN_HEIGHT;
 
   CGFloat content_height = 0;
-  if (_contentView != nil && [_disclosureButton state])
+  if (_contentView != nil && _disclosureButton.state)
     {
       content_height = callHeightForWidth(_delegate, _contentView, content_width);
       if (content_height > bounds.size.width - (header_height + SPACING))
@@ -206,12 +206,12 @@ callLayoutSubviews(id delegate, NSView *view)
     {
       NSRect cr = NSMakeRect(bounds.origin.x + 1, bounds.origin.y + 1,
 			     content_width, content_height);
-      [_contentView setFrame:cr];
+      _contentView.frame = cr;
       callLayoutSubviews(_delegate, _contentView);
-      [_contentView setHidden:NO];
+      _contentView.hidden = NO;
     }
   else
-    [_contentView setHidden:YES];
+    _contentView.hidden = YES;
 
   // for -drawRect:
 
@@ -226,13 +226,12 @@ callLayoutSubviews(id delegate, NSView *view)
   // we're drawing into an opaque view that will work fine, so turn
   // it back on for the length of this method call.
 
-  CGContextRef ctx
-    = (CGContextRef) [[NSGraphicsContext currentContext] graphicsPort];
+  CGContextRef ctx = [NSGraphicsContext currentContext].CGContext;
   CGContextSaveGState(ctx);
   CGContextSetShouldSmoothFonts(ctx, true);
 
-  NSRect bounds = [self bounds];
-  BOOL expanded = [_disclosureButton state] && _contentHeight > 0;
+  NSRect bounds = self.bounds;
+  BOOL expanded = _disclosureButton.state && _contentHeight > 0;
 
   NSColor *dark = [NSColor colorWithDeviceWhite:.75 alpha:1];
 
@@ -286,13 +285,13 @@ callLayoutSubviews(id delegate, NSView *view)
 
 - (void)mouseDown:(NSEvent *)e
 {
-  NSRect bounds = [self bounds];
-  NSPoint p = [self convertPoint:[e locationInWindow] fromView:nil];
+  NSRect bounds = self.bounds;
+  NSPoint p = [self convertPoint:e.locationInWindow fromView:nil];
 
   if (p.y > bounds.origin.y + bounds.size.height - _headerHeight
-      && [e clickCount] == 2)
+      && e.clickCount == 2)
     {
-      [self setCollapsed:![self isCollapsed]];
+      self.collapsed = !self.collapsed;
     }
 }
 
@@ -300,7 +299,7 @@ callLayoutSubviews(id delegate, NSView *view)
 {
   if (sender == _disclosureButton)
     {
-      [[self superview] subviewNeedsLayout:self];
+      [self.superview subviewNeedsLayout:self];
     }
 }
 

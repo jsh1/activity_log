@@ -39,6 +39,6 @@
 
 @interface NSView (ActHorizontalBoxView)
 
-- (CGFloat)preferredWidth;
+@property(nonatomic, readonly) CGFloat preferredWidth;
 
 @end

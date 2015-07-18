@@ -45,9 +45,8 @@
 
 - (id)propertyListRepresentation;
 
-- (NSString *)identifier;
-
-@property(nonatomic, readonly) NSString *identifierSuffix;
+@property(nonatomic, readonly, copy) NSString *identifier;
+@property(nonatomic, readonly, copy) NSString *identifierSuffix;
 
 - (id)initWithController:(ActWindowController *)controller
     options:(NSDictionary *)dict;

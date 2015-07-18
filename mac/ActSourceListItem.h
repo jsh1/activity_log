@@ -45,7 +45,7 @@
 
 // can be overridden if more efficient than [self.subitems count]
 
-- (NSInteger)subitemsCount;
+@property(nonatomic, readonly) NSInteger subitemsCount;
 
 @property(nonatomic, getter=isExpandable) BOOL expandable;
 

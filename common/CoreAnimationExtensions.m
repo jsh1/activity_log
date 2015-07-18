@@ -49,7 +49,7 @@
   [CATransaction begin];
 
   for (NSString *key in dict)
-    [self setValue:[dict objectForKey:key] forKey:key];
+    [self setValue:dict[key] forKey:key];
 
   thunk();
 
