@@ -33,39 +33,20 @@
 @end
 
 @interface ActCachedURL : NSObject
-{
-@private
-  NSURL *_url;
-  id<ActURLCacheDelegate> _delegate;
-  id _userInfo;
-  ActURLCache *_cache;
-  NSURLSessionTask *_task;
-  NSMutableData *_data;
-  NSError *_error;
-  BOOL _dispatching;
-  int _fileId;
-}
 
 - (void)cancel;
 
 @property(nonatomic, copy) NSURL *URL;
-@property(nonatomic, assign) id<ActURLCacheDelegate> delegate;
-@property(nonatomic, retain) id userInfo;
+@property(nonatomic, weak) id<ActURLCacheDelegate> delegate;
+@property(nonatomic, strong) id userInfo;
 
-@property(nonatomic, readonly) ActURLCache *cache;
-@property(nonatomic, readonly) NSData *data;
-@property(nonatomic, readonly) NSError *error;
+@property(nonatomic, strong, readonly) ActURLCache *cache;
+@property(nonatomic, copy, readonly) NSData *data;
+@property(nonatomic, copy, readonly) NSError *error;
 
 @end
 
 @interface ActURLCache : NSObject
-{
-  NSString *_path;
-  void *_handle;
-  void *_queryStmt;
-  void *_insertStmt;
-  void *_deleteStmt;
-}
 
 + (ActURLCache *)sharedURLCache;
 

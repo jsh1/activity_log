@@ -28,33 +28,24 @@
 @class ActSummaryView, ActHorizontalBoxView, ActSplitView;
 
 @interface ActSummaryViewController : ActViewController <NSTextViewDelegate>
-{
-  IBOutlet ActSummaryView *_summaryView;
 
-  IBOutlet ActHorizontalBoxView *_dateBox;
-  IBOutlet ActExpandableTextField *_dateTimeField;
-  IBOutlet ActExpandableTextField *_dateDayField;
-  IBOutlet ActExpandableTextField *_dateDateField;
+@property(nonatomic, strong) ActSummaryView *summaryView;
 
-  IBOutlet ActHorizontalBoxView *_typeBox;
-  IBOutlet ActExpandableTextField *_typeActivityField;
-  IBOutlet ActExpandableTextField *_typeTypeField;
+@property(nonatomic, strong) ActHorizontalBoxView *dateBox;
+@property(nonatomic, strong) ActExpandableTextField *dateTimeField;
+@property(nonatomic, strong) ActExpandableTextField *dateDayField;
+@property(nonatomic, strong) ActExpandableTextField *dateDateField;
 
-  IBOutlet ActHorizontalBoxView *_statsBox;
-  IBOutlet ActExpandableTextField *_statsDistanceField;
-  IBOutlet ActExpandableTextField *_statsDurationField;
-  IBOutlet ActExpandableTextField *_statsPaceField;
+@property(nonatomic, strong) ActHorizontalBoxView *typeBox;
+@property(nonatomic, strong) ActExpandableTextField *typeActivityField;
+@property(nonatomic, strong) ActExpandableTextField *typeTypeField;
 
-  IBOutlet ActTextField *_courseField;
+@property(nonatomic, strong) ActHorizontalBoxView *statsBox;
+@property(nonatomic, strong) ActExpandableTextField *statsDistanceField;
+@property(nonatomic, strong) ActExpandableTextField *statsDurationField;
+@property(nonatomic, strong) ActExpandableTextField *statsPaceField;
 
-  NSTextView *_bodyTextView;
-  NSLayoutManager *_bodyLayoutManager;
-  NSTextContainer *_bodyLayoutContainer;
-
-  NSDictionary *_fieldControls;		// FIELD-NAME -> CONTROL
-
-  int _ignoreChanges;
-}
+@property(nonatomic, strong) ActTextField *courseField;
 
 - (IBAction)controlAction:(id)sender;
 
@@ -63,7 +54,7 @@
 // draws the background rounded rect
 
 @interface ActSummaryView : NSView
-{
-  IBOutlet ActSummaryViewController *_controller;
-}
+
+@property(nonatomic, weak) ActSummaryViewController *controller;
+
 @end

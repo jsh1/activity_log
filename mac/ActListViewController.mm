@@ -34,6 +34,12 @@
 #import <algorithm>
 
 @implementation ActListViewController
+{
+  std::unordered_map<act::activity_storage_ref,
+    std::unique_ptr<act::activity>> _activity_cache;
+}
+
+@synthesize tableView = _tableView;
 
 + (NSString *)viewNibName
 {
@@ -44,15 +50,15 @@
 {
   [[NSNotificationCenter defaultCenter]
    addObserver:self selector:@selector(activityListDidChange:)
-   name:ActActivityListDidChange object:_controller];
+   name:ActActivityListDidChange object:self.controller];
 
   [[NSNotificationCenter defaultCenter]
    addObserver:self selector:@selector(selectedActivityDidChange:)
-   name:ActSelectedActivityDidChange object:_controller];
+   name:ActSelectedActivityDidChange object:self.controller];
 
   [[NSNotificationCenter defaultCenter]
    addObserver:self selector:@selector(activityDidChangeField:)
-   name:ActActivityDidChangeField object:_controller];
+   name:ActActivityDidChangeField object:self.controller];
 
   for (NSTableColumn *col in _tableView.tableColumns)
     ((NSCell *)col.dataCell).verticallyCentered = YES;
@@ -63,7 +69,6 @@
   [[NSNotificationCenter defaultCenter] removeObserver:self];
   [NSRunLoop cancelPreviousPerformRequestsWithTarget:self];
 
-  [super dealloc];
 }
 
 - (NSView *)initialFirstResponder
@@ -76,7 +81,7 @@
   if (storage == nullptr)
     return NSNotFound;
 
-  const std::vector<act::database::item> &vec = _controller.activityList;
+  const std::vector<act::database::item> &vec = self.controller.activityList;
 
   const auto &pos = std::find_if(vec.begin(), vec.end(),
 				 [=] (const act::database::item &a) {
@@ -91,7 +96,7 @@
 
 - (act::activity *)activityForRow:(NSInteger)row
 {
-  const auto &vec = _controller.activityList;
+  const auto &vec = self.controller.activityList;
 
   act::activity_storage_ref storage = vec[row].storage();
 
@@ -116,7 +121,7 @@
 - (void)selectedActivityDidChange:(NSNotification *)note
 {
   NSInteger newRow = [self rowForActivityStorage:
-		      _controller.selectedActivityStorage];
+		      self.controller.selectedActivityStorage];
 
   NSIndexSet *set = nil;
 
@@ -152,7 +157,7 @@
 
 - (NSInteger)numberOfRowsInTableView:(NSTableView *)tv
 {
-  return _controller.activityList.size();
+  return self.controller.activityList.size();
 }
 
 - (id)tableView:(NSTableView *)tv
@@ -181,7 +186,7 @@
 	      [NSDate dateWithTimeIntervalSince1970:(time_t)a->date()]];
     }
   else
-    return [_controller stringForField:ident ofActivity:*a];
+    return [self.controller stringForField:ident ofActivity:*a];
 }
 
 - (void)tableView:(NSTableView *)tv setObjectValue:(id)object
@@ -194,7 +199,7 @@
   if ([ident isEqualToString:@"date"])
     return;
   else
-    [_controller setString:object forField:ident ofActivity:*a];
+    [self.controller setString:object forField:ident ofActivity:*a];
 }
 
 // NSTableViewDelegate methods
@@ -202,12 +207,12 @@
 - (void)tableViewSelectionDidChange:(NSNotification *)note
 {
   NSInteger row = _tableView.selectedRow;
-  const auto &activities = _controller.activityList;
+  const auto &activities = self.controller.activityList;
 
   if (row >= 0 && row < activities.size())
-    _controller.selectedActivityStorage = activities[row].storage();
+    self.controller.selectedActivityStorage = activities[row].storage();
   else
-    _controller.selectedActivityStorage = nullptr;
+    self.controller.selectedActivityStorage = nullptr;
 }
 
 @end

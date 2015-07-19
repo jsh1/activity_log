@@ -27,15 +27,12 @@
 @class ActWindowController;
 
 @interface ActAppDelegate : NSObject <NSApplicationDelegate, NSMenuDelegate>
-{
-  IBOutlet NSMenu *_viewMenu;
 
-  ActWindowController *_windowController;
-}
+@property(nonatomic, strong) IBOutlet NSMenu *viewMenu;
 
-@property(readonly) ActWindowController *windowController;
+@property(nonatomic, readonly) ActWindowController *windowController;
 
-@property(readonly) NSLocale *currentLocale;
+@property(nonatomic, readonly) NSLocale *currentLocale;
 
 - (IBAction)showWindow:(id)sender;
 

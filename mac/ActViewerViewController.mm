@@ -33,6 +33,11 @@
 
 @implementation ActViewerViewController
 
+@synthesize splitView = _splitView;
+@synthesize listContainer = _listContainer;
+@synthesize contentContainer = _contentContainer;
+@synthesize listViewType = _listViewType;
+
 + (NSString *)viewNibName
 {
   return @"ActViewerView";
@@ -46,19 +51,19 @@
     return nil;
 
   if (ActViewController *obj = [[ActListViewController alloc]
-				initWithController:_controller options:nil])
+				initWithController:self.controller options:nil])
     {
       [self addSubviewController:obj];
     }
 
   if (ActViewController *obj = [[ActNotesListViewController alloc]
-				initWithController:_controller options:nil])
+				initWithController:self.controller options:nil])
     {
       [self addSubviewController:obj];
     }
 
   if (ActViewController *obj = [[ActWeekViewController alloc]
-				initWithController:_controller options:nil])
+				initWithController:self.controller options:nil])
     {
       [self addSubviewController:obj];
     }
@@ -66,17 +71,16 @@
   // FIXME: also some kind of multi-activity summary view
 
   if (ActViewController *obj = [[ActActivityViewController alloc]
-				initWithController:_controller options:nil])
+				initWithController:self.controller options:nil])
     {
       [self addSubviewController:obj];
-      [obj release];
     }
 
   _listViewType = -1;
 
   [[NSNotificationCenter defaultCenter]
    addObserver:self selector:@selector(selectedActivityDidChange:)
-   name:ActSelectedActivityDidChange object:_controller];
+   name:ActSelectedActivityDidChange object:self.controller];
 
   return self;
 }
@@ -85,7 +89,7 @@
 {
   [super viewDidLoad];
 
-  [_controller addSplitView:_splitView identifier:@"1.Viewer"];
+  [self.controller addSplitView:_splitView identifier:@"1.Viewer"];
   _splitView.indexOfResizableSubview = 1;
 
   for (ActViewController *controller in self.subviewControllers)
@@ -93,7 +97,8 @@
       if ([controller isKindOfClass:[ActActivityViewController class]])
 	{
 	  [controller addToContainerView:_contentContainer];
-	  controller.view.hidden = _controller.selectedActivityStorage == nullptr;
+	  controller.view.hidden
+	    = self.controller.selectedActivityStorage == nullptr;
 	}
     }
 
@@ -104,8 +109,7 @@
 - (void)dealloc
 {
   [[NSNotificationCenter defaultCenter] removeObserver:self];
-  [_controller removeSplitView:_splitView identifier:@"1.Viewer"];
-  [super dealloc];
+  [self.controller removeSplitView:_splitView identifier:@"1.Viewer"];
 }
 
 static Class
@@ -187,7 +191,7 @@ listViewControllerClass(int type)
   ActViewController *activityC = [self viewControllerWithClass:
 				  [ActActivityViewController class]];
 
-  activityC.view.hidden = _controller.selectedActivityStorage == nullptr;
+  activityC.view.hidden = self.controller.selectedActivityStorage == nullptr;
 }
 
 @end

@@ -37,6 +37,20 @@
 #define SPOT_RADIUS 7
 
 @implementation ActMapViewController
+{
+  int _pendingSources;
+  NSString *_defaultSourceName;
+
+  BOOL _hasCurrentLocation;
+  act::location _currentLocation;
+}
+
+@synthesize mapView = _mapView;
+@synthesize mapSrcButton = _mapSrcButton;
+@synthesize zoomSlider = _zoomSlider;
+@synthesize zoomInButton = _zoomInButton;
+@synthesize zoomOutButton = _zoomOutButton;
+@synthesize centerButton = _centerButton;
 
 + (NSString *)viewNibName
 {
@@ -73,7 +87,6 @@
     }
 
   NSArray *ret = [NSArray arrayWithArray:tem];
-  [tem release];
 
   return ret;
 }
@@ -93,7 +106,6 @@
 	[tem addObjectsFromArray:a];
 
       array = [tem copy];
-      [tem release];
     }
 
   return array;
@@ -108,18 +120,18 @@
 
   [[NSNotificationCenter defaultCenter]
    addObserver:self selector:@selector(selectedActivityDidChange:)
-   name:ActSelectedActivityDidChange object:_controller];
+   name:ActSelectedActivityDidChange object:self.controller];
 
   [[NSNotificationCenter defaultCenter]
    addObserver:self selector:@selector(selectedLapIndexDidChange:)
-   name:ActSelectedLapIndexDidChange object:_controller];
+   name:ActSelectedLapIndexDidChange object:self.controller];
 
   [[NSNotificationCenter defaultCenter]
    addObserver:self selector:@selector(currentTimeWillChange:)
-   name:ActCurrentTimeWillChange object:_controller];
+   name:ActCurrentTimeWillChange object:self.controller];
   [[NSNotificationCenter defaultCenter]
    addObserver:self selector:@selector(currentTimeDidChange:)
-   name:ActCurrentTimeDidChange object:_controller];
+   name:ActCurrentTimeDidChange object:self.controller];
 
   for (ActMapSource *src in [self.class mapSources])
     {
@@ -133,8 +145,6 @@
 - (void)dealloc
 {
   [[NSNotificationCenter defaultCenter] removeObserver:self];
-  [_defaultSourceName release];
-  [super dealloc];
 }
 
 - (void)viewDidLoad
@@ -205,7 +215,6 @@
   if (_defaultSourceName != nil)
     {
       [self setMapSourceByName:_defaultSourceName];
-      [_defaultSourceName release];
       _defaultSourceName = nil;
     }
   else
@@ -225,7 +234,6 @@
     {
       if (_pendingSources > 0 || !self.viewLoaded)
 	{
-	  [_defaultSourceName release];
 	  _defaultSourceName = [name copy];
 	}
       else
@@ -237,7 +245,7 @@
 {
   if (view == _mapView)
     {
-      const act::activity *a = _controller.selectedActivity;
+      const act::activity *a = self.controller.selectedActivity;
 
       if (a != nullptr && a->gps_data() != nullptr)
 	return floor(width * (9./16.));
@@ -254,7 +262,7 @@
 
 - (void)_updateDisplayedRegion
 {
-  const act::activity *a = _controller.selectedActivity;
+  const act::activity *a = self.controller.selectedActivity;
   if (!a)
     return;
 
@@ -274,7 +282,7 @@
   [self _updateDisplayedRegion];
   _mapView.needsDisplay = YES;
 
-  const act::activity *a = _controller.selectedActivity;
+  const act::activity *a = self.controller.selectedActivity;
   bool has_map = a != nullptr && a->gps_data() != nullptr;
 
   _centerButton.enabled = has_map;
@@ -282,7 +290,7 @@
 
 - (void)selectedLapIndexDidChange:(NSNotification *)note
 {
-  const act::activity *a = _controller.selectedActivity;
+  const act::activity *a = self.controller.selectedActivity;
 
   if (a != nullptr && a->gps_data() != nullptr)
     _mapView.needsDisplay = YES;
@@ -292,11 +300,11 @@
 {
   _hasCurrentLocation = NO;
 
-  double t = _controller.currentTime;
+  double t = self.controller.currentTime;
   if (!(t >= 0))
     return;
 
-  const act::activity *a = _controller.selectedActivity;
+  const act::activity *a = self.controller.selectedActivity;
   if (a == nullptr)
     return;
 
@@ -370,7 +378,7 @@
     mapBottomLeft:(const act::location &)loc_ll
     topRight:(const act::location &)loc_ur
 {
-  const act::activity *a = _controller.selectedActivity;
+  const act::activity *a = self.controller.selectedActivity;
   if (!a)
     return;
 
@@ -460,7 +468,7 @@
 
   draw_track(gps_a->points().begin(), gps_a->points().end(), 9);
 
-  int selected_lap = _controller.selectedLapIndex;
+  int selected_lap = self.controller.selectedLapIndex;
 
   if (selected_lap >= 0)
     {

@@ -35,19 +35,15 @@ enum ActWeekViewDisplayMode
 };
 
 @interface ActWeekViewController : ActViewController
-{
-  IBOutlet NSScrollView *_scrollView;
-  IBOutlet ActWeekListView *_listView;
-  IBOutlet ActWeekHeaderView *_headerView;
-  IBOutlet NSSegmentedControl *_displayModeControl;
-  IBOutlet NSSlider *_scaleSlider;
 
-  CGFloat _interfaceScale;
-  int _displayMode;
-}
+@property(nonatomic, strong) IBOutlet NSScrollView *scrollView;
+@property(nonatomic, strong) IBOutlet ActWeekListView *listView;
+@property(nonatomic, strong) IBOutlet ActWeekHeaderView *headerView;
+@property(nonatomic, strong) IBOutlet NSSegmentedControl *displayModeControl;
+@property(nonatomic, strong) IBOutlet NSSlider *scaleSlider;
 
-@property(nonatomic) CGFloat interfaceScale;
-@property(nonatomic) int displayMode;
+@property(nonatomic, assign) CGFloat interfaceScale;
+@property(nonatomic, assign) int displayMode;
 
 - (int)weekForActivityStorage:(const act::activity_storage_ref)storage;
 
@@ -56,16 +52,8 @@ enum ActWeekViewDisplayMode
 @end
 
 @interface ActWeekListView : NSView
-{
-  IBOutlet ActWeekViewController *_controller;
 
-  NSRange _weekRange;
-
-  NSTrackingArea *_trackingArea;
-  ActWeekView_ActivityLayer *_expandedLayer;
-  ActWeekView_ActivityLayer *_highlitLayer;
-  ActWeekView_ActivityLayer *_selectedLayer;
-}
+@property(nonatomic, weak) IBOutlet ActWeekViewController *controller;
 
 @property(nonatomic) NSRange weekRange;
 
@@ -77,12 +65,9 @@ enum ActWeekViewDisplayMode
 @end
 
 @interface ActWeekHeaderView : NSView
-{
-  IBOutlet ActWeekViewController *_controller;
 
-  int _weekIndex;
-}
+@property(nonatomic, weak) IBOutlet ActWeekViewController *controller;
 
-@property(nonatomic) int weekIndex;
+@property(nonatomic, assign) int weekIndex;
 
 @end

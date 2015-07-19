@@ -31,14 +31,8 @@
 #import <algorithm>
 
 @interface ActTextFieldCell : NSTextFieldCell
-{
-  BOOL _completesEverything;
-}
-
-@property(nonatomic) BOOL completesEverything;
-
+@property(nonatomic, assign) BOOL completesEverything;
 @end
-
 
 @implementation ActTextField
 
@@ -137,6 +131,9 @@
 @end
 
 @implementation ActFieldEditor
+{
+  int _completionDepth;
+}
 
 @synthesize autoCompletes = _autoCompletes;
 @synthesize completesEverything = _completesEverything;

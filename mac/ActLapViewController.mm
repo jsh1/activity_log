@@ -37,6 +37,12 @@
 #define SEPARATOR_HEIGHT 2
 
 @implementation ActLapViewController
+{
+  NSTableView *_tableView;
+  NSTableHeaderView *_headerView;
+}
+
+@synthesize lapView = _lapView;
 
 + (NSString *)viewNibName
 {
@@ -54,9 +60,7 @@ addTableColumn (NSTableView *tv, NSFont *font, NSString *ident,NSString *title)
   NSTableHeaderCell *hc = [[NSTableHeaderCell alloc] initTextCell:title];
   hc.font = font;
   tc.headerCell = hc;
-  [hc release];
   [tv addTableColumn:tc];
-  [tc release];
 }
 
 #if 0
@@ -76,11 +80,11 @@ setTableColumnEnabled(NSTableView *tv, NSString *ident, BOOL state)
 
   [[NSNotificationCenter defaultCenter]
    addObserver:self selector:@selector(selectedActivityDidChange:)
-   name:ActSelectedActivityDidChange object:_controller];
+   name:ActSelectedActivityDidChange object:self.controller];
 
   [[NSNotificationCenter defaultCenter]
    addObserver:self selector:@selector(selectedLapIndexDidChange:)
-   name:ActSelectedActivityDidChange object:_controller];
+   name:ActSelectedActivityDidChange object:self.controller];
 
   return self;
 }
@@ -88,7 +92,6 @@ setTableColumnEnabled(NSTableView *tv, NSString *ident, BOOL state)
 - (void)dealloc
 {
   [[NSNotificationCenter defaultCenter] removeObserver:self];
-  [super dealloc];
 }
 
 - (void)viewDidLoad
@@ -100,7 +103,6 @@ setTableColumnEnabled(NSTableView *tv, NSString *ident, BOOL state)
 
   _headerView = [[NSTableHeaderView alloc] initWithFrame:NSZeroRect];
   [_lapView addSubview:_headerView];
-  [_headerView release];
 
   _tableView = [[ActTableView alloc] initWithFrame:NSZeroRect];
   _tableView.dataSource = self;
@@ -123,7 +125,6 @@ setTableColumnEnabled(NSTableView *tv, NSString *ident, BOOL state)
   addTableColumn(_tableView, font, @"avg_vertical_oscillation", @"Vert. Oscillation");
 
   [_lapView addSubview:_tableView];
-  [_tableView release];
 
   _headerView.tableView = _tableView;
 }
@@ -131,7 +132,7 @@ setTableColumnEnabled(NSTableView *tv, NSString *ident, BOOL state)
 - (void)selectedActivityDidChange:(NSNotification *)note
 {
 #if 0
-  const act::activity *a = _controller.selectedActivity;
+  const act::activity *a = self.controller.selectedActivity;
   if (!a)
     return;
 
@@ -166,7 +167,7 @@ setTableColumnEnabled(NSTableView *tv, NSString *ident, BOOL state)
 
 - (void)selectedLapIndexDidChange:(NSNotification *)note
 {
-  NSInteger row = _controller.selectedLapIndex;
+  NSInteger row = self.controller.selectedLapIndex;
   NSIndexSet *set = nil;
 
   if (row >= 0)
@@ -211,7 +212,7 @@ setTableColumnEnabled(NSTableView *tv, NSString *ident, BOOL state)
 
 - (NSInteger)numberOfRowsInTableView:(NSTableView *)tv
 {
-  const act::activity *a = _controller.selectedActivity;
+  const act::activity *a = self.controller.selectedActivity;
   if (!a)
     return 0;
 
@@ -225,7 +226,7 @@ setTableColumnEnabled(NSTableView *tv, NSString *ident, BOOL state)
 - (id)tableView:(NSTableView *)tv
   objectValueForTableColumn:(NSTableColumn *)col row:(NSInteger)row
 {
-  const act::activity *a = _controller.selectedActivity;
+  const act::activity *a = self.controller.selectedActivity;
   if (!a)
     return nil;
 
@@ -288,12 +289,14 @@ setTableColumnEnabled(NSTableView *tv, NSString *ident, BOOL state)
 
 - (void)tableViewSelectionDidChange:(NSNotification *)note
 {
-  _controller.selectedLapIndex = _tableView.selectedRow;
+  self.controller.selectedLapIndex = _tableView.selectedRow;
 }
 
 @end
 
 @implementation ActLapView
+
+@synthesize controller = _controller;
 
 - (CGFloat)heightForWidth:(CGFloat)width
 {

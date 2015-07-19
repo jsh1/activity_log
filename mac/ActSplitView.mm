@@ -25,6 +25,9 @@
 #import "ActSplitView.h"
 
 @implementation ActSplitView
+{
+  NSView *_collapsingSubview;
+}
 
 @synthesize indexOfResizableSubview = _indexOfResizableSubview;
 

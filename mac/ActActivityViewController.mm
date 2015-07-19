@@ -32,6 +32,9 @@
 
 @implementation ActActivityViewController
 
+@synthesize scrollView = _scrollView;
+@synthesize activityView = _activityView;
+
 + (NSString *)viewNibName
 {
   return @"ActActivityView";
@@ -51,7 +54,7 @@
     {
       ActViewController *obj
         = [ActViewController viewControllerWithPropertyListRepresentation:dict
-	   controller:_controller];
+	   controller:self.controller];
 
       if (obj != nil)
 	[self addSubviewController:obj];
@@ -119,7 +122,7 @@
 
   ActViewController *obj
     = [ActViewController viewControllerWithPropertyListRepresentation:dict
-       controller:_controller];
+       controller:self.controller];
 
   if (obj != nil)
     [self addSubviewController:obj after:pred];
@@ -226,6 +229,12 @@
 @end
 
 @implementation ActActivityView
+{
+  BOOL _needsLayout;
+  int _ignoreLayout;
+}
+
+@synthesize controller = _controller;
 
 static CGFloat
 layoutSubviews(ActActivityView *self, CGFloat width,

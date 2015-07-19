@@ -39,9 +39,6 @@
 {
 @public
   ActImporterViewController *_controller;
-  NSURL *_url;
-  BOOL _checked;
-  BOOL _exists;
   BOOL _queued;
   std::unique_ptr<act::gps::activity> _data;
 }
@@ -59,6 +56,12 @@
 @end
 
 @implementation ActImporterViewController
+{
+  NSMutableArray *_activities;
+}
+
+@synthesize tableView = _tableView;
+@synthesize importButton = _importButton;
 
 + (NSString *)viewNibName
 {
@@ -74,7 +77,7 @@
 
   [[NSNotificationCenter defaultCenter]
    addObserver:self selector:@selector(selectedDeviceDidChange:)
-   name:ActSelectedDeviceDidChange object:_controller];
+   name:ActSelectedDeviceDidChange object:self.controller];
 
   [self selectedDeviceDidChange:nil];
 
@@ -94,9 +97,7 @@
   for (ActImporterActivity *obj in _activities)
     [obj invalidate];
 
-  [_activities release];
 
-  [super dealloc];
 }
 
 - (void)reloadData
@@ -117,17 +118,15 @@
   for (ActImporterActivity *obj in _activities)
     [obj invalidate];
 
-  [_activities release];
 
   _activities = [[NSMutableArray alloc] init];
 
-  for (NSURL *url in [_controller.selectedDevice.activityURLs
+  for (NSURL *url in [self.controller.selectedDevice.activityURLs
 		      reverseObjectEnumerator])
     {
       ActImporterActivity *obj
         = [[ActImporterActivity alloc] initWithURL:url controller:self];
       [_activities addObject:obj];
-      [obj release];
     }
 
   [self reloadData];
@@ -216,7 +215,7 @@ copyFileToGPSDirectory(std::string &gps_path)
 	}
     }
 
-  [_controller performSelector:@selector(reloadActivities)
+  [self.controller performSelector:@selector(reloadActivities)
    withObject:nil afterDelay:.25];
 
   // FIXME: switch to viewing the earliest activity?
@@ -235,8 +234,8 @@ copyFileToGPSDirectory(std::string &gps_path)
   act::database::query q;
   q.set_term(term);
 
-  [_controller showQueryResults:q];
-  _controller.windowMode = ActWindowMode_Viewer;
+  [self.controller showQueryResults:q];
+  self.controller.windowMode = ActWindowMode_Viewer;
 }
 
 // NSTableDataSource methods
@@ -368,8 +367,6 @@ copyFileToGPSDirectory(std::string &gps_path)
 {
   assert(_controller == nil);
 
-  [_url release];
-  [super dealloc];
 }
 
 - (const act::gps::activity *)data

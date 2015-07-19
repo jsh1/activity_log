@@ -30,11 +30,11 @@
 - (void)commitCachedURL:(ActCachedURL *)url;
 @end
 
-@interface ActCachedURL (internal)
-- (void)setCache:(ActURLCache *)cache;
-- (void)setData:(NSData *)data;
-- (void)setError:(NSError *)err;
-@property(nonatomic, retain) NSURLSessionTask *task;
+@interface ActCachedURL ()
+@property(nonatomic, strong) ActURLCache *cache;
+@property(nonatomic, copy) NSData *data;
+@property(nonatomic, copy) NSError *error;
+@property(nonatomic, strong) NSURLSessionTask *task;
 @property(nonatomic, assign) int fileId;
 - (void)dispatch;
 @end
@@ -53,6 +53,13 @@
   } while(0)
 
 @implementation ActURLCache
+{
+  NSString *_path;
+  void *_handle;
+  void *_queryStmt;
+  void *_insertStmt;
+  void *_deleteStmt;
+}
 
 static ActURLCache *_sharedCache;
 
@@ -95,13 +102,11 @@ static ActURLCache *_sharedCache;
       if (![fm createDirectoryAtPath:_path withIntermediateDirectories:YES
 	    attributes:nil error:nil])
 	{
-	  [self release];
 	  return nil;
 	}
     }
   else if (!isdir)
     {
-      [self release];
       return nil;
     }
 
@@ -111,7 +116,6 @@ static ActURLCache *_sharedCache;
 
   if (_handle == NULL)
     {
-      [self release];
       return nil;
     }
 
@@ -124,11 +128,9 @@ static ActURLCache *_sharedCache;
 
 - (void)dealloc
 {
-  [_path release];
 
   TRY(sqlite3_close(_handle));
 
-  [super dealloc];
 }
 
 - (NSString *)_pathForFileId:(int)x
@@ -328,24 +330,18 @@ static ActURLCache *_sharedCache;
 @end
 
 @implementation ActCachedURL
+{
+  BOOL _dispatching;
+}
 
 @synthesize URL = _url;
 @synthesize delegate = _delegate;
 @synthesize userInfo = _userInfo;
-
 @synthesize cache = _cache;
 @synthesize data = _data;
 @synthesize error = _error;
-
-- (void)dealloc
-{
-  [_url release];
-  [_userInfo release];
-  [_cache release];
-  [_task release];
-  [_data release];
-  [super dealloc];
-}
+@synthesize task = _task;
+@synthesize fileId = _fileId;
 
 - (void)cancel
 {
@@ -363,49 +359,6 @@ static ActURLCache *_sharedCache;
 {
   [_delegate cachedURLDidFinish:self];
   _dispatching = NO;
-}
-
-@end
-
-@implementation ActCachedURL (internal)
-
-- (void)setCache:(ActURLCache *)cache
-{
-  [_cache release];
-  _cache = [cache retain];
-}
-
-- (void)setData:(NSData *)data
-{
-  [_data release];
-  _data = [data copy];
-}
-
-- (void)setError:(NSError *)err
-{
-  [_error release];
-  _error = [err retain];
-}
-
-- (NSURLSessionTask *)task
-{
-  return _task;
-}
-
-- (void)setTask:(NSURLSessionTask *)task
-{
-  [_task release];
-  _task = [task retain];
-}
-
-- (int)fileId
-{
-  return _fileId;
-}
-
-- (void)setFileId:(int)x
-{
-  _fileId = x;
 }
 
 - (void)dispatch

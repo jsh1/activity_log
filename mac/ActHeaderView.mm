@@ -40,10 +40,8 @@
 
 @implementation ActHeaderView
 
-- (ActWindowController *)controller
-{
-  return (ActWindowController *)self.window.windowController;
-}
+@synthesize controller = _controller;
+@synthesize addFieldButton = _addFieldButton;
 
 - (id)initWithFrame:(NSRect)frame
 {
@@ -58,17 +56,16 @@
 {
   [[NSNotificationCenter defaultCenter]
    addObserver:self selector:@selector(selectedActivityDidChange:)
-   name:ActSelectedActivityDidChange object:self.controller];
+   name:ActSelectedActivityDidChange object:_controller.controller];
 
   [[NSNotificationCenter defaultCenter]
    addObserver:self selector:@selector(activityDidChangeField:)
-   name:ActActivityDidChangeField object:self.controller];
+   name:ActActivityDidChangeField object:_controller.controller];
 }
 
 - (void)dealloc
 {
   [[NSNotificationCenter defaultCenter] removeObserver:self];
-  [super dealloc];
 }
 
 - (NSArray *)displayedFields
@@ -82,7 +79,7 @@
 	[array addObject:name];
     }
 
-  return [array autorelease];
+  return array;
 }
 
 - (void)setDisplayedFields:(NSArray *)array
@@ -109,8 +106,8 @@
 
       if (new_subview == nil)
 	{
-	  new_subview = [[[ActHeaderFieldView alloc]
-			  initWithFrame:NSZeroRect] autorelease];
+	  new_subview = [[ActHeaderFieldView alloc]
+			  initWithFrame:NSZeroRect];
 	  new_subview.headerView = self;
 	  new_subview.fieldName = field;
 	}
@@ -120,8 +117,6 @@
 
   self.subviews = new_subviews;
 
-  [new_subviews release];
-  [old_subviews release];
 }
 
 - (ActHeaderFieldView *)_ensureField:(NSString *)name
@@ -139,7 +134,6 @@
   field.fieldName = name;
 
   [self addSubview:field];
-  [field release];
 
   return field;
 }
@@ -218,7 +212,7 @@
   void *ptr = [dict[@"activity"] pointerValue];
   const auto &a = *reinterpret_cast<const act::activity_storage_ref *> (ptr);
   
-  if (a == self.controller.selectedActivityStorage)
+  if (a == _controller.controller.selectedActivityStorage)
     {
       for (ActHeaderFieldView *subview in self.subviews)
 	[subview update];

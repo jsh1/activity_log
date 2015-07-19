@@ -26,31 +26,19 @@
 
 #import "act-activity.h"
 
-#import <memory>
-
 @interface ActPopoverViewController : ActViewController
-{
-  IBOutlet NSTextField *_typeField;
-  IBOutlet NSTextField *_dateField;
-  IBOutlet NSTextField *_courseField;
-  IBOutlet NSTextField *_distanceLabel;
-  IBOutlet NSTextField *_distanceField;
-  IBOutlet NSTextField *_durationLabel;
-  IBOutlet NSTextField *_durationField;
-  IBOutlet NSTextField *_paceLabel;
-  IBOutlet NSTextField *_paceField;
-  IBOutlet NSTextField *_pointsLabel;
-  IBOutlet NSTextField *_pointsField;
 
-  CGFloat _baseHeight;
-
-  NSTextView *_bodyTextView;
-  NSLayoutManager *_bodyLayoutManager;
-  NSTextContainer *_bodyLayoutContainer;
-
-  act::activity_storage_ref _activityStorage;
-  std::unique_ptr<act::activity> _activity;
-}
+@property(nonatomic, strong) NSTextField *typeField;
+@property(nonatomic, strong) NSTextField *dateField;
+@property(nonatomic, strong) NSTextField *courseField;
+@property(nonatomic, strong) NSTextField *distanceLabel;
+@property(nonatomic, strong) NSTextField *distanceField;
+@property(nonatomic, strong) NSTextField *durationLabel;
+@property(nonatomic, strong) NSTextField *durationField;
+@property(nonatomic, strong) NSTextField *paceLabel;
+@property(nonatomic, strong) NSTextField *paceField;
+@property(nonatomic, strong) NSTextField *pointsLabel;
+@property(nonatomic, strong) NSTextField *pointsField;
 
 @property(nonatomic) act::activity_storage_ref activityStorage;
 

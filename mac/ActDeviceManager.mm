@@ -31,6 +31,9 @@ NSString *const ActDeviceManagerDevicesDidChange
   = @"ActDeviceManagerDevicesDidChange";
 
 @implementation ActDeviceManager
+{
+  NSMutableDictionary *_devices;	// URL -> ActDevice
+}
 
 + (ActDeviceManager *)sharedDeviceManager
 {
@@ -67,9 +70,7 @@ NSString *const ActDeviceManagerDevicesDidChange
 {
   [[NSWorkspace sharedWorkspace].notificationCenter removeObserver:self];
 
-  [_devices release];
 
-  [super dealloc];
 }
 
 - (NSArray *)allDevices
@@ -86,7 +87,7 @@ NSString *const ActDeviceManagerDevicesDidChange
     {
       NSString *gp = [path stringByAppendingPathComponent:dir];
       if ([fm fileExistsAtPath:gp])
-	return [[[ActGarminDevice alloc] initWithPath:gp] autorelease];
+	return [[ActGarminDevice alloc] initWithPath:gp];
     }
 
   return nil;
@@ -123,8 +124,7 @@ NSString *const ActDeviceManagerDevicesDidChange
 
   if (![_devices isEqual:dict])
     {
-      [_devices release];
-      _devices = [dict retain];
+      _devices = dict;
 
       [[NSNotificationCenter defaultCenter] postNotificationName:
        ActDeviceManagerDevicesDidChange object:self];

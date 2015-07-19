@@ -27,15 +27,12 @@
 @class ActSplitView;
 
 @interface ActViewerViewController : ActViewController
-{
-  IBOutlet ActSplitView *_splitView;
 
-  IBOutlet NSView *_listContainer;		// activity list
-  IBOutlet NSView *_contentContainer;		// activity / summary
+@property(nonatomic, strong) ActSplitView *splitView;
 
-  NSInteger _listViewType;
-}
+@property(nonatomic, strong) NSView *listContainer;    // activity list
+@property(nonatomic, strong) NSView *contentContainer; // activity / summary
 
-@property(nonatomic) NSInteger listViewType;
+@property(nonatomic, assign) NSInteger listViewType;
 
 @end

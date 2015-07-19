@@ -28,10 +28,9 @@
 @class ActCollapsibleView, ActHorizontalBoxView, ActHeaderView;
 
 @interface ActHeaderViewController : ActViewController
-{
-  IBOutlet ActCollapsibleView *_containerView;
-  IBOutlet ActHorizontalBoxView *_boxView;
-  IBOutlet ActHeaderView *_headerView;
-}
+
+@property(nonatomic, strong) IBOutlet ActCollapsibleView *containerView;
+@property(nonatomic, strong) IBOutlet ActHorizontalBoxView *boxView;
+@property(nonatomic, strong) IBOutlet ActHeaderView *headerView;
 
 @end

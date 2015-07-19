@@ -54,42 +54,17 @@ enum ActWindowMode
 @interface ActWindowController : NSWindowController
     <NSSplitViewDelegate, PXSourceListDataSource, PXSourceListDelegate,
     NSPopoverDelegate>
-{
-  IBOutlet NSSegmentedControl *_listTypeControl;
-  IBOutlet NSSegmentedControl *_reloadControl;
-  IBOutlet NSSegmentedControl *_addControl;
-  IBOutlet NSSegmentedControl *_importControl;
-  IBOutlet NSSegmentedControl *_nextPreviousControl;
 
-  IBOutlet ActSplitView *_splitView;
+@property(nonatomic, strong) IBOutlet NSSegmentedControl *listTypeControl;
+@property(nonatomic, strong) IBOutlet NSSegmentedControl *reloadControl;
+@property(nonatomic, strong) IBOutlet NSSegmentedControl *addControl;
+@property(nonatomic, strong) IBOutlet NSSegmentedControl *importControl;
+@property(nonatomic, strong) IBOutlet NSSegmentedControl *nextPreviousControl;
 
-  IBOutlet PXSourceList *_sourceListView;
-  IBOutlet NSView *_contentContainer;
+@property(nonatomic, strong) IBOutlet ActSplitView *splitView;
 
-  NSMutableArray *_sourceListItems;
-
-  NSMutableArray *_viewControllers;
-  NSMutableDictionary *_splitViews;
-
-  ActFieldEditor *_fieldEditor;
-  NSUndoManager *_undoManager;
-
-  NSInteger _windowMode;
-  CGFloat _windowModeWidths[ActWindowMode_Count];
-
-  std::unique_ptr<act::database> _database;
-  BOOL _needsSynchronize;
-
-  std::vector<act::database::item> _activityList;
-  act::activity_storage_ref _selectedActivityStorage;
-  std::unique_ptr<act::activity> _selectedActivity;
-  NSInteger _selectedLapIndex;
-  double _currentTime;
-
-  ActDevice *_selectedDevice;
-
-  NSPopover *_activityPopover;
-}
+@property(nonatomic, strong) IBOutlet PXSourceList *sourceListView;
+@property(nonatomic, strong) IBOutlet NSView *contentContainer;
 
 @property(nonatomic) NSInteger windowMode;
 @property(nonatomic) NSInteger listViewType;
@@ -107,7 +82,7 @@ enum ActWindowMode
 @property(nonatomic) NSInteger selectedLapIndex;
 @property(nonatomic) double currentTime;
 
-@property(nonatomic, retain) ActDevice *selectedDevice;
+@property(nonatomic, strong) ActDevice *selectedDevice;
 
 @property(nonatomic, readonly) ActFieldEditor *fieldEditor;
 @property(nonatomic, readonly) NSUndoManager *undoManager;

@@ -27,10 +27,13 @@
 #import "ActWindowController.h"
 
 @implementation ActViewController
+{
+  NSMutableArray *_subviewControllers;
+}
 
 @synthesize controller = _controller;
-@synthesize identifierSuffix = _identifierSuffix;
 @synthesize superviewController = _superviewController;
+@synthesize identifierSuffix = _identifierSuffix;
 
 + (NSString *)viewNibName
 {
@@ -49,8 +52,8 @@
   if (![cls isSubclassOfClass:[ActViewController class]])
     return nil;
 
-  return [[[cls alloc] initWithController:
-	   controller options:dict] autorelease];
+  return [[cls alloc] initWithController:
+	   controller options:dict];
 }
 
 - (id)propertyListRepresentation
@@ -80,12 +83,6 @@
   return self;
 }
 
-- (void)dealloc
-{
-  [_subviewControllers release];
-  [_identifierSuffix release];
-  [super dealloc];
-}
 
 - (NSString *)identifier
 {
@@ -102,7 +99,7 @@
   if (self.class == cls)
     return self;
 
-  for (ActViewController *obj in _subviewControllers)
+  for (__strong ActViewController *obj in _subviewControllers)
     {
       obj = [obj viewControllerWithClass:cls];
       if (obj != nil)
@@ -122,7 +119,6 @@
   for (ActViewController *c in _subviewControllers)
     c->_superviewController = nil;
 
-  [_subviewControllers release];
   _subviewControllers = [array mutableCopy];
 
   for (ActViewController *c in _subviewControllers)

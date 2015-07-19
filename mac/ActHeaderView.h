@@ -27,11 +27,9 @@
 @class ActHeaderViewController, ActHeaderFieldView;
 
 @interface ActHeaderView : NSView
-{
-  IBOutlet ActHeaderViewController *_controller;
 
-  IBOutlet NSButton *_addFieldButton;
-}
+@property(nonatomic, weak) IBOutlet ActHeaderViewController *controller;
+@property(nonatomic, strong) IBOutlet NSButton *addFieldButton;
 
 @property(nonatomic, copy) NSArray *displayedFields;
 

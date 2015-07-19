@@ -37,6 +37,7 @@
 #import "FoundationExtensions.h"
 
 #import <algorithm>
+#import <memory>
 
 // list view constants
 #define Y_OFFSET 8
@@ -75,8 +76,88 @@
 #define DRAW_SELECTED 4U
 #define DRAW_FOCUSED 8U
 
-@implementation ActNotesListViewController
+struct ActNotesItem
+{
+  act::activity_storage_ref storage;
 
+  mutable std::unique_ptr<act::activity> activity;
+
+  mutable time_t date;
+  mutable int year;
+  mutable int month;
+  mutable int week;
+  mutable int day_of_week;
+  mutable int day_of_month;
+
+  mutable objc_ptr<NSString> body;
+
+  mutable CGFloat body_width;
+  mutable CGFloat body_height;
+  mutable CGFloat height;
+
+  mutable bool valid_date :1;
+  mutable bool valid_height :1;
+
+  ActNotesItem();
+  explicit ActNotesItem(act::activity_storage_ref storage);
+  explicit ActNotesItem(const ActNotesItem &rhs);
+
+  struct header_stats
+    {
+      double month_distance;
+      double week_distance;
+    };
+
+  void draw(const NSRect &bounds, uint32_t flags) const;
+  void draw_header(const NSRect &bounds, uint32_t flags,
+    const header_stats &stats) const;
+
+  void update_date() const;
+  void update_body() const;
+  void update_body_height(CGFloat width) const;
+  void update_height(CGFloat width) const;
+
+  double distance() const;
+  double duration() const;
+  double points() const;
+
+  bool same_day_p(const ActNotesItem &other) const;
+
+private:
+  static bool initialized;
+  static NSDictionary *title_attrs;
+  static NSDictionary *selected_title_attrs;
+  static NSDictionary *body_attrs;
+  static NSDictionary *time_attrs;
+  static NSDictionary *stats_attrs;
+  static NSDictionary *dow_attrs;
+  static NSDictionary *dom_attrs;
+  static NSDictionary *month_attrs;
+  static NSDictionary *week_attrs;
+  static NSDictionary *header_stats_attrs;
+  static NSColor *separator_color;
+  static NSDateFormatter *time_formatter;
+  static NSDateFormatter *week_formatter;
+  static NSDateFormatter *month_formatter;
+
+  static void initialize();
+};
+
+@interface ActNotesListViewController ()
+@property(nonatomic, readonly) const std::vector<ActNotesItem> &activities;
+@end
+
+@implementation ActNotesListViewController
+{
+  std::vector<ActNotesItem> _activities;
+
+  NSInteger _headerItemIndex;
+  struct ActNotesItem::header_stats _headerStats;
+}
+
+@synthesize scrollView = _scrollView;
+@synthesize listView = _listView;
+@synthesize headerView = _headerView;
 @synthesize activities = _activities;
 
 + (NSString *)viewNibName
@@ -88,18 +169,18 @@
 {
   [[NSNotificationCenter defaultCenter]
    addObserver:self selector:@selector(activityListDidChange:)
-   name:ActActivityListDidChange object:_controller];
+   name:ActActivityListDidChange object:self.controller];
 
   [[NSNotificationCenter defaultCenter]
    addObserver:self selector:@selector(selectedActivityDidChange:)
-   name:ActSelectedActivityDidChange object:_controller];
+   name:ActSelectedActivityDidChange object:self.controller];
 
   [[NSNotificationCenter defaultCenter]
    addObserver:self selector:@selector(activityDidChangeField:)
-   name:ActActivityDidChangeField object:_controller];
+   name:ActActivityDidChangeField object:self.controller];
   [[NSNotificationCenter defaultCenter]
    addObserver:self selector:@selector(activityDidChangeBody:)
-   name:ActActivityDidChangeBody object:_controller];
+   name:ActActivityDidChangeBody object:self.controller];
 
   [_listView setPostsBoundsChangedNotifications:YES];
 
@@ -115,7 +196,6 @@
   [[NSNotificationCenter defaultCenter] removeObserver:self];
   [NSRunLoop cancelPreviousPerformRequestsWithTarget:self];
 
-  [super dealloc];
 }
 
 - (NSView *)initialFirstResponder
@@ -219,18 +299,18 @@
 - (void)selectRow:(NSInteger)row
 {
   if (row >= 0 && row < _activities.size())
-    _controller.selectedActivityStorage = _activities[row].storage;
+    self.controller.selectedActivityStorage = _activities[row].storage;
 }
 
 - (void)toggleRowSelected:(NSInteger)row
 {
   if (row >= 0 && row < _activities.size())
     {
-      act::activity_storage_ref sel = _controller.selectedActivityStorage;
+      act::activity_storage_ref sel = self.controller.selectedActivityStorage;
       if (_activities[row].storage == sel)
-	_controller.selectedActivityStorage = nullptr;
+	self.controller.selectedActivityStorage = nullptr;
       else
-	_controller.selectedActivityStorage = _activities[row].storage;
+	self.controller.selectedActivityStorage = _activities[row].storage;
     }
 }
 
@@ -310,7 +390,7 @@
 
 - (void)activityListDidChange:(NSNotification *)note
 {
-  const auto &activities = _controller.activityList;
+  const auto &activities = self.controller.activityList;
 
   _activities.clear();
 
@@ -327,7 +407,7 @@
 - (void)selectedActivityDidChange:(NSNotification *)note
 {
   NSInteger row = [self rowForActivityStorage:
-		   _controller.selectedActivityStorage];
+		   self.controller.selectedActivityStorage];
 
   if (row != NSNotFound)
     {
@@ -396,6 +476,8 @@
 @end
 
 @implementation ActNotesListView
+
+@synthesize controller = _controller;
 
 - (void)drawRect:(NSRect)r
 {
@@ -497,22 +579,24 @@
 
   if (chars.length == 1)
     {
+      ActWindowController *controller = _controller.controller;
+
       switch ([chars characterAtIndex:0])
 	{
 	case NSDownArrowFunctionKey:
-	  [_controller.controller nextActivity:_controller];
+	  [controller nextActivity:_controller];
 	  return;
 
 	case NSUpArrowFunctionKey:
-	  [_controller.controller previousActivity:_controller];
+	  [controller previousActivity:_controller];
 	  return;
 
 	case NSHomeFunctionKey:
-	  [_controller.controller firstActivity:_controller];
+	  [controller firstActivity:_controller];
 	  return;
 
 	case NSEndFunctionKey:
-	  [_controller.controller lastActivity:_controller];
+	  [controller lastActivity:_controller];
 	  return;
 
 	case NSPageUpFunctionKey:
@@ -542,6 +626,8 @@
 @end
 
 @implementation ActNotesHeaderView
+
+@synthesize controller = _controller;
 
 - (void)drawRect:(NSRect)r
 {
@@ -583,68 +669,68 @@ ActNotesItem::initialize()
   NSColor *blueColor = [ActColor colorWithCalibratedRed:72/255. green:122/255. blue:1 alpha:1];
 
   NSMutableParagraphStyle *rightStyle
-    = [[[NSParagraphStyle defaultParagraphStyle] mutableCopy] autorelease];
+    = [[NSParagraphStyle defaultParagraphStyle] mutableCopy];
   rightStyle.alignment = NSRightTextAlignment;
 
   NSMutableParagraphStyle *centerStyle
-    = [[[NSParagraphStyle defaultParagraphStyle] mutableCopy] autorelease];
+    = [[NSParagraphStyle defaultParagraphStyle] mutableCopy];
   centerStyle.alignment = NSCenterTextAlignment;
 
-  title_attrs = [@{
+  title_attrs = @{
     NSFontAttributeName: [NSFont boldSystemFontOfSize:TITLE_FONT_SIZE],
     NSForegroundColorAttributeName: greyColor,
-  } retain];
+  };
 
-  selected_title_attrs = [@{
+  selected_title_attrs = @{
     NSFontAttributeName: [NSFont boldSystemFontOfSize:TITLE_FONT_SIZE],
     NSForegroundColorAttributeName: [ActColor alternateSelectedControlTextColor],
-  } retain];
+  };
 
-  body_attrs = [@{
+  body_attrs = @{
     NSFontAttributeName: [ActFont bodyFontOfSize:BODY_FONT_SIZE],
     NSForegroundColorAttributeName: greyColor
-  } retain];
+  };
 
-  time_attrs = [@{
+  time_attrs = @{
     NSFontAttributeName: [NSFont systemFontOfSize:TIME_FONT_SIZE],
     NSForegroundColorAttributeName: blueColor,
     NSParagraphStyleAttributeName: rightStyle,
-  } retain];
+  };
 
-  stats_attrs = [@{
+  stats_attrs = @{
     NSFontAttributeName: [NSFont boldSystemFontOfSize:STATS_FONT_SIZE],
     NSForegroundColorAttributeName: redColor,
-  } retain];
+  };
 
-  dow_attrs = [@{
+  dow_attrs = @{
     NSFontAttributeName: [NSFont boldSystemFontOfSize:DAY_OF_WEEK_FONT_SIZE],
     NSForegroundColorAttributeName: greyColor,
     NSParagraphStyleAttributeName: centerStyle,
-  } retain];
+  };
 
-  dom_attrs = [@{
+  dom_attrs = @{
     NSFontAttributeName: [ActFont mediumSystemFontOfSize:DAY_OF_MONTH_FONT_SIZE],
     NSForegroundColorAttributeName: greyColor,
     NSParagraphStyleAttributeName: centerStyle,
-  } retain];
+  };
 
-  month_attrs = [@{
+  month_attrs = @{
     NSFontAttributeName: [NSFont boldSystemFontOfSize:MONTH_FONT_SIZE],
     NSForegroundColorAttributeName: greyColor,
-  } retain];
+  };
 
-  week_attrs = [@{
+  week_attrs = @{
     NSFontAttributeName: [NSFont boldSystemFontOfSize:WEEK_FONT_SIZE],
     NSForegroundColorAttributeName: greyColor,
-  } retain];
+  };
 
-  header_stats_attrs = [@{
+  header_stats_attrs = @{
     NSFontAttributeName: [NSFont boldSystemFontOfSize:HEADER_STATS_FONT_SIZE],
     NSForegroundColorAttributeName: redColor,
     NSParagraphStyleAttributeName: rightStyle,
-  } retain];
+  };
 
-  separator_color = [[NSColor colorWithDeviceWhite:.85 alpha:1] retain];
+  separator_color = [NSColor colorWithDeviceWhite:.85 alpha:1];
 
   NSLocale *locale = ((ActAppDelegate *)NSApp.delegate).currentLocale;
 
@@ -972,7 +1058,6 @@ ActNotesItem::update_body() const
 	      NSString *tem = [[NSString alloc] initWithBytes:ptr
 			       length:eol-ptr encoding:NSUTF8StringEncoding];
 	      [str appendString:tem];
-	      [tem release];
 	      ptr = eol + 1;
 	      if (eol[1] == '\n')
 		{
@@ -988,7 +1073,6 @@ ActNotesItem::update_body() const
 	    {
 	      NSString *tem = [[NSString alloc] initWithUTF8String:ptr];
 	      [str appendString:tem];
-	      [tem release];
 	    }
 
 	  body.reset(str);

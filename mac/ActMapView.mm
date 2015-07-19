@@ -71,7 +71,14 @@ convertPointToLocation(CGPoint p)
 }
 
 @implementation ActMapView
+{
+  uint32_t _seed;
+  NSMutableDictionary *_images;		/* NSURL -> ActMapImage */
+}
 
+@synthesize mapSource = _mapSource;
+@synthesize mapZoom = _mapZoom;
+@synthesize mapCenter = _mapCenter;
 @synthesize mapDelegate = _mapDelegate;
 
 - (id)initWithFrame:(NSRect)frame
@@ -97,16 +104,13 @@ convertPointToLocation(CGPoint p)
       [im invalidate];
     }
 
-  [_images release];
   _images = nil;
 }
 
 - (void)dealloc
 {
   [self invalidate];
-  [_mapSource release];
 
-  [super dealloc];
 }
 
 - (ActMapSource *)mapSource
@@ -118,8 +122,7 @@ convertPointToLocation(CGPoint p)
 {
   if (_mapSource != src)
     {
-      [_mapSource release];
-      _mapSource = [src retain];
+      _mapSource = src;
       self.needsDisplay = YES;
     }
 }
@@ -316,7 +319,6 @@ convertPointToLocation(CGPoint p)
   for (NSURL *url in removed)
     [_images removeObjectForKey:url];
 
-  [removed release];
 }
 
 - (ActMapImage *)imageForURL:(NSURL *)url
@@ -332,7 +334,6 @@ convertPointToLocation(CGPoint p)
       im = [[ActMapImage alloc] init];
 
       _images[url] = im;
-      [im release];
     }
 
   if (im->_image == NULL && im->_url == nil && !im->_failed)
@@ -347,7 +348,6 @@ convertPointToLocation(CGPoint p)
 	im->_url = cached_url;
       else
 	{
-	  [cached_url release];
 	  im->_failed = YES;
 	}
     }
@@ -375,7 +375,6 @@ convertPointToLocation(CGPoint p)
       [im invalidate];
     }
 
-  [im->_url release];
   im->_url = nil;
 }
 
@@ -383,8 +382,6 @@ convertPointToLocation(CGPoint p)
 
 - (void)mouseDown:(NSEvent *)e
 {
-  NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-
   BOOL dragging = NO;
 
   NSPoint p0 = [self convertPoint:e.locationInWindow fromView:nil];
@@ -398,35 +395,33 @@ convertPointToLocation(CGPoint p)
 
   while (1)
     {
-      e = [self.window nextEventMatchingMask:DRAG_MASK];
+      @autoreleasepool
+        {
+	  e = [self.window nextEventMatchingMask:DRAG_MASK];
 
-      if (e.type != NSLeftMouseDragged)
-	break;
+	  if (e.type != NSLeftMouseDragged)
+	    break;
 
-      NSPoint p1 = [self convertPoint:e.locationInWindow fromView:nil];
+	  NSPoint p1 = [self convertPoint:e.locationInWindow fromView:nil];
 
-      if (!dragging && (fabs(p1.x - p0.x) >= DRAG_THRESH
-			|| fabs(p1.y - p0.y) >= DRAG_THRESH))
-	{
-	  dragging = YES;
+	  if (!dragging && (fabs(p1.x - p0.x) >= DRAG_THRESH
+			    || fabs(p1.y - p0.y) >= DRAG_THRESH))
+	    {
+	      dragging = YES;
+	    }
+
+	  if (dragging)
+	    {
+	      CGPoint c1;
+	      c1.x = (c0.x + (p0.x - p1.x)) / mx;
+	      c1.y = (c0.y + (p0.y - p1.y)) / my;
+
+	      self.mapCenter = convertPointToLocation(c1);
+
+	      [self displayIfNeeded];
+	    }
 	}
-
-      if (dragging)
-	{
-	  CGPoint c1;
-	  c1.x = (c0.x + (p0.x - p1.x)) / mx;
-	  c1.y = (c0.y + (p0.y - p1.y)) / my;
-
-	  self.mapCenter = convertPointToLocation(c1);
-
-	  [self displayIfNeeded];
-	}
-
-      [pool drain];
-      pool = [[NSAutoreleasePool alloc] init];
     }
-
-  [pool drain];
 }
 
 @end
@@ -458,7 +453,6 @@ convertPointToLocation(CGPoint p)
   _image = NULL;
 
   [_url cancel];
-  [_url release];
   _url = nil;
 }
 
@@ -466,7 +460,6 @@ convertPointToLocation(CGPoint p)
 {
   [self invalidate];
 
-  [super dealloc];
 }
 
 - (void)drawInRect:(CGRect)r

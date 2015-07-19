@@ -458,7 +458,6 @@ chart::draw_line(const line &l, const x_axis_state &xs, CGFloat tx)
 	[[NSColor colorWithCalibratedRed:r green:g blue:b alpha:a] setFill];
 	[fill_path fill];
 
-	[fill_path release];
       }
 
     // Draw stroked line
@@ -472,7 +471,6 @@ chart::draw_line(const line &l, const x_axis_state &xs, CGFloat tx)
 	[path stroke];
       }
 
-    [path release];
   }
 
   {
@@ -546,7 +544,6 @@ chart::draw_line(const line &l, const x_axis_state &xs, CGFloat tx)
 	[path stroke];
       }
 
-    [path release];
   }
 }
 

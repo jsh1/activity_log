@@ -35,7 +35,7 @@
 
 + (id)itemWithDevice:(ActDevice *)device
 {
-  return [[[self alloc] initWithDevice:device] autorelease];
+  return [[self alloc] initWithDevice:device];
 }
 
 - (id)initWithDevice:(ActDevice *)device
@@ -44,23 +44,18 @@
   if (self == nil)
     return nil;
 
-  _device = [device retain];
+  _device = device;
 
   self.name = _device.name;
 
   return self;
 }
 
-- (void)dealloc
-{
-  [_device release];
-  [super dealloc];
-}
 
 - (void)select
 {
-  _controller.selectedDevice = _device;
-  _controller.windowMode = ActWindowMode_Importer;
+  self.controller.selectedDevice = _device;
+  self.controller.windowMode = ActWindowMode_Importer;
 }
 
 - (BOOL)hasBadge
@@ -77,7 +72,7 @@
 
   if (activities.size() != 0)
     {
-      for (const auto &it : _controller.database->items())
+      for (const auto &it : self.controller.database->items())
 	{
 	  if (const std::string *s = it.storage()->field_ptr("GPS-File"))
 	    {

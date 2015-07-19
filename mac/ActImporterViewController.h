@@ -26,12 +26,9 @@
 
 @interface ActImporterViewController : ActViewController
     <NSTableViewDataSource, NSTableViewDelegate>
-{
-  IBOutlet NSTableView *_tableView;
-  IBOutlet NSButton *_importButton;
 
-  NSMutableArray *_activities;
-}
+@property(nonatomic, strong) IBOutlet NSTableView *tableView;
+@property(nonatomic, strong) IBOutlet NSButton *importButton;
 
 - (void)reloadData;
 - (void)importActivityFromURL:(NSURL *)url;

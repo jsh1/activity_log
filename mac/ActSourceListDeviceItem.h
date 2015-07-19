@@ -27,14 +27,11 @@
 @class ActDevice;
 
 @interface ActSourceListDeviceItem : ActSourceListItem
-{
-  ActDevice *_device;
-}
 
 + (id)itemWithDevice:(ActDevice *)device;
 
 - (id)initWithDevice:(ActDevice *)device;
 
-@property(nonatomic, readonly) ActDevice *device;
+@property(nonatomic, strong, readonly) ActDevice *device;
 
 @end

@@ -27,18 +27,8 @@
 @class ActHeaderView;
 
 @interface ActHeaderFieldView : NSView <ActTextFieldDelegate>
-{
-  ActHeaderView *_headerView;
 
-  ActTextField *_labelField;
-  ActTextField *_valueField;
-
-  NSString *_fieldName;
-
-  int _depth;
-}
-
-@property(nonatomic, assign) ActHeaderView *headerView;
+@property(nonatomic, weak) ActHeaderView *headerView;
 
 @property(nonatomic, copy) NSString *fieldName;
 @property(nonatomic, copy) NSString *fieldString;
@@ -51,7 +41,7 @@
 
 // controller calls -makeFirstResponder: with these views
 
-@property(nonatomic, readonly) NSView *nameView;
-@property(nonatomic, readonly) NSView *valueView;
+@property(weak, nonatomic, readonly) NSView *nameView;
+@property(weak, nonatomic, readonly) NSView *valueView;
   
 @end

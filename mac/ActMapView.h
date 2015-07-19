@@ -33,23 +33,13 @@
 @protocol ActMapViewDelegate;
 
 @interface ActMapView : NSView <ActURLCacheDelegate>
-{
-  ActMapSource *_mapSource;
-  int _mapZoom;
-  act::location _mapCenter;
 
-  IBOutlet id<ActMapViewDelegate> _mapDelegate;
-
-  uint32_t _seed;
-  NSMutableDictionary *_images;		/* NSURL -> ActMapImage */
-}
-
-@property(nonatomic, retain) ActMapSource *mapSource;
+@property(nonatomic, strong) ActMapSource *mapSource;
 
 @property(nonatomic) int mapZoom;
 @property(nonatomic) act::location mapCenter;
 
-@property(nonatomic, assign) id<ActMapViewDelegate> mapDelegate;
+@property(nonatomic, weak) id<ActMapViewDelegate> mapDelegate;
 
 - (void)displayRegion:(const act::location_region &)rgn;
 

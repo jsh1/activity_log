@@ -29,12 +29,8 @@
 
 @implementation ActAppDelegate
 
-- (void)dealloc
-{
-  [_windowController release];
-
-  [super dealloc];
-}
+@synthesize viewMenu = _viewMenu;
+@synthesize windowController = _windowController;
 
 - (void)applicationDidFinishLaunching:(NSNotification *)note
 {

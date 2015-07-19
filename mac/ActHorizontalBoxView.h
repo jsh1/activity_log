@@ -25,13 +25,9 @@
 #import <AppKit/AppKit.h>
 
 @interface ActHorizontalBoxView : NSView
-{
-  CGFloat _spacing;
-  BOOL _rightToLeft;
-}
 
-@property(nonatomic) CGFloat spacing;
-@property(nonatomic, getter=isRightToLeft) BOOL rightToLeft;
+@property(nonatomic, assign) CGFloat spacing;
+@property(nonatomic, assign, getter=isRightToLeft) BOOL rightToLeft;
 
 - (void)layoutSubviews;
 
@@ -39,6 +35,6 @@
 
 @interface NSView (ActHorizontalBoxView)
 
-@property(nonatomic, readonly) CGFloat preferredWidth;
+@property(nonatomic, assign, readonly) CGFloat preferredWidth;
 
 @end

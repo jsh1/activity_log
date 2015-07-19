@@ -34,6 +34,15 @@
 #define TITLE_FONT_SIZE 11
 
 @implementation ActCollapsibleView
+{
+  NSButton *_disclosureButton;
+
+  NSString *_title;
+  NSSize _titleSize;
+
+  CGFloat _headerHeight;
+  CGFloat _contentHeight;
+}
 
 @synthesize delegate = _delegate;
 @synthesize headerView = _headerView;
@@ -58,7 +67,6 @@ static NSDictionary *_titleAttrs;
   _disclosureButton.target = self;
   _disclosureButton.action = @selector(controlAction:);
   [self addSubview:_disclosureButton];
-  [_disclosureButton release];
 
   if (_titleAttrs == nil)
     {
@@ -75,12 +83,6 @@ static NSDictionary *_titleAttrs;
   return self;
 }
 
-- (void)dealloc
-{
-  [_title release];
-
-  [super dealloc];
-}
 
 - (BOOL)isCollapsed
 {
@@ -105,7 +107,6 @@ static NSDictionary *_titleAttrs;
 {
   if (_title != title)
     {
-      [_title release];
       _title = [title copy];
       _titleSize = [_title sizeWithAttributes:_titleAttrs];
 

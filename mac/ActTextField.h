@@ -26,7 +26,7 @@
 
 @interface ActTextField : NSTextField
 
-@property(nonatomic) BOOL completesEverything;
+@property(nonatomic, assign) BOOL completesEverything;
 
 @end
 
@@ -36,11 +36,6 @@
 
 
 @interface ActFieldEditor : NSTextView
-{
-  BOOL _autoCompletes;
-  BOOL _completesEverything;
-  int _completionDepth;
-}
 
 @property(nonatomic) BOOL autoCompletes;
 @property(nonatomic) BOOL completesEverything;

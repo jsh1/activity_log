@@ -25,12 +25,9 @@
 #import "ActDevice.h"
 
 @interface ActGarminDevice : ActDevice
-{
-  NSString *_path;
-}
 
 - (id)initWithPath:(NSString *)path;
 
-@property(nonatomic, readonly) NSString *path;
+@property(nonatomic, copy, readonly) NSString *path;
 
 @end

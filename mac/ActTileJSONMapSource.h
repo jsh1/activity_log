@@ -27,11 +27,6 @@
 #import "ActURLCache.h"
 
 @interface ActTileJSONMapSource : ActMapSource <ActURLCacheDelegate>
-{
-@private
-  NSDictionary *_dict;
-  ActCachedURL *_url;
-}
 
 + (ActTileJSONMapSource *)mapSourceFromResource:(NSString *)name;
 

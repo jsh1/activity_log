@@ -33,7 +33,7 @@
   static NSColor *color;
 
   if (color == nil)
-    color = [[NSColor colorWithDeviceWhite:.25 alpha:1] retain];
+    color = [NSColor colorWithDeviceWhite:.25 alpha:1];
 
   return color;
 }
@@ -43,7 +43,7 @@
   static NSColor *color;
 
   if (color == nil)
-    color = [[NSColor colorWithDeviceWhite:.45 alpha:1] retain];
+    color = [NSColor colorWithDeviceWhite:.45 alpha:1];
 
   return color;
 }
@@ -59,8 +59,8 @@
 
   if (color == nil)
     {
-      color = [[NSColor colorWithDeviceRed:197/255. green:56/255.
-		blue:51/255. alpha:1] retain];
+      color = [NSColor colorWithDeviceRed:197/255. green:56/255.
+		blue:51/255. alpha:1];
     }
 
   return color;
@@ -72,8 +72,8 @@
 
   if (color == nil)
     {
-      color = [[NSColor colorWithDeviceRed:197/255. green:121/255.
-		blue:118/255. alpha:1] retain];
+      color = [NSColor colorWithDeviceRed:197/255. green:121/255.
+		blue:118/255. alpha:1];
     }
 
   return color;
@@ -89,7 +89,7 @@
   static NSColor *color;
 
   if (color == nil)
-    color = [[NSColor colorWithCalibratedHue:BG_HUE saturation:.01 brightness:.96 alpha:1] retain];
+    color = [NSColor colorWithCalibratedHue:BG_HUE saturation:.01 brightness:.96 alpha:1];
 
   return color;
 }
@@ -99,7 +99,7 @@
   static NSColor *color;
 
   if (color == nil)
-    color = [[NSColor colorWithCalibratedHue:BG_HUE saturation:.03 brightness:.91 alpha:1] retain];
+    color = [NSColor colorWithCalibratedHue:BG_HUE saturation:.03 brightness:.91 alpha:1];
 
   return color;
 }
@@ -109,7 +109,7 @@
   static NSColor *color;
 
   if (color == nil)
-    color = [[NSColor colorWithCalibratedHue:BG_HUE saturation:.02 brightness:.935 alpha:1] retain];
+    color = [NSColor colorWithCalibratedHue:BG_HUE saturation:.02 brightness:.935 alpha:1];
 
   return color;
 }

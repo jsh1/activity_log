@@ -25,6 +25,10 @@
 #import "ActTileJSONMapSource.h"
 
 @implementation ActTileJSONMapSource
+{
+  NSDictionary *_dict;
+  ActCachedURL *_url;
+}
 
 + (ActTileJSONMapSource *)mapSourceFromResource:(NSString *)name
 {
@@ -36,7 +40,7 @@
   if (data == nil)
     return nil;
 
-  return [[[self alloc] initWithJSONData:data] autorelease];
+  return [[self alloc] initWithJSONData:data];
 }
 
 + (ActTileJSONMapSource *)mapSourceFromURL:(NSURL *)url
@@ -47,7 +51,7 @@
       if (data == nil)
 	return nil;
 
-      return [[[self alloc] initWithJSONData:data] autorelease];
+      return [[self alloc] initWithJSONData:data];
     }
   else
     {
@@ -56,7 +60,7 @@
 
       ActTileJSONMapSource *src = [[self alloc] initWithJSONData:nil];
       [src startLoadingURL:url];
-      return [src autorelease];
+      return src;
     }
 }
 
@@ -68,12 +72,11 @@
 
   if (data != nil)
     {
-      _dict = [[NSJSONSerialization
-		JSONObjectWithData:data options:0 error:nil] retain];
+      _dict = [NSJSONSerialization
+		JSONObjectWithData:data options:0 error:nil];
 
       if (_dict == nil)
 	{
-	  [self release];
 	  return nil;
 	}
     }
@@ -83,12 +86,9 @@
 
 - (void)dealloc
 {
-  [_dict release];
 
   [_url cancel];
-  [_url release];
 
-  [super dealloc];
 }
 
 - (void)startLoadingURL:(NSURL *)url
@@ -179,11 +179,9 @@
 
 - (void)cachedURLDidFinish:(ActCachedURL *)url
 {
-  [_dict release];
-  _dict = [[NSJSONSerialization JSONObjectWithData:url.data
-	    options:0 error:nil] retain];
+  _dict = [NSJSONSerialization JSONObjectWithData:url.data
+	    options:0 error:nil];
 
-  [_url release];
   _url = nil;
 
   [[NSNotificationCenter defaultCenter]

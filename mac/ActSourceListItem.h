@@ -27,17 +27,11 @@
 @class ActWindowController;
 
 @interface ActSourceListItem : NSObject
-{
-  ActWindowController *_controller;
-  NSString *_name;
-  NSMutableArray *_subitems;
-  BOOL _expandable;
-}
 
 + (id)item;
 + (id)itemWithName:(NSString *)name;
 
-@property(nonatomic, assign) ActWindowController *controller;
+@property(nonatomic, weak) ActWindowController *controller;
 
 @property(nonatomic, copy) NSString *name;
 
@@ -56,7 +50,7 @@
 @property(nonatomic, readonly) NSInteger badgeValue;
 
 @property(nonatomic, readonly) BOOL hasIcon;
-@property(nonatomic, readonly) NSImage *iconImage;
+@property(weak, nonatomic, readonly) NSImage *iconImage;
 
 - (void)select;
 

@@ -62,6 +62,14 @@ public:
 
 // implementation details
 
+#if !__has_feature(objc_arc)
+# define objc_retain(p) ((__typeof p)[p retain])
+# define objc_release(p) [p release]
+#else
+# define objc_retain(p) (p)
+# define objc_release(p) do {} while(0)
+#endif
+
 template<typename T> inline
 objc_ptr<T>::objc_ptr()
 : _p(nil)
@@ -76,7 +84,7 @@ objc_ptr<T>::objc_ptr(T *p)
 
 template<typename T> inline
 objc_ptr<T>::objc_ptr(const objc_ptr &p)
-: _p([p._p retain])
+: _p(objc_retain(p._p))
 {
 }
 
@@ -88,27 +96,27 @@ objc_ptr<T>::objc_ptr(U *p)
 
 template<typename T> template<typename U> inline
 objc_ptr<T>::objc_ptr(const objc_ptr<U> &p)
-: _p([p._p retain])
+: _p(objc_retain(p._p))
 {
 }
 
 template<typename T> inline
 objc_ptr<T>::~objc_ptr()
 {
-  [_p release];
+  objc_release(_p);
 }
 
 template<typename T> inline void
 objc_ptr<T>::reset()
 {
-  [_p release];
+  objc_release(_p);
   _p = nil;
 }
 
 template<typename T> inline void
 objc_ptr<T>::reset(T *p)
 {
-  [_p release];
+  objc_release(_p);
   _p = p;
 }
 
@@ -117,8 +125,8 @@ objc_ptr<T>::operator=(T *p)
 {
   if (_p != p)
     {
-      [_p release];
-      _p = [p retain];
+      objc_release(_p);
+      _p = objc_retain(p);
     }
   return *this;
 }
@@ -128,8 +136,8 @@ objc_ptr<T>::operator=(const objc_ptr<T> &p)
 {
   if (_p != p._p)
     {
-      [_p release];
-      _p = [p._p retain];
+      objc_release(_p);
+      _p = objc_retain(p._p);
     }
   return *this;
 }
@@ -181,5 +189,8 @@ objc_ptr<T>::operator!=(const objc_ptr<T> &p) const
 {
   return _p != p._p;
 }
+
+#undef objc_retain
+#undef objc_release
 
 #endif /* OBJC_PTR_H */

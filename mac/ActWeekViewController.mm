@@ -67,8 +67,6 @@
 @class ActWeekView_ActivityLayer, ActWeekView_ActivityGroupLayer;
 
 @interface ActWeekViewController ()
-@property(nonatomic, readonly) ActWeekListView *listView;
-@property(nonatomic, readonly) ActWeekHeaderView *headerView;
 - (void)activityListDidChange:(NSNotification *)note;
 - (void)selectedActivityDidChange:(NSNotification *)note;
 @end
@@ -102,7 +100,7 @@
 @property(nonatomic) const std::vector<act::database::item> &items;
 @property(nonatomic, readonly) const std::vector<act::activity_ref> &activities;
 
-@property(nonatomic, readonly) ActWeekView_GroupLayer *groupLayer;
+@property(nonatomic, strong, readonly) ActWeekView_GroupLayer *groupLayer;
 
 @end
 
@@ -151,7 +149,7 @@
 @property(nonatomic, getter=isExpanded) BOOL expanded;
 @property(nonatomic, getter=isExpandable) BOOL expandable;
 
-@property(nonatomic, readonly) ActWeekView_ActivityGroupLayer *groupLayer;
+@property(nonatomic, strong, readonly) ActWeekView_ActivityGroupLayer *groupLayer;
 
 @end
 
@@ -192,10 +190,13 @@ activity_radius(double dist, double dur, double pts, int displayMode)
 
 @implementation ActWeekViewController
 
-@synthesize interfaceScale = _interfaceScale;
-@synthesize displayMode = _displayMode;
+@synthesize scrollView = _scrollView;
 @synthesize listView = _listView;
 @synthesize headerView = _headerView;
+@synthesize displayModeControl = _displayModeControl;
+@synthesize scaleSlider = _scaleSlider;
+@synthesize interfaceScale = _interfaceScale;
+@synthesize displayMode = _displayMode;
 
 + (NSString *)viewNibName
 {
@@ -218,15 +219,15 @@ activity_radius(double dist, double dur, double pts, int displayMode)
 {
   [[NSNotificationCenter defaultCenter]
    addObserver:self selector:@selector(activityListDidChange:)
-   name:ActActivityListDidChange object:_controller];
+   name:ActActivityListDidChange object:self.controller];
 
   [[NSNotificationCenter defaultCenter]
    addObserver:self selector:@selector(selectedActivityDidChange:)
-   name:ActSelectedActivityDidChange object:_controller];
+   name:ActSelectedActivityDidChange object:self.controller];
 
   [[NSNotificationCenter defaultCenter]
    addObserver:self selector:@selector(activityDidChangeField:)
-   name:ActActivityDidChangeField object:_controller];
+   name:ActActivityDidChangeField object:self.controller];
 
   /* This is so we update when the scroll view scrolls. */
 
@@ -256,8 +257,6 @@ activity_radius(double dist, double dur, double pts, int displayMode)
 {
   [[NSNotificationCenter defaultCenter] removeObserver:self];
   [NSRunLoop cancelPreviousPerformRequestsWithTarget:self];
-
-  [super dealloc];
 }
 
 - (NSView *)initialFirstResponder
@@ -270,7 +269,7 @@ activity_radius(double dist, double dur, double pts, int displayMode)
   if (storage == nullptr)
     return -1;
 
-  const auto &activities = _controller.activityList;
+  const auto &activities = self.controller.activityList;
 
   for (size_t i = 0; i < activities.size(); i++)
     {
@@ -283,7 +282,7 @@ activity_radius(double dist, double dur, double pts, int displayMode)
 
 - (void)activityListDidChange:(NSNotification *)note
 {
-  const auto &activities = _controller.activityList;
+  const auto &activities = self.controller.activityList;
 
   int first_week = 0;
   int last_week = 0;
@@ -300,7 +299,7 @@ activity_radius(double dist, double dur, double pts, int displayMode)
 
 - (void)selectedActivityDidChange:(NSNotification *)note
 {
-  int week = [self weekForActivityStorage:_controller.selectedActivityStorage];
+  int week = [self weekForActivityStorage:self.controller.selectedActivityStorage];
 
   if (week >= 0)
     {
@@ -388,19 +387,16 @@ activity_radius(double dist, double dur, double pts, int displayMode)
 @end
 
 @implementation ActWeekListView
-
-- (void)dealloc
 {
-  [_expandedLayer release];
-  [_highlitLayer release];
-  [_selectedLayer release];
-  [super dealloc];
+  NSTrackingArea *_trackingArea;
+
+  ActWeekView_ActivityLayer *_expandedLayer;
+  ActWeekView_ActivityLayer *_highlitLayer;
+  ActWeekView_ActivityLayer *_selectedLayer;
 }
 
-- (NSRange)weekRange
-{
-  return _weekRange;
-}
+@synthesize controller = _controller;
+@synthesize weekRange = _weekRange;
 
 - (void)setWeekRange:(NSRange)x
 {
@@ -517,7 +513,6 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
 				| NSTrackingActiveInKeyWindow)
 		       owner:self userInfo:nil];
       [self addTrackingArea:_trackingArea];
-      [_trackingArea release];
     }
 }
 
@@ -601,8 +596,6 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
 
   layer.sublayers = new_sublayers;
 
-  [new_sublayers release];
-  [old_sublayers release];
 }
 
 - (void)updateSelectionState
@@ -616,8 +609,7 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
   if (_selectedLayer != selected_layer)
     {
       [_selectedLayer setNeedsLayout];
-      [_selectedLayer release];
-      _selectedLayer = [selected_layer retain];
+      _selectedLayer = selected_layer;
       [_selectedLayer setNeedsLayout];
     }
 }
@@ -627,8 +619,7 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
   if (_selectedLayer != layer)
     {
       [_selectedLayer setNeedsLayout];
-      [_selectedLayer release];
-      _selectedLayer = [layer retain];
+      _selectedLayer = layer;
     }
 }
 
@@ -798,8 +789,7 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
   if (_expandedLayer != layer)
     {
       _expandedLayer.expanded = NO;
-      [_expandedLayer release];
-      _expandedLayer = [layer retain];
+      _expandedLayer = layer;
       _expandedLayer.expanded = YES;
     }
 }
@@ -809,8 +799,7 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
   if (_highlitLayer != layer)
     {
       _highlitLayer.highlit = NO;
-      [_highlitLayer release];
-      _highlitLayer = [layer retain];
+      _highlitLayer = layer;
       _highlitLayer.highlit = YES;
 
       [NSRunLoop cancelPreviousPerformRequestsWithTarget:self
@@ -846,14 +835,12 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
   if (_expandedLayer != nil)
     {
       _expandedLayer.expanded = NO;
-      [_expandedLayer release];
       _expandedLayer = nil;
     }
 
   if (_highlitLayer != nil)
     {
       _highlitLayer.highlit = NO;
-      [_highlitLayer release];
       _highlitLayer = nil;
       [self updatePopover];
     }
@@ -863,10 +850,8 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
 
 @implementation ActWeekHeaderView
 
-- (int)weekIndex
-{
-  return _weekIndex;
-}
+@synthesize controller = _controller;
+@synthesize weekIndex = _weekIndex;
 
 - (void)setWeekIndex:(int)idx
 {
@@ -898,21 +883,21 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
       NSColor *greyColor = [ActColor controlTextColor];
 
       NSMutableParagraphStyle *centerStyle
-        = [[[NSParagraphStyle defaultParagraphStyle] mutableCopy] autorelease];
+        = [[NSParagraphStyle defaultParagraphStyle] mutableCopy];
       centerStyle.alignment = NSCenterTextAlignment;
 
-      month_attrs = [@{
+      month_attrs = @{
         NSFontAttributeName: [NSFont boldSystemFontOfSize:HEADER_MONTH_FONT_SIZE],
 	NSForegroundColorAttributeName: greyColor,
-      } retain];
+      };
 
-      day_attrs = [@{
+      day_attrs = @{
         NSFontAttributeName: [NSFont systemFontOfSize:HEADER_DAY_FONT_SIZE],
 	NSForegroundColorAttributeName: greyColor,
 	NSParagraphStyleAttributeName: centerStyle,
-      } retain];
+      };
 
-      separator_color = [[NSColor colorWithDeviceWhite:.80 alpha:1] retain];
+      separator_color = [NSColor colorWithDeviceWhite:.80 alpha:1];
     });
 
   NSRect bounds = self.bounds;
@@ -1284,7 +1269,6 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
   [astr setAttributes:sub_attrs range:NSMakeRange(date_len + main_len, sub_len)];
 
   self.string = astr;
-  [astr release];
 }
 
 - (void)drawInContext:(CGContextRef)ctx
@@ -1392,8 +1376,6 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
 
   self.sublayers = new_sublayers;
 
-  [new_sublayers release];
-  [old_sublayers release];
 }
 
 @end

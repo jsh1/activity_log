@@ -29,14 +29,6 @@
 @class ActWindowController;
 
 @interface ActViewController : NSViewController <ActTextFieldDelegate>
-{
-  ActWindowController *_controller;
-
-@private
-  ActViewController *_superviewController;
-  NSMutableArray *_subviewControllers;
-  NSString *_identifierSuffix;
-}
 
 + (NSString *)viewNibName;
 
@@ -57,11 +49,11 @@
 - (void)viewWillDisappear;
 - (void)viewDidDisappear;
 
-@property(nonatomic, readonly) ActWindowController *controller;
+@property(weak, nonatomic, readonly) ActWindowController *controller;
 
 - (ActViewController *)viewControllerWithClass:(Class)cls;
 
-@property(nonatomic, readonly) ActViewController *superviewController;
+@property(weak, nonatomic, readonly) ActViewController *superviewController;
 @property(nonatomic, copy) NSArray *subviewControllers;
 
 - (void)addSubviewController:(ActViewController *)controller;
@@ -69,7 +61,7 @@
     after:(ActViewController *)pred;
 - (void)removeSubviewController:(ActViewController *)controller;
 
-@property(nonatomic, readonly) NSView *initialFirstResponder;
+@property(weak, nonatomic, readonly) NSView *initialFirstResponder;
 
 - (NSDictionary *)savedViewState;
 - (void)applySavedViewState:(NSDictionary *)dict;

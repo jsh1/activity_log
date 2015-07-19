@@ -37,6 +37,13 @@
 #define CONTROL_HEIGHT LABEL_HEIGHT
 
 @implementation ActHeaderFieldView
+{
+  ActTextField *_labelField;
+  ActTextField *_valueField;
+
+  NSString *_fieldName;
+  int _depth;
+}
 
 @synthesize headerView = _headerView;
 
@@ -61,7 +68,6 @@
   cell.font = font;
   cell.textColor = [ActColor controlTextColor];
   [self addSubview:_labelField];
-  [_labelField release];
 
   _valueField = [[ActTextField alloc] initWithFrame:
 		 NSMakeRect(LABEL_WIDTH + SPACING, 0, frame.size.width
@@ -75,7 +81,6 @@
   cell.font = font1;
   cell.textColor = [ActColor controlTextColor];
   [self addSubview:_valueField];
-  [_valueField release];
 
   return self;
 }
@@ -85,9 +90,7 @@
   [_labelField setDelegate:nil];
   [_valueField setDelegate:nil];
 
-  [_fieldName release];
 
-  [super dealloc];
 }
 
 - (ActWindowController *)controller
@@ -119,7 +122,6 @@
 {
   if (_fieldName != name)
     {
-      [_fieldName release];
       _fieldName = [name copy];
 
       [self _updateFieldName];
@@ -168,7 +170,6 @@
       else if (newName.length != 0)
 	[controller setString:_valueField.stringValue forField:newName];
 
-      [oldName release];
     }
 }
 

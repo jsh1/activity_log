@@ -25,14 +25,17 @@
 #import "ActSourceListItem.h"
 
 @implementation ActSourceListItem
+{
+  NSMutableArray *_subitems;
+}
 
+@synthesize controller = _controller;
 @synthesize name = _name;
 @synthesize expandable = _expandable;
-@synthesize controller = _controller;
 
 + (id)item
 {
-  return [[[self alloc] init] autorelease];
+  return [[self alloc] init];
 }
 
 + (id)itemWithName:(NSString *)name
@@ -42,12 +45,6 @@
   return item;
 }
 
-- (void)dealloc
-{
-  [_name release];
-  [_subitems release];
-  [super dealloc];
-}
 
 - (NSArray *)subitems
 {
@@ -58,7 +55,6 @@
 {
   if (_subitems != array)
     {
-      [_subitems release];
       _subitems = [array mutableCopy];
     }
 }

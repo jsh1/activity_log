@@ -32,12 +32,8 @@
 
 @interface ActListViewController : ActViewController
   <NSTableViewDelegate, NSTableViewDataSource>
-{
-  IBOutlet NSTableView *_tableView;
 
-  std::unordered_map<act::activity_storage_ref,
-    std::unique_ptr<act::activity>> _activity_cache;
-}
+@property(nonatomic, strong) IBOutlet NSTableView *tableView;
 
 - (NSInteger)rowForActivityStorage:(const act::activity_storage_ref)storage;
 

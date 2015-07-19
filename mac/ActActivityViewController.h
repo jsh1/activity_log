@@ -27,10 +27,9 @@
 @class ActActivityView;
 
 @interface ActActivityViewController : ActViewController
-{
-  IBOutlet NSScrollView *_scrollView;
-  IBOutlet ActActivityView *_activityView;
-}
+
+@property(nonatomic, strong) IBOutlet NSScrollView *scrollView;
+@property(nonatomic, strong) IBOutlet ActActivityView *activityView;
 
 - (void)addSubviewControllerWithClass:(Class)cls
     after:(ActViewController *)pred;
@@ -41,10 +40,7 @@
 @end
 
 @interface ActActivityView : NSView
-{
-  IBOutlet ActActivityViewController *_controller;
 
-  BOOL _needsLayout;
-  int _ignoreLayout;
-}
+@property(nonatomic, weak) ActActivityViewController *controller;
+
 @end

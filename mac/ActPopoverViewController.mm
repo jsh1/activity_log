@@ -39,6 +39,28 @@
 @end
 
 @implementation ActPopoverViewController
+{
+  CGFloat _baseHeight;
+
+  NSTextView *_bodyTextView;
+  NSLayoutManager *_bodyLayoutManager;
+  NSTextContainer *_bodyLayoutContainer;
+
+  act::activity_storage_ref _activityStorage;
+  std::unique_ptr<act::activity> _activity;
+}
+
+@synthesize typeField = _typeField;
+@synthesize dateField = _dateField;
+@synthesize courseField = _courseField;
+@synthesize distanceLabel = _distanceLabel;
+@synthesize distanceField = _distanceField;
+@synthesize durationLabel = _durationLabel;
+@synthesize durationField = _durationField;
+@synthesize paceLabel = _paceLabel;
+@synthesize paceField = _paceField;
+@synthesize pointsLabel = _pointsLabel;
+@synthesize pointsField = _pointsField;
 
 + (NSString *)viewNibName
 {
@@ -60,7 +82,6 @@
   _bodyTextView.font = [ActFont bodyFontOfSize:11];
   _bodyTextView.textColor = [ActColor controlTextColor];
   [self.view addSubview:_bodyTextView];
-  [_bodyTextView release];
 
   _bodyLayoutContainer = [[NSTextContainer alloc]
 			  initWithContainerSize:NSZeroSize];
@@ -71,11 +92,11 @@
 
   [[NSNotificationCenter defaultCenter]
    addObserver:self selector:@selector(activityDidChangeField:)
-   name:ActActivityDidChangeField object:_controller];
+   name:ActActivityDidChangeField object:self.controller];
 
   [[NSNotificationCenter defaultCenter]
    addObserver:self selector:@selector(activityDidChangeBody:)
-   name:ActActivityDidChangeBody object:_controller];
+   name:ActActivityDidChangeBody object:self.controller];
 
   NSColor *greyColor = [ActColor controlTextColor];
   NSColor *redColor = [ActColor controlDetailTextColor];
@@ -95,12 +116,6 @@
   [self reloadFields];
 }
 
-- (void)dealloc
-{
-  [_bodyLayoutManager release];
-  [_bodyLayoutContainer release];
-  [super dealloc];
-}
 
 - (void)setActivityStorage:(act::activity_storage_ref)storage
 {
@@ -133,7 +148,7 @@
   const auto &a = *reinterpret_cast<const act::activity_storage_ref *> (ptr);
 
   if (a == _activityStorage)
-    _bodyTextView.string = _controller.bodyString;
+    _bodyTextView.string = self.controller.bodyString;
 }
 
 - (void)reloadFields
@@ -151,25 +166,27 @@
 	@"E dd MMM yyyy ha" options:0 locale:locale];
     });
 
+  ActWindowController *controller = self.controller;
+
   if (_activity)
     {
       _typeField.objectValue =
        [NSString stringWithFormat:@"%@ / %@",
-	[_controller stringForField:@"activity" ofActivity:*_activity],
-	[_controller stringForField:@"type" ofActivity:*_activity]];
+	[controller stringForField:@"activity" ofActivity:*_activity],
+	[controller stringForField:@"type" ofActivity:*_activity]];
       _dateField.objectValue =
        [NSDate dateWithTimeIntervalSince1970:_activity->date()];
       _courseField.objectValue =
-       [_controller stringForField:@"course" ofActivity:*_activity];
+       [controller stringForField:@"course" ofActivity:*_activity];
       _distanceField.objectValue =
-       [_controller stringForField:@"distance" ofActivity:*_activity];
+       [controller stringForField:@"distance" ofActivity:*_activity];
       _durationField.objectValue =
-       [_controller stringForField:@"duration" ofActivity:*_activity];
+       [controller stringForField:@"duration" ofActivity:*_activity];
       _paceField.objectValue =
-       [_controller stringForField:@"pace" ofActivity:*_activity];
+       [controller stringForField:@"pace" ofActivity:*_activity];
       _pointsField.objectValue =
-       [_controller stringForField:@"points" ofActivity:*_activity];
-      _bodyTextView.string = [_controller bodyStringOfActivity:*_activity];
+       [controller stringForField:@"points" ofActivity:*_activity];
+      _bodyTextView.string = [controller bodyStringOfActivity:*_activity];
     }
   else
     {

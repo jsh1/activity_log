@@ -33,15 +33,12 @@
 @end
 
 @interface ActDevice : NSObject
-{
-  id _delegate;
-}
 
-@property(nonatomic, readonly) NSString *name;
+@property(nonatomic, copy, readonly) NSString *name;
 
-@property(nonatomic, assign) id delegate;
+@property(nonatomic, weak) id delegate;
 
-@property(nonatomic, readonly) NSArray *activityURLs;
+@property(nonatomic, copy, readonly) NSArray *activityURLs;
 
 - (void)invalidate;
 

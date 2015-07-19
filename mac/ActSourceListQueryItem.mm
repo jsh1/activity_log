@@ -38,15 +38,15 @@
 - (NSInteger)badgeValue
 {
   std::vector<act::database::item> items;
-  _controller.database->execute_query(_query, items);
+  self.controller.database->execute_query(_query, items);
 
   return (NSInteger)items.size();
 }
 
 - (void)select
 {
-  [_controller showQueryResults:_query];
-  _controller.windowMode = ActWindowMode_Viewer;
+  [self.controller showQueryResults:_query];
+  self.controller.windowMode = ActWindowMode_Viewer;
 }
 
 @end

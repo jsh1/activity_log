@@ -26,7 +26,9 @@
 
 #import "Macros.h"
 
-/* IMPORTANT NOTE: this file is always compiled with ARC disabled. */
+#if __has_feature(objc_arc)
+# error "Must be compiled with -fno-objc-arc"
+#endif
 
 @implementation NSObject (FoundationExtensions)
 
@@ -111,7 +113,7 @@
   if (count == 0)
     return @[];
 
-  __strong id *objects = STACK_ALLOC(id, count);
+  id *objects = STACK_ALLOC(id, count);
 
   NSInteger i = 0;
   for (id obj in self)
@@ -130,7 +132,7 @@
   if (count == 0)
     return @[];
   
-  __strong id *objects = STACK_ALLOC(id, count);
+  id *objects = STACK_ALLOC(id, count);
 
   NSInteger idx = 0;
   for (id obj in self)

@@ -28,16 +28,13 @@
 
 @interface ActLapViewController : ActViewController
   <NSTableViewDataSource, NSTableViewDelegate>
-{
-  IBOutlet ActLapView *_lapView;
-  NSTableView *_tableView;
-  NSTableHeaderView *_headerView;
-}
+
+@property(nonatomic, strong) IBOutlet ActLapView *lapView;
 
 @end
 
 @interface ActLapView : NSView
-{
-  IBOutlet ActLapViewController *_controller;
-}
+
+@property(nonatomic, weak) IBOutlet ActLapViewController *controller;
+
 @end

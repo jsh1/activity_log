@@ -100,6 +100,19 @@ enum ChartFieldMasks
 };
 
 @implementation ActChartViewController
+{
+  uint32_t _fieldMask;
+  int _smoothing;
+
+  std::unique_ptr<act::chart_view::chart> _chart;
+  std::unique_ptr<act::gps::activity> _smoothed_data;
+}
+
+@synthesize chartView = _chartView;
+@synthesize configButton = _configButton;
+@synthesize addButton = _addButton;
+@synthesize removeButton = _removeButton;
+@synthesize configMenu = _configMenu;
 
 + (NSString *)viewNibName
 {
@@ -115,18 +128,18 @@ enum ChartFieldMasks
 
   [[NSNotificationCenter defaultCenter]
    addObserver:self selector:@selector(selectedActivityDidChange:)
-   name:ActSelectedActivityDidChange object:_controller];
+   name:ActSelectedActivityDidChange object:self.controller];
 
   [[NSNotificationCenter defaultCenter]
    addObserver:self selector:@selector(selectedLapIndexDidChange:)
-   name:ActSelectedLapIndexDidChange object:_controller];
+   name:ActSelectedLapIndexDidChange object:self.controller];
 
   [[NSNotificationCenter defaultCenter]
    addObserver:self selector:@selector(currentTimeWillChange:)
-   name:ActCurrentTimeWillChange object:_controller];
+   name:ActCurrentTimeWillChange object:self.controller];
   [[NSNotificationCenter defaultCenter]
    addObserver:self selector:@selector(currentTimeDidChange:)
-   name:ActCurrentTimeDidChange object:_controller];
+   name:ActCurrentTimeDidChange object:self.controller];
 
   _fieldMask = CHART_PACE_MI_MASK | CHART_ALT_M_MASK;
 
@@ -145,7 +158,6 @@ enum ChartFieldMasks
 - (void)dealloc
 {
   [[NSNotificationCenter defaultCenter] removeObserver:self];
-  [super dealloc];
 }
 
 - (act::chart_view::chart *)chart
@@ -163,7 +175,7 @@ enum ChartFieldMasks
       _chartView.needsDisplay = YES;
     }
 
-  const act::activity *a = _controller.selectedActivity;
+  const act::activity *a = self.controller.selectedActivity;
   if (a == nullptr)
     return;
 
@@ -325,7 +337,7 @@ enum ChartFieldMasks
 
   _chart->set_chart_rect(NSRectToCGRect(_chartView.bounds));
   _chart->set_backing_scale(_chartView.window.backingScaleFactor);
-  _chart->set_selected_lap(_controller.selectedLapIndex);
+  _chart->set_selected_lap(self.controller.selectedLapIndex);
   _chart->update_values();
 
   _chartView.needsDisplay = YES;
@@ -412,7 +424,6 @@ enum ChartFieldMasks
 
   ((ActCollapsibleView *)self.view).title = str != nil ? str : @"Chart";
 
-  [str release];
 }
 
 - (void)selectedActivityDidChange:(NSNotification *)note
@@ -424,7 +435,7 @@ enum ChartFieldMasks
 {
   if (_chart)
     {
-      _chart->set_selected_lap(_controller.selectedLapIndex);
+      _chart->set_selected_lap(self.controller.selectedLapIndex);
       _chartView.needsDisplay = YES;
     }
 }
@@ -442,7 +453,7 @@ enum ChartFieldMasks
 {
   if (_chart)
     {
-      _chart->set_current_time(_controller.currentTime);
+      _chart->set_current_time(self.controller.currentTime);
 
       CGRect dirtyR = _chart->current_time_rect();
       [_chartView setNeedsDisplayInRect:NSRectFromCGRect(dirtyR)];
@@ -551,7 +562,7 @@ enum ChartFieldMasks
     {
       uint32_t enableMask = 0;
 
-      if (const act::activity *a = _controller.selectedActivity)
+      if (const act::activity *a = self.controller.selectedActivity)
 	{
 	  if (const act::gps::activity *gps_a = a->gps_data())
 	    {
@@ -586,7 +597,7 @@ enum ChartFieldMasks
 
 - (void)mouseExited:(NSEvent *)e
 {
-  _controller.currentTime = -1;
+  self.controller.currentTime = -1;
 }
 
 - (void)mouseMoved:(NSEvent *)e
@@ -599,7 +610,7 @@ enum ChartFieldMasks
       if (_chart->point_at_x(p.x, pt))
 	{
 	  double t = pt.elapsed_time;
-	  _controller.currentTime = t;
+	  self.controller.currentTime = t;
 	}
     }
 }
@@ -608,6 +619,11 @@ enum ChartFieldMasks
 
 
 @implementation ActChartView
+{
+  NSTrackingArea *_trackingArea;
+}
+
+@synthesize controller = _controller;
 
 - (void)updateTrackingAreas
 {
@@ -623,7 +639,6 @@ enum ChartFieldMasks
 				| NSTrackingActiveInKeyWindow)
 		       owner:_controller userInfo:nil];
       [self addTrackingArea:_trackingArea];
-      [_trackingArea release];
     }
 }
 
@@ -653,6 +668,8 @@ enum ChartFieldMasks
 
 
 @implementation ActChartViewConfigLabel
+
+@synthesize controller = _controller;
 
 - (void)mouseDown:(NSEvent *)e
 {

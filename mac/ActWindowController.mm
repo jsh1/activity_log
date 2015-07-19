@@ -38,6 +38,7 @@
 #import "ActSplitView.h"
 #import "ActTextField.h"
 
+#import "FoundationExtensions.h"
 #import "PXSourceList.h"
 
 #import "act-config.h"
@@ -74,7 +75,37 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
 @end
 
 @implementation ActWindowController
+{
+  NSMutableArray *_sourceListItems;
 
+  NSMutableArray *_viewControllers;
+  NSMutableDictionary *_splitViews;
+
+  NSInteger _windowMode;
+  CGFloat _windowModeWidths[ActWindowMode_Count];
+
+  std::unique_ptr<act::database> _database;
+  BOOL _needsSynchronize;
+
+  std::vector<act::database::item> _activityList;
+  act::activity_storage_ref _selectedActivityStorage;
+  std::unique_ptr<act::activity> _selectedActivity;
+  NSInteger _selectedLapIndex;
+  double _currentTime;
+
+  ActDevice *_selectedDevice;
+
+  NSPopover *_activityPopover;
+}
+
+@synthesize listTypeControl = _listTypeControl;
+@synthesize reloadControl = _reloadControl;
+@synthesize addControl = _addControl;
+@synthesize importControl = _importControl;
+@synthesize nextPreviousControl = _nextPreviousControl;
+@synthesize splitView = _splitView;
+@synthesize sourceListView = _sourceListView;
+@synthesize contentContainer = _contentContainer;
 @synthesize undoManager = _undoManager;
 @synthesize fieldEditor = _fieldEditor;
 
@@ -85,7 +116,7 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
 
 - (ActViewController *)viewControllerWithClass:(Class)cls
 {
-  for (ActViewController *obj in _viewControllers)
+  for (__strong ActViewController *obj in _viewControllers)
     {
       obj = [obj viewControllerWithClass:cls];
       if (obj != nil)
@@ -349,21 +380,18 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
 				initWithController:self options:nil])
     {
       [_viewControllers addObject:obj];
-      [obj release];
     }
 
   if (ActViewController *obj = [[ActImporterViewController alloc]
 				initWithController:self options:nil])
     {
       [_viewControllers addObject:obj];
-      [obj release];
     }
 
   if (ActViewController *obj = [[ActPopoverViewController alloc]
 				initWithController:self options:nil])
     {
       [_viewControllers addObject:obj];
-      [obj release];
     }
 
   // make sure we're in viewer mode before trying to restore view state
@@ -402,16 +430,8 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
   [[NSNotificationCenter defaultCenter] removeObserver:self];
   [NSRunLoop cancelPreviousPerformRequestsWithTarget:self];
 
-  [_sourceListItems release];
-  [_viewControllers release];
-  [_splitViews release];
-  [_undoManager release];
-  [_fieldEditor release];
-  [_selectedDevice release];
   [_activityPopover close];
-  [_activityPopover release];
 
-  [super dealloc];
 }
 
 - (void)addSplitView:(ActSplitView *)view identifier:(NSString *)ident
@@ -684,8 +704,7 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
 {
   if (_selectedDevice != device)
     {
-      [_selectedDevice release];
-      _selectedDevice = [device retain];
+      _selectedDevice = device;
 
       [[NSNotificationCenter defaultCenter]
        postNotificationName:ActSelectedDeviceDidChange object:self];
@@ -918,7 +937,6 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
 	  NSString *tem = [[NSString alloc] initWithBytes:ptr
 			   length:eol-ptr encoding:NSUTF8StringEncoding];
 	  [str appendString:tem];
-	  [tem release];
 	  ptr = eol + 1;
 	  if (eol[1] == '\n')
 	    [str appendString:@"\n\n"], ptr++;
@@ -930,10 +948,9 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
 	{
 	  NSString *tem = [[NSString alloc] initWithUTF8String:ptr];
 	  [str appendString:tem];
-	  [tem release];
 	}
 
-      return [str autorelease];
+      return str;
     }
 
   return @"";
@@ -1216,7 +1233,7 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
 - (IBAction)toggleActivityPane:(id)sender
 {
   [[self viewControllerWithClass:[ActActivityViewController class]]
-   performSelector:_cmd withObject:sender];
+   performVoidSelector:_cmd withObject:sender];
 }
 
 - (void)showPopoverWithActivityStorage:(act::activity_storage_ref)storage

@@ -38,19 +38,12 @@ namespace act {
 @class ActChartView, ActChartViewConfigLabel;
 
 @interface ActChartViewController : ActViewController
-{
-  IBOutlet ActChartView *_chartView;
-  IBOutlet ActChartViewConfigLabel *_configButton;
-  IBOutlet NSButton *_addButton;
-  IBOutlet NSButton *_removeButton;
-  IBOutlet NSMenu *_configMenu;
 
-  uint32_t _fieldMask;
-  int _smoothing;
-
-  std::unique_ptr<act::chart_view::chart> _chart;
-  std::unique_ptr<act::gps::activity> _smoothed_data;
-}
+@property(nonatomic, strong) IBOutlet ActChartView *chartView;
+@property(nonatomic, strong) IBOutlet IBOutlet ActChartViewConfigLabel *configButton;
+@property(nonatomic, strong) IBOutlet IBOutlet NSButton *addButton;
+@property(nonatomic, strong) IBOutlet IBOutlet NSButton *removeButton;
+@property(nonatomic, strong) IBOutlet IBOutlet NSMenu *configMenu;
 
 - (IBAction)configMenuAction:(id)sender;
 - (IBAction)smoothingAction:(id)sender;
@@ -60,16 +53,14 @@ namespace act {
 
 
 @interface ActChartView : NSView
-{
-  IBOutlet ActChartViewController *_controller;
 
-  NSTrackingArea *_trackingArea;
-}
+@property(nonatomic, weak) ActChartViewController *controller;
+
 @end
 
 
 @interface ActChartViewConfigLabel : NSTextField
-{
-  IBOutlet ActChartViewController *_controller;
-}
+
+@property(nonatomic, weak) ActChartViewController *controller;
+
 @end

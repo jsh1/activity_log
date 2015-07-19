@@ -44,6 +44,29 @@
 #define MIN_BODY_HEIGHT 42
 
 @implementation ActSummaryViewController
+{
+  NSTextView *_bodyTextView;
+  NSLayoutManager *_bodyLayoutManager;
+  NSTextContainer *_bodyLayoutContainer;
+
+  NSDictionary *_fieldControls;		// FIELD-NAME -> CONTROL
+
+  int _ignoreChanges;
+}
+
+@synthesize summaryView = _summaryView;
+@synthesize dateBox = _dateBox;
+@synthesize dateTimeField = _dateTimeField;
+@synthesize dateDayField = _dateDayField;
+@synthesize dateDateField = _dateDateField;
+@synthesize typeBox = _typeBox;
+@synthesize typeActivityField = _typeActivityField;
+@synthesize typeTypeField = _typeTypeField;
+@synthesize statsBox = _statsBox;
+@synthesize statsDistanceField = _statsDistanceField;
+@synthesize statsDurationField = _statsDurationField;
+@synthesize statsPaceField = _statsPaceField;
+@synthesize courseField = _courseField;
 
 + (NSString *)viewNibName
 {
@@ -59,15 +82,15 @@
 
   [[NSNotificationCenter defaultCenter]
    addObserver:self selector:@selector(selectedActivityDidChange:)
-   name:ActSelectedActivityDidChange object:_controller];
+   name:ActSelectedActivityDidChange object:self.controller];
 
   [[NSNotificationCenter defaultCenter]
    addObserver:self selector:@selector(activityDidChangeField:)
-   name:ActActivityDidChangeField object:_controller];
+   name:ActActivityDidChangeField object:self.controller];
 
   [[NSNotificationCenter defaultCenter]
    addObserver:self selector:@selector(activityDidChangeBody:)
-   name:ActActivityDidChangeBody object:_controller];
+   name:ActActivityDidChangeBody object:self.controller];
 
   return self;
 }
@@ -104,7 +127,6 @@
   _bodyTextView.textColor = [ActColor controlTextColor];
   _bodyTextView.delegate = self;
   [_summaryView addSubview:_bodyTextView];
-  [_bodyTextView release];
 
   _bodyLayoutContainer = [[NSTextContainer alloc]
 			  initWithContainerSize:NSZeroSize];
@@ -121,12 +143,8 @@
   [[NSNotificationCenter defaultCenter] removeObserver:self];
 
   [_bodyTextView setDelegate:nil];
-  [_bodyLayoutManager release];
-  [_bodyLayoutContainer release];
 
-  [_fieldControls release];
 
-  [super dealloc];
 }
 
 - (NSView *)initialFirstResponder
@@ -138,14 +156,14 @@
 {
   if (_fieldControls == nil)
     {
-      _fieldControls = [@{
+      _fieldControls = @{
 	@"activity": _typeActivityField,
 	@"type": _typeTypeField,
 	@"distance":_statsDistanceField,
 	@"duration": _statsDurationField,
 	@"pace": _statsPaceField,
 	@"course": _courseField,
-      } retain];
+      };
     }
 
   return _fieldControls;
@@ -202,9 +220,11 @@
 
 - (void)_reloadFields
 {
-  if (_controller.selectedActivity != nullptr)
+  ActWindowController *controller = self.controller;
+
+  if (controller.selectedActivity != nullptr)
     {
-      NSDate *date = _controller.dateField;
+      NSDate *date = controller.dateField;
       NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
 
       formatter.locale = ((ActAppDelegate *)NSApp.delegate).currentLocale;
@@ -221,15 +241,14 @@
       formatter.timeStyle = NSDateFormatterShortStyle;
       _dateTimeField.stringValue = [formatter stringFromDate:date];
 
-      [formatter release];
 
       NSDictionary *dict = self.fieldControls;
       for (NSString *field in dict)
 	{
-	  NSString *string = [_controller stringForField:field];
+	  NSString *string = [controller stringForField:field];
 	  NSTextField *control = dict[field];
 	  control.stringValue = string;
-	  BOOL readOnly = [_controller isFieldReadOnly:field];
+	  BOOL readOnly = [controller isFieldReadOnly:field];
 	  control.editable = !readOnly;
 	  NSColor *color;
 	  if (control.superview != _statsBox)
@@ -239,7 +258,7 @@
 	  control.textColor = color;
 	}
 
-      _bodyTextView.string = _controller.bodyString;
+      _bodyTextView.string = controller.bodyString;
     }
   else
     {
@@ -278,7 +297,7 @@
   void *ptr = [note.userInfo[@"activity"] pointerValue];
   const auto &a = *reinterpret_cast<const act::activity_storage_ref *> (ptr);
 
-  if (a == _controller.selectedActivityStorage)
+  if (a == self.controller.selectedActivityStorage)
     [self _reloadFields];
 }
 
@@ -290,8 +309,8 @@
   void *ptr = [note.userInfo[@"activity"] pointerValue];
   const auto &a = *reinterpret_cast<const act::activity_storage_ref *> (ptr);
 
-  if (a == _controller.selectedActivityStorage)
-    _bodyTextView.string = _controller.bodyString;
+  if (a == self.controller.selectedActivityStorage)
+    _bodyTextView.string = self.controller.bodyString;
 }
 
 - (IBAction)controlAction:(id)sender
@@ -305,7 +324,7 @@
     {
       if (dict[fieldName] == sender)
 	{
-	  [_controller setString:[sender stringValue] forField:fieldName];
+	  [self.controller setString:[sender stringValue] forField:fieldName];
 	  return;
 	}
     }
@@ -323,9 +342,8 @@
       // FIXME: mark invalid dates somehow?
 
       if (NSDate *date = [formatter dateFromString:str])
-	_controller.dateField = date;
+	self.controller.dateField = date;
 
-      [formatter release];
       return;
     }
 }
@@ -356,7 +374,7 @@
     {
       NSString *str = [textView.string substringWithRange:charRange];
 
-      act::database *db = _controller.database;
+      act::database *db = self.controller.database;
 
       std::vector<std::string> completions;
       db->complete_field_value(field_name, str.UTF8String, completions);
@@ -385,7 +403,7 @@
 	[_summaryView.superview subviewNeedsLayout:_summaryView];
 
       _ignoreChanges++;
-      _controller.bodyString = _bodyTextView.string;
+      self.controller.bodyString = _bodyTextView.string;
       _ignoreChanges--;
     }
 }
@@ -394,13 +412,15 @@
 {
   if (note.object == _bodyTextView)
     {
-      _controller.bodyString = _bodyTextView.string;
+      self.controller.bodyString = _bodyTextView.string;
     }
 }
 
 @end
 
 @implementation ActSummaryView
+
+@synthesize controller = _controller;
 
 - (void)drawRect:(NSRect)r
 {

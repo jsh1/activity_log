@@ -25,13 +25,8 @@
 #import <AppKit/AppKit.h>
 
 @interface ActSplitView : NSSplitView
-{
-@private
-  NSInteger _indexOfResizableSubview;
-  NSView *_collapsingSubview;
-}
 
-@property(nonatomic) NSInteger indexOfResizableSubview;
+@property(nonatomic, assign) NSInteger indexOfResizableSubview;
 
 - (NSDictionary *)savedViewState;
 - (void)applySavedViewState:(NSDictionary *)dict;
@@ -46,6 +41,6 @@
 
 @interface NSView (ActSplitView)
 
-@property(nonatomic, readonly) CGFloat minSize;
+@property(nonatomic, assign, readonly) CGFloat minSize;
 
 @end

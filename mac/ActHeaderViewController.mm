@@ -38,6 +38,10 @@
 
 @implementation ActHeaderViewController
 
+@synthesize containerView = _containerView;
+@synthesize boxView = _boxView;
+@synthesize headerView = _headerView;
+
 + (NSString *)viewNibName
 {
   return @"ActHeaderView";
@@ -52,7 +56,7 @@
 
   [[NSNotificationCenter defaultCenter]
    addObserver:self selector:@selector(selectedActivityDidChange:)
-   name:ActSelectedActivityDidChange object:_controller];
+   name:ActSelectedActivityDidChange object:self.controller];
 
   return self;
 }
@@ -74,12 +78,11 @@
 - (void)dealloc
 {
   [[NSNotificationCenter defaultCenter] removeObserver:self];
-  [super dealloc];
 }
 
 - (void)_updateHeaderFields
 {
-  const act::activity *a = _controller.selectedActivity;
+  const act::activity *a = self.controller.selectedActivity;
 
   _headerView.displayedFields = @[];
 
@@ -153,7 +156,6 @@
 	  if (![_headerView displaysField:str]
 	      && ![ignoredFields containsString:str caseInsensitive:YES])
 	    [_headerView addDisplayedField:str];
-	  [str release];
 	}
     }
 

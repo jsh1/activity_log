@@ -49,7 +49,6 @@
 - (void)dealloc
 {
   [self invalidate];
-  [super dealloc];
 }
 
 @end

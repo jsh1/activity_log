@@ -29,20 +29,13 @@
 @class ActMapView;
 
 @interface ActMapViewController : ActViewController
-{
-  IBOutlet ActMapView *_mapView;
-  IBOutlet NSPopUpButton *_mapSrcButton;
-  IBOutlet NSSlider *_zoomSlider;
-  IBOutlet NSButton *_zoomInButton;
-  IBOutlet NSButton *_zoomOutButton;
-  IBOutlet NSButton *_centerButton;
 
-  int _pendingSources;
-  NSString *_defaultSourceName;
-
-  BOOL _hasCurrentLocation;
-  act::location _currentLocation;
-}
+@property(nonatomic, strong) IBOutlet ActMapView *mapView;
+@property(nonatomic, strong) IBOutlet NSPopUpButton *mapSrcButton;
+@property(nonatomic, strong) IBOutlet NSSlider *zoomSlider;
+@property(nonatomic, strong) IBOutlet NSButton *zoomInButton;
+@property(nonatomic, strong) IBOutlet NSButton *zoomOutButton;
+@property(nonatomic, strong) IBOutlet NSButton *centerButton;
 
 - (IBAction)controlAction:(id)sender;
 
