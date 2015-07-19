@@ -92,6 +92,8 @@
 	target:self action:@selector(toggleWeekAction:)];
 
   [[self navigationItem] setRightBarButtonItems:@[_addItem, _weekItem]];
+
+  self.automaticallyAdjustsScrollViewInsets = NO;
 }
 
 - (void)viewWillAppear:(BOOL)animated

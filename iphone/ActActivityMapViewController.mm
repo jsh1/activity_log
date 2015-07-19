@@ -42,6 +42,7 @@ CA_HIDDEN @interface AAMVPolylineView : MKPolylineView
 @end
 
 CA_HIDDEN @interface AAMVLayoutGuide : NSObject <UILayoutSupport>
+- (instancetype)initWithLayoutGuide:(id<UILayoutSupport>)guide;
 @property(nonatomic) CGFloat length;
 @end
 
@@ -281,7 +282,8 @@ CA_HIDDEN @interface AAMVLayoutGuide : NSObject <UILayoutSupport>
 
 - (id<UILayoutSupport>)topLayoutGuide
 {
-  AAMVLayoutGuide *guide = [[AAMVLayoutGuide alloc] init];
+  AAMVLayoutGuide *guide = [[AAMVLayoutGuide alloc]
+    initWithLayoutGuide:super.topLayoutGuide];
   guide.length = self.controller.fullscreen ? 0 : _contentInset.top;
   return guide;
 }
@@ -304,5 +306,33 @@ CA_HIDDEN @interface AAMVLayoutGuide : NSObject <UILayoutSupport>
 @end
 
 @implementation AAMVLayoutGuide
+{
+  id<UILayoutSupport> _guide;
+}
+
 @synthesize length = _length;
+
+- (instancetype)initWithLayoutGuide:(id<UILayoutSupport>)guide
+{
+  self = [super init];
+  if (self != nil)
+    _guide = guide;
+  return self;
+}
+
+- (NSLayoutYAxisAnchor *)topAnchor
+{
+  return _guide.topAnchor;
+}
+
+- (NSLayoutYAxisAnchor *)bottomAnchor
+{
+  return _guide.bottomAnchor;
+}
+
+- (NSLayoutDimension *)heightAnchor
+{
+  return _guide.heightAnchor;
+}
+
 @end

@@ -82,6 +82,13 @@
     }
 }
 
+- (void)viewDidLoad
+{
+  [super viewDidLoad];
+
+  self.automaticallyAdjustsScrollViewInsets = NO;
+}
+
 - (void)viewWillAppear:(BOOL)animated
 {
   if (void (^handler)(void) = self.viewWillDisappearHandler)
