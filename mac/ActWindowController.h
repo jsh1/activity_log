@@ -60,6 +60,8 @@ enum ActWindowMode
 @property(nonatomic, strong) IBOutlet NSSegmentedControl *addControl;
 @property(nonatomic, strong) IBOutlet NSSegmentedControl *importControl;
 @property(nonatomic, strong) IBOutlet NSSegmentedControl *nextPreviousControl;
+@property(nonatomic, weak) IBOutlet NSSearchField *searchField;
+@property(nonatomic, weak) IBOutlet NSMenu *searchMenu;
 
 @property(nonatomic, strong) IBOutlet ActSplitView *splitView;
 
@@ -135,6 +137,7 @@ enum ActWindowMode
 - (IBAction)firstActivity:(id)sender;
 - (IBAction)lastActivity:(id)sender;
 - (IBAction)nextPreviousActivity:(id)sender;
+- (IBAction)searchAction:(id)sender;
 
 - (IBAction)setListViewAction:(id)sender;
 

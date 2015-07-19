@@ -15,6 +15,8 @@
                 <outlet property="_reloadControl" destination="gjh-MI-TEg" id="ngN-1b-m4n"/>
                 <outlet property="_sourceListView" destination="fiv-w1-hzZ" id="5W2-F8-CxO"/>
                 <outlet property="_splitView" destination="3" id="ESa-Uw-Q4x"/>
+                <outlet property="searchField" destination="nMB-hS-5xZ" id="33b-UC-FIq"/>
+                <outlet property="searchMenu" destination="Z81-On-1ls" id="M0G-fB-fqJ"/>
                 <outlet property="window" destination="1" id="17"/>
             </connections>
         </customObject>
@@ -205,15 +207,39 @@
                             </connections>
                         </segmentedControl>
                     </toolbarItem>
+                    <toolbarItem implicitItemIdentifier="D6CE89E9-7F94-4F1B-9A8E-E55C3A37036D" label="Search Field" paletteLabel="Search Field" id="qy8-Q5-X5c">
+                        <nil key="toolTip"/>
+                        <size key="minSize" width="300" height="22"/>
+                        <size key="maxSize" width="300" height="22"/>
+                        <searchField key="view" wantsLayer="YES" verticalHuggingPriority="750" id="nMB-hS-5xZ">
+                            <rect key="frame" x="0.0" y="14" width="300" height="22"/>
+                            <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES" flexibleMaxY="YES"/>
+                            <animations/>
+                            <searchFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" borderStyle="bezel" placeholderString="All Activities" usesSingleLineMode="YES" bezelStyle="round" sendsSearchStringImmediately="YES" recentsAutosaveName="ActWindow.predicates" id="2PN-Lw-TEr">
+                                <font key="font" metaFont="system"/>
+                                <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                            </searchFieldCell>
+                            <connections>
+                                <action selector="searchAction:" target="-2" id="qRU-EX-QGn"/>
+                                <outlet property="menu" destination="Z81-On-1ls" id="ebP-fZ-cOJ"/>
+                                <outlet property="searchMenuTemplate" destination="Z81-On-1ls" id="Wal-YT-Nzz"/>
+                            </connections>
+                        </searchField>
+                    </toolbarItem>
                     <toolbarItem implicitItemIdentifier="NSToolbarSpaceItem" id="OxF-5z-x5L"/>
                     <toolbarItem implicitItemIdentifier="NSToolbarFlexibleSpaceItem" id="n2X-bJ-5tt"/>
                 </allowedToolbarItems>
                 <defaultToolbarItems>
                     <toolbarItem reference="8vL-nz-k1y"/>
+                    <toolbarItem reference="OxF-5z-x5L"/>
                     <toolbarItem reference="2X1-6R-nnk"/>
                     <toolbarItem reference="f9p-ou-X0H"/>
                     <toolbarItem reference="q6s-SN-89m"/>
+                    <toolbarItem reference="OxF-5z-x5L"/>
                     <toolbarItem reference="tek-uP-4VT"/>
+                    <toolbarItem reference="OxF-5z-x5L"/>
+                    <toolbarItem reference="qy8-Q5-X5c"/>
                     <toolbarItem reference="n2X-bJ-5tt"/>
                 </defaultToolbarItems>
             </toolbar>
@@ -225,7 +251,25 @@
             <connections>
                 <outlet property="delegate" destination="-2" id="61"/>
             </connections>
+            <point key="canvasLocation" x="549.5" y="198.5"/>
         </window>
+        <menu id="Z81-On-1ls">
+            <items>
+                <menuItem title="No Recent Searches" tag="1003" id="bhG-sc-dph">
+                    <modifierMask key="keyEquivalentModifierMask"/>
+                </menuItem>
+                <menuItem title="Recent Searches" tag="1000" id="U99-Ik-J4Z">
+                    <modifierMask key="keyEquivalentModifierMask"/>
+                </menuItem>
+                <menuItem title="Search Placeholder" tag="1001" id="V2y-9j-oFy">
+                    <modifierMask key="keyEquivalentModifierMask"/>
+                </menuItem>
+                <menuItem isSeparatorItem="YES" tag="1000" id="c3H-zz-uR3"/>
+                <menuItem title="Clear Recent Searches" tag="1002" id="W9X-HB-Tax">
+                    <modifierMask key="keyEquivalentModifierMask"/>
+                </menuItem>
+            </items>
+        </menu>
     </objects>
     <resources>
         <image name="NSAddTemplate" width="11" height="11"/>

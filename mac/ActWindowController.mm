@@ -108,6 +108,8 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
 @synthesize contentContainer = _contentContainer;
 @synthesize undoManager = _undoManager;
 @synthesize fieldEditor = _fieldEditor;
+@synthesize searchField = _searchField;
+@synthesize searchMenu = _searchMenu;
 
 - (NSString *)windowNibName
 {
@@ -591,7 +593,21 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
 - (void)showQueryResults:(const act::database::query &)query
 {
   _activityList.clear();
-  self.database->execute_query(query, _activityList);
+
+  NSString *pattern = _searchField.stringValue;
+
+  if (pattern.length == 0)
+    self.database->execute_query(query, _activityList);
+  else
+    {
+      act::database::query_term_ref term = std::make_shared
+        <act::database::matches_term>("course", pattern.UTF8String);
+      if (query.term())
+	term = std::make_shared<act::database::and_term>(query.term(), term);
+      act::database::query pattern_query(query);
+      pattern_query.set_term(term);
+      self.database->execute_query(pattern_query, _activityList);
+    }
 
   BOOL selection = NO;
   for (auto &it : _activityList)
@@ -607,7 +623,7 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
    postNotificationName:ActActivityListDidChange object:self];
 
   if (!selection)
-    self.selectedActivityStorage = nullptr;
+    self.selectedActivityStorage = _activityList.size() > 0 ? _activityList[0].storage() : nullptr;
 }
 
 - (void)reloadActivities
@@ -1222,6 +1238,16 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
     [self previousActivity:sender];
   else
     [self nextActivity:sender];
+}
+
+- (IBAction)searchAction:(id)sender
+{
+  [self sourceListSelectionDidChange:nil];
+}
+
+- (IBAction)performFindPanelAction:(id)sender
+{
+  [self.window makeFirstResponder:_searchField];
 }
 
 - (IBAction)setListViewAction:(id)sender
