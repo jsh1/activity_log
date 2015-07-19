@@ -267,7 +267,7 @@ copyFileToGPSDirectory(std::string &gps_path)
       if (formatter == nil)
 	{
 	  NSLocale *locale
-	    = ((ActAppDelegate *)NSApp.delegate).currentLocale;
+	    = ((ActAppDelegate *)[NSApp delegate]).currentLocale;
 	  formatter = [[NSDateFormatter alloc] init];
 	  formatter.locale = locale;
 	  formatter.dateFormat = 

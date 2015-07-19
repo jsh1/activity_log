@@ -227,7 +227,7 @@
       NSDate *date = controller.dateField;
       NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
 
-      formatter.locale = ((ActAppDelegate *)NSApp.delegate).currentLocale;
+      formatter.locale = ((ActAppDelegate *)[NSApp delegate]).currentLocale;
       formatter.dateStyle = NSDateFormatterShortStyle;
       formatter.timeStyle = NSDateFormatterNoStyle;
       _dateDateField.stringValue = [formatter stringFromDate:date];
@@ -335,7 +335,7 @@
 		       _dateDateField.stringValue, _dateTimeField.stringValue];
 
       NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
-      formatter.locale = ((ActAppDelegate *)NSApp.delegate).currentLocale;
+      formatter.locale = ((ActAppDelegate *)[NSApp delegate]).currentLocale;
       formatter.dateStyle = NSDateFormatterShortStyle;
       formatter.timeStyle = NSDateFormatterShortStyle;
 

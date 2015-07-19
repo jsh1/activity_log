@@ -872,7 +872,7 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
 
   dispatch_once(&once, ^
     {
-      NSLocale *locale = ((ActAppDelegate *)NSApp.delegate).currentLocale;
+      NSLocale *locale = ((ActAppDelegate *)[NSApp delegate]).currentLocale;
 
       date_formatter = [[NSDateFormatter alloc] init];
       date_formatter.locale = locale;
@@ -1175,7 +1175,7 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
 
   dispatch_once(&once, ^
     {
-      NSLocale *locale = ((ActAppDelegate *)NSApp.delegate).currentLocale;
+      NSLocale *locale = ((ActAppDelegate *)[NSApp delegate]).currentLocale;
 
       date_formatter = [[NSDateFormatter alloc] init];
       date_formatter.locale = locale;

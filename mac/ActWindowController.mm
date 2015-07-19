@@ -239,7 +239,7 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
 	  if (year_formatter == nil)
 	    {
 	      NSLocale *locale
-	        = ((ActAppDelegate *)NSApp.delegate).currentLocale;
+	        = ((ActAppDelegate *)[NSApp delegate]).currentLocale;
 
 	      year_formatter = [[NSDateFormatter alloc] init];
 	      year_formatter.locale = locale;
@@ -362,7 +362,7 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
   // use inclusive (single-layer) mode (which also avoids any special
   // tricks being needed for font-smoothing).
 
-  window.contentView.wantsLayer = YES;
+  ((NSView *)window.contentView).wantsLayer = YES;
 
   [self addSplitView:_splitView identifier:@"0.Window"];
   _splitView.indexOfResizableSubview = 1;

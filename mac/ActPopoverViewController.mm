@@ -159,7 +159,7 @@
   dispatch_once(&once, ^
     {
       date_formatter = [[NSDateFormatter alloc] init];
-      NSLocale *locale = ((ActAppDelegate *)NSApp.delegate).currentLocale;
+      NSLocale *locale = ((ActAppDelegate *)[NSApp delegate]).currentLocale;
       date_formatter.locale = locale;
       date_formatter.dateFormat =
        [NSDateFormatter dateFormatFromTemplate:

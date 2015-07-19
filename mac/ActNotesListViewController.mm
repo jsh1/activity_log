@@ -732,7 +732,7 @@ ActNotesItem::initialize()
 
   separator_color = [NSColor colorWithDeviceWhite:.85 alpha:1];
 
-  NSLocale *locale = ((ActAppDelegate *)NSApp.delegate).currentLocale;
+  NSLocale *locale = ((ActAppDelegate *)[NSApp delegate]).currentLocale;
 
   time_formatter = [[NSDateFormatter alloc] init];
   time_formatter.locale = locale;
@@ -800,7 +800,7 @@ ActNotesItem::draw(const NSRect &bounds, uint32_t flags) const
       // draw day-of-week
 
       subR.size.height = DAY_OF_WEEK_HEIGHT;
-      [(time_formatter.shortWeekdaySymbols[day_of_week]).uppercaseString
+      [((NSString *)time_formatter.shortWeekdaySymbols[day_of_week]).uppercaseString
        drawInRect:subR withAttributes:dow_attrs];
     }
 
