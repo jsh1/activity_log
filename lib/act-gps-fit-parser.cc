@@ -128,7 +128,8 @@ fit_parser::read_bytes(void *buf, size_t size)
 
 	  if (_buf_size == 0)
 	    {
-	      memset(buf, 0, size);
+	      if (buf)
+		memset(buf, 0, size);
 	      return false;
 	    }
 	}
