@@ -913,7 +913,8 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
 
   time_t date = act::week_date(_weekIndex);
 
-  [[date_formatter stringFromDate:[NSDate dateWithTimeIntervalSince1970:date]]
+  [[date_formatter stringFromDate:
+    [NSDate dateWithTimeIntervalSince1970:date + act::timezone_offset()]]
    drawInRect:subR withAttributes:month_attrs];
 
   // draw days of week
@@ -1206,10 +1207,10 @@ activityLayerForStorage(NSArray *sublayers, act::activity_storage_ref storage)
       en_dash = [[NSString alloc] initWithCharacters:&c length:1];
     });
 
-  time_t start_date = _date;
-  time_t end_date = _date + SECONDS_PER_WEEK;
+  time_t start_date = _date + act::timezone_offset();
+  time_t end_date = _date + SECONDS_PER_WEEK - SECONDS_PER_DAY;
 
-  NSString *date_str = [NSString stringWithFormat:@"%@%@%@\n",
+  NSString *date_str = [NSString stringWithFormat:@"%@ %@ %@\n",
 			[date_formatter stringFromDate:
 			 [NSDate dateWithTimeIntervalSince1970:start_date]],
 			en_dash,

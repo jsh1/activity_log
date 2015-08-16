@@ -938,7 +938,7 @@ ActNotesItem::draw_header(const NSRect &bounds, uint32_t flags,
 	en_dash = [[NSString alloc] initWithCharacters:&c length:1];
       }
 
-    time_t start_date = act::week_date(week);
+    time_t start_date = act::week_date(week) + act::timezone_offset();
     time_t end_date = start_date + 6 * 24 * 60 * 60;
 
     [[NSString stringWithFormat:@"%@ %@ %@",

@@ -267,7 +267,8 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
 		  ActSourceListQueryItem *year_item
 		    = [ActSourceListQueryItem itemWithName:
 		       [year_formatter stringFromDate:
-			[NSDate dateWithTimeIntervalSince1970:year_min + 24*60*60]]];
+			[NSDate dateWithTimeIntervalSince1970:
+			 year_min + act::timezone_offset()]]];
 		  year_item.expandable = YES;
 		  act::date_range year_range(year_min, year_max - year_min);
 		  year_item.query.add_date_range(year_range);
@@ -285,7 +286,8 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
 			  ActSourceListQueryItem *month_item
 			    = [ActSourceListQueryItem itemWithName:
 			       [month_formatter stringFromDate:
-				[NSDate dateWithTimeIntervalSince1970:month_min]]];
+				[NSDate dateWithTimeIntervalSince1970:
+				 month_min + act::timezone_offset()]]];
 			  month_item.expandable = YES;
 			  act::date_range month_range(month_min,
 						      month_max - month_min);
