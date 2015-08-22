@@ -103,6 +103,7 @@ enum ChartFieldMasks
 {
   uint32_t _fieldMask;
   int _smoothing;
+  act::chart_view::x_axis_type _xAxis;
 
   std::unique_ptr<act::chart_view::chart> _chart;
   std::unique_ptr<act::gps::activity> _smoothed_data;
@@ -232,7 +233,7 @@ enum ChartFieldMasks
   if (data == nullptr)
     data = gps_a;
 
-  _chart.reset(new chart(*data, x_axis_type::distance));
+  _chart.reset(new chart(*data, _xAxis));
 
   int slices = count;
   if (slices > 1 && (line_mask & (1U << line_altitude)))
@@ -495,6 +496,17 @@ enum ChartFieldMasks
     }
 }
 
+- (IBAction)xAxisAction:(id)sender
+{
+  auto value = (act::chart_view::x_axis_type)[sender tag];
+
+  if (_xAxis != value)
+    {
+      _xAxis = value;
+      [self _updateChart];
+    }
+}
+
 - (void)popUpConfigMenuForView:(NSView *)view
 {
   [_configMenu popUpMenuPositioningItem:[_configMenu itemAtIndex:0]
@@ -519,7 +531,8 @@ enum ChartFieldMasks
 {
   return @{
     @"fieldMask": @(_fieldMask),
-    @"smoothing": @(_smoothing)
+    @"smoothing": @(_smoothing),
+    @"xAxis": @((int)_xAxis),
   };
 }
 
@@ -530,6 +543,9 @@ enum ChartFieldMasks
 
   if (NSNumber *obj = state[@"smoothing"])
     _smoothing = obj.intValue;
+
+  if (NSNumber *obj = state[@"xAxis"])
+    _xAxis = (act::chart_view::x_axis_type)obj.intValue;
 
   [self updateChart];
   [self updateTitle];
@@ -590,6 +606,10 @@ enum ChartFieldMasks
 	  else if (item.action == @selector(smoothingAction:))
 	    {
 	      item.state = item.tag == _smoothing;
+	    }
+	  else if (item.action == @selector(xAxisAction:))
+	    {
+	      item.state = (act::chart_view::x_axis_type)item.tag == _xAxis;
 	    }
 	}	      
     }

@@ -47,6 +47,7 @@ namespace act {
 
 - (IBAction)configMenuAction:(id)sender;
 - (IBAction)smoothingAction:(id)sender;
+- (IBAction)xAxisAction:(id)sender;
 - (IBAction)buttonAction:(id)sender;
 
 @end
