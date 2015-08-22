@@ -84,6 +84,8 @@
 		<string>.90 0 .89</string>
 		<key>run/race</key>
 		<string>.87 0 .02</string>
+		<key>run/run-walk</key>
+		<string>.4 .82 .56</string>
 	</dict>
 
 	<key>ActBodyFont</key>
