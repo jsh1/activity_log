@@ -265,10 +265,16 @@
                     <modifierMask key="keyEquivalentModifierMask"/>
                 </menuItem>
                 <menuItem isSeparatorItem="YES" tag="1000" id="c3H-zz-uR3"/>
+                <menuItem title="Save Search to Sidebar" keyEquivalent="s" id="rId-i2-KVO">
+                    <connections>
+                        <action selector="saveSearchAction:" target="-2" id="bkG-bl-God"/>
+                    </connections>
+                </menuItem>
                 <menuItem title="Clear Recent Searches" tag="1002" id="W9X-HB-Tax">
                     <modifierMask key="keyEquivalentModifierMask"/>
                 </menuItem>
             </items>
+            <point key="canvasLocation" x="599.5" y="-316.5"/>
         </menu>
     </objects>
     <resources>

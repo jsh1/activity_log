@@ -138,6 +138,7 @@ enum ActWindowMode
 - (IBAction)lastActivity:(id)sender;
 - (IBAction)nextPreviousActivity:(id)sender;
 - (IBAction)searchAction:(id)sender;
+- (IBAction)saveSearchAction:(id)sender;
 
 - (IBAction)setListViewAction:(id)sender;
 

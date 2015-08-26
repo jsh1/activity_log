@@ -42,6 +42,7 @@
 @property(nonatomic, readonly) NSInteger subitemsCount;
 
 @property(nonatomic, getter=isExpandable) BOOL expandable;
+@property(nonatomic, getter=isEditable) BOOL editable;
 
 - (void)addSubitem:(ActSourceListItem *)item;
 - (void)removeSubitem:(ActSourceListItem *)item;

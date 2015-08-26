@@ -74,6 +74,192 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
 - (void)selectedActivityDidChange;
 @end
 
+namespace {
+
+/* Extract space-, or doublequote-, delimited phrases into a vector of
+   strings. Backslash can be used to escape individual characters. */
+
+std::vector<std::string>
+string_phrases(const char *str)
+{
+  std::vector<std::string> vec;
+
+  static const char *separators[2] = {" \t\"\\", "\"\\"};
+
+  while (str[0] != 0)
+    {
+      str += strspn(str, " \t");
+
+      std::string token;
+      bool finished_token = false;
+      int in_quote = 0;
+
+      while (!finished_token)
+	{
+	  size_t len = strcspn(str, separators[in_quote]);
+	  token.append(str, len);
+	  str += len;
+
+	  switch (str[0])
+	    {
+	    case 0:
+	      finished_token = true;
+	      break;
+
+	    case ' ':
+	    case '\t':
+	      len = strspn(str, " \t");
+	      if (!in_quote)
+		finished_token = true;
+	      else
+		token.append(str, len);
+	      str += len;
+	      break;
+
+	    case '\\':
+	      str++;
+	      if (str[0] == 0)
+		finished_token = true;
+	      else
+		token.push_back(*str++);
+	      break;
+
+	    case '"':
+	      str++;
+	      in_quote = !in_quote;
+	      break;
+
+	    default:
+	      NSCAssert(false, @"string parser error");
+	    }
+	}
+
+      if (token.size() != 0)
+	vec.push_back(token);
+    }
+                   
+  return vec;
+}
+
+/* Turn phrases into query terms. Either one of:
+
+   FIELD:REGEXP  -- string match
+   FIELD=VALUE   -- numeric comparison, = or one of !=, <=, >=, <, >
+		    VALUE can contain unit spec.
+
+   or just a string to match against the course field. */
+
+act::database::const_query_term_ref
+phrase_query_term(const char *pattern)
+{
+  const char *field = "course";
+
+  size_t len = strcspn(pattern, " \t:=!<>");
+
+  if (pattern[len] == ' ' || pattern[len] == '\t')
+    {
+      switch (pattern[len + strspn(pattern + len, " \t")])
+	{
+	case ':': case '=': case '!': case '<': case '>':
+	  break;
+	default:
+	  len = strlen(pattern);
+	}
+    }
+
+  if (pattern[len] == 0)
+    return std::make_shared<act::database::matches_term>(field, pattern);
+
+  // some kind of "FIELD\s+[:=!<>]\s+QUERY..." string
+
+  char *tem = (char *)alloca(len + 1);
+  memcpy(tem, pattern, len);
+  tem[len] = 0;
+  field = tem;
+  pattern += len;
+
+  pattern += strspn(pattern, " \t");
+
+  if (pattern[0] == ':')
+    {
+      pattern += 1;
+      pattern += strspn(pattern, " \t");
+      return std::make_shared<act::database::matches_term>(field, pattern);
+    }      
+
+  auto op = act::database::compare_term::compare_op::equal;
+
+  if (pattern[0] == '=')
+    {
+      op = act::database::compare_term::compare_op::equal;
+      pattern += 1;
+    }
+  else if (pattern[0] == '!' && pattern[1] == '=')
+    {
+      op = act::database::compare_term::compare_op::not_equal;
+      pattern += 2;
+    }
+  else if (pattern[0] == '<' && pattern[1] == '=')
+    {
+      op = act::database::compare_term::compare_op::less_or_equal;
+      pattern += 2;
+    }
+  else if (pattern[0] == '>' && pattern[1] == '=')
+    {
+      op = act::database::compare_term::compare_op::greater_or_equal;
+      pattern += 2;
+    }
+  else if (pattern[0] == '<')
+    {
+      op = act::database::compare_term::compare_op::less;
+      pattern += 1;
+    }
+  else if (pattern[0] == '>')
+    {
+      op = act::database::compare_term::compare_op::greater;
+      pattern += 1;
+    }
+
+  pattern += strspn(pattern, " \t");
+
+  act::field_id id = act::lookup_field_id(field);
+  act::field_data_type type = act::lookup_field_data_type(id);
+  if (type == act::field_data_type::string)
+    type = act::field_data_type::number;
+
+  double rhs;
+  if (!parse_value(std::string(pattern), type, &rhs, nullptr))
+    return act::database::const_query_term_ref();
+
+  return std::make_shared<act::database::compare_term>(field, op, rhs);
+}
+
+act::database::const_query_term_ref
+append_string_query_terms(act::database::const_query_term_ref term,
+			  const char *search_string)
+{
+  auto and_term = std::make_shared<act::database::and_term>();
+
+  if (term)
+    and_term->add_term(term);
+
+  bool modified = false;
+
+  for (const auto &str : string_phrases(search_string))
+    {
+      auto match_term = phrase_query_term(str.c_str());
+      if (match_term)
+	{
+	  and_term->add_term(match_term);
+	  modified = true;
+	}
+    }
+
+  return modified ? and_term : term;
+}
+
+} // anonymous namespace
+
 @implementation ActWindowController
 {
   NSMutableArray *_sourceListItems;
@@ -314,6 +500,31 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
 
       [_sourceListView reloadItem:item reloadChildren:YES];
     }
+
+  if (ActSourceListItem *item = [self sourceListItemWithPath:@"QUERIES"])
+    {
+      item.subitems = @[];
+
+      for (NSDictionary *dict in [[NSUserDefaults standardUserDefaults]
+				  arrayForKey:@"ActSavedQueries"])
+	{
+	  NSString *name = dict[@"name"];
+	  NSString *query = dict[@"query"];
+
+	  act::database::const_query_term_ref term;
+	  term = append_string_query_terms(term, query.UTF8String);
+
+	  ActSourceListQueryItem *subitem
+	    = [[ActSourceListQueryItem alloc] init];
+
+	  subitem.name = name;
+	  subitem.query.set_term(term);
+	  subitem.controller = self;
+	  subitem.editable = YES;
+
+	  [item addSubitem:subitem];
+	}
+    }
 }
 
 - (id)init
@@ -436,6 +647,23 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
 
   [_activityPopover close];
 
+}
+
+- (void)setSavedQueries:(NSArray *)queries reload:(BOOL)flag
+{
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+
+  [[_undoManager prepareWithInvocationTarget:self]
+   setSavedQueries:[defaults arrayForKey:@"ActSavedQueries"]
+   reload:YES];
+
+  [defaults setObject:queries forKey:@"ActSavedQueries"];
+
+  if (flag)
+    {
+      [self updateSourceList];
+      [_sourceListView reloadData];
+    }
 }
 
 - (void)addSplitView:(ActSplitView *)view identifier:(NSString *)ident
@@ -592,168 +820,6 @@ NSString *const ActSelectedDeviceDidChange = @"ActSelectedDeviceDidChange";
   return _database.get();
 }
 
-namespace {
-
-/* Extract space-, or doublequote-, delimited phrases into a vector of
-   strings. Backslash can be used to escape individual characters. */
-
-std::vector<std::string>
-string_phrases(const char *str)
-{
-  std::vector<std::string> vec;
-
-  static const char *separators[2] = {" \t\"\\", "\"\\"};
-
-  while (str[0] != 0)
-    {
-      str += strspn(str, " \t");
-
-      std::string token;
-      bool finished_token = false;
-      int in_quote = 0;
-
-      while (!finished_token)
-	{
-	  size_t len = strcspn(str, separators[in_quote]);
-	  token.append(str, len);
-	  str += len;
-
-	  switch (str[0])
-	    {
-	    case 0:
-	      finished_token = true;
-	      break;
-
-	    case ' ':
-	    case '\t':
-	      len = strspn(str, " \t");
-	      if (!in_quote)
-		finished_token = true;
-	      else
-		token.append(str, len);
-	      str += len;
-	      break;
-
-	    case '\\':
-	      str++;
-	      if (str[0] == 0)
-		finished_token = true;
-	      else
-		token.push_back(*str++);
-	      break;
-
-	    case '"':
-	      str++;
-	      in_quote = !in_quote;
-	      break;
-
-	    default:
-	      NSCAssert(false, @"string parser error");
-	    }
-	}
-
-      if (token.size() != 0)
-	vec.push_back(token);
-    }
-                   
-  return vec;
-}
-
-/* Turn phrases into query terms. Either one of:
-
-   FIELD:REGEXP  -- string match
-   FIELD=VALUE   -- numeric comparison, = or one of !=, <=, >=, <, >
-		    VALUE can contain unit spec.
-
-   or just a string to match against the course field. */
-
-act::database::const_query_term_ref
-string_query(const char *pattern)
-{
-  const char *field = "course";
-
-  size_t len = strcspn(pattern, " \t:=!<>");
-
-  if (pattern[len] == ' ' || pattern[len] == '\t')
-    {
-      switch (pattern[len + strspn(pattern + len, " \t")])
-	{
-	case ':': case '=': case '!': case '<': case '>':
-	  break;
-	default:
-	  len = strlen(pattern);
-	}
-    }
-
-  if (pattern[len] == 0)
-    return std::make_shared<act::database::matches_term>(field, pattern);
-
-  // some kind of "FIELD\s+[:=!<>]\s+QUERY..." string
-
-  char *tem = (char *)alloca(len + 1);
-  memcpy(tem, pattern, len);
-  tem[len] = 0;
-  field = tem;
-  pattern += len;
-
-  pattern += strspn(pattern, " \t");
-
-  if (pattern[0] == ':')
-    {
-      pattern += 1;
-      pattern += strspn(pattern, " \t");
-      return std::make_shared<act::database::matches_term>(field, pattern);
-    }      
-
-  auto op = act::database::compare_term::compare_op::equal;
-
-  if (pattern[0] == '=')
-    {
-      op = act::database::compare_term::compare_op::equal;
-      pattern += 1;
-    }
-  else if (pattern[0] == '!' && pattern[1] == '=')
-    {
-      op = act::database::compare_term::compare_op::not_equal;
-      pattern += 2;
-    }
-  else if (pattern[0] == '<' && pattern[1] == '=')
-    {
-      op = act::database::compare_term::compare_op::less_or_equal;
-      pattern += 2;
-    }
-  else if (pattern[0] == '>' && pattern[1] == '=')
-    {
-      op = act::database::compare_term::compare_op::greater_or_equal;
-      pattern += 2;
-    }
-  else if (pattern[0] == '<')
-    {
-      op = act::database::compare_term::compare_op::less;
-      pattern += 1;
-    }
-  else if (pattern[0] == '>')
-    {
-      op = act::database::compare_term::compare_op::greater;
-      pattern += 1;
-    }
-
-  pattern += strspn(pattern, " \t");
-
-  act::field_id id = act::lookup_field_id(field);
-  act::field_data_type type = act::lookup_field_data_type(id);
-  if (type == act::field_data_type::string)
-    type = act::field_data_type::number;
-
-  double rhs;
-  if (!parse_value(std::string(pattern), type, &rhs, nullptr))
-    return act::database::const_query_term_ref();
-
-  return std::make_shared<act::database::compare_term>(field, op, rhs);
-}
-
-} // anonymous namespace
-
 - (void)showQueryResults:(const act::database::query &)query
 {
   _activityList.clear();
@@ -764,22 +830,9 @@ string_query(const char *pattern)
     self.database->execute_query(query, _activityList);
   else
     {
-      auto term = query.term();
-
-      for (const auto &str : string_phrases(pattern.UTF8String))
-	{
-	  auto match_term = string_query(str.c_str());
-	  if (!match_term)
-	    continue;
-
-	  if (term)
-	    term = std::make_shared<act::database::and_term>(term, match_term);
-	  else
-	    term = match_term;
-	}
-
       act::database::query pattern_query(query);
-      pattern_query.set_term(term);
+      pattern_query.set_term(append_string_query_terms
+			     (query.term(), pattern.UTF8String));
       self.database->execute_query(pattern_query, _activityList);
     }
 
@@ -1419,6 +1472,25 @@ string_query(const char *pattern)
   [self sourceListSelectionDidChange:nil];
 }
 
+- (IBAction)saveSearchAction:(id)sender
+{
+  NSString *str = _searchField.stringValue;
+
+  if (str.length == 0)
+    {
+      NSBeep();
+      return;
+    }
+
+  NSMutableArray *queries = [NSMutableArray arrayWithArray:
+			     [[NSUserDefaults standardUserDefaults]
+			      arrayForKey:@"ActSavedQueries"]];
+
+  [queries addObject:@{@"name": str, @"query": str}];
+
+  [self setSavedQueries:queries reload:YES];
+}
+
 - (IBAction)performFindPanelAction:(id)sender
 {
   [self.window makeFirstResponder:_searchField];
@@ -1501,6 +1573,11 @@ string_query(const char *pattern)
   if (sel == @selector(importAllActivities:))
     {
       return _importControl.enabled;
+    }
+
+  if (sel == @selector(saveSearchAction:))
+    {
+      return _searchField.stringValue.length != 0;
     }
 
   return YES;
@@ -1591,6 +1668,27 @@ string_query(const char *pattern)
   return ((ActSourceListItem *)item).name;
 }
 
+- (void)sourceList:(PXSourceList*)lst setObjectValue:(id)value
+  forItem:(id)item_
+{
+  ActSourceListItem *item = item_;
+
+  NSArray *subitems = [self sourceListItemWithPath:@"QUERIES"].subitems;
+  NSInteger idx = [subitems indexOfObjectIdenticalTo:item];
+
+  if (idx != NSNotFound)
+    {
+      NSMutableArray *queries = [NSMutableArray arrayWithArray:
+				 [[NSUserDefaults standardUserDefaults]
+				  arrayForKey:@"ActSavedQueries"]];
+      NSMutableDictionary *dict = [queries[idx] mutableCopy];
+      dict[@"name"] = value;
+      queries[idx] = dict;
+      [self setSavedQueries:queries reload:NO];
+      ((ActSourceListQueryItem *)item).name = value;
+    }
+}
+
 - (BOOL)sourceList:(PXSourceList *)lst isItemExpandable:(id)item
 {
   return ((ActSourceListItem *)item).expandable;
@@ -1625,7 +1723,7 @@ string_query(const char *pattern)
 
 - (BOOL)sourceList:(PXSourceList *)lst shouldEditItem:(id)item
 {
-  return NO;
+  return ((ActSourceListItem *)item).editable;
 }
 
 - (void)sourceListSelectionDidChange:(NSNotification *)note
@@ -1634,6 +1732,33 @@ string_query(const char *pattern)
 			     _sourceListView.selectedRow];
 
   [item select];
+}
+
+- (void)sourceListDeleteKeyPressedOnRows:(NSNotification *)note
+{
+  NSIndexSet *rows = note.userInfo[@"rows"];
+
+  NSArray *subitems = [self sourceListItemWithPath:@"QUERIES"].subitems;
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  NSMutableArray *queries = [NSMutableArray arrayWithArray:
+			     [defaults arrayForKey:@"ActSavedQueries"]];
+  bool changed = false;
+
+  for (NSInteger row = rows.lastIndex; row != NSNotFound;
+       row = [rows indexLessThanIndex:row])
+    {
+      ActSourceListItem *item = [_sourceListView itemAtRow:row];
+      NSInteger idx = [subitems indexOfObjectIdenticalTo:item];
+
+      if (idx != NSNotFound)
+	{
+	  [queries removeObjectAtIndex:idx];
+	  changed = true;
+	}
+    }
+
+  if (changed)
+    [self setSavedQueries:queries reload:YES];
 }
 
 @end

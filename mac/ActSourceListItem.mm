@@ -32,6 +32,7 @@
 @synthesize controller = _controller;
 @synthesize name = _name;
 @synthesize expandable = _expandable;
+@synthesize editable = _editable;
 
 + (id)item
 {

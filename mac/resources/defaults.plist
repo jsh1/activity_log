@@ -90,5 +90,9 @@
 
 	<key>ActBodyFont</key>
 	<string>Helvetica</string>
+
+	<key>ActSavedQueries</key>
+	<array>
+	</array>
 </dict>
 </plist>
