@@ -42,6 +42,9 @@
 @property(nonatomic) time_t earliestTime;
 @end
 
+@interface ActActivitiesViewController () <UIViewControllerPreviewingDelegate>
+@end
+
 @implementation ActActivitiesViewController
 {
   act::database::query _query;
@@ -58,6 +61,8 @@
 
   UIBarButtonItem *_addItem;
   UIBarButtonItem *_weekItem;
+
+  id <UIViewControllerPreviewing> _forceTouchContext;
 }
 
 + (ActActivitiesViewController *)instantiate
@@ -94,6 +99,33 @@
   [[self navigationItem] setRightBarButtonItems:@[_addItem, _weekItem]];
 
   self.automaticallyAdjustsScrollViewInsets = NO;
+
+  if (self.traitCollection.forceTouchCapability == UIForceTouchCapabilityAvailable)
+    {
+      _forceTouchContext =
+        [self registerForPreviewingWithDelegate:self sourceView:self.view];
+    }
+}
+
+- (void)traitCollectionDidChange:(UITraitCollection *)old
+{
+  UIForceTouchCapability oldCap = old.forceTouchCapability;
+  UIForceTouchCapability newCap = self.traitCollection.forceTouchCapability;
+
+  if (oldCap != newCap)
+    {
+      if (_forceTouchContext)
+	{
+	  [self unregisterForPreviewingWithContext:_forceTouchContext];
+	  _forceTouchContext = nil;
+	}
+
+      if (newCap == UIForceTouchCapabilityAvailable)
+	{
+	  _forceTouchContext =
+	    [self registerForPreviewingWithDelegate:self sourceView:self.view];
+	}
+    }
 }
 
 - (void)viewWillAppear:(BOOL)animated
@@ -516,6 +548,45 @@
     }
 
   [tv deselectRowAtIndexPath:path animated:NO];
+}
+
+/* UIViewControllerPreviewingDelegate methods. */
+
+- (UIViewController *)previewingContext:(id<UIViewControllerPreviewing>)ctx
+  viewControllerForLocation:(CGPoint)loc
+{
+  UITableView *tv = self.tableView;
+
+  NSIndexPath *path = [tv indexPathForRowAtPoint:loc];
+  if (path == nil)
+    return nil;
+
+  UITableViewCell *cell = [tv cellForRowAtIndexPath:path];
+  if (![cell.reuseIdentifier isEqualToString:@"activityCell"])
+    return nil;
+
+  if (_listData.size() == 0)
+    [self updateListData];
+
+  /* FIXME: copy-paste from above. */
+
+  act::activity_list_item_ref item = _listData[path.section].items[path.row];
+
+  ActActivityViewController *controller
+    = [ActActivityViewController instantiate];
+
+  controller.activityStorage = item->activity->storage();
+
+  controller.preferredContentSize = CGSizeZero;
+  ctx.sourceRect = cell.frame;
+
+  return controller;
+}
+
+- (void)previewingContext:(id<UIViewControllerPreviewing>)ctx
+  commitViewController:(UIViewController *)controller
+{
+  [self.navigationController pushViewController:controller animated:NO];
 }
 
 @end

@@ -35,7 +35,7 @@
 @end
 
 CA_HIDDEN @interface AAMVPointAnnotation : MKPointAnnotation
-@property(nonatomic) MKPinAnnotationColor pinColor;
+@property(nonatomic, strong) UIColor *pinColor;
 @end
 
 CA_HIDDEN @interface AAMVPolylineView : MKPolylineView
@@ -185,7 +185,7 @@ CA_HIDDEN @interface AAMVLayoutGuide : NSObject <UILayoutSupport>
 	std::string sub;
 	act::format_distance(sub, p->distance, act::unit_type::unknown);
 	anno.subtitle = [NSString stringWithUTF8String:sub.c_str()];
-	anno.pinColor = MKPinAnnotationColorPurple;
+	anno.pinColor = [UIColor purpleColor];
 	[map_view addAnnotation:anno];
       }
 
@@ -194,7 +194,7 @@ CA_HIDDEN @interface AAMVLayoutGuide : NSObject <UILayoutSupport>
 	AAMVPointAnnotation *first = [[AAMVPointAnnotation alloc] init];
 	first.coordinate = coords.front();
 	first.title = @"Start";
-	first.pinColor = MKPinAnnotationColorGreen;
+	first.pinColor = [UIColor greenColor];
 	[map_view addAnnotation:first];
 
 	AAMVPointAnnotation *last = [[AAMVPointAnnotation alloc] init];
@@ -204,7 +204,7 @@ CA_HIDDEN @interface AAMVLayoutGuide : NSObject <UILayoutSupport>
 	act::format_distance(sub, gps_data->points().back().distance,
 			     act::unit_type::unknown);
 	last.subtitle = [NSString stringWithUTF8String:sub.c_str()];
-	last.pinColor = MKPinAnnotationColorRed;
+	last.pinColor = [UIColor redColor];
 	[map_view addAnnotation:last];
 
 	[map_view addOverlay:
@@ -256,7 +256,7 @@ CA_HIDDEN @interface AAMVLayoutGuide : NSObject <UILayoutSupport>
 	}
 
       view.rightCalloutAccessoryView = nil;
-      view.pinColor = anno.pinColor;
+      view.pinTintColor = anno.pinColor;
       return view;
     }
 
