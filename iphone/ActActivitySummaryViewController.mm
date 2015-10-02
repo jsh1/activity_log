@@ -163,11 +163,13 @@
   [self updateConstraints];
 }
 
-static inline void
+static inline bool
 update_constraint(NSLayoutConstraint *constraint, UILabel *label)
 {
   const CGFloat spacing = 6;
-  constraint.constant = [label.text length] == 0 ? 0 : spacing;
+  NSInteger length = [label.text length];
+  constraint.constant = length == 0 ? 0 : spacing;
+  return length != 0;
 }
 
 - (void)updateConstraints
@@ -178,14 +180,30 @@ update_constraint(NSLayoutConstraint *constraint, UILabel *label)
 
      but if the label collapses to zero-height, we want to remove the
      8px spacing as well, so programmatically set the constraint's
-     constant (the "+ 8") based on if the label is empty or not. */
+     constant (the "+ 8") based on if the label is empty or not.
 
-  update_constraint(_distanceHeightConstraint, _distanceLabel);
-  update_constraint(_durationHeightConstraint, _durationLabel);
-  update_constraint(_paceHeightConstraint, _paceLabel);
-  update_constraint(_avgHRHeightConstraint, _avgHRLabel);
-  update_constraint(_cadenceHeightConstraint, _cadenceLabel);
-  update_constraint(_pointsHeightConstraint, _pointsLabel);
+     Also, if all labels are empty, collapse the second horizontal
+     line view. */
+
+  bool all_empty = true;
+
+  if (update_constraint(_distanceHeightConstraint, _distanceLabel))
+    all_empty = false;
+  if (update_constraint(_durationHeightConstraint, _durationLabel))
+    all_empty = false;
+  if (update_constraint(_paceHeightConstraint, _paceLabel))
+    all_empty = false;
+  if (update_constraint(_avgHRHeightConstraint, _avgHRLabel))
+    all_empty = false;
+  if (update_constraint(_cadenceHeightConstraint, _cadenceLabel))
+    all_empty = false;
+  if (update_constraint(_pointsHeightConstraint, _pointsLabel))
+    all_empty = false;
+
+  if (all_empty)
+    _separator2HeightConstraint.constant = 0;
+  else
+    _separator2HeightConstraint.constant = _separator1HeightConstraint.constant;
 }
 
 @end
