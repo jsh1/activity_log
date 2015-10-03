@@ -417,7 +417,6 @@
 	{
 	  cell = [[ActActivityLoadMoreCell alloc] initWithStyle:
 		  UITableViewCellStyleDefault reuseIdentifier:ident];
-	  cell.textLabel.text = @"Load More Activities";
 	}
     }
 
@@ -482,7 +481,7 @@
       if (_listData.size() == 0)
 	[self updateListData];
 
-      if (sec < _listData.size())
+      if (sec <= _listData.size())
 	return tv.sectionHeaderHeight;
       else
 	return 0;
@@ -498,23 +497,23 @@
       if (_listData.size() == 0)
 	[self updateListData];
 
-      if (sec < _listData.size())
+      NSString *ident = @"listHeader";
+
+      UITableViewHeaderFooterView *view
+        = [tv dequeueReusableHeaderFooterViewWithIdentifier:ident];
+
+      if (view == nil)
 	{
-	  NSString *ident = @"listHeader";
-
-	  UITableViewHeaderFooterView *view
-	    = [tv dequeueReusableHeaderFooterViewWithIdentifier:ident];
-
-	  if (view == nil)
-	    {
-	      view = [[UITableViewHeaderFooterView alloc]
-		      initWithReuseIdentifier:ident];
-	    }
-
-	  _listData[sec].configure_view(view);
-
-	  return view;
+	  view = [[UITableViewHeaderFooterView alloc]
+		  initWithReuseIdentifier:ident];
 	}
+
+      if (sec < _listData.size())
+	_listData[sec].configure_view(view);
+      else
+	view.textLabel.text = @"More";
+
+      return view;
     }
 
   return nil;
@@ -592,5 +591,29 @@
 @end
 
 @implementation ActActivityLoadMoreCell
+
 @synthesize earliestTime = _earliestTime;
+
+- (void)setEarliestTime:(time_t)t
+{
+  static NSDateFormatter *formatter;
+
+  if (_earliestTime == t)
+    return;
+
+  _earliestTime = t;
+
+  if (formatter == nil)
+    {
+      formatter = [[NSDateFormatter alloc] init];
+      formatter.dateFormat = [NSDateFormatter dateFormatFromTemplate:
+			      @"MMMM" options:0 locale:nil];
+    }
+
+  NSDate *date = [NSDate dateWithTimeIntervalSince1970:t - 15 * 86400];
+  self.textLabel.text = [NSString stringWithFormat:
+			 @"Load %@ Activities…",
+			 [formatter stringFromDate:date]];
+}
+
 @end

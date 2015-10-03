@@ -598,7 +598,7 @@ chart::draw_line(const line &l, const x_axis_state &xs, CGFloat tx) const
 	CGContextSetShadow(ctx, CGSizeMake(0, 0), 1);
 
 	[[UIColor whiteColor] setStroke];
-	path.lineWidth = 2;
+	path.lineWidth = 1.5;
 	path.lineJoinStyle = kCGLineJoinRound;
 	[path stroke];
 
