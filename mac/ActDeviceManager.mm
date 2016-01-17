@@ -110,6 +110,8 @@ NSString *const ActDeviceManagerDevicesDidChange
 
   for (NSString *path in local_volumes)
     {
+      if ([path isEqualToString:@"/net"]) // often hangs
+	continue;
       NSURL *url = [NSURL fileURLWithPath:path];
       if (ActDevice *device = [self deviceForURL:url])
 	dict[url] = device;
