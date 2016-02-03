@@ -147,9 +147,15 @@ format_distance(std::string &str, double dist, unit_type unit)
   if (unit == unit_type::unknown)
     unit = shared_config().default_distance_unit();
 
+again:
   switch (unit)
     {
     case unit_type::centimetres:
+      if (dist < 5e-3)
+	{
+	  unit = unit_type::millimetres;
+	  goto again;
+	}
       format = "%.1f cm";
       dist = dist * 1e2;
       break;
@@ -160,15 +166,30 @@ format_distance(std::string &str, double dist, unit_type unit)
       break;
 
     case unit_type::metres:
+      if (dist < 0.5)
+	{
+	  unit = unit_type::centimetres;
+	  goto again;
+	}
       format = dist < 10 ? "%.2f m" : "%.1f m";
       break;
 
     case unit_type::kilometres:
+      if (dist < 5e-2)
+	{
+	  unit = unit_type::metres;
+	  goto again;
+	}
       dist = dist * 1e-3;
       format = dist < 10 ? "%.2f km" : "%.1f km";
       break;
 
     case unit_type::inches:
+      if (dist < (1 / INCHES_PER_METER) * 0.5)
+	{
+	  unit = unit_type::millimetres;
+	  goto again;
+	}
       format = "%.0f in";
       dist = dist * INCHES_PER_METER;
       break;
@@ -179,12 +200,22 @@ format_distance(std::string &str, double dist, unit_type unit)
       break;
 
     case unit_type::yards:
+      if (dist < (1 / YARDS_PER_METER) * 0.5)
+	{
+	  unit = unit_type::inches;
+	  goto again;
+	}
       format = "%.1f yd";
       dist = dist * YARDS_PER_METER;
       break;
 
     case unit_type::miles:
     default:
+      if (dist < METERS_PER_MILE * 0.5)
+	{
+	  unit = unit_type::metres;
+	  goto again;
+	}
       dist = dist * MILES_PER_METER;
       format = dist < 10 ? "%.2f mi" : "%.1f mi";
       break;
