@@ -957,6 +957,21 @@ box_stream<Stream>::next(activity::point &ret_p)
     return false;
 }
 
+template<typename T> inline input_stream<T>
+make_input_stream(T begin, T end) {
+  return input_stream<T>(begin, end);
+}
+
+template <typename T> inline resampler_stream<T>
+make_resampler_stream(T src, float sample_width) {
+  return resampler_stream<T>(src, sample_width);
+}
+
+template <typename T> inline box_stream<T>
+make_box_stream(T src, int filter_width) {
+  return box_stream<T>(src, filter_width);
+}
+
 } // anonymous namespace
 
 void
@@ -968,12 +983,10 @@ activity::smooth(const activity &src, int width)
   /* Resample to one second intervals, smooth across width samples,
      resample to five second intervals. */
 
-  typedef input_stream<point_vector::const_iterator> f1;
-  typedef resampler_stream<f1> f2;
-  typedef box_stream<f2> f3;
-  typedef resampler_stream<f3> f4;
-
-  f4 filter(f3(f2(f1(src._points.begin(), src._points.end()), 1), width), 5);
+  auto input = make_input_stream(src._points.begin(), src._points.end());
+  auto resampled = make_resampler_stream(input, 1);
+  auto averaged = make_box_stream(resampled, width);
+  auto filter = make_resampler_stream(averaged, 5);
 
   point p;
   while (filter.next(p))
