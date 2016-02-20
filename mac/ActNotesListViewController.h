@@ -22,6 +22,7 @@
    CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
    SOFTWARE. */
 
+#import "ActAsyncView.h"
 #import "ActViewController.h"
 
 #import "objc-ptr.h"
@@ -39,7 +40,7 @@
 @end
 
 
-@interface ActNotesListView : NSView
+@interface ActNotesListView : ActAsyncView
 
 @property(nonatomic, weak) IBOutlet ActNotesListViewController *controller;
 

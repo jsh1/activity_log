@@ -22,6 +22,7 @@
    CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
    SOFTWARE. */
 
+#import "ActAsyncView.h"
 #import "ActViewController.h"
 
 #import <memory>
@@ -53,7 +54,7 @@ namespace act {
 @end
 
 
-@interface ActChartView : NSView
+@interface ActChartView : ActAsyncView
 
 @property(nonatomic, weak) ActChartViewController *controller;
 

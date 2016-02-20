@@ -22,26 +22,7 @@
    CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
    SOFTWARE. */
 
-#import "ActAsyncView.h"
-#import "ActViewController.h"
+#import <AppKit/AppKit.h>
 
-@interface ActCollapsibleView : ActAsyncView
-
-@property(nonatomic, weak) IBOutlet id delegate;
-
-@property(nonatomic, strong) IBOutlet NSView *headerView;
-@property(nonatomic, strong) IBOutlet NSView *contentView;
-
-@property(nonatomic, copy) NSString *title;
-@property(nonatomic, getter=isCollapsed) BOOL collapsed;
-@property(nonatomic) CGFloat headerInset;
-
-@end
-
-@interface NSObject (ActLayoutDelegate)
-
-- (CGFloat)heightOfView:(NSView *)view forWidth:(CGFloat)width;
-
-- (void)layoutSubviewsOfView:(NSView *)view;
-
+@interface ActAsyncView : NSView
 @end

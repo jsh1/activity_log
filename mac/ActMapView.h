@@ -22,7 +22,7 @@
    CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
    SOFTWARE. */
 
-#import <AppKit/AppKit.h>
+#import "ActAsyncView.h"
 
 #import "ActURLCache.h"
 
@@ -32,7 +32,7 @@
 
 @protocol ActMapViewDelegate;
 
-@interface ActMapView : NSView <ActURLCacheDelegate>
+@interface ActMapView : ActAsyncView <ActURLCacheDelegate>
 
 @property(nonatomic, strong) ActMapSource *mapSource;
 

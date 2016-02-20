@@ -23,25 +23,14 @@
    SOFTWARE. */
 
 #import "ActAsyncView.h"
-#import "ActViewController.h"
 
-@interface ActCollapsibleView : ActAsyncView
+@implementation ActAsyncView
 
-@property(nonatomic, weak) IBOutlet id delegate;
-
-@property(nonatomic, strong) IBOutlet NSView *headerView;
-@property(nonatomic, strong) IBOutlet NSView *contentView;
-
-@property(nonatomic, copy) NSString *title;
-@property(nonatomic, getter=isCollapsed) BOOL collapsed;
-@property(nonatomic) CGFloat headerInset;
-
-@end
-
-@interface NSObject (ActLayoutDelegate)
-
-- (CGFloat)heightOfView:(NSView *)view forWidth:(CGFloat)width;
-
-- (void)layoutSubviewsOfView:(NSView *)view;
+- (CALayer *)makeBackingLayer
+{
+  CALayer *layer = [super makeBackingLayer];
+  layer.drawsAsynchronously = YES;
+  return layer;
+}
 
 @end
