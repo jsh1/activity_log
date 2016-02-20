@@ -435,7 +435,7 @@ format_fraction(std::string &str, double frac)
 {
   char buf[32];
 
-  snprintf_l(buf, sizeof(buf), nullptr, "%d%%", (int)round(frac * 100));
+  snprintf_l(buf, sizeof(buf), nullptr, "%.1f%%", frac * 100);
 
   str.append(buf);
 }
