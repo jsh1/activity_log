@@ -56,6 +56,7 @@ public:
       heart_rate,
       cadence,
       vertical_oscillation,
+      vertical_ratio,
       stance_time,
       stance_ratio,
       stride_length,

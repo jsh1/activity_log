@@ -65,6 +65,7 @@ enum class x_axis_type
 enum class value_conversion
 {
   identity,
+  percentage,
   heartrate_bpm_hrr,
   heartrate_bpm_pmax,
   speed_ms_pace_mi,

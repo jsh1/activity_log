@@ -59,6 +59,7 @@ enum ChartFields
   CHART_VERT_OSC,
   CHART_STANCE_TIME,
   CHART_STANCE_RATIO,
+  CHART_VERT_RATIO,
   CHART_FIELD_COUNT,
 };
 
@@ -80,6 +81,7 @@ enum ChartFieldMasks
   CHART_CADENCE_MASK = 1U << CHART_CADENCE,
   CHART_STRIDE_LENGTH_MASK = 1U << CHART_STRIDE_LENGTH,
   CHART_VERT_OSC_MASK = 1U << CHART_VERT_OSC,
+  CHART_VERT_RATIO_MASK = 1U << CHART_VERT_RATIO,
   CHART_STANCE_TIME_MASK = 1U << CHART_STANCE_TIME,
   CHART_STANCE_RATIO_MASK = 1U << CHART_STANCE_RATIO,
 
@@ -95,6 +97,8 @@ enum ChartFieldMasks
 		       | CHART_ALT_M_MASK,
   CHART_CADENCE_ANY_MASK = CHART_CADENCE_MASK
 			   | CHART_STRIDE_LENGTH_MASK,
+  CHART_BOUNCE_ANY_MASK = CHART_VERT_OSC_MASK
+			  | CHART_VERT_RATIO_MASK,
   CHART_STANCE_ANY_MASK = CHART_STANCE_TIME_MASK
 			  | CHART_STANCE_RATIO_MASK,
 };
@@ -204,7 +208,7 @@ enum ChartFieldMasks
       line_hr,
       line_cadence,
       line_stride,
-      line_vert_osc,
+      line_bounce,
       line_stance,
       line_altitude,			/* last as it draws on top */
     };
@@ -218,8 +222,8 @@ enum ChartFieldMasks
     line_mask |= 1U << line_cadence;
   if ((_fieldMask & CHART_STRIDE_LENGTH_MASK) && gps_a->has_cadence())
     line_mask |= 1U << line_stride;
-  if ((_fieldMask & CHART_VERT_OSC_MASK) && gps_a->has_dynamics())
-    line_mask |= 1U << line_vert_osc;
+  if ((_fieldMask & CHART_BOUNCE_ANY_MASK) && gps_a->has_dynamics())
+    line_mask |= 1U << line_bounce;
   if ((_fieldMask & CHART_STANCE_ANY_MASK) && gps_a->has_dynamics())
     line_mask |= 1U << line_stance;
   if ((_fieldMask & CHART_ALT_ANY_MASK) && gps_a->has_altitude())
@@ -315,20 +319,26 @@ enum ChartFieldMasks
 			   FILL_BG | OPAQUE_BG | TICK_LINES, bot, top);
 	  break;
 
-	case line_vert_osc:
-	  _chart->add_line(act::gps::activity::point_field::vertical_oscillation,
-			   value_conversion::distance_m_cm, line_color::teal,
+	case line_bounce: {
+	  auto field = (_fieldMask & CHART_VERT_OSC_MASK
+			? act::gps::activity::point_field::vertical_oscillation
+			: act::gps::activity::point_field::vertical_ratio);
+	  auto conv = (_fieldMask & CHART_VERT_OSC_MASK
+		       ? value_conversion::distance_m_cm
+		       : value_conversion::percentage);
+	  _chart->add_line(field, conv, line_color::teal,
 			   FILL_BG | OPAQUE_BG | TICK_LINES, bot, top);
-	  break;
+	  break; }
 
 	case line_stance: {
 	  auto field = (_fieldMask & CHART_STANCE_TIME_MASK
 			? act::gps::activity::point_field::stance_time
 			: act::gps::activity::point_field::stance_ratio);
-
-	  _chart->add_line(field, value_conversion::time_s_ms,
-			   line_color::steel_blue, FILL_BG | OPAQUE_BG
-			   | TICK_LINES, bot, top);
+	  auto conv = (_fieldMask & CHART_STANCE_TIME_MASK
+		       ? value_conversion::time_s_ms
+		       : value_conversion::percentage);
+	  _chart->add_line(field, conv, line_color::steel_blue,
+			   FILL_BG | OPAQUE_BG | TICK_LINES, bot, top);
 	  break; }
 	}
 
@@ -411,11 +421,14 @@ enum ChartFieldMasks
 	    case CHART_VERT_OSC:
 	      type = @"Vertical Oscillation (cm)";
 	      break;
+	    case CHART_VERT_RATIO:
+	      type = @"Vertical Ratio";
+	      break;
 	    case CHART_STANCE_TIME:
 	      type = @"Stance Time (ms)";
 	      break;
 	    case CHART_STANCE_RATIO:
-	      type = @"Stance Ratio (%)";
+	      type = @"Stance Ratio";
 	      break;
 	    }
 	  if (type != nil)
@@ -423,8 +436,14 @@ enum ChartFieldMasks
 	}
     }
 
-  ((ActCollapsibleView *)self.view).title = str != nil ? str : @"Chart";
+  if (_smoothing != 0)
+    {
+      [str appendFormat:@" — %g%s average",
+       _smoothing < 60 ? (double)_smoothing : _smoothing / 60.,
+       _smoothing < 60 ? "s" : "min"];
+    }
 
+  ((ActCollapsibleView *)self.view).title = str != nil ? str : @"Chart";
 }
 
 - (void)selectedActivityDidChange:(NSNotification *)note
@@ -472,6 +491,8 @@ enum ChartFieldMasks
     mask |= CHART_HR_ANY_MASK;
   else if (mask & CHART_ALT_ANY_MASK)
     mask |= CHART_ALT_ANY_MASK;
+  else if (mask & CHART_BOUNCE_ANY_MASK)
+    mask |= CHART_BOUNCE_ANY_MASK;
   else if (mask & CHART_STANCE_ANY_MASK)
     mask |= CHART_STANCE_ANY_MASK;
 
@@ -493,6 +514,7 @@ enum ChartFieldMasks
       _smoothing = tag;
       _smoothed_data.reset();
       [self _updateChart];
+      [self updateTitle];
     }
 }
 
@@ -591,7 +613,7 @@ enum ChartFieldMasks
 	      if (gps_a->has_cadence())
 		enableMask |= CHART_CADENCE_ANY_MASK;
 	      if (gps_a->has_dynamics())
-		enableMask |= CHART_VERT_OSC_MASK | CHART_STANCE_ANY_MASK;
+		enableMask |= CHART_BOUNCE_ANY_MASK | CHART_STANCE_ANY_MASK;
 	    }
 	}
 

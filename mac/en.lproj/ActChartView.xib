@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="8173.3" systemVersion="15A263e" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="9532" systemVersion="15E39d" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
     <dependencies>
         <deployment identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="8173.3"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="9532"/>
     </dependencies>
     <objects>
         <customObject id="-2" userLabel="File's Owner" customClass="ActChartViewController">
@@ -24,7 +24,6 @@
                 <customView id="U4C-Ob-I1X" customClass="ActChartView">
                     <rect key="frame" x="0.0" y="0.0" width="588" height="212"/>
                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                    <animations/>
                     <connections>
                         <outlet property="_controller" destination="-2" id="qoW-S6-dGS"/>
                     </connections>
@@ -36,7 +35,6 @@
                         <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" id="cJ8-01-tf3" customClass="ActChartViewConfigLabel">
                             <rect key="frame" x="10" y="3" width="68" height="14"/>
                             <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES"/>
-                            <animations/>
                             <textFieldCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="center" title="Configure" id="T4T-lN-Pj0">
                                 <font key="font" metaFont="smallSystem"/>
                                 <color key="textColor" white="0.25" alpha="1" colorSpace="deviceWhite"/>
@@ -49,7 +47,6 @@
                         <button verticalHuggingPriority="750" id="vqB-00-ezl">
                             <rect key="frame" x="96" y="0.0" width="20" height="20"/>
                             <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES"/>
-                            <animations/>
                             <buttonCell key="cell" type="square" bezelStyle="shadowlessSquare" image="NSRemoveTemplate" imagePosition="only" alignment="center" state="on" inset="2" id="rMp-bH-50Q">
                                 <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                 <font key="font" metaFont="system"/>
@@ -61,7 +58,6 @@
                         <button verticalHuggingPriority="750" id="WAY-qW-xIg">
                             <rect key="frame" x="76" y="0.0" width="20" height="20"/>
                             <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES"/>
-                            <animations/>
                             <buttonCell key="cell" type="square" bezelStyle="shadowlessSquare" image="NSAddTemplate" imagePosition="only" alignment="center" state="on" inset="2" id="kqx-hr-GHx">
                                 <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                 <font key="font" metaFont="system"/>
@@ -71,10 +67,8 @@
                             </connections>
                         </button>
                     </subviews>
-                    <animations/>
                 </customView>
             </subviews>
-            <animations/>
             <connections>
                 <outlet property="_contentView" destination="U4C-Ob-I1X" id="rcE-Hc-Yc7"/>
                 <outlet property="_delegate" destination="-2" id="OMJ-pg-zZa"/>
@@ -165,6 +159,12 @@
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <connections>
                         <action selector="configMenuAction:" target="-2" id="aT4-Ry-lLg"/>
+                    </connections>
+                </menuItem>
+                <menuItem title="Vertical Ratio" tag="15" indentationLevel="1" id="nnr-8J-sBu">
+                    <modifierMask key="keyEquivalentModifierMask"/>
+                    <connections>
+                        <action selector="configMenuAction:" target="-2" id="MuK-nH-sAr"/>
                     </connections>
                 </menuItem>
                 <menuItem title="Stance Time" tag="13" indentationLevel="1" id="q2h-e9-IRD">

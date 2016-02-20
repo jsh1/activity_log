@@ -545,6 +545,11 @@ activity::point::field_function(point_field field)
     case point_field::vertical_oscillation:
       return [] (const point &p) -> float {return p.vertical_oscillation;};
 
+    case point_field::vertical_ratio:
+      return [] (const point &p) -> float {
+	float stride = p.cadence != 0 ? p.speed / (p.cadence * (1/60.)) : 0;
+	return stride != 0 ? p.vertical_oscillation / stride : 0;};
+
     case point_field::stance_time:
       return [] (const point &p) -> float {return p.stance_time;};
 

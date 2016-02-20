@@ -98,6 +98,8 @@ chart::line::convert_from_si(double x) const
     {
     case value_conversion::identity:
       return x;
+    case value_conversion::percentage:
+      return x * 100;
     case value_conversion::heartrate_bpm_hrr: {
       const config &cfg = shared_config();
       return ((x - cfg.resting_hr())
@@ -141,6 +143,8 @@ chart::line::convert_to_si(double x) const
     {
     case value_conversion::identity:
       return x;
+    case value_conversion::percentage:
+      return x * .01;
     case value_conversion::heartrate_bpm_hrr: {
       const config &cfg = shared_config();
       return (x * (1./100) * (cfg.max_hr() - cfg.resting_hr())
@@ -237,6 +241,9 @@ chart::line::update_values(const chart &c)
       tick_delta = 50;
       scale_ticks = false;
       break;
+    case value_conversion::percentage:
+      tick_delta = 1;
+      break;
     default:
       tick_delta = 5;
     }
@@ -302,7 +309,15 @@ chart::line::format_tick(std::string &s, double tick, double value) const
       break;
 
     default:
-      format_number(s, tick);
+      switch (conversion)
+	{
+	case value_conversion::percentage:
+	  format_fraction(s, convert_to_si(tick));
+	  break;
+	default:	
+	  format_number(s, tick);
+	  break;
+	}
     }
 }
 
@@ -683,6 +698,7 @@ chart::draw_current_time()
 	  break;
 
 	case gps::activity::point_field::stance_ratio:
+	case gps::activity::point_field::vertical_ratio:
 	  format_fraction(buf, value);
 	  break;
 
