@@ -485,6 +485,12 @@ make_cadence(uint16_t value)
 }
 
 inline float
+make_fractional_cadence(uint8_t value)
+{
+  return value * (1.f / 128);
+}
+
+inline float
 make_training_effect(uint8_t value)
 {
   return value * .1f;
@@ -556,7 +562,8 @@ fit_parser::read_record_message(const message_type &def, uint32_t timestamp)
 	  break;
 
 	case 4:				/* cadence */
-	  p.cadence = make_cadence(read_field(def, it));
+	  p.cadence -= floor(p.cadence);
+	  p.cadence += make_cadence(read_field(def, it));
 	  if (p.cadence != 0)
 	    destination().set_has_cadence(true);
 	  break;
@@ -592,8 +599,11 @@ fit_parser::read_record_message(const message_type &def, uint32_t timestamp)
 	    destination().set_has_dynamics(true);
 	  break;
 
+	case 53:			/* fractional_cadence */
+	  p.cadence = floor(p.cadence) + make_fractional_cadence(read_field(def, it));
+	  break;
+
 	case 42:			/* activity_type */
-	case 53:			/* unknown */
 	  /* fall through. */
 
 	default:
