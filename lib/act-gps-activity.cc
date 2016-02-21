@@ -860,8 +860,15 @@ resampler_stream<Stream>::resampler_stream (Stream src_, float sample_width_)
 
 template<typename Stream> inline
 resampler_stream<Stream>::resampler_stream(const resampler_stream &rhs)
-: resampler_stream(rhs.src, rhs.sample_width)
+: src(rhs.src),
+  sample_width(rhs.sample_width),
+  p0(p + 0),
+  p1(p + 1),
+  p1_valid(rhs.p1_valid),
+  t(rhs.t)
 {
+  *p0 = *rhs.p0;
+  *p1 = *rhs.p1;
 }
 
 template<typename Stream> bool
@@ -920,7 +927,13 @@ box_stream<Stream>::box_stream(Stream src_, int filter_width_)
 
 template<typename Stream> inline
 box_stream<Stream>::box_stream(const box_stream &rhs)
-: box_stream(rhs.s_in, rhs.filter_width)
+: s_in(rhs.s_in),
+  s_out(rhs.s_out),
+  s_in_valid(rhs.s_in_valid),
+  filter_width(rhs.filter_width),
+  sum(rhs.sum),
+  sum_n(rhs.sum_n),
+  total(rhs.total)
 {
 }
 
