@@ -168,7 +168,12 @@ phrase_query_term(const char *pattern)
     }
 
   if (pattern[len] == 0)
-    return std::make_shared<act::database::matches_term>(field, pattern);
+    {
+      if (strcmp(field, "grep") == 0)
+	return std::make_shared<act::database::grep_term>(pattern);
+      else
+	return std::make_shared<act::database::matches_term>(field, pattern);
+    }
 
   // some kind of "FIELD\s+[:=!<>]\s+QUERY..." string
 
@@ -184,7 +189,10 @@ phrase_query_term(const char *pattern)
     {
       pattern += 1;
       pattern += strspn(pattern, " \t");
-      return std::make_shared<act::database::matches_term>(field, pattern);
+      if (strcmp(field, "grep") == 0)
+	return std::make_shared<act::database::grep_term>(pattern);
+      else
+	return std::make_shared<act::database::matches_term>(field, pattern);
     }      
 
   auto op = act::database::compare_term::compare_op::equal;
