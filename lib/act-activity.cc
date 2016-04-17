@@ -28,7 +28,7 @@
 #include "act-format.h"
 #include "act-util.h"
 
-#include <math.h>
+#include <cmath>
 #include <xlocale.h>
 
 namespace act {
@@ -694,11 +694,11 @@ activity::vdot() const
 
   if (time > 0 && velocity > 0)
     {
-      double percent_max = (0.8 + 0.1894393 * exp(-0.012778 * time)
-			    + 0.2989558 * exp(-0.1932605 * time));
+      double percent_max = (0.8 + 0.1894393 * std::exp(-0.012778 * time)
+			    + 0.2989558 * std::exp(-0.1932605 * time));
       double vo2 = -4.60 + 0.182258 * velocity + 0.000104 * velocity*velocity;
       double vdot = vo2 / percent_max;
-      return round(vdot*10) * .1;
+      return std::round(vdot*10) * .1;
     }
   else
     return 0;

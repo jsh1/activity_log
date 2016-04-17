@@ -32,7 +32,6 @@
 #include "act-util.h"
 
 #include <map>
-#include <math.h>
 #include <xlocale.h>
 
 using namespace act;
@@ -234,7 +233,7 @@ value_group::insert(const activity &a)
   if (value == 0)
     return;
 
-  add_activity((int)floor(value * bucket_scale), a);
+  add_activity((int)std::floor(value * bucket_scale), a);
 }
 
 void

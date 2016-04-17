@@ -29,7 +29,6 @@
 #include "act-gps-tcx-parser.h"
 
 #include <getopt.h>
-#include <math.h>
 
 using namespace act;
 

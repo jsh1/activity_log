@@ -29,7 +29,7 @@
 
 #include <algorithm>
 #include <errno.h>
-#include <math.h>
+#include <cmath>
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -83,36 +83,38 @@ format_time(std::string &str, double dur,
   else if (dur > 10)
     {
       if (!include_frac)
-	dur = floor(dur + .5);
+	dur = std::floor(dur + .5);
 
       if (dur > 3600)
 	{
 	  snprintf_l(buf, sizeof(buf), nullptr, "%d:%02d:%02d",
-		     (int) floor(dur/3600), (int) fmod(floor(dur/60),60),
-		     (int) fmod(dur, 60));
+		     (int) std::floor(dur/3600),
+		     (int) std::fmod(std::floor(dur/60),60),
+		     (int) std::fmod(dur, 60));
 	}
       else if (dur > 60)
 	{
 	  snprintf_l(buf, sizeof(buf), nullptr, "%d:%02d",
-		     (int) floor(dur/60), (int) fmod(dur, 60));
+		     (int) std::floor(dur/60), (int) std::fmod(dur, 60));
 	}
       else
 	{
 	  snprintf_l(buf, sizeof(buf), nullptr, "%d", (int) dur);
 	}
 
-      double frac = dur - floor(dur);
+      double frac = dur - std::floor(dur);
 
       if (frac > 1e-4)
 	{
 	  size_t len = strlen(buf);
 	  snprintf_l(buf + len, sizeof(buf) - len, nullptr,
-		     ".%02d", (int) floor(frac * 100 + .5));
+		     ".%02d", (int) std::floor(frac * 100 + .5));
 	}
     }
   else
     {
-      snprintf_l(buf, sizeof(buf), nullptr, "%d ms", (int) round(dur * 1000));
+      snprintf_l(buf, sizeof(buf), nullptr, "%d ms",
+		 (int) std::round(dur * 1000));
     }
 
   if (suffix)
@@ -390,7 +392,7 @@ format_cadence(std::string &str, double value, unit_type unit)
 {
   char buf[64];
 
-  if (floor(value) == value)
+  if (std::floor(value) == value)
     snprintf_l(buf, sizeof(buf), nullptr, "%d spm", (int) value);
   else
     snprintf_l(buf, sizeof(buf), nullptr, "%.1f spm", value);

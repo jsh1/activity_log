@@ -29,8 +29,8 @@
 #include "act-gps-tcx-parser.h"
 #include "act-util.h"
 
-#include <float.h>
-#include <math.h>
+#include <cfloat>
+#include <cmath>
 
 namespace act {
 namespace gps {
@@ -311,11 +311,11 @@ activity::update_summary()
 	  _total_ascent += it.total_ascent;
 	  _total_descent += it.total_descent;
 	  _total_calories += it.total_calories;
-	  _max_speed = fmax(_max_speed, it.max_speed);
+	  _max_speed = std::max(_max_speed, it.max_speed);
 	  _avg_heart_rate += it.avg_heart_rate * it.total_duration;
-	  _max_heart_rate = fmax(_max_heart_rate, it.max_heart_rate);
+	  _max_heart_rate = std::max(_max_heart_rate, it.max_heart_rate);
 	  _avg_cadence += it.avg_cadence * it.total_duration;
-	  _max_cadence = fmax(_max_cadence, it.max_cadence);
+	  _max_cadence = std::max(_max_cadence, it.max_cadence);
 	  _avg_vertical_oscillation
 	    += it.avg_vertical_oscillation * it.total_duration;
 	  _avg_stance_time += it.avg_stance_time * it.total_duration;
@@ -465,8 +465,8 @@ activity::print_laps(FILE *fh) const
       if (has_cadence())
 	{
 	  std::string avg_str, max_str;
-	  format_number(avg_str, round(it.avg_cadence*10)*.1);
-	  format_number(max_str, round(it.max_cadence*10)*.1);
+	  format_number(avg_str, std::round(it.avg_cadence*10)*.1);
+	  format_number(max_str, std::round(it.max_cadence*10)*.1);
 
 	  fprintf(fh, "  %6s %6s", avg_str.c_str(), max_str.c_str());
 	}

@@ -29,7 +29,7 @@
 
 #include <string>
 #include <vector>
-#include <math.h>
+#include <cmath>
 
 namespace act {
 namespace gps {
@@ -309,8 +309,8 @@ private:
 inline bool
 activity::point::follows_continuously(const point &pred) const
 {
-  return fabsf((pred.timer_time - pred.elapsed_time)
-	       - (timer_time - elapsed_time)) < 1e-3f;
+  return std::abs((pred.timer_time - pred.elapsed_time)
+		  - (timer_time - elapsed_time)) < 1e-3f;
 }
 
 inline activity::point_vector::iterator

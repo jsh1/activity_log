@@ -30,8 +30,8 @@
 #include "act-output-table.h"
 #include "act-util.h"
 
-#include <math.h>
-#include <float.h>
+#include <cmath>
+#include <cfloat>
 
 namespace act {
 

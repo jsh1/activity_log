@@ -30,7 +30,7 @@
 #include "act-intensity-points.h"
 #include "act-util.h"
 
-#include <math.h>
+#include <cmath>
 
 namespace act {
 
@@ -215,7 +215,7 @@ copy_gps_fields(activity_storage &a, const gps::activity &gps_data)
       && a.field_ptr("Duration") == nullptr)
     {
       // rounding to seconds, don't need fractional precision
-      format_duration(a["Duration"], round(gps_data.total_duration()));
+      format_duration(a["Duration"], std::round(gps_data.total_duration()));
       changed = true;
     }
 
@@ -236,7 +236,7 @@ copy_gps_fields(activity_storage &a, const gps::activity &gps_data)
 
       if (points != 0)
 	{
-	  points = round(points * 10) * .1;
+	  points = std::round(points * 10) * .1;
 	  format_number(a["Points"], points);
 	  changed = true;
 	}
@@ -339,7 +339,7 @@ act_new(arguments &args)
 
       if (points != 0)
 	{
-	  points = round(points * 10) * .1;
+	  points = std::round(points * 10) * .1;
 	  format_number((*storage)["Points"], points);
 	  storage->increment_seed();
 	}

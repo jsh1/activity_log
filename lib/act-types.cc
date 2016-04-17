@@ -28,7 +28,7 @@
 #include "act-format.h"
 #include "act-util.h"
 
-#include <math.h>
+#include <cmath>
 #include <xlocale.h>
 
 namespace act {
@@ -593,10 +593,10 @@ location::distance(const location &rhs) const
       // "Haversine" formula,
       // from http://www.movable-type.co.uk/scripts/latlong.html
 
-      double snp = sin((ph2 - ph1) * .5);
-      double snt = sin((th2 - th1) * .5);
-      double a = snp * snp + cos(ph1) * cos(ph2) * snt * snt;
-      double c = 2 * atan2(sqrt(a), sqrt(1-a));
+      double snp = std::sin((ph2 - ph1) * .5);
+      double snt = std::sin((th2 - th1) * .5);
+      double a = snp * snp + std::cos(ph1) * std::cos(ph2) * snt * snt;
+      double c = 2 * std::atan2(std::sqrt(a), std::sqrt(1-a));
 
       return R * c;
     }
@@ -608,10 +608,10 @@ location::distance(const location &rhs) const
       // same cumulative distance (to the nearest meter) for the last
       // point of a 26.2 mile GPS track.)
 
-      double x = (th2 - th1) * cos((ph1 + ph2) * .5);
+      double x = (th2 - th1) * std::cos((ph1 + ph2) * .5);
       double y = ph2 - ph1;
 
-      return sqrt(x * x + y * y) * R;
+      return std::sqrt(x * x + y * y) * R;
     }
 }
 

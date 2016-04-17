@@ -115,7 +115,7 @@ parse_time(const std::string &s)
 
   tm.tm_year = tm.tm_year - 1900;
   tm.tm_mon = tm.tm_mon - 1;		// 0..11
-  tm.tm_sec = floor(seconds);
+  tm.tm_sec = std::floor(seconds);
   seconds = seconds - tm.tm_sec;
 
   time_t epoch_time = timegm(&tm);

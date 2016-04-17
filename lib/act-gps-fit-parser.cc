@@ -562,7 +562,7 @@ fit_parser::read_record_message(const message_type &def, uint32_t timestamp)
 	  break;
 
 	case 4:				/* cadence */
-	  p.cadence -= floor(p.cadence);
+	  p.cadence -= std::floor(p.cadence);
 	  p.cadence += make_cadence(read_field(def, it));
 	  if (p.cadence != 0)
 	    destination().set_has_cadence(true);
@@ -600,7 +600,8 @@ fit_parser::read_record_message(const message_type &def, uint32_t timestamp)
 	  break;
 
 	case 53:			/* fractional_cadence */
-	  p.cadence = floor(p.cadence) + make_fractional_cadence(read_field(def, it));
+	  p.cadence = (std::floor(p.cadence)
+		       + make_fractional_cadence(read_field(def, it)));
 	  break;
 
 	case 42:			/* activity_type */
