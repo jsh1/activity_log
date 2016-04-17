@@ -153,7 +153,7 @@ again:
   switch (unit)
     {
     case unit_type::centimetres:
-      if (dist < 5e-3)
+      if (dist != 0 && std::abs(dist) < 5e-3)
 	{
 	  unit = unit_type::millimetres;
 	  goto again;
@@ -168,7 +168,7 @@ again:
       break;
 
     case unit_type::metres:
-      if (dist < 0.5)
+      if (dist != 0 && std::abs(dist) < 0.5)
 	{
 	  unit = unit_type::centimetres;
 	  goto again;
@@ -177,7 +177,7 @@ again:
       break;
 
     case unit_type::kilometres:
-      if (dist < 5e-2)
+      if (dist != 0 && std::abs(dist) < 5e-2)
 	{
 	  unit = unit_type::metres;
 	  goto again;
@@ -187,7 +187,7 @@ again:
       break;
 
     case unit_type::inches:
-      if (dist < (1 / INCHES_PER_METER) * 0.5)
+      if (dist != 0 && std::abs(dist) < (1 / INCHES_PER_METER) * 0.5)
 	{
 	  unit = unit_type::millimetres;
 	  goto again;
@@ -202,7 +202,7 @@ again:
       break;
 
     case unit_type::yards:
-      if (dist < (1 / YARDS_PER_METER) * 0.5)
+      if (dist != 0 && std::abs(dist) < (1 / YARDS_PER_METER) * 0.5)
 	{
 	  unit = unit_type::inches;
 	  goto again;
@@ -213,7 +213,7 @@ again:
 
     case unit_type::miles:
     default:
-      if (dist < METERS_PER_MILE * 0.5)
+      if (dist != 0 && std::abs(dist) < METERS_PER_MILE * 0.5)
 	{
 	  unit = unit_type::metres;
 	  goto again;
