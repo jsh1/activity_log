@@ -90,6 +90,14 @@ config::config()
       exit(1);
     }
 
+  // look for .actconfig in Activities dir as well
+
+  {
+    std::string file(_activity_dir);
+    file.append("/.actconfig");
+    read_config_file(file.c_str());
+  }
+
   if (const char *dir = getenv("ACT_GPS_DIR"))
     _gps_file_dir = dir;
 
